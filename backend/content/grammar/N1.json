@@ -596,8 +596,7 @@
         "fr": "Défense de dessiner sur ce mur.",
         "es": "Prohibido hacer grafitis en esta pared.",
         "id": "Dilarang mencoret-coret dinding ini.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "ここに車を止めるべからず。",
@@ -605,8 +604,7 @@
         "fr": "Défense de stationner ici.",
         "es": "Prohibido estacionar aquí.",
         "id": "Dilarang parkir di sini.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "働かざる者、食うべからず。",
@@ -614,8 +612,7 @@
         "fr": "Qui ne travaille pas ne mange pas.",
         "es": "Quien no trabaja, que no coma.",
         "id": "Siapa yang tidak bekerja, tidak boleh makan.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "この先、立ち入るべからず。",
@@ -624,6 +621,68 @@
         "es": "Prohibido el paso más allá de este punto.",
         "id": "Dilarang masuk melewati batas ini.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "この池で泳ぐ＿＿＿。",
+        "tr": {
+          "en": "No swimming in this pond.",
+          "fr": "Baignade interdite dans cet étang.",
+          "es": "Prohibido nadar en este estanque.",
+          "id": "Dilarang berenang di kolam ini."
+        },
+        "choices": [
+          "べからず",
+          "べし",
+          "べきだ"
+        ],
+        "why": {
+          "en": "A ban on a sign: べからず, « shall not ». べし (« shall ») would order a swim, and べきだ (« ought to ») would recommend one.",
+          "fr": "Une interdiction sur un panneau : べからず, « il est interdit de ». べし (« il faut ») ordonnerait la baignade, et べきだ (« on devrait ») la conseillerait.",
+          "es": "Una prohibición en un letrero: べからず, «prohibido». べし («se debe») ordenaría nadar, y べきだ («habría que») lo recomendaría.",
+          "id": "Larangan di papan: べからず, “dilarang”. べし (“wajib”) akan memerintahkan berenang, dan べきだ (“sebaiknya”) akan menganjurkannya."
+        }
+      },
+      {
+        "jp": "芝生に入る＿＿＿。",
+        "tr": {
+          "en": "Keep off the grass.",
+          "fr": "Défense de marcher sur la pelouse.",
+          "es": "Prohibido pisar el pasto.",
+          "id": "Dilarang menginjak rumput."
+        },
+        "choices": [
+          "べからず",
+          "べきだ",
+          "ことだ"
+        ],
+        "why": {
+          "en": "The sign forbids it: べからず. べきだ (« ought to ») and ことだ (« it is best to ») would both invite you onto the grass.",
+          "fr": "Le panneau l'interdit : べからず. べきだ (« on devrait ») et ことだ (« le mieux est de ») inviteraient l'un et l'autre à marcher sur la pelouse.",
+          "es": "El letrero lo prohíbe: べからず. べきだ («habría que») y ことだ («lo mejor es») invitarían los dos a pisar el pasto.",
+          "id": "Papan itu melarangnya: べからず. べきだ (“sebaiknya”) dan ことだ (“yang terbaik adalah”) sama-sama mengajak masuk ke rumput."
+        }
+      },
+      {
+        "jp": "危険につき、さわる＿＿＿。",
+        "tr": {
+          "en": "Danger: do not touch.",
+          "fr": "Danger : ne pas toucher.",
+          "es": "Peligro: no tocar.",
+          "id": "Berbahaya, jangan disentuh."
+        },
+        "choices": [
+          "べからず",
+          "べし",
+          "ものだ"
+        ],
+        "why": {
+          "en": "A danger is warned against with a ban: べからず. べし (« shall ») would order you to touch, and ものだ (« one does ») would say people touch it as a rule.",
+          "fr": "On met en garde contre un danger par une interdiction : べからず. べし (« il faut ») ordonnerait de toucher, et ものだ (« c'est l'usage ») dirait qu'on y touche d'habitude.",
+          "es": "Contra un peligro se advierte con una prohibición: べからず. べし («se debe») ordenaría tocar, y ものだ («es lo normal») diría que se toca por costumbre.",
+          "id": "Bahaya diperingatkan dengan larangan: べからず. べし (“wajib”) akan menyuruh menyentuh, dan ものだ (“lazimnya”) akan berarti orang biasa menyentuhnya."
+        }
       }
     ],
     "tour": {
@@ -7559,8 +7618,7 @@
         "fr": "À l'instant où la sonnerie a retenti, il a bondi hors de la classe.",
         "es": "En el instante en que sonó el timbre, salió disparado del aula.",
         "id": "Begitu bel berbunyi, dia langsung melesat keluar dari kelas.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "子どもは家に着くが早いか、外へ遊びに行った。",
@@ -7568,8 +7626,7 @@
         "fr": "À peine à la maison, l'enfant a filé jouer dehors.",
         "es": "Apenas llegó a casa, el niño salió a jugar.",
         "id": "Begitu tiba di rumah, anak itu langsung pergi bermain ke luar.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "店が開くが早いか、客がなだれ込んだ。",
@@ -7577,8 +7634,7 @@
         "fr": "À l'instant où le magasin a ouvert, les clients se sont engouffrés.",
         "es": "En cuanto abrió la tienda, los clientes entraron en tropel.",
         "id": "Begitu toko dibuka, para pembeli langsung menyerbu masuk.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "彼は席に着くが早いか、弁当を食べ始めた。",
@@ -7587,6 +7643,68 @@
         "es": "Nada más sentarse, empezó a comerse su almuerzo.",
         "id": "Begitu duduk, dia langsung mulai menyantap bekalnya.",
         "register": "written"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "弟は宿題を終える＿＿＿、ゲームを始めた。",
+        "tr": {
+          "en": "No sooner had my little brother finished his homework than he started a game.",
+          "fr": "À peine mon petit frère avait-il fini ses devoirs qu'il a lancé un jeu.",
+          "es": "En cuanto mi hermanito terminó la tarea, se puso a jugar un videojuego.",
+          "id": "Begitu adik laki-lakiku selesai mengerjakan PR, dia langsung mulai main game."
+        },
+        "choices": [
+          "が早いか",
+          "までに",
+          "たびに"
+        ],
+        "why": {
+          "en": "One moment hard on the other, a dash to the game: が早いか, « no sooner… than ». までに (« by the time ») sets a deadline, and たびに (« every time ») a habit, where this happened once.",
+          "fr": "Un instant collé à l'autre, une ruée vers le jeu : が早いか, « à peine… que ». までに (« d'ici à ») pose une échéance, et たびに (« chaque fois que ») une habitude, alors que c'est arrivé une fois.",
+          "es": "Un momento pegado al otro, una carrera hacia el juego: が早いか, «apenas… cuando». までに («para cuando») fija un plazo, y たびに («cada vez que») un hábito, y esto pasó una sola vez.",
+          "id": "Satu saat langsung disusul saat berikutnya, buru-buru main game: が早いか, “begitu… langsung”. までに (“paling lambat saat”) menetapkan batas waktu, dan たびに (“setiap kali”) kebiasaan, padahal ini terjadi sekali."
+        }
+      },
+      {
+        "jp": "電車のドアが開く＿＿＿、彼はホームへ走り出した。",
+        "tr": {
+          "en": "The moment the train doors opened, he dashed out onto the platform.",
+          "fr": "Dès que les portes du train se sont ouvertes, il s'est élancé sur le quai.",
+          "es": "En el instante en que se abrieron las puertas del tren, salió corriendo al andén.",
+          "id": "Begitu pintu kereta terbuka, dia langsung berlari ke peron."
+        },
+        "choices": [
+          "が早いか",
+          "前に",
+          "ついでに"
+        ],
+        "why": {
+          "en": "He ran the instant the doors opened, not before: が早いか. 前に (« before ») would have him run first, and ついでに (« while at it ») makes the run a side errand.",
+          "fr": "Il a couru à l'instant où les portes se sont ouvertes, pas avant : が早いか. 前に (« avant ») le ferait courir d'abord, et ついでに (« au passage ») ferait de sa course une affaire en passant.",
+          "es": "Corrió en el instante en que se abrieron las puertas, no antes: が早いか. 前に («antes de») lo haría correr primero, y ついでに («de paso») haría de la carrera algo de paso.",
+          "id": "Dia berlari tepat saat pintu terbuka, bukan sebelumnya: が早いか. 前に (“sebelum”) akan membuatnya berlari lebih dulu, dan ついでに (“sekalian”) menjadikan larinya urusan sampingan."
+        }
+      },
+      {
+        "jp": "会議が終わる＿＿＿、みんな部屋を出て行った。",
+        "tr": {
+          "en": "The instant the meeting ended, everyone walked out of the room.",
+          "fr": "Sitôt la réunion terminée, tout le monde est sorti de la salle.",
+          "es": "En cuanto terminó la reunión, todo el mundo salió de la sala.",
+          "id": "Begitu rapat selesai, semua orang langsung keluar dari ruangan."
+        },
+        "choices": [
+          "が早いか",
+          "までに",
+          "かわりに"
+        ],
+        "why": {
+          "en": "Out the door the instant it ended: が早いか. までに (« by the time ») would have them gone before the end, and かわりに (« instead of ») would say the meeting never ended.",
+          "fr": "Dehors à l'instant où elle s'est terminée : が早いか. までに (« d'ici à ») les ferait partir avant la fin, et かわりに (« au lieu de ») dirait que la réunion ne s'est pas terminée.",
+          "es": "Afuera en el instante en que terminó: が早いか. までに («para cuando») los haría irse antes del final, y かわりに («en lugar de») diría que la reunión no terminó.",
+          "id": "Keluar tepat saat rapat selesai: が早いか. までに (“paling lambat saat”) akan membuat mereka pergi sebelum rapat usai, dan かわりに (“alih-alih”) akan berarti rapatnya tidak selesai."
+        }
       }
     ],
     "tour": {
@@ -8010,8 +8128,7 @@
         "fr": "Dès qu'il s'est assis, il s'est mis à parler.",
         "es": "En cuanto se sentó, empezó a hablar.",
         "id": "Segera setelah duduk, dia mulai berbicara.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "その知らせを聞くや否や、母は泣き出した。",
@@ -8019,8 +8136,7 @@
         "fr": "Dès qu'elle a appris la nouvelle, ma mère a fondu en larmes.",
         "es": "En cuanto oyó la noticia, mi madre rompió a llorar.",
         "id": "Begitu mendengar kabar itu, ibu saya langsung menangis.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "ドアが開くや否や、犬が飛び出してきた。",
@@ -8028,8 +8144,7 @@
         "fr": "À peine la porte ouverte, le chien a bondi dehors.",
         "es": "Apenas se abrió la puerta, el perro salió de un salto.",
         "id": "Baru saja pintu terbuka, anjing itu sudah melompat keluar.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "新商品は発売されるや否や、売り切れた。",
@@ -8038,6 +8153,68 @@
         "es": "El nuevo producto se agotó en cuanto salió a la venta.",
         "id": "Produk baru itu langsung habis terjual begitu diluncurkan.",
         "register": "written"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "赤ちゃんは母親の顔を見る＿＿＿、泣きやんだ。",
+        "tr": {
+          "en": "The moment the baby saw its mother's face, it stopped crying.",
+          "fr": "Dès que le bébé a vu le visage de sa mère, il a cessé de pleurer.",
+          "es": "En cuanto el bebé vio la cara de su mamá, dejó de llorar.",
+          "id": "Begitu bayi itu melihat wajah ibunya, tangisnya langsung berhenti."
+        },
+        "choices": [
+          "や否や",
+          "前に",
+          "ために"
+        ],
+        "why": {
+          "en": "Seeing her face, and at once no more tears: や否や, « the moment ». 前に (« before ») would stop the crying first, and ために (« in order to ») would make seeing her the aim of stopping.",
+          "fr": "Voir son visage, et aussitôt plus de larmes : や否や, « dès que ». 前に (« avant ») ferait cesser les pleurs d'abord, et ために (« pour ») ferait de la voir le but de l'arrêt.",
+          "es": "Ver su cara, y al instante se acabaron las lágrimas: や否や, «en cuanto». 前に («antes de») haría cesar el llanto primero, y ために («para») haría de verla el fin de dejar de llorar.",
+          "id": "Melihat wajah ibunya, lalu seketika tangisnya reda: や否や, “begitu”. 前に (“sebelum”) akan menghentikan tangisnya lebih dulu, dan ために (“supaya”) akan menjadikan melihat ibunya tujuan berhentinya tangis."
+        }
+      },
+      {
+        "jp": "映画が始まる＿＿＿、彼は眠ってしまった。",
+        "tr": {
+          "en": "Hardly had the film begun when he fell asleep.",
+          "fr": "À peine le film avait-il commencé qu'il s'est endormi.",
+          "es": "Apenas empezó la película, se quedó dormido.",
+          "id": "Begitu film dimulai, dia langsung tertidur."
+        },
+        "choices": [
+          "や否や",
+          "までに",
+          "のに"
+        ],
+        "why": {
+          "en": "Asleep the moment it began: や否や. までに (« by the time ») would have him asleep before the start, and のに (« even though ») would set the start against the sleep, which the translation does not.",
+          "fr": "Endormi à l'instant où il a commencé : や否や. までに (« d'ici à ») l'endormirait avant le début, et のに (« alors que ») opposerait le début au sommeil, ce que la traduction ne fait pas.",
+          "es": "Dormido en el instante en que empezó: や否や. までに («para cuando») lo dormiría antes del inicio, y のに («aunque») opondría el inicio al sueño, cosa que la traducción no hace.",
+          "id": "Tertidur tepat saat film dimulai: や否や. までに (“paling lambat saat”) akan membuatnya tertidur sebelum film dimulai, dan のに (“padahal”) akan mempertentangkan awal film dengan tidurnya, sedangkan terjemahannya tidak begitu."
+        }
+      },
+      {
+        "jp": "窓を開ける＿＿＿、冷たい風が吹き込んできた。",
+        "tr": {
+          "en": "Hardly had I opened the window when a cold wind blew in.",
+          "fr": "À peine avais-je ouvert la fenêtre qu'un vent froid s'est engouffré.",
+          "es": "Apenas abrí la ventana, entró un viento frío.",
+          "id": "Begitu jendela kubuka, angin dingin langsung bertiup masuk."
+        },
+        "choices": [
+          "や否や",
+          "ついでに",
+          "前に"
+        ],
+        "why": {
+          "en": "The wind came in the moment the window opened: や否や. ついでに (« while at it ») would make the wind a side errand, and 前に (« before ») would bring it in while the window was still shut.",
+          "fr": "Le vent est entré à l'instant où la fenêtre s'est ouverte : や否や. ついでに (« au passage ») ferait du vent une affaire en passant, et 前に (« avant ») le ferait entrer fenêtre encore fermée.",
+          "es": "El viento entró en el instante en que se abrió la ventana: や否や. ついでに («de paso») haría del viento algo de paso, y 前に («antes de») lo haría entrar con la ventana aún cerrada.",
+          "id": "Angin masuk tepat saat jendela terbuka: や否や. ついでに (“sekalian”) akan menjadikan angin itu urusan sampingan, dan 前に (“sebelum”) akan membuatnya masuk saat jendela masih tertutup."
+        }
       }
     ],
     "tour": {
@@ -9205,8 +9382,7 @@
         "fr": "En me promenant, j'ai fait un saut à la librairie de la gare.",
         "es": "Aprovechando el paseo, pasé por la librería frente a la estación.",
         "id": "Sekalian jalan-jalan, saya mampir ke toko buku di depan stasiun.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "買い物がてら、友人の家を訪ねた。",
@@ -9214,8 +9390,7 @@
         "fr": "En faisant les courses, j'ai fait un saut chez un ami.",
         "es": "Aprovechando que fui de compras, visité a un amigo.",
         "id": "Sekalian berbelanja, saya berkunjung ke rumah teman.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "見学がてら、新しい図書館に行ってみた。",
@@ -9223,8 +9398,7 @@
         "fr": "Je suis allé voir la nouvelle bibliothèque, en visite.",
         "es": "Fui a la nueva biblioteca, aprovechando para conocerla.",
         "id": "Saya pergi ke perpustakaan baru, sekalian melihat-lihat isinya.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "運動がてら、会社まで歩くことにした。",
@@ -9233,6 +9407,68 @@
         "es": "Decidí ir caminando al trabajo, y así, de paso, hago ejercicio.",
         "id": "Saya memutuskan berjalan kaki ke kantor, sekalian berolahraga.",
         "register": "neutral"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "花見＿＿＿、公園の近くのカフェに寄った。",
+        "tr": {
+          "en": "Out to see the cherry blossoms, I also stopped at a café near the park.",
+          "fr": "En allant voir les cerisiers en fleur, j'ai aussi fait halte dans un café près du parc.",
+          "es": "Aprovechando que fui a ver los cerezos, pasé también por un café cerca del parque.",
+          "id": "Sambil pergi melihat bunga sakura, aku sekalian mampir ke kafe dekat taman."
+        },
+        "choices": [
+          "がてら",
+          "のかわりに",
+          "のおかげで"
+        ],
+        "why": {
+          "en": "One outing for two ends, the blossoms and the café: がてら. のかわりに (« instead of ») would drop the blossoms, and のおかげで (« thanks to ») would make them the cause of the stop.",
+          "fr": "Une sortie pour deux choses, les cerisiers et le café : がてら. のかわりに (« au lieu de ») renoncerait aux cerisiers, et のおかげで (« grâce à ») en ferait la cause de la halte.",
+          "es": "Una salida con dos fines, los cerezos y el café: がてら. のかわりに («en lugar de») dejaría los cerezos, y のおかげで («gracias a») haría de ellos la causa de la parada.",
+          "id": "Satu kali keluar untuk dua hal, sakura dan kafe: がてら. のかわりに (“alih-alih”) akan meninggalkan sakura, dan のおかげで (“berkat”) akan menjadikannya penyebab mampir."
+        }
+      },
+      {
+        "jp": "家族の見送り＿＿＿、空港の展望台に上ってみた。",
+        "tr": {
+          "en": "Seeing my family off at the airport, I took the chance to go up to the observation deck.",
+          "fr": "En accompagnant ma famille à l'aéroport, j'en ai profité pour monter à la terrasse panoramique.",
+          "es": "Al despedir a mi familia en el aeropuerto, aproveché para subir al mirador.",
+          "id": "Sambil mengantar keluargaku di bandara, aku sekalian naik ke dek observasi."
+        },
+        "choices": [
+          "がてら",
+          "のかわりに",
+          "にしては"
+        ],
+        "why": {
+          "en": "Seeing them off, and the deck while there: がてら. のかわりに (« instead of ») would skip the farewell, and にしては (« for a… ») has nothing to measure here.",
+          "fr": "Les accompagner, et la terrasse au passage : がてら. のかわりに (« au lieu de ») sauterait les adieux, et にしては (« pour un… ») n'a rien à mesurer ici.",
+          "es": "Despedirlos, y el mirador de paso: がてら. のかわりに («en lugar de») se saltaría la despedida, y にしては («para ser…») no tiene nada que medir aquí.",
+          "id": "Mengantar mereka, dan dek observasi sekalian: がてら. のかわりに (“alih-alih”) akan melewatkan perpisahan, dan にしては (“untuk ukuran”) tidak punya apa pun untuk diukur di sini."
+        }
+      },
+      {
+        "jp": "気分転換＿＿＿、少し遠くのスーパーまで歩いた。",
+        "tr": {
+          "en": "Partly for a change of scene, I walked to a supermarket a bit farther away.",
+          "fr": "Un peu pour me changer les idées, j'ai marché jusqu'à un supermarché plus loin.",
+          "es": "En parte para despejarme, caminé hasta un supermercado un poco más lejos.",
+          "id": "Sekalian untuk menyegarkan pikiran, aku berjalan kaki ke supermarket yang agak jauh."
+        },
+        "choices": [
+          "がてら",
+          "のかわりに",
+          "のせいで"
+        ],
+        "why": {
+          "en": "The walk serves the shopping and the change of scene at once: がてら. のかわりに (« instead of ») would give up the change of scene, and のせいで (« because of », with blame) would blame the walk on it.",
+          "fr": "La marche sert à la fois aux courses et à se changer les idées : がてら. のかわりに (« au lieu de ») renoncerait à se changer les idées, et のせいで (« à cause de », avec reproche) lui reprocherait la marche.",
+          "es": "La caminata sirve a la vez para las compras y para despejarse: がてら. のかわりに («en lugar de») renunciaría a despejarse, y のせいで («por culpa de») le echaría la culpa de la caminata.",
+          "id": "Jalan kaki itu sekaligus untuk belanja dan menyegarkan pikiran: がてら. のかわりに (“alih-alih”) akan meninggalkan penyegaran pikiran, dan のせいで (“gara-gara”, dengan nada menyalahkan) akan menyalahkannya atas jalan kaki itu."
+        }
       }
     ],
     "tour": {
@@ -24606,8 +24842,7 @@
         "fr": "Je suis venu vous saluer et vous remercier par la même occasion.",
         "es": "Vine a presentarle mis respetos y, a la vez, a darle las gracias.",
         "id": "Saya datang untuk menyampaikan salam sekaligus berterima kasih.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "お祝いかたがた、新しい店を見に行った。",
@@ -24632,6 +24867,68 @@
         "es": "Fui a ver a mi abuela al campo, también para ver cómo seguía de salud.",
         "id": "Saya pergi menemui nenek di kampung, sekaligus menanyakan kabar kesehatannya.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "新年のごあいさつ＿＿＿、取引先を回った。",
+        "tr": {
+          "en": "We made the rounds of our clients, partly to give them New Year's greetings.",
+          "fr": "Nous avons fait le tour de nos clients, notamment pour leur présenter nos vœux.",
+          "es": "Recorrimos a nuestros clientes, en parte para darles los saludos de Año Nuevo.",
+          "id": "Kami berkeliling mengunjungi klien, sekaligus untuk menyampaikan salam Tahun Baru."
+        },
+        "choices": [
+          "かたがた",
+          "のかわりに",
+          "にもかかわらず"
+        ],
+        "why": {
+          "en": "A round of visits that also brings greetings, in formal speech: かたがた. のかわりに (« instead of ») would skip the greetings, and にもかかわらず (« despite ») would set them against the visits.",
+          "fr": "Une tournée de visites qui porte aussi les vœux, en langage soutenu : かたがた. のかわりに (« au lieu de ») sauterait les vœux, et にもかかわらず (« malgré ») les opposerait aux visites.",
+          "es": "Una ronda de visitas que también lleva los saludos, en lenguaje formal: かたがた. のかわりに («en lugar de») se saltaría los saludos, y にもかかわらず («a pesar de») los opondría a las visitas.",
+          "id": "Kunjungan berkeliling yang sekaligus membawa salam, dalam bahasa resmi: かたがた. のかわりに (“alih-alih”) akan melewatkan salamnya, dan にもかかわらず (“meskipun”) akan mempertentangkannya dengan kunjungan itu."
+        }
+      },
+      {
+        "jp": "先日のおわび＿＿＿、改めてごあいさつに参りました。",
+        "tr": {
+          "en": "I have come again to pay my respects, and to apologize for the other day.",
+          "fr": "Je viens à nouveau vous saluer, et vous présenter mes excuses pour l'autre jour.",
+          "es": "Vengo de nuevo a presentarle mis saludos, y mis disculpas por lo del otro día.",
+          "id": "Saya datang lagi untuk menyampaikan salam, sekaligus meminta maaf atas kejadian tempo hari."
+        },
+        "choices": [
+          "かたがた",
+          "どころか",
+          "にしては"
+        ],
+        "why": {
+          "en": "The call greets and apologizes at once, politely: かたがた. どころか (« far from ») would deny the apology, and にしては (« for a… ») would measure the call against one.",
+          "fr": "La visite salue et s'excuse à la fois, poliment : かたがた. どころか (« loin de ») nierait les excuses, et にしては (« pour un… ») mesurerait la visite à leur aune.",
+          "es": "La visita saluda y se disculpa a la vez, con cortesía: かたがた. どころか («lejos de») negaría la disculpa, y にしては («para ser…») mediría la visita con ella.",
+          "id": "Kunjungan itu sekaligus memberi salam dan meminta maaf, dengan sopan: かたがた. どころか (“jangankan”) akan menyangkal permintaan maafnya, dan にしては (“untuk ukuran”) akan mengukur kunjungan itu dengannya."
+        }
+      },
+      {
+        "jp": "近況のお知らせ＿＿＿、お手紙を差し上げます。",
+        "tr": {
+          "en": "I am writing to you, partly to let you know how I have been.",
+          "fr": "Je vous écris, entre autres pour vous donner de mes nouvelles.",
+          "es": "Le escribo, entre otras cosas para contarle cómo me ha ido.",
+          "id": "Saya menulis surat ini, sekaligus untuk mengabarkan keadaan saya."
+        },
+        "choices": [
+          "かたがた",
+          "のくせに",
+          "のおかげで"
+        ],
+        "why": {
+          "en": "A letter that also brings news, in formal writing: かたがた. のくせに (« for all that », a reproach) has no place in a courtesy, and のおかげで (« thanks to ») would make the news the cause of the letter.",
+          "fr": "Une lettre qui donne aussi des nouvelles, en langage soutenu : かたがた. のくせに (« avec ça », un reproche) n'a pas sa place dans une politesse, et のおかげで (« grâce à ») ferait des nouvelles la cause de la lettre.",
+          "es": "Una carta que también da noticias, en lenguaje formal: かたがた. のくせに («y encima», un reproche) no cabe en una cortesía, y のおかげで («gracias a») haría de las noticias la causa de la carta.",
+          "id": "Surat yang sekaligus membawa kabar, dalam bahasa resmi: かたがた. のくせに (“padahal”, sebuah celaan) tidak cocok dalam ungkapan sopan, dan のおかげで (“berkat”) akan menjadikan kabar itu penyebab surat."
+        }
       }
     ],
     "tour": {
@@ -28771,8 +29068,7 @@
         "fr": "Le froid ce jour-là, pas croyable, j'en avais mal aux oreilles.",
         "es": "¡El frío que hacía aquel día, no te imaginas! Me dolían las orejas.",
         "id": "Dinginnya hari itu bukan main, sampai telingaku sakit.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "その量のなんのって、とても食べきれない。",
@@ -28780,8 +29076,7 @@
         "fr": "La quantité, pas possible, impossible de tout finir.",
         "es": "¡Es una cantidad que no te imaginas! Imposible terminárselo.",
         "id": "Porsinya banyak bukan main, aku tak mungkin menghabiskannya.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "うれしいのなんのって、一晩中眠れなかった。",
@@ -28789,8 +29084,7 @@
         "fr": "J'étais si content que je n'ai pas fermé l'œil de la nuit.",
         "es": "¡Qué alegría, no te imaginas! No pude dormir en toda la noche.",
         "id": "Aku senang bukan main, sampai semalaman tidak bisa tidur.",
-        "register": "casual",
-        "contrast": true
+        "register": "casual"
       },
       {
         "jp": "その店の高いのなんのって、コーヒー一杯で千円だ。",
@@ -28799,6 +29093,68 @@
         "es": "¡Lo caro que es ese local! Un café cuesta mil yenes.",
         "id": "Kafe itu mahalnya bukan main, secangkir kopi saja 1.000 yen.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "昨日の試合は面白い＿＿＿、最後まで目が離せなかった。",
+        "tr": {
+          "en": "Yesterday's match was exciting beyond words; I couldn't look away until the end.",
+          "fr": "Le match d'hier, passionnant, c'est peu dire : impossible d'en détacher les yeux jusqu'à la fin.",
+          "es": "El partido de ayer fue emocionante como no te imaginas: no pude dejar de verlo hasta el final.",
+          "id": "Pertandingan kemarin serunya bukan main, aku tidak bisa berpaling sampai akhir."
+        },
+        "choices": [
+          "のなんのって",
+          "のに",
+          "わりに"
+        ],
+        "why": {
+          "en": "An exclamation at how exciting it was: のなんのって. のに (« even though ») and わりに (« for something so… ») would set the excitement against not looking away, which follows from it.",
+          "fr": "Une exclamation sur le suspense : のなんのって. のに (« alors que ») et わりに (« pour un… ») opposeraient le suspense aux yeux rivés, qui en découlent.",
+          "es": "Una exclamación por lo emocionante que fue: のなんのって. のに («aunque») y わりに («para ser tan…») opondrían la emoción a no poder dejar de verlo, que viene de ella.",
+          "id": "Seruan tentang betapa serunya: のなんのって. のに (“padahal”) dan わりに (“untuk ukuran”) akan mempertentangkan keseruan itu dengan tidak bisa berpaling, padahal yang satu akibat yang lain."
+        }
+      },
+      {
+        "jp": "駅から遠い＿＿＿、歩いて一時間もかかった。",
+        "tr": {
+          "en": "It's so far from the station, you wouldn't believe it: an hour on foot.",
+          "fr": "Loin de la gare, et pas qu'un peu : une heure à pied.",
+          "es": "Está lejísimos de la estación, no te imaginas: una hora a pie.",
+          "id": "Jauhnya dari stasiun bukan main, jalan kaki sampai sejam."
+        },
+        "choices": [
+          "のなんのって",
+          "ものの",
+          "くせに"
+        ],
+        "why": {
+          "en": "The hour on foot shows how far it is: のなんのって. ものの (« although ») and くせに (« for all that ») would set the distance against the walk, when one explains the other.",
+          "fr": "L'heure de marche montre à quel point c'est loin : のなんのって. ものの (« bien que ») et くせに (« avec ça ») opposeraient la distance à la marche, alors que l'une explique l'autre.",
+          "es": "La hora a pie muestra lo lejos que está: のなんのって. ものの («aunque») y くせに («y encima») opondrían la distancia a la caminata, cuando una explica la otra.",
+          "id": "Jalan kaki sejam menunjukkan betapa jauhnya: のなんのって. ものの (“meskipun”) dan くせに (“padahal”, dengan nada mencela) akan mempertentangkan jarak dengan perjalanan kaki, padahal yang satu menjelaskan yang lain."
+        }
+      },
+      {
+        "jp": "引っ越しの荷物が重い＿＿＿、腰が痛くなった。",
+        "tr": {
+          "en": "The moving boxes were unbelievably heavy; my back started to hurt.",
+          "fr": "Les cartons du déménagement, lourds, je ne vous dis pas : j'en ai eu mal au dos.",
+          "es": "Las cajas de la mudanza pesaban muchísimo, no te imaginas: me empezó a doler la espalda.",
+          "id": "Barang pindahan itu beratnya bukan main, pinggangku sampai sakit."
+        },
+        "choices": [
+          "のなんのって",
+          "のに",
+          "どころか"
+        ],
+        "why": {
+          "en": "So heavy the back gave: のなんのって. のに (« even though ») would set the weight against the pain, and どころか (« far from ») would deny the weight.",
+          "fr": "Si lourds que le dos a lâché : のなんのって. のに (« alors que ») opposerait le poids à la douleur, et どころか (« loin de ») nierait le poids.",
+          "es": "Tan pesadas que la espalda no aguantó: のなんのって. のに («aunque») opondría el peso al dolor, y どころか («lejos de») negaría el peso.",
+          "id": "Begitu beratnya sampai pinggang sakit: のなんのって. のに (“padahal”) akan mempertentangkan berat dengan rasa sakit, dan どころか (“jangankan”) akan menyangkal beratnya."
+        }
       }
     ],
     "tour": {

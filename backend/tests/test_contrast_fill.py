@@ -68,3 +68,64 @@ def test_a_rival_the_lesson_calls_the_same_is_never_offered():
                                 for rule in payload.get("rules", {}).values() if rule in same]
     assert asked
     assert not offered, offered[:10]
+
+
+# A twin the catalogue joins to a point only through another (plan 320b):
+# no compare line names it beside the point, yet it says the same in the
+# point's hole: 日本語のみならず for 日本語ばかりか, 世界中で起きている after
+# 日本ばかりか as after 日本に限らず, 雨なら for 雨の場合, 急いだとしても for
+# 急いだところで, 若いにもかかわらず for 若いながらも.
+CHAINED_TWINS = [
+    ("N2", "〜ばかりか", "〜のみならず"),
+    ("N2", "〜に限らず", "〜ばかりか"),
+    ("N4", "〜場合", "〜なら"),
+    ("N2", "〜たところで", "〜としても"),
+    ("N2", "〜ながらも", "〜にもかかわらず"),
+]
+
+
+@pytest.mark.parametrize("level, pattern, twin", CHAINED_TWINS)
+def test_a_twin_reached_through_another_is_never_drawn_either(level, pattern, twin):
+    # `same` is followed through the whole catalogue, not one link: a mark
+    # joins two points that fill each other's holes, and the chain finds
+    # the twins no line names. Stopping at one link would draw these as
+    # fillers, a second right answer.
+    import random
+
+    from study.grammar_lesson import _same_family, contrast_payload
+
+    entries = GRAMMAR_POINTS_BY_LEVEL[level]
+    entry = next(e for e in entries if e["pattern"] == pattern)
+    direct = {r["pattern"] for r in entry.get("compare", []) if r.get("same")}
+    assert twin in _same_family(pattern) and twin not in direct
+    assert any(e["pattern"] == twin for e in entries), "the twin is a filler only at the point's level"
+    examples = [ex for ex in entry["examples"] if ex.get("contrast")]
+    assert examples
+    for ex in examples:
+        for seed in range(12):
+            payload = contrast_payload(level, entry, entries, "en", rng=random.Random(seed), example=ex)
+            assert twin not in payload["rules"].values(), (ex["jp"], seed)
+
+
+def test_the_family_s_reach_costs_no_question_a_choice():
+    # The chain also joins points that are not twins (〜通りに to 〜うちに,
+    # through とともに and につれて). What that costs is a filler that would
+    # have been wrong, and only while the level has others: every question
+    # of a point with a family still offers its full set.
+    import random
+
+    from study.grammar_lesson import CONTRAST_CHOICES, _same_family, contrast_payload, verifiable
+
+    short = []
+    for level, entries in GRAMMAR_POINTS_BY_LEVEL.items():
+        for entry in entries:
+            if not verifiable(entry["pattern"]) or not _same_family(entry["pattern"]):
+                continue
+            for ex in entry.get("examples", []):
+                if not ex.get("contrast"):
+                    continue
+                for seed in range(3):
+                    payload = contrast_payload(level, entry, entries, "en", rng=random.Random(seed), example=ex)
+                    if payload is None or len(payload["choices"]) < CONTRAST_CHOICES:
+                        short.append((level, entry["pattern"], ex["jp"]))
+    assert not short, short[:10]

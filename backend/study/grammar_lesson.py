@@ -78,7 +78,14 @@ def _same_family(pattern: str) -> frozenset[str]:
     """Every point the catalogue's `same` marks join to `pattern`, either
     way and through one another (plan 319): なきゃ／なくちゃ is the twin of
     なくてはいけない, which is the twin of ないといけない, so none of them
-    is drawn as a filler in another's hole, where it would say the same."""
+    is drawn as a filler in another's hole, where it would say the same.
+
+    The whole chain, not one link (plan 320b): it finds the twins no
+    compare line names (のみならず in ばかりか's hole, なら in 場合's,
+    としても in たところで's), and the points it joins that are not twins
+    (通りに and うちに, through とともに) are only fillers that would have
+    been wrong, which the level has others to replace
+    (tests/test_contrast_fill.py holds both)."""
     edges: dict[str, set[str]] = {}
     for entries in GRAMMAR_POINTS_BY_LEVEL.values():
         for e in entries:

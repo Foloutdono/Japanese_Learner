@@ -13031,8 +13031,7 @@
         "fr": "Contrairement aux attentes, l'examen était facile.",
         "es": "Contrariamente a lo previsto, el examen fue fácil.",
         "id": "Di luar dugaan, ujiannya ternyata mudah.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "親の願いに反して、彼は音楽の道を選んだ。",
@@ -13048,8 +13047,7 @@
         "fr": "Contrairement aux espoirs, les ventes n'ont pas progressé.",
         "es": "Contrariamente a lo esperado, las ventas no crecieron.",
         "id": "Bertentangan dengan harapan, penjualan ternyata tidak naik.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "規則に反して、彼は勝手に休んだ。",
@@ -13058,6 +13056,68 @@
         "es": "En contra del reglamento, se tomó el día libre sin permiso.",
         "id": "Bertentangan dengan peraturan, dia mengambil libur seenaknya.",
         "register": "formal"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "天気予報＿＿＿、一日中よく晴れた。",
+        "tr": {
+          "en": "Contrary to the weather forecast, it was sunny all day.",
+          "fr": "Contrairement aux prévisions météo, il a fait beau toute la journée.",
+          "es": "Al contrario de lo que decía el pronóstico, hizo sol todo el día.",
+          "id": "Bertentangan dengan prakiraan cuaca, hari itu cerah seharian."
+        },
+        "choices": [
+          "に反して",
+          "に比べて",
+          "に加えて"
+        ],
+        "why": {
+          "en": "The forecast said one thing and the day did the other: に反して, « contrary to ». に比べて (« compared with ») would weigh the day against the forecast, and に加えて (« in addition to ») would add to it.",
+          "fr": "La météo annonçait une chose et la journée a fait l'inverse : に反して, « contrairement à ». に比べて (« comparé à ») mettrait la journée en balance avec les prévisions, et に加えて (« en plus de ») s'y ajouterait.",
+          "es": "El pronóstico decía una cosa y el día hizo lo contrario: に反して, «en contra de». に比べて («comparado con») pondría el día frente al pronóstico, y に加えて («además de») se sumaría a él.",
+          "id": "Prakiraan mengatakan satu hal, tetapi cuaca hari itu sebaliknya: に反して, “bertentangan dengan”. に比べて (“dibandingkan dengan”) akan menimbang hari itu terhadap prakiraan, dan に加えて (“selain”) akan menambahkan sesuatu padanya."
+        }
+      },
+      {
+        "jp": "会社の方針＿＿＿、彼は一人で決めてしまった。",
+        "tr": {
+          "en": "Going against company policy, he made the decision on his own.",
+          "fr": "À l'encontre de la politique de l'entreprise, il a pris la décision tout seul.",
+          "es": "En contra de la política de la empresa, tomó la decisión por su cuenta.",
+          "id": "Bertentangan dengan kebijakan perusahaan, dia mengambil keputusan itu sendirian."
+        },
+        "choices": [
+          "に反して",
+          "にそって",
+          "にもとづいて"
+        ],
+        "why": {
+          "en": "Deciding alone, against the policy, is going against it: に反して. にそって (« in line with ») and にもとづいて (« based on ») would say he followed the policy, which the translation rules out.",
+          "fr": "Décider seul, contre la politique, c'est aller à son encontre : に反して. にそって (« conformément à ») et にもとづいて (« sur la base de ») diraient qu'il l'a suivie, ce que la traduction exclut.",
+          "es": "Decidir solo, contra la política, es ir en su contra: に反して. にそって («conforme a») y にもとづいて («con base en») dirían que la siguió, lo que la traducción descarta.",
+          "id": "Memutuskan sendiri, melawan kebijakan, berarti bertentangan dengannya: に反して. にそって (“sesuai dengan”) dan にもとづいて (“berdasarkan”) akan berarti dia mengikutinya, dan terjemahannya menolak itu."
+        }
+      },
+      {
+        "jp": "ルール＿＿＿、ボールを手で持ってしまった。",
+        "tr": {
+          "en": "Against the rules, I picked up the ball with my hands.",
+          "fr": "Contre les règles, j'ai pris le ballon avec les mains.",
+          "es": "Contra las reglas, agarré el balón con las manos.",
+          "id": "Melanggar aturan, aku memegang bola dengan tangan."
+        },
+        "choices": [
+          "に反して",
+          "にしたがって",
+          "について"
+        ],
+        "why": {
+          "en": "しまった says it was a slip: the rule was broken, に反して. にしたがって (« following ») would say the rules called for it, and について (« about ») cannot link a rule to an act.",
+          "fr": "しまった dit que c'était une faute : la règle a été enfreinte, に反して. にしたがって (« en suivant ») dirait que les règles le voulaient, et について (« au sujet de ») ne relie pas une règle à un geste.",
+          "es": "しまった dice que fue un error: se rompió la regla, に反して. にしたがって («siguiendo») diría que las reglas lo pedían, y について («acerca de») no une una regla a un acto.",
+          "id": "しまった menandakan itu sebuah kesalahan: aturannya dilanggar, に反して. にしたがって (“mengikuti”) akan berarti aturan memintanya, dan について (“tentang”) tidak bisa menghubungkan aturan dengan perbuatan."
+        }
       }
     ],
     "tour": {
@@ -14675,8 +14735,8 @@
           "kind": "use",
           "ask": {
             "en": "You learned the manager's opinion because your coworker Yamada passed it on to you. You tell a friend how you came to know it.",
-            "fr": "Tu connais l'opinion du chef parce que ton collègue Yamada te l'a transmise. Tu dis à un ami comment tu l'as apprise.",
-            "es": "Conoces la opinión del jefe porque tu compañero Yamada te la transmitió. Le cuentas a un amigo cómo te enteraste.",
+            "fr": "Tu connais l'opinion du chef parce que Yamada, qui travaille avec toi, te l'a transmise. Tu dis à un ami comment tu l'as apprise.",
+            "es": "Conoces la opinión del jefe porque Yamada, que trabaja contigo, te la transmitió. Le cuentas a un amigo cómo te enteraste.",
             "id": "Kamu tahu pendapat manajer karena rekan kerjamu, Yamada, menyampaikannya kepadamu. Kamu bercerita kepada seorang teman bagaimana kamu bisa tahu."
           },
           "choices": [
