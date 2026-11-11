@@ -7459,3 +7459,11 @@ Main took plan 318 too (the home screen widget's board, #543), so this plan is 3
 | 319 | **Main took plan 318 too** (the widget's board, #543): this plan's citations moved to 319, the next free number to 320 | DONE |
 
 Open: the first person still agrees in the French of some examples and translations (« je suis allé », « je me suis endormi », about 140 texts by a rough count; N1's pass neutralised a few): the learner's own lines never agree, but an example's « je » is not ruled on, which is the owner's call. Main has moved since this branch began (its detector, `LOCAL_REV` and CLAUDE.md), so the merge will meet conflicts there. The Indonesian (plan 312's branch) follows the source: `git diff ddfcfb07..claude/relaxed-cerf-p22722 -- backend/content/grammar/` lists every text it must take again.
+
+## Plan 320 — 残り, what the corrected source still said (2026-11-11)
+
+Plan 312's readers, bringing the Indonesian up to plans 318–319, read the corrected catalogue once more and listed what was left (`plans/312-source-findings.md` §9). The owner: fix it. Four readers, a level file each, every item read against the file first.
+
+| Phase | What | Status |
+|---|---|---|
+| 320 | **The catalogue, level by level**, in English, French and Spanish, the Indonesian with them where a text's sense moved: no sex the Japanese does not give in the French and Spanish where a neutral word reads naturally (« Un parent », « Une personne âgée », « Uno de los padres »); the Spanish and French readings evened as plan 319 evened the English; Choisir's second answers closed, `same` where the compare line calls the rival a twin or a register's pair (や否や／が早いか both ways, な, にしろ, ために, といったらない, かたがた／がてら both ways), the contrast mark off elsewhere (ものだ, に反して, 極まりない, そばから, べく, の極み), 一方で ex0 rewritten with two subjects; the `same` marks the compare lines contradicted decided on the drill's printed forms (限り beside としたら unmarked, the rest kept, their lines saying how close); asks that presupposed and notions that named the answer neutral; しか〜ない's and じゃないか's own glosses, をもって's "as of", wrong whys and slips. `TOUR_REV` 30; ladder flags unchanged | DONE |

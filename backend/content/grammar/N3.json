@@ -6775,20 +6775,20 @@
       },
       {
         "pattern": "〜ものの",
-        "en": "一方で balances two facts; ものの concedes one and contradicts it.",
-        "fr": "一方で équilibre deux faits ; ものの en concède un et le contredit.",
-        "es": "一方で equilibra dos hechos; ものの concede uno y lo contradice.",
-        "id": "一方で menyeimbangkan dua fakta; ものの mengakui satu hal, lalu menyatakan kebalikannya.",
+        "en": "ものの often fits as well (忙しいものの). Still, 一方で balances two facts; ものの concedes one and contradicts it.",
+        "fr": "ものの convient souvent aussi (忙しいものの). Mais 一方で équilibre deux faits ; ものの en concède un et le contredit.",
+        "es": "ものの también suele servir (忙しいものの). Aun así, 一方で equilibra dos hechos; ものの concede uno y lo contradice.",
+        "id": "ものの sering juga cocok (忙しいものの). Namun, 一方で menyeimbangkan dua fakta; ものの mengakui satu hal, lalu menyatakan kebalikannya.",
         "same": true
       }
     ],
     "examples": [
       {
-        "jp": "兄は仕事が忙しい一方で、家族との時間も大切にしている。",
-        "en": "While my brother is busy with work, he also values time with his family.",
-        "fr": "Mon frère est très pris par son travail, mais il tient aussi au temps passé en famille.",
-        "es": "Mi hermano mayor está muy ocupado con el trabajo, pero por otra parte también valora el tiempo con su familia.",
-        "id": "Kakakku sibuk bekerja, tapi di sisi lain dia juga menghargai waktu bersama keluarga.",
+        "jp": "兄は外で遊ぶのが好きな一方で、弟は家で本を読むのが好きだ。",
+        "en": "My older brother likes playing outside, while my younger brother likes reading at home.",
+        "fr": "Mon grand frère aime jouer dehors, alors que mon petit frère aime lire à la maison.",
+        "es": "A mi hermano mayor le gusta jugar afuera, mientras que a mi hermano menor le gusta leer en casa.",
+        "id": "Kakak laki-lakiku suka bermain di luar, sedangkan adik laki-lakiku suka membaca di rumah.",
         "register": "casual",
         "contrast": true
       },
@@ -10436,10 +10436,10 @@
       },
       {
         "pattern": "〜うちに",
-        "en": "につれて: one change follows another; うちに: while something lasts, a change comes about.",
-        "fr": "につれて : un changement en suit un autre ; うちに : pendant que quelque chose dure, un changement survient.",
-        "es": "につれて: un cambio sigue a otro; うちに: mientras algo dura, sobreviene un cambio.",
-        "id": "につれて: satu perubahan mengikuti perubahan lain; うちに: selagi sesuatu berlangsung, terjadi suatu perubahan.",
+        "en": "うちに can fit as well (山を登るうちに). Still, につれて: one change follows another; うちに: while something lasts, a change comes about.",
+        "fr": "うちに peut convenir aussi (山を登るうちに). Mais につれて : un changement en suit un autre ; うちに : pendant que quelque chose dure, un changement survient.",
+        "es": "うちに también puede servir (山を登るうちに). Aun así, につれて: un cambio sigue a otro; うちに: mientras algo dura, sobreviene un cambio.",
+        "id": "うちに juga bisa cocok (山を登るうちに). Namun, につれて: satu perubahan mengikuti perubahan lain; うちに: selagi sesuatu berlangsung, terjadi suatu perubahan.",
         "same": true
       }
     ],
@@ -13935,10 +13935,10 @@
       "twists": [
         {
           "notion": {
-            "en": "After a た-form: 高かった",
-            "fr": "Après une forme en た : 高かった",
-            "es": "Tras una forma た: 高かった",
-            "id": "Setelah bentuk た: 高かった"
+            "en": "After a past form: 高かった",
+            "fr": "Après une forme au passé : 高かった",
+            "es": "Tras una forma en pasado: 高かった",
+            "id": "Setelah bentuk lampau: 高かった"
           },
           "jp": "このかさは高かったわりに、すぐこわれた。",
           "tr": {
@@ -14137,10 +14137,10 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What surprises the speaker about the car?",
-            "fr": "Qu'est-ce qui surprend la personne dans cette voiture ?",
-            "es": "¿Qué sorprende a quien habla del auto?",
-            "id": "Apa yang mengejutkan pembicara tentang mobil itu?"
+            "en": "How much luggage does this car take?",
+            "fr": "Combien de bagages peut-on mettre dans cette voiture ?",
+            "es": "¿Cuánto equipaje le cabe a este auto?",
+            "id": "Seberapa banyak barang yang muat di mobil ini?"
           },
           "jp": "この車は小さいわりに、にもつがたくさん入る。",
           "tr": {
@@ -22300,10 +22300,10 @@
       },
       {
         "pattern": "〜限り",
-        "en": "以上: now that it is so, it follows; 限り: for as long as it stays so.",
-        "fr": "以上 : maintenant que c'est ainsi, il s'ensuit ; 限り : tant que cela dure.",
-        "es": "以上: ya que es así, se sigue; 限り: mientras siga así.",
-        "id": "以上: karena memang sudah begitu, maka akibatnya menyusul; 限り: selama keadaannya tetap begitu.",
+        "en": "限り often fits as well (学生である限り). Still, 以上: now that it is so, it follows; 限り: for as long as it stays so.",
+        "fr": "限り convient souvent aussi (学生である限り). Mais 以上 : maintenant que c'est ainsi, il s'ensuit ; 限り : tant que cela dure.",
+        "es": "限り también suele servir (学生である限り). Aun así, 以上: ya que es así, se sigue; 限り: mientras siga así.",
+        "id": "限り sering juga cocok (学生である限り). Namun, 以上: karena memang sudah begitu, maka akibatnya menyusul; 限り: selama keadaannya tetap begitu.",
         "same": true
       }
     ],
@@ -23449,8 +23449,8 @@
         "place": "ホーム",
         "them": {
           "en": "An older traveller",
-          "fr": "Un vieux monsieur",
-          "es": "Un señor mayor",
+          "fr": "Un voyageur âgé",
+          "es": "Una persona mayor",
           "id": "Seorang penumpang lansia"
         },
         "lines": [
@@ -25068,7 +25068,7 @@
       {
         "pattern": "〜てたまらない",
         "en": "てしかたがない: can't help it; てたまらない: can't bear it.",
-        "fr": "てしかたがない : on n'y peut rien ; てたまらない : on ne le supporte pas.",
+        "fr": "てしかたがない : on ne peut pas s'en empêcher ; てたまらない : on ne le supporte pas.",
         "es": "てしかたがない: no lo puedo evitar; てたまらない: no lo soporto.",
         "id": "てしかたがない: tak bisa dicegah; てたまらない: tak tertahankan.",
         "same": true
@@ -25101,8 +25101,8 @@
       },
       {
         "jp": "この部屋はうるさくてしかたがない。",
-        "en": "This room is so noisy, there's no helping it.",
-        "fr": "Cette pièce est tellement bruyante, on n'y peut rien.",
+        "en": "This room is unbearably noisy.",
+        "fr": "Cette pièce est d'un bruit insupportable.",
         "es": "Esta habitación es ruidosa a más no poder.",
         "id": "Kamar ini berisik sekali sampai tidak bisa ditahan.",
         "register": "casual",
@@ -25943,18 +25943,18 @@
       },
       {
         "pattern": "〜場合",
-        "en": "としたら is a thought experiment; 場合 is a foreseen situation.",
-        "fr": "としたら est une expérience de pensée ; 場合, une situation prévue.",
-        "es": "としたら es un experimento mental; 場合 es una situación prevista.",
-        "id": "としたら adalah eksperimen pikiran; 場合 adalah situasi yang sudah diperkirakan.",
+        "en": "場合 often fits as well (この計画を進める場合). Still, としたら is a thought experiment; 場合 is a foreseen situation.",
+        "fr": "場合 convient souvent aussi (この計画を進める場合). Mais としたら est une expérience de pensée ; 場合, une situation prévue.",
+        "es": "場合 también suele servir (この計画を進める場合). Aun así, としたら es un experimento mental; 場合 es una situación prevista.",
+        "id": "場合 sering juga cocok (この計画を進める場合). Namun, としたら adalah eksperimen pikiran; 場合 adalah situasi yang sudah diperkirakan.",
         "same": true
       },
       {
         "pattern": "〜ようなら",
-        "en": "としたら: a thought experiment; ようなら: if things turn out to look that way.",
-        "fr": "としたら : une hypothèse ; ようなら : si les choses semblent tourner ainsi.",
-        "es": "としたら: una hipótesis; ようなら: si las cosas parecen ir por ese camino.",
-        "id": "としたら: sekadar pengandaian; ようなら: kalau keadaannya ternyata tampak begitu.",
+        "en": "ようなら can fit as well (この計画を進めるようなら). Still, としたら: a thought experiment; ようなら: if things turn out to look that way.",
+        "fr": "ようなら peut convenir aussi (この計画を進めるようなら). Mais としたら : une hypothèse ; ようなら : si les choses semblent tourner ainsi.",
+        "es": "ようなら también puede servir (この計画を進めるようなら). Aun así, としたら: una hipótesis; ようなら: si las cosas parecen ir por ese camino.",
+        "id": "ようなら juga bisa cocok (この計画を進めるようなら). Namun, としたら: sekadar pengandaian; ようなら: kalau keadaannya ternyata tampak begitu.",
         "same": true
       },
       {
@@ -25962,8 +25962,7 @@
         "en": "としたら: supposing it were so; 限り: for as long as it is so.",
         "fr": "としたら : à supposer que ce soit le cas ; 限り : tant que c'est le cas.",
         "es": "としたら: suponiendo que fuera así; 限り: mientras sea así.",
-        "id": "としたら: seandainya memang begitu; 限り: selama memang begitu.",
-        "same": true
+        "id": "としたら: seandainya memang begitu; 限り: selama memang begitu."
       }
     ],
     "examples": [
@@ -27374,10 +27373,10 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What is the speaker's surprise?",
-            "fr": "Qu'est-ce qui surprend la personne qui parle ?",
-            "es": "¿Qué sorprende a quien habla?",
-            "id": "Apa yang membuat pembicara heran?"
+            "en": "What does the speaker say about the report?",
+            "fr": "Que dit la personne qui parle de ce rapport ?",
+            "es": "¿Qué dice quien habla de este informe?",
+            "id": "Apa kata pembicara tentang laporan ini?"
           },
           "jp": "このレポートは、一日で書いたにしては、とても読みやすい。",
           "tr": {
@@ -40313,14 +40312,14 @@
           },
           "choices": [
             "雨の上に",
-            "雨な上に",
+            "雨だ上に",
             "雨なのに"
           ],
           "why": {
-            "en": "A noun takes の before 上に: 雨の上に. 雨な上に borrows the な of な-adjectives, and 雨なのに says « although it rains », a contrast this sentence does not make.",
-            "fr": "Un nom prend の devant 上に : 雨の上に. 雨な上に emprunte le な des adjectifs en な, et 雨なのに dit « bien qu'il pleuve », un contraste que la phrase ne fait pas.",
-            "es": "Un sustantivo lleva の antes de 上に: 雨の上に. 雨な上に toma el な de los adjetivos en な, y 雨なのに dice «aunque llueve», un contraste que esta oración no hace.",
-            "id": "Kata benda memakai の sebelum 上に: 雨の上に. 雨な上に meminjam な milik kata sifat な, dan 雨なのに berarti “padahal hujan”, pertentangan yang tidak ada dalam kalimat ini."
+            "en": "A noun takes の before 上に: 雨の上に. 雨だ上に keeps the だ of the plain form, and 雨なのに says « although it rains », a contrast this sentence does not make.",
+            "fr": "Un nom prend の devant 上に : 雨の上に. 雨だ上に garde le だ de la forme neutre, et 雨なのに dit « bien qu'il pleuve », un contraste que la phrase ne fait pas.",
+            "es": "Un sustantivo lleva の antes de 上に: 雨の上に. 雨だ上に conserva el だ de la forma llana, y 雨なのに dice «aunque llueve», un contraste que esta oración no hace.",
+            "id": "Kata benda memakai の sebelum 上に: 雨の上に. 雨だ上に mempertahankan だ dari bentuk biasa, dan 雨なのに berarti “padahal hujan”, pertentangan yang tidak ada dalam kalimat ini."
           }
         },
         {
@@ -40804,10 +40803,10 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What can the speaker cook?",
-            "fr": "Que sait cuisiner la personne qui parle ?",
-            "es": "¿Qué sabe cocinar quien habla?",
-            "id": "Apa yang bisa dimasak pembicara?"
+            "en": "Can the speaker cook these dishes?",
+            "fr": "La personne qui parle sait-elle cuisiner ces plats ?",
+            "es": "¿Sabe quien habla cocinar estas comidas?",
+            "id": "Apakah pembicara bisa memasak kedua masakan ini?"
           },
           "jp": "わたしは、ちゅうか料理はもちろん、カレーも作れません。",
           "tr": {
@@ -43824,8 +43823,8 @@
           "kind": "use",
           "ask": {
             "en": "Your older sibling complains of being exhausted from work, and says you could not understand. You had a draining day at school too; you say so, with some feeling.",
-            "fr": "Ton grand frère se plaint d'être épuisé par le travail et dit que tu ne peux pas comprendre. Toi aussi, tu as eu une journée éreintante à l'école : dis-le, avec un peu d'humeur.",
-            "es": "Tu hermano mayor se queja de que el trabajo lo agota y de que tú no lo puedes entender. Tú también tuviste un día agotador en la escuela; lo dices con cierta emoción.",
+            "fr": "Ton grand frère ou ta grande sœur se plaint que le travail l'épuise et dit que tu ne peux pas comprendre. Toi aussi, tu as eu une journée éreintante à l'école : dis-le, avec un peu d'humeur.",
+            "es": "Tu hermano o hermana mayor se queja del cansancio del trabajo y dice que tú no lo puedes entender. Tú también tuviste un día agotador en la escuela; lo dices con cierta emoción.",
             "id": "Kakakmu mengeluh kelelahan karena pekerjaan, dan berkata bahwa kamu tidak mungkin mengerti. Harimu di sekolah juga sangat melelahkan; kamu mengatakannya dengan sedikit emosi."
           },
           "choices": [
@@ -43835,8 +43834,8 @@
           ],
           "why": {
             "en": "The one marked by だって is the one added: わたしだって is « me too ». あなただって would say « you're tired too », which your sibling has just said, and わたしだけ says no one else is.",
-            "fr": "Celui que marque だって est celui qu'on ajoute : わたしだって, c'est « moi aussi ». あなただって dirait que lui aussi est fatigué, ce qu'il vient de dire lui-même, et わたしだけ dit que personne d'autre ne l'est.",
-            "es": "Lo marcado por だって es lo que se agrega: わたしだって es «yo también». あなただって diría que él también está cansado, lo que acaba de decir él mismo, y わたしだけ dice que nadie más lo está.",
+            "fr": "Celui que marque だって est celui qu'on ajoute : わたしだって, c'est « moi aussi ». あなただって dirait que l'autre aussi est à bout, ce qu'on vient justement de te dire, et わたしだけ dit que personne d'autre n'est fatigué.",
+            "es": "Lo marcado por だって es lo que se agrega: わたしだって es «yo también». あなただって diría que la otra persona también está cansada, justo lo que acaba de decirte, y わたしだけ dice que nadie más lo está.",
             "id": "Yang ditandai だって adalah yang ditambahkan: わたしだって berarti “aku juga”. あなただって berarti “kamu juga lelah”, padahal kakakmu baru saja mengatakannya, dan わたしだけ berarti tidak ada orang lain yang lelah."
           }
         },
@@ -45248,8 +45247,8 @@
         "place": "待合室",
         "them": {
           "en": "An elderly passenger",
-          "fr": "Une dame âgée",
-          "es": "Una señora mayor",
+          "fr": "Une personne âgée",
+          "es": "Una persona mayor",
           "id": "Seorang penumpang lanjut usia"
         },
         "lines": [
@@ -45280,8 +45279,8 @@
         ],
         "note": {
           "en": "ていらっしゃる raises what the passenger is doing: 持っていらっしゃる. For your own side the form is ております.",
-          "fr": "ていらっしゃる élève ce qu'elle est en train de faire : 持っていらっしゃる. Pour soi et les siens, c'est ております.",
-          "es": "ていらっしゃる eleva lo que ella está haciendo: 持っていらっしゃる. Para tu propio lado, la forma es ております.",
+          "fr": "ていらっしゃる élève ce que cette personne est en train de faire : 持っていらっしゃる. Pour soi et les siens, c'est ております.",
+          "es": "ていらっしゃる eleva lo que esa persona está haciendo: 持っていらっしゃる. Para tu propio lado, la forma es ております.",
           "id": "ていらっしゃる meninggikan apa yang sedang dilakukan penumpang itu: 持っていらっしゃる. Untuk pihakmu sendiri, bentuknya ております."
         },
         "ask": {
@@ -45295,7 +45294,7 @@
           },
           "task": {
             "en": "Ask the passenger, with respect, whether they are waiting for the train to Kyoto.",
-            "fr": "Demande-lui, avec respect, si elle attend le train pour Kyoto.",
+            "fr": "Demande à cette personne, avec respect, si elle attend le train pour Kyoto.",
             "es": "Pregúntale, con respeto, si espera el tren a Kioto.",
             "id": "Tanyakan kepada penumpang itu, dengan hormat, apakah dia sedang menunggu kereta ke Kyoto."
           },
@@ -45306,8 +45305,8 @@
           ],
           "why": {
             "en": "The passenger's action, raised: ていらっしゃる. ております and お〜する lower the speaker's own side, never the passenger's.",
-            "fr": "Son action à elle, élevée : ていらっしゃる. ております et お〜する abaissent son propre côté, jamais le sien.",
-            "es": "Su acción, elevada: ていらっしゃる. ております y お〜する rebajan el lado de quien habla, nunca el de ella.",
+            "fr": "Son action, élevée : ていらっしゃる. ております et お〜する abaissent le côté de qui parle, jamais celui de la personne âgée.",
+            "es": "Su acción, elevada: ていらっしゃる. ております y お〜する rebajan el lado de quien habla, nunca el de la persona mayor.",
             "id": "Tindakan penumpang itu, ditinggikan: ていらっしゃる. ております dan お〜する merendahkan pihak pembicara sendiri, bukan pihak penumpang."
           }
         }
@@ -49801,10 +49800,10 @@
       "scene": {
         "place": "改札",
         "them": {
-          "en": "Your little nephew",
-          "fr": "Ton petit neveu",
-          "es": "Tu sobrino pequeño",
-          "id": "Keponakan kecilmu"
+          "en": "A child in your care",
+          "fr": "L'enfant que tu gardes",
+          "es": "Niña o niño a tu cargo",
+          "id": "Anak yang kamu jaga"
         },
         "lines": [
           {
@@ -49849,8 +49848,8 @@
           },
           "task": {
             "en": "Gently invite the child to have a go at putting it in the gate alone.",
-            "fr": "Invite-le gentiment à essayer de le glisser tout seul dans le portique.",
-            "es": "Invítalo con suavidad a probar a meterlo él solo en el torniquete.",
+            "fr": "Invite gentiment l'enfant à essayer de glisser le billet sans aide dans le portique.",
+            "es": "Dile con suavidad que pruebe a meterlo sin ayuda en el torniquete.",
             "id": "Ajak anak itu dengan lembut untuk mencoba memasukkannya sendiri ke gerbang tiket."
           },
           "choices": [
@@ -49860,8 +49859,8 @@
           ],
           "why": {
             "en": "A kind invitation to a child to try: てごらん. てくださいませんか is for a superior, and てあげる means you do it for the child.",
-            "fr": "Une invitation bienveillante à essayer, pour un enfant : てごらん. てくださいませんか s'adresse à un supérieur, et てあげる veut dire que tu le fais pour lui.",
-            "es": "Una invitación amable a un niño a que pruebe: てごらん. てくださいませんか es para un superior, y てあげる significa que lo haces tú por él.",
+            "fr": "Une invitation bienveillante à essayer, pour un enfant : てごらん. てくださいませんか s'adresse à un supérieur, et てあげる veut dire que tu le fais à sa place.",
+            "es": "Una invitación amable a un niño a que pruebe: てごらん. てくださいませんか es para un superior, y てあげる significa que lo haces tú en su lugar.",
             "id": "Ajakan ramah kepada anak untuk mencoba: てごらん. てくださいませんか untuk atasan, dan てあげる berarti kamu yang melakukannya untuk anak itu."
           }
         }
@@ -49940,8 +49939,8 @@
           "kind": "use",
           "ask": {
             "en": "Your little sibling says they've drawn a picture. You want to see it. You say:",
-            "fr": "Ton petit frère dit qu'il a fait un dessin. Tu veux le voir. Tu dis :",
-            "es": "Tu hermano menor dice que ha hecho un dibujo. Quieres verlo. Dices:",
+            "fr": "Ton petit frère ou ta petite sœur dit avoir fait un dessin. Tu veux le voir. Tu dis :",
+            "es": "Tu hermano o hermana menor dice que ha hecho un dibujo. Quieres verlo. Dices:",
             "id": "Adikmu berkata bahwa dia sudah menggambar sesuatu. Kamu ingin melihatnya. Kamu berkata:"
           },
           "choices": [

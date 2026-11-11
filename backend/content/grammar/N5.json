@@ -1131,9 +1131,9 @@
               "id": "Seorang teman: apa yang dia lakukan."
             },
             {
-              "en": "The speaker: it says what was written.",
+              "en": "The speaker: it says what they wrote.",
               "fr": "La personne qui parle : on dit ce qu'elle a écrit.",
-              "es": "De quien habla: dice lo que se escribió.",
+              "es": "De quien habla: dice lo que escribió.",
               "id": "Pembicara: apa yang dia tulis."
             }
           ],
@@ -5398,10 +5398,10 @@
             "id": "Minggu depan, saya akan pergi ke Kyoto."
           },
           "ask": {
-            "en": "There is no future ending. When does this happen?",
-            "fr": "Il n'y a pas de terminaison du futur. Quand cela se passe-t-il ?",
-            "es": "No hay terminación de futuro. ¿Cuándo ocurre esto?",
-            "id": "Tidak ada akhiran masa depan. Kapan ini terjadi?"
+            "en": "When does this happen?",
+            "fr": "Quand cela se passe-t-il ?",
+            "es": "¿Cuándo ocurre esto?",
+            "id": "Kapan ini terjadi?"
           },
           "choices": [
             {
@@ -10140,10 +10140,10 @@
           },
           "choices": [
             {
-              "en": "Before こと the verb stays in its dictionary form; できます carries the politeness.",
-              "fr": "Devant こと, le verbe reste à la forme du dictionnaire ; できます porte la politesse.",
-              "es": "Ante こと el verbo queda en forma de diccionario; できます lleva la cortesía.",
-              "id": "Sebelum こと, kata kerja tetap dalam bentuk kamus; できます yang membawa kesopanan."
+              "en": "The verb stays in its dictionary form; できます carries the politeness.",
+              "fr": "Le verbe reste à la forme du dictionnaire ; できます porte la politesse.",
+              "es": "El verbo queda en forma de diccionario; できます lleva la cortesía.",
+              "id": "Kata kerjanya tetap dalam bentuk kamus; できます yang membawa kesopanan."
             },
             {
               "en": "Either works: ひきますこと is just as good and more polite.",
@@ -14083,10 +14083,10 @@
           },
           "choices": [
             {
-              "en": "A noun or a な-adjective takes だ before から.",
-              "fr": "Un nom ou un adjectif en な prend だ devant から.",
-              "es": "Un sustantivo o un adjetivo en な lleva だ ante から.",
-              "id": "Kata benda atau kata sifat な memakai だ sebelum から."
+              "en": "A noun takes だ: 日よう日だ.",
+              "fr": "Un nom prend だ : 日よう日だ.",
+              "es": "Un sustantivo lleva だ: 日よう日だ.",
+              "id": "Kata benda memakai だ: 日よう日だ."
             },
             {
               "en": "だから is one word here, and it means « but ».",
@@ -17544,10 +17544,10 @@
           },
           "choices": [
             {
-              "en": "しずか is a な-adjective: it becomes with になる.",
-              "fr": "しずか est un adjectif en な : il devient avec になる.",
-              "es": "しずか es un adjetivo en な: cambia con になる.",
-              "id": "しずか adalah kata sifat な: berubah dengan になる."
+              "en": "しずか is a な-adjective, not an い-adjective.",
+              "fr": "しずか est un adjectif en な, pas en い.",
+              "es": "しずか es un adjetivo en な, no en い.",
+              "id": "しずか itu kata sifat な, bukan い."
             },
             {
               "en": "しずかくなる is the casual form of it.",
@@ -20430,10 +20430,10 @@
           },
           "choices": [
             {
-              "en": "Before まえに the verb stays in the dictionary form, whatever the tense.",
-              "fr": "Devant まえに, le verbe reste à la forme du dictionnaire, quel que soit le temps.",
-              "es": "Ante まえに el verbo va en forma de diccionario, sea cual sea el tiempo.",
-              "id": "Sebelum まえに, kata kerja tetap dalam bentuk kamus, lampau atau tidak."
+              "en": "The verb stays in the dictionary form, whatever the tense.",
+              "fr": "Le verbe reste à la forme du dictionnaire, quel que soit le temps.",
+              "es": "El verbo va en forma de diccionario, sea cual sea el tiempo.",
+              "id": "Kata kerjanya tetap dalam bentuk kamus, lampau atau tidak."
             },
             {
               "en": "The sentence is about the future: the hiragana are still to learn.",
@@ -27569,10 +27569,10 @@
           },
           "choices": [
             {
-              "en": "A noun before と思います takes だ: 先生だと.",
-              "fr": "Un nom devant と思います prend だ : 先生だと.",
-              "es": "Un sustantivo delante de と思います lleva だ: 先生だと.",
-              "id": "Kata benda di depan と思います memakai だ: 先生だと."
+              "en": "A noun takes だ: 先生だと.",
+              "fr": "Un nom prend だ : 先生だと.",
+              "es": "Un sustantivo lleva だ: 先生だと.",
+              "id": "Kata benda memakai だ: 先生だと."
             },
             {
               "en": "だ shows the speaker is certain.",
@@ -27621,10 +27621,10 @@
           },
           "choices": [
             {
-              "en": "The verb before と stays plain.",
-              "fr": "Le verbe devant と reste neutre.",
-              "es": "Ante と, el verbo va en forma llana.",
-              "id": "Kata kerja di depan と tetap bentuk biasa."
+              "en": "The verb stays plain; 思います takes the ます.",
+              "fr": "Le verbe reste neutre ; 思います prend le ます.",
+              "es": "El verbo va en forma llana; 思います lleva el ます.",
+              "id": "Kata kerjanya tetap bentuk biasa; 思います yang memakai ます."
             },
             {
               "en": "ふる is the future of ふります: it will rain.",
@@ -28510,10 +28510,10 @@
           },
           "choices": [
             {
-              "en": "Before の, the verb takes its dictionary form.",
-              "fr": "Devant の, le verbe prend la forme du dictionnaire.",
-              "es": "Ante の, el verbo toma la forma de diccionario.",
-              "id": "Di depan の, kata kerjanya memakai bentuk kamus."
+              "en": "The verb stays in its dictionary form; です makes it polite.",
+              "fr": "Le verbe reste à la forme du dictionnaire ; です rend la phrase polie.",
+              "es": "El verbo queda en forma de diccionario; です la hace cortés.",
+              "id": "Kata kerjanya tetap bentuk kamus; です yang membuatnya sopan."
             },
             {
               "en": "見る is casual; 見ますのが would be the polite way.",
@@ -33609,10 +33609,10 @@
           "のに"
         ],
         "why": {
-          "en": "が also opens a polite request: しつれいですが…. しかし cannot stand inside the sentence, and のに cannot lead into a question.",
-          "fr": "が ouvre aussi une demande polie : しつれいですが…. しかし ne peut pas se mettre dans la phrase, et のに ne peut pas introduire une question.",
-          "es": "が también abre una petición cortés: しつれいですが…. しかし no puede ir dentro de la frase, y のに no puede introducir una pregunta.",
-          "id": "が juga membuka permintaan yang sopan: しつれいですが…. しかし tidak bisa berada di dalam kalimat, dan のに tidak bisa disusul pertanyaan."
+          "en": "が also opens a polite request: しつれいですが…. しかし cannot stand inside the sentence, and のに would make it a complaint: « even though it is rude… ».",
+          "fr": "が ouvre aussi une demande polie : しつれいですが…. しかし ne peut pas se mettre dans la phrase, et のに en ferait un reproche : « alors que c'est impoli… ».",
+          "es": "が también abre una petición cortés: しつれいですが…. しかし no puede ir dentro de la frase, y のに la volvería un reproche: «aunque es descortés…».",
+          "id": "が juga membuka permintaan yang sopan: しつれいですが…. しかし tidak bisa berada di dalam kalimat, dan のに akan menjadikannya keluhan: “padahal itu tidak sopan…”."
         }
       },
       {
@@ -34814,10 +34814,10 @@
           },
           "choices": [
             {
-              "en": "After a noun, the plain だ comes before けど.",
-              "fr": "Après un nom, le だ simple vient devant けど.",
-              "es": "Un sustantivo lleva el だ llano antes de けど.",
-              "id": "Kata benda perlu だ bentuk biasa di depan けど."
+              "en": "A noun needs its だ to make a full clause.",
+              "fr": "Un nom a besoin de son だ pour faire une proposition.",
+              "es": "Un sustantivo necesita su だ para formar una oración.",
+              "id": "Kata benda memerlukan だ agar menjadi klausa utuh."
             },
             {
               "en": "だ means « because »: it is a holiday, so…",
@@ -36545,10 +36545,10 @@
           },
           "choices": [
             {
-              "en": "同じ goes straight before a noun, with no な.",
-              "fr": "同じ se place directement devant un nom, sans な.",
-              "es": "同じ va justo delante del sustantivo, sin な.",
-              "id": "同じ langsung diletakkan di depan kata benda, tanpa な."
+              "en": "同じ joins a noun directly, with no な.",
+              "fr": "同じ s'accroche directement au nom, sans な.",
+              "es": "同じ se une directo al sustantivo, sin な.",
+              "id": "同じ langsung menempel pada kata benda, tanpa な."
             },
             {
               "en": "な drops because 電車 is a vehicle.",
@@ -38382,7 +38382,7 @@
           "を"
         ],
         "why": {
-          "en": "も … も means “both … and”. The second も is already there, so this one must answer it; が and を cannot pair with it.",
+          "en": "も … も means « both … and ». The second も is already there, so this one must answer it; が and を cannot pair with it.",
           "fr": "も … も veut dire « et … et ». Le second も est déjà là, celui-ci doit lui répondre ; が et を ne s'y associent pas.",
           "es": "も … も significa «tanto … como». El segundo も ya está, así que este debe responderle; が y を no pueden emparejarse con él.",
           "id": "も … も berarti “baik … maupun”. も yang kedua sudah ada, jadi yang ini harus menjawabnya; が dan を tidak bisa berpasangan dengannya."
@@ -38402,7 +38402,7 @@
           "を"
         ],
         "why": {
-          "en": "With a negative, も … も means “neither … nor”. が and を cannot pair with the second も.",
+          "en": "With a negative, も … も means « neither … nor ». が and を cannot pair with the second も.",
           "fr": "Avec une négation, も … も veut dire « ni … ni ». が et を ne peuvent pas s'associer au second も.",
           "es": "Con negación, も … も significa «ni … ni». が y を no pueden emparejarse con el segundo も.",
           "id": "Dengan negatif, も … も berarti “tidak … maupun …”. が dan を tidak bisa berpasangan dengan も yang kedua."
@@ -38422,7 +38422,7 @@
           "を"
         ],
         "why": {
-          "en": "も … も means “both … and”: あさもよるも. が and を cannot pair with the second も.",
+          "en": "も … も means « both … and »: あさもよるも. が and を cannot pair with the second も.",
           "fr": "も … も veut dire « et … et » : あさもよるも. が et を ne peuvent pas s'associer au second も.",
           "es": "も … も significa «tanto … como»: あさもよるも. が y を no pueden emparejarse con el segundo も.",
           "id": "も … も berarti “baik … maupun”: あさもよるも. が dan を tidak bisa berpasangan dengan も yang kedua."
@@ -38442,7 +38442,7 @@
           "を"
         ],
         "why": {
-          "en": "も … も means “both … and”: one も on each name. が and を cannot pair with the second も.",
+          "en": "も … も means « both … and »: one も on each name. が and を cannot pair with the second も.",
           "fr": "も … も veut dire « et … et » : un も sur chaque nom. が et を ne peuvent pas s'associer au second も.",
           "es": "も … も significa «tanto … como»: un も en cada nombre. が y を no pueden emparejarse con el segundo も.",
           "id": "も … も berarti “baik … maupun”: satu も pada setiap nama. が dan を tidak bisa berpasangan dengan も yang kedua."

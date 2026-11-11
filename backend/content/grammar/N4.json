@@ -1859,10 +1859,10 @@
           },
           "choices": [
             {
-              "en": "A noun takes な before ので.",
-              "fr": "Un nom prend な devant ので.",
-              "es": "Un sustantivo toma な ante ので.",
-              "id": "Kata benda memakai な sebelum ので."
+              "en": "A noun takes な: 日曜日なので.",
+              "fr": "Un nom prend な : 日曜日なので.",
+              "es": "Un sustantivo toma な: 日曜日なので.",
+              "id": "Kata benda memakai な: 日曜日なので."
             },
             {
               "en": "なので is the past of ので.",
@@ -4513,8 +4513,8 @@
         "place": "待合室",
         "them": {
           "en": "A parent",
-          "fr": "Une mère",
-          "es": "Una madre",
+          "fr": "Un parent",
+          "es": "Uno de los padres",
           "id": "Orang tua"
         },
         "lines": [
@@ -4546,7 +4546,7 @@
         "note": {
           "en": "The causative puts the one who decides as the subject and the one who acts after に or を: the parent has the child sit, and practise.",
           "fr": "Le causatif met en sujet la personne qui décide, et celle qui agit après に ou を : on fait asseoir l'enfant, on lui fait faire ses exercices.",
-          "es": "El causativo pone de sujeto a quien decide, y a quien actúa tras に o を: la madre hace que se siente y que practique.",
+          "es": "El causativo pone de sujeto a quien decide, y a quien actúa tras に o を: el padre o la madre hace que se siente y que practique.",
           "id": "Bentuk kausatif menjadikan yang memutuskan sebagai subjek, dan yang bertindak ditandai に atau を: orang tua menyuruh anaknya duduk, dan berlatih."
         },
         "ask": {
@@ -8030,7 +8030,7 @@
             "習ったつもりです"
           ],
           "why": {
-            "en": "つもり follows the dictionary form: 習う + つもりです. 習い (the ます stem, as before たい) does not work, and 習ったつもりです looks back: 'I believe I have already learned it'.",
+            "en": "つもり follows the dictionary form: 習う + つもりです. 習い (the ます stem, as before たい) does not work, and 習ったつもりです looks back: « I believe I have already learned it ».",
             "fr": "つもり se place après la forme du dictionnaire : 習う + つもりです. 習い (la base en ます, comme devant たい) ne convient pas, et 習ったつもりです regarde en arrière : « je crois l'avoir déjà appris ».",
             "es": "つもり sigue a la forma de diccionario: 習う + つもりです. 習い (la raíz ます, como ante たい) no sirve, y 習ったつもりです mira atrás: «creo que ya lo he aprendido».",
             "id": "つもり mengikuti bentuk kamus: 習う + つもりです. 習い (batang ます, seperti sebelum たい) tidak bisa, dan 習ったつもりです melihat ke belakang: “aku merasa sudah mempelajarinya”."
@@ -8492,7 +8492,7 @@
             "と言います"
           ],
           "why": {
-            "en": "という joins a name to the noun it names: 「あおぞら」という本屋, 'a bookshop called Aozora'. のような would say 'a bookshop like Aozora', and と言います is the verb 'to say', which cannot stand before a noun like this.",
+            "en": "という joins a name to the noun it names: 「あおぞら」という本屋, « a bookshop called Aozora ». のような would say « a bookshop like Aozora », and と言います is the verb « to say », which cannot stand before a noun like this.",
             "fr": "という relie un nom propre au nom qu'il désigne : 「あおぞら」という本屋, « une librairie appelée Aozora ». のような dirait « une librairie comme Aozora », et と言います est le verbe « dire », qui ne peut pas se placer ainsi devant un nom.",
             "es": "という une un nombre al sustantivo que nombra: 「あおぞら」という本屋, «una librería llamada Aozora». のような diría «una librería como Aozora», y と言います es el verbo «decir», que no puede ir así ante un sustantivo.",
             "id": "という menghubungkan nama dengan kata benda yang dinamainya: 「あおぞら」という本屋, “toko buku bernama Aozora”. のような berarti “toko buku seperti Aozora”, dan と言います kata kerja “mengatakan”, yang tidak bisa berada di depan kata benda."
@@ -8534,7 +8534,7 @@
             }
           ],
           "why": {
-            "en": "という presents a name to someone who may not know it: 'a person called Suzuki'. For someone everybody knows you would just say すずきさん. It is not the verb 'to say' here.",
+            "en": "という presents a name to someone who may not know it: « a person called Suzuki ». For someone everybody knows you would just say すずきさん. It is not the verb « to say » here.",
             "fr": "という présente un nom à quelqu'un qui l'ignore peut-être : « une personne appelée Suzuki ». Pour quelqu'un que tout le monde connaît, on dit simplement すずきさん. Ce n'est pas le verbe « dire ».",
             "es": "という presenta un nombre a quien quizá no lo conoce: «una persona llamada Suzuki». Para alguien a quien todos conocen dirías solo すずきさん. Aquí no es el verbo «decir».",
             "id": "という memperkenalkan nama kepada orang yang mungkin belum tahu: “orang yang bernama Suzuki”. Untuk orang yang dikenal semua orang, cukup katakan すずきさん. Di sini, maknanya bukan kata kerja “mengatakan”."
@@ -8561,7 +8561,7 @@
             "だったという"
           ],
           "why": {
-            "en": "Before という the clause is in the plain form, and a noun keeps its plain だ: 休みだという. ですという puts the polite form inside, and だったという is the past: 'school was closed'.",
+            "en": "Before という the clause is in the plain form, and a noun keeps its plain だ: 休みだという. ですという puts the polite form inside, and だったという is the past: « school was closed ».",
             "fr": "Devant という, la proposition est à la forme neutre, et un nom garde son だ neutre : 休みだという. ですという met la forme polie à l'intérieur, et だったという est le passé : « l'école était fermée ».",
             "es": "Ante という la oración va en forma llana, y un sustantivo conserva su だ llana: 休みだという. ですという mete la forma cortés dentro, y だったという es el pasado: «la escuela estaba cerrada».",
             "id": "Sebelum という, klausanya berbentuk biasa, dan kata benda mempertahankan だ biasa: 休みだという. ですという memasukkan bentuk sopan ke dalamnya, dan だったという adalah bentuk lampau: “sekolahnya libur waktu itu”."
@@ -8630,7 +8630,7 @@
             "来なかったと"
           ],
           "why": {
-            "en": "Inside という the verb is plain, and for yesterday it is the plain past negative: 来なかった. 来ない is the present, 'isn't coming', and 来なかったと drops いう: と alone cannot join a noun like 話.",
+            "en": "Inside という the verb is plain, and for yesterday it is the plain past negative: 来なかった. 来ない is the present, « isn't coming », and 来なかったと drops いう: と alone cannot join a noun like 話.",
             "fr": "Devant という, le verbe est à la forme neutre, et pour hier c'est le passé négatif neutre : 来なかった. 来ない est le présent, « ne vient pas », et 来なかったと oublie いう : と seul ne peut pas se relier à un nom comme 話.",
             "es": "Dentro de という el verbo va en forma llana, y para ayer es el pasado negativo llano: 来なかった. 来ない es el presente, «no viene», y 来なかったと olvida いう: と solo no puede unirse a un sustantivo como 話.",
             "id": "Dalam という kata kerjanya berbentuk biasa, dan untuk kemarin bentuknya lampau negatif biasa: 来なかった. 来ない adalah nonlampau, “tidak akan datang”, dan 来なかったと membuang いう: と saja tidak bisa menyambung ke kata benda seperti 話."
@@ -8970,7 +8970,7 @@
             }
           ],
           "why": {
-            "en": "はずではありませんでした says 'it was not supposed to be so': the speaker expected fewer people and is surprised. It is an expectation, not a rule against crowds.",
+            "en": "はずではありませんでした says « it was not supposed to be so »: the speaker expected fewer people and is surprised. It is an expectation, not a rule against crowds.",
             "fr": "はずではありませんでした dit « ça ne devait pas être ainsi » : la personne attendait moins de monde et s'étonne. C'est une attente, pas une règle contre la foule.",
             "es": "はずではありませんでした dice «no debía ser así»: quien habla esperaba menos gente y le sorprende. Es una expectativa, no una regla contra las multitudes.",
             "id": "はずではありませんでした berarti “semestinya tidak begini”: pembicara memperkirakan orangnya lebih sedikit dan heran. Ini perkiraan, bukan aturan yang melarang keramaian."
@@ -9017,7 +9017,7 @@
             "来たはず"
           ],
           "why": {
-            "en": "はず follows the plain form: 来る + はず. The polite 来ます cannot stand before it, and 来たはず looks back: 'it should have come already', which does not fit もうすぐ (soon).",
+            "en": "はず follows the plain form: 来る + はず. The polite 来ます cannot stand before it, and 来たはず looks back: « it should have come already », which does not fit もうすぐ (soon).",
             "fr": "はず suit la forme neutre : 来る + はず. 来ます (poli) ne peut pas se placer devant, et 来たはず regarde en arrière : « il aurait déjà dû venir », ce qui ne va pas avec もうすぐ (bientôt).",
             "es": "はず sigue a la forma llana: 来る + はず. El cortés 来ます no puede ir delante, y 来たはず mira atrás: «ya debería haber llegado», lo que no encaja con もうすぐ (pronto).",
             "id": "はず mengikuti bentuk biasa: 来る + はず. Bentuk sopan 来ます tidak bisa berada sebelumnya, dan 来たはず melihat ke belakang: “semestinya sudah datang”, yang tidak cocok dengan もうすぐ (sebentar lagi)."
@@ -9059,7 +9059,7 @@
             }
           ],
           "why": {
-            "en": "まだ五さいだから gives the fact, and はず draws the conclusion from it: at five, a child shouldn't be able to. It is not a rule (that would be べき) and not a 'maybe' (かもしれません).",
+            "en": "まだ五さいだから gives the fact, and はず draws the conclusion from it: at five, a child shouldn't be able to. It is not a rule (that would be べき) and not a « maybe » (かもしれません).",
             "fr": "まだ五さいだから donne le fait, et はず en tire la conclusion : à cinq ans, un enfant ne devrait pas savoir. Ce n'est pas une règle (ce serait べき) ni un « peut-être » (かもしれません).",
             "es": "まだ五さいだから da el hecho, y はず saca la conclusión: con cinco años, un niño no debería saber. No es una regla (eso sería べき) ni un «quizá» (かもしれません).",
             "id": "まだ五さいだから memberi faktanya, dan はず menarik kesimpulan darinya: di usia lima tahun, semestinya anak belum bisa. Ini bukan aturan (itu べき) dan bukan “mungkin” (かもしれません)."
@@ -9398,7 +9398,7 @@
             "見ないかもしれません"
           ],
           "why": {
-            "en": "Before かもしれません the verb takes its plain form, here the plain past negative: 見なかった. 見ませんでした is the polite form, which cannot stand there, and 見ない is the present: 'might not see it'.",
+            "en": "Before かもしれません the verb takes its plain form, here the plain past negative: 見なかった. 見ませんでした is the polite form, which cannot stand there, and 見ない is the present: « might not see it ».",
             "fr": "Devant かもしれません, le verbe prend sa forme neutre, ici le passé négatif neutre : 見なかった. 見ませんでした est la forme polie, qui ne peut pas se placer là, et 見ない est le présent : « ne le verra peut-être pas ».",
             "es": "Antes de かもしれません el verbo va en forma llana, aquí el pasado negativo llano: 見なかった. 見ませんでした es la forma cortés, que no puede ir ahí, y 見ない es presente: «puede que no lo vea».",
             "id": "Sebelum かもしれません, kata kerja memakai bentuk biasa, di sini bentuk biasa lampau negatif: 見なかった. 見ませんでした adalah bentuk sopan, yang tidak bisa dipakai di situ, dan 見ない bentuk nonlampau: “mungkin tidak akan melihatnya”."
@@ -9460,7 +9460,7 @@
             "ねつがあるので、休むつもりです。"
           ],
           "why": {
-            "en": "You don't know yet, so you leave it open: 休むかもしれません (plain present + かもしれません). 休んだかもしれません is about the past, 'I might have been away', and 休むつもりです says you have decided.",
+            "en": "You don't know yet, so you leave it open: 休むかもしれません (plain present + かもしれません). 休んだかもしれません is about the past, « I might have been away », and 休むつもりです says you have decided.",
             "fr": "Tu ne sais pas encore, tu laisses donc la question ouverte : 休むかもしれません (forme neutre au présent + かもしれません). 休んだかもしれません parle du passé : « il se peut que j'aie manqué », et 休むつもりです dit que tu as décidé.",
             "es": "Aún no lo sabes, así que lo dejas abierto: 休むかもしれません (presente llano + かもしれません). 休んだかもしれません habla del pasado, «puede que haya faltado», y 休むつもりです dice que ya lo decidiste.",
             "id": "Kamu belum tahu, jadi kamu membiarkannya terbuka: 休むかもしれません (bentuk biasa nonlampau + かもしれません). 休んだかもしれません tentang masa lampau, “mungkin saya sudah absen”, dan 休むつもりです berarti kamu sudah memutuskan."
@@ -9502,7 +9502,7 @@
             }
           ],
           "why": {
-            "en": "かもしれません softens the bad news: 'maybe impossible' is a gentle way to say no. It is not the flat むりです, and it is not a yes.",
+            "en": "かもしれません softens the bad news: « maybe impossible » is a gentle way to say no. It is not the flat むりです, and it is not a yes.",
             "fr": "かもしれません adoucit la mauvaise nouvelle : « peut-être impossible » est une façon délicate de dire non. Ce n'est ni le むりです tout sec, ni un oui.",
             "es": "かもしれません suaviza la mala noticia: «quizá imposible» es una forma amable de decir que no. No es el むりです seco, y no es un sí.",
             "id": "かもしれません memperhalus kabar buruk: “mungkin tidak bisa” adalah cara halus untuk menolak. Ini bukan むりです yang tegas, dan bukan jawaban ya."
@@ -18023,7 +18023,7 @@
           "tr": {
             "en": "I've decided to run every morning from next month.",
             "fr": "J'ai décidé de courir tous les matins à partir du mois prochain.",
-            "es": "Decidió correr todas las mañanas a partir del mes que viene.",
+            "es": "Decidí correr todas las mañanas a partir del mes que viene.",
             "id": "Saya sudah memutuskan untuk berlari setiap pagi mulai bulan depan."
           },
           "ask": {
@@ -18036,19 +18036,19 @@
             {
               "en": "I've decided to run every morning from next month.",
               "fr": "J'ai décidé de courir chaque matin.",
-              "es": "Ha decidido correr cada mañana.",
+              "es": "Decidí correr cada mañana.",
               "id": "Saya sudah memutuskan untuk berlari setiap pagi."
             },
             {
               "en": "I'm making an effort to keep running every morning.",
               "fr": "Je m'efforce de courir chaque matin.",
-              "es": "Se esfuerza por seguir corriendo cada mañana.",
+              "es": "Me esfuerzo por seguir corriendo cada mañana.",
               "id": "Saya sedang berusaha untuk terus berlari setiap pagi."
             },
             {
               "en": "I've become able to run every morning.",
               "fr": "J'arrive maintenant à courir chaque matin.",
-              "es": "Ha llegado a poder correr cada mañana.",
+              "es": "Ahora ya puedo correr cada mañana.",
               "id": "Sekarang saya sudah bisa berlari setiap pagi."
             }
           ],
@@ -18724,19 +18724,19 @@
     "structure_es": "sustantivo + しか + verbo negativo",
     "structure_id": "kata benda + しか + kata kerja negatif",
     "meaning": {
-      "en": "only, nothing but",
-      "fr": "seulement, rien que",
-      "es": "solo, nada más que",
-      "id": "hanya, semata-mata"
+      "en": "only (and too little)",
+      "fr": "seulement (et trop peu)",
+      "es": "solo (y es poco)",
+      "id": "hanya (dan terlalu sedikit)"
     },
     "register": "neutral",
     "steps": [
       {
         "kind": "rule",
-        "en": "**noun + しか + negative verb** means « only, nothing but », with the feeling that it is not enough: 百円しかない (I've only got a hundred yen).",
-        "fr": "**nom + しか + verbe négatif** signifie « seulement, rien que », avec le sentiment que c'est trop peu : 百円しかない (je n'ai que cent yens).",
-        "es": "**sustantivo + しか + verbo negativo** significa «solo, nada más que», con la sensación de que no basta: 百円しかない (solo tengo cien yenes).",
-        "id": "**Kata benda + しか + kata kerja negatif** berarti “hanya, tidak lain dari”, dengan perasaan bahwa itu tidak cukup: 百円しかない (aku hanya punya seratus yen)."
+        "en": "**noun + しか + negative verb** means « only », with the feeling that it is not enough: 百円しかない (I've only got a hundred yen).",
+        "fr": "**nom + しか + verbe négatif** signifie « seulement », avec le sentiment que c'est trop peu : 百円しかない (je n'ai que cent yens).",
+        "es": "**sustantivo + しか + verbo negativo** significa «solo», con la sensación de que no basta: 百円しかない (solo tengo cien yenes).",
+        "id": "**Kata benda + しか + kata kerja negatif** berarti “hanya”, dengan perasaan bahwa itu tidak cukup: 百円しかない (aku hanya punya seratus yen)."
       },
       {
         "kind": "use",
@@ -20442,10 +20442,10 @@
           },
           "choices": [
             {
-              "en": "A noun or な-adjective takes な before んです.",
-              "fr": "Un nom ou un adjectif en な prend な devant んです.",
-              "es": "Un sustantivo o adjetivo en な lleva な ante んです.",
-              "id": "Kata benda atau kata sifat な memakai な sebelum んです."
+              "en": "A noun takes な: たんじょう日なんです.",
+              "fr": "Un nom prend な : たんじょう日なんです.",
+              "es": "Un sustantivo lleva な: たんじょう日なんです.",
+              "id": "Kata benda memakai な: たんじょう日なんです."
             },
             {
               "en": "な makes the sentence a question.",
@@ -21532,8 +21532,8 @@
         "place": "ホーム",
         "them": {
           "en": "A parent",
-          "fr": "Une mère",
-          "es": "Una madre",
+          "fr": "Un parent",
+          "es": "Uno de los padres",
           "id": "Orang tua seorang anak"
         },
         "lines": [
@@ -26278,10 +26278,10 @@
           },
           "choices": [
             {
-              "en": "No: before です, only こと works.",
-              "fr": "Non : devant です, seul こと convient.",
-              "es": "No: ante です, solo sirve こと.",
-              "id": "Tidak: sebelum です, hanya こと yang bisa."
+              "en": "No: only こと can stand there.",
+              "fr": "Non : seul こと peut se mettre là.",
+              "es": "No: ahí solo sirve こと.",
+              "id": "Tidak: di situ hanya こと yang bisa."
             },
             {
               "en": "Yes: の and こと are always the same.",
@@ -27436,10 +27436,10 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "Said to your teacher, what is wrong with this sentence?",
-            "fr": "Dite à ton professeur, qu'est-ce qui cloche dans cette phrase ?",
-            "es": "Dicha a tu profesor, ¿qué falla en esta oración?",
-            "id": "Kalau diucapkan kepada gurumu, apa yang salah dengan kalimat ini?"
+            "en": "Is this all right to say to your teacher?",
+            "fr": "Peux-tu dire cette phrase à ton professeur ?",
+            "es": "¿Puedes decirle esto a tu profesor?",
+            "id": "Bolehkah kalimat ini diucapkan kepada gurumu?"
           },
           "jp": "先生、そんなにいそがしいなら、もう帰ったらどうですか。",
           "tr": {
@@ -27450,22 +27450,22 @@
           },
           "choices": [
             {
-              "en": "It tells the teacher what to do.",
-              "fr": "Elle dit au professeur quoi faire.",
-              "es": "Le dice al profesor qué hacer.",
-              "id": "Menyuruh guru melakukan sesuatu."
+              "en": "No: it tells the teacher what to do.",
+              "fr": "Non : elle dit au professeur quoi faire.",
+              "es": "No: le dice al profesor qué hacer.",
+              "id": "Tidak: menyuruh guru melakukan sesuatu."
             },
             {
-              "en": "Nothing: どうですか is polite enough for anyone.",
-              "fr": "Rien : どうですか est assez poli pour tout le monde.",
-              "es": "Nada: どうですか es cortés para cualquiera.",
-              "id": "Tidak ada: どうですか cukup sopan untuk siapa pun."
+              "en": "Yes: どうですか is polite enough for anyone.",
+              "fr": "Oui : どうですか est assez poli pour tout le monde.",
+              "es": "Sí: どうですか es cortés para cualquiera.",
+              "id": "Boleh: どうですか cukup sopan untuk siapa pun."
             },
             {
-              "en": "It asks whether the teacher has already gone home.",
-              "fr": "Elle demande si le professeur est déjà parti.",
-              "es": "Pregunta si el profesor ya se ha ido a casa.",
-              "id": "Menanyakan apakah guru sudah pulang."
+              "en": "No: it asks whether the teacher has already gone home.",
+              "fr": "Non : elle demande si le professeur est déjà parti.",
+              "es": "No: pregunta si el profesor ya se fue a casa.",
+              "id": "Tidak: menanyakan apakah guru sudah pulang."
             }
           ],
           "why": {
@@ -28769,7 +28769,7 @@
           "why": {
             "en": "The whole time your friend is away, with ずっと: あいだ. あいだに puts one act at a point in the span; うちに is « before it ends », for a chance you seize.",
             "fr": "Pendant toute son absence, avec ずっと : あいだ. あいだに place un acte à un moment de la durée ; うちに, c'est « avant que ça finisse », pour saisir une occasion.",
-            "es": "Todo el tiempo que tu amiga no está, con ずっと: あいだ. あいだに pone un acto en un punto del período; うちに es «antes de que acabe», para aprovechar una ocasión.",
+            "es": "Todo el tiempo que no esté, con ずっと: あいだ. あいだに pone un acto en un punto del período; うちに es «antes de que acabe», para aprovechar una ocasión.",
             "id": "Sepanjang waktu temanmu pergi, dengan ずっと: あいだ. あいだに menempatkan satu tindakan pada satu saat dalam rentang itu; うちに berarti “sebelum berakhir”, untuk kesempatan yang kamu manfaatkan."
           }
         }
@@ -30234,8 +30234,8 @@
         "place": "待合室",
         "them": {
           "en": "An older traveller",
-          "fr": "Une dame âgée",
-          "es": "Una señora mayor",
+          "fr": "Une personne âgée",
+          "es": "Una persona mayor",
           "id": "Seorang penumpang lanjut usia"
         },
         "lines": [
@@ -30252,7 +30252,7 @@
             "jp": "よかったら、おてつだいさせてください。",
             "en": "If you like, let me help you.",
             "fr": "Si vous voulez, laissez-moi vous aider.",
-            "es": "Si quiere, déjeme ayudarla.",
+            "es": "Si quiere, déjeme ayudar.",
             "id": "Kalau tidak keberatan, izinkan saya membantu."
           },
           {
@@ -30282,7 +30282,7 @@
           "task": {
             "en": "Insist: let me treat you this time.",
             "fr": "Insiste : laissez-moi vous l'offrir, cette fois.",
-            "es": "Insiste en que esta vez te deje invitarla.",
+            "es": "Insiste en que esta vez te deje invitar.",
             "id": "Bersikeras: minta agar kali ini kamu diizinkan mentraktirnya."
           },
           "choices": [
@@ -33022,10 +33022,10 @@
     "compare": [
       {
         "pattern": "〜はじめる／〜おわる／〜つづける",
-        "en": "出す: sudden; はじめる: a beginning, often intended.",
-        "fr": "出す : soudain ; はじめる : un début, souvent voulu.",
-        "es": "出す: de repente; はじめる: un comienzo, a menudo intencionado.",
-        "id": "出す: mendadak; はじめる: suatu permulaan, sering kali disengaja.",
+        "en": "出す: a start that comes suddenly; はじめる: a start, sudden or not (急に走りはじめる is said too). おわる, つづける: the end, the going on.",
+        "fr": "出す : un début qui survient d'un coup ; はじめる : un début, soudain ou non (急に走りはじめる se dit aussi). おわる, つづける : la fin, la suite.",
+        "es": "出す: un comienzo que llega de golpe; はじめる: un comienzo, repentino o no (急に走りはじめる también se dice). おわる, つづける: el final, la continuación.",
+        "id": "出す: permulaan yang datang tiba-tiba; はじめる: permulaan, mendadak atau tidak (急に走りはじめる juga lazim). おわる, つづける: akhir, kelanjutan.",
         "same": true
       },
       {
@@ -35893,10 +35893,10 @@
           },
           "choices": [
             {
-              "en": "ひつよう is a な-adjective: な before a noun.",
-              "fr": "ひつよう est un adjectif en な : な devant un nom.",
-              "es": "ひつよう es adjetivo en な: な ante un sustantivo.",
-              "id": "ひつよう adalah kata sifat な: な di depan kata benda."
+              "en": "ひつよう is a な-adjective, describing a noun.",
+              "fr": "ひつよう est un adjectif en な, qui qualifie un nom.",
+              "es": "ひつよう es adjetivo en な, que califica a un sustantivo.",
+              "id": "ひつよう adalah kata sifat な yang menerangkan kata benda."
             },
             {
               "en": "な turns it into « not »: if you don't need one.",
@@ -36703,19 +36703,19 @@
     "structure_es": "forma llana ／ sustantivo + じゃないか（ではないか）",
     "structure_id": "bentuk biasa ／ kata benda + じゃないか（ではないか）",
     "meaning": {
-      "en": "isn't it?; I told you so (seeking agreement, or pointing something out)",
-      "fr": "n'est-ce pas ? ; je te l'avais dit (chercher l'accord, ou faire remarquer)",
-      "es": "¿no es así?; ya te lo dije (buscar la confirmación de quien escucha o hacer notar algo)",
-      "id": "bukankah begitu?; sudah kukatakan (meminta pendengar mengiyakan, atau menunjukkan sesuatu)"
+      "en": "see?; I told you so (pointing something out, or pressing the listener to admit it)",
+      "fr": "tu vois ? ; je te l'avais dit (faire remarquer, ou pousser l'autre à l'admettre)",
+      "es": "¿ves?; ya te lo dije (hacer notar algo o empujar a quien escucha a admitirlo)",
+      "id": "lihat sendiri; sudah kukatakan (menunjukkan sesuatu, atau mendesak pendengar mengakuinya)"
     },
     "register": "casual",
     "steps": [
       {
         "kind": "rule",
-        "en": "**plain form or noun + じゃないか** (formal: ではないか) points something out or seeks agreement: 言ったじゃないか (I told you, didn't I?), いいじゃないか (that's fine, isn't it?).",
-        "fr": "**forme neutre ou nom + じゃないか** (formel : ではないか) fait remarquer une chose ou cherche l'accord : 言ったじゃないか (je te l'avais dit, non ?), いいじゃないか (c'est bien, non ?).",
-        "es": "**forma llana o sustantivo + じゃないか** (formal: ではないか) hace notar algo o busca la confirmación de quien escucha: 言ったじゃないか (te lo dije, ¿no?), いいじゃないか (está bien, ¿no?).",
-        "id": "**bentuk biasa atau kata benda + じゃないか** (resmi: ではないか) menunjukkan sesuatu atau meminta pendengar mengiyakan: 言ったじゃないか (sudah kukatakan, kan?), いいじゃないか (tidak apa-apa, kan?)."
+        "en": "**plain form or noun + じゃないか** (formal: ではないか) points something out or presses the listener to admit it: 言ったじゃないか (I told you, didn't I?), いいじゃないか (that's fine, isn't it?).",
+        "fr": "**forme neutre ou nom + じゃないか** (formel : ではないか) fait remarquer une chose ou pousse l'autre à l'admettre : 言ったじゃないか (je te l'avais dit, non ?), いいじゃないか (c'est bien, non ?).",
+        "es": "**forma llana o sustantivo + じゃないか** (formal: ではないか) hace notar algo o empuja a quien escucha a admitirlo: 言ったじゃないか (te lo dije, ¿no?), いいじゃないか (está bien, ¿no?).",
+        "id": "**bentuk biasa atau kata benda + じゃないか** (resmi: ではないか) menunjukkan sesuatu atau mendesak pendengar mengakuinya: 言ったじゃないか (sudah kukatakan, kan?), いいじゃないか (tidak apa-apa, kan?)."
       },
       {
         "kind": "use",
@@ -36902,10 +36902,10 @@
             "id": "Nah, sudah kukatakan!"
           },
           "ask": {
-            "en": "What is the speaker doing here?",
-            "fr": "Que fait la personne qui parle ?",
-            "es": "¿Qué hace aquí quien habla?",
-            "id": "Apa yang dilakukan pembicara di sini?"
+            "en": "How should the listener take this?",
+            "fr": "Comment faut-il le prendre ?",
+            "es": "¿Cómo debe tomarlo quien escucha?",
+            "id": "Bagaimana pendengar harus menangkapnya?"
           },
           "choices": [
             {
@@ -37414,8 +37414,8 @@
         "place": "待合室",
         "them": {
           "en": "A parent",
-          "fr": "Une mère",
-          "es": "Una madre",
+          "fr": "Un parent",
+          "es": "Uno de los padres",
           "id": "Orang tua seorang anak"
         },
         "lines": [
@@ -39386,8 +39386,8 @@
         "place": "待合室",
         "them": {
           "en": "An elderly traveller",
-          "fr": "Un vieux monsieur",
-          "es": "Un señor mayor",
+          "fr": "Un voyageur âgé",
+          "es": "Una persona mayor",
           "id": "Seorang pelancong lanjut usia"
         },
         "lines": [
@@ -39395,7 +39395,7 @@
             "who": "me",
             "jp": "どちらへいらっしゃいますか。",
             "en": "Where are you headed?",
-            "fr": "Vous allez où, monsieur ?",
+            "fr": "Vous allez où ?",
             "es": "¿Adónde se dirige?",
             "id": "Anda hendak pergi ke mana?"
           },
@@ -40193,10 +40193,10 @@
     "compare": [
       {
         "pattern": "〜てあげる／てくれる／てもらう",
-        "en": "The plain trio; くださる (respectful) and いただく (humble) are the polite forms of くれる and もらう.",
-        "fr": "Le trio ordinaire ; くださる (respectueux) et いただく (humble) sont les formes polies de くれる et もらう.",
-        "es": "El trío llano; くださる (respetuoso) e いただく (humilde) son las formas corteses de くれる y もらう.",
-        "id": "Ketiganya bentuk biasa; くださる (hormat) dan いただく (merendah) adalah bentuk sopan dari くれる dan もらう.",
+        "en": "てくれる and てもらう say the same favour plainly; くださる (respectful) and いただく (humble) raise it for someone above you. てあげる is the other way round: your favour to them.",
+        "fr": "てくれる et てもらう disent le même service sans façons ; くださる (respectueux) et いただく (humble) l'élèvent pour un supérieur. てあげる va dans l'autre sens : le service vient de toi.",
+        "es": "てくれる y てもらう dicen el mismo favor en llano; くださる (respetuoso) e いただく (humilde) lo elevan ante un superior. てあげる va al revés: el favor lo haces tú.",
+        "id": "てくれる dan てもらう menyatakan bantuan yang sama secara biasa; くださる (hormat) dan いただく (merendah) meninggikannya untuk atasan. てあげる arahnya terbalik: kamu yang berbuat untuknya.",
         "same": true
       },
       {
@@ -40255,7 +40255,7 @@
           },
           "jp": "となりの人に、写真をとっていただきました。",
           "tr": {
-            "en": "I had the person next to me take a photo for me.",
+            "en": "The person next to me was kind enough to take a photo for me.",
             "fr": "J'ai bénéficié de la gentillesse de la personne à côté de moi, qui a pris une photo pour moi.",
             "es": "Recibí el favor de la persona de al lado, que me tomó una foto.",
             "id": "Saya telah diambilkan foto oleh orang di sebelah saya."
@@ -40881,8 +40881,8 @@
         "place": "車内",
         "them": {
           "en": "An elderly passenger",
-          "fr": "Une vieille dame",
-          "es": "Una señora mayor",
+          "fr": "Une personne âgée",
+          "es": "Una persona mayor",
           "id": "Seorang penumpang lanjut usia"
         },
         "lines": [
@@ -42759,9 +42759,9 @@
           },
           "choices": [
             {
-              "en": "No: it is a sigh, « what nice weather ».",
-              "fr": "Non : c'est un soupir, « quel beau temps ».",
-              "es": "No: es un suspiro, «qué buen tiempo».",
+              "en": "No: it exclaims « what nice weather ».",
+              "fr": "Non : il s'exclame, « quel beau temps ».",
+              "es": "No: exclama «qué buen tiempo».",
               "id": "Tidak: ini seruan, “cuaca bagus sekali”."
             },
             {
@@ -42794,7 +42794,7 @@
         "place": "ホーム",
         "them": {
           "en": "Your young child",
-          "fr": "Ton petit garçon",
+          "fr": "Ton jeune enfant",
           "es": "Tu hijo pequeño",
           "id": "Anakmu yang masih kecil"
         },
@@ -42991,10 +42991,10 @@
             "来ないな"
           ],
           "why": {
-            "en": "来る is irregular, but the prohibition is regular: dictionary form + な, 来るな. 来い is the imperative, the opposite order (« come here! »), and 来ないな is a sigh with a negative (« still not coming… »).",
-            "fr": "来る est irrégulier, mais l'interdiction est régulière : forme du dictionnaire + な, 来るな. 来い est l'impératif, l'ordre inverse (« viens ici ! »), et 来ないな est un soupir au négatif (« ça ne vient toujours pas… »).",
-            "es": "来る es irregular, pero la prohibición es regular: forma de diccionario + な, 来るな. 来い es el imperativo, la orden contraria («¡ven aquí!»), y 来ないな es un suspiro con negación («no viene…»).",
-            "id": "来る tidak beraturan, tetapi larangannya beraturan: bentuk kamus + な, 来るな. 来い adalah bentuk perintah, perintah yang berlawanan (“ke sini!”), dan 来ないな adalah keluhan dalam bentuk negatif (“belum datang juga…”)."
+            "en": "来る is irregular, but the prohibition is regular: dictionary form + な, 来るな. 来い is the imperative, the opposite order (« come here! »), and 来ないな is the な of feeling, on a negative (« still not coming… »).",
+            "fr": "来る est irrégulier, mais l'interdiction est régulière : forme du dictionnaire + な, 来るな. 来い est l'impératif, l'ordre inverse (« viens ici ! »), et 来ないな est le な du sentiment, sur un négatif (« ça ne vient toujours pas… »).",
+            "es": "来る es irregular, pero la prohibición es regular: forma de diccionario + な, 来るな. 来い es el imperativo, la orden contraria («¡ven aquí!»), y 来ないな es el な del sentimiento, sobre una negación («no viene…»).",
+            "id": "来る tidak beraturan, tetapi larangannya beraturan: bentuk kamus + な, 来るな. 来い adalah bentuk perintah, perintah yang berlawanan (“ke sini!”), dan 来ないな adalah な perasaan pada bentuk negatif (“belum datang juga…”)."
           }
         },
         {
@@ -44357,10 +44357,10 @@
           },
           "choices": [
             {
-              "en": "なかったほうがいい is simply not said.",
-              "fr": "なかったほうがいい ne se dit tout simplement pas.",
-              "es": "なかったほうがいい sencillamente no se dice.",
-              "id": "なかったほうがいい memang tak dipakai."
+              "en": "Advice keeps ない; なかったほうがいい is rare.",
+              "fr": "Le conseil garde ない ; なかったほうがいい est rare.",
+              "es": "Lo normal es ない; なかったほうがいい es raro.",
+              "id": "Saran memakai ない; なかったほうがいい jarang dipakai."
             },
             {
               "en": "食べなかった would only be more polite.",

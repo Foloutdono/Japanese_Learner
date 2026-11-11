@@ -585,7 +585,8 @@
         "en": "な is a spoken ban; べからず is a written one on a board.",
         "fr": "な est un interdit oral ; べからず, un interdit écrit sur un panneau.",
         "es": "な es una prohibición hablada; べからず, una escrita en un cartel.",
-        "id": "な adalah larangan lisan; べからず larangan tertulis di papan."
+        "id": "な adalah larangan lisan; べからず larangan tertulis di papan.",
+        "same": true
       }
     ],
     "examples": [
@@ -1019,7 +1020,8 @@
         "en": "ゆえに: because of (solemn, a quality); ために: because of (plain).",
         "fr": "ゆえに : en raison de (solennel, une qualité) ; ために : à cause de (simple).",
         "es": "ゆえに: debido a (solemne, una cualidad); ために: a causa de (sencillo).",
-        "id": "ゆえに: karena (khidmat, berupa sifat); ために: karena (biasa)."
+        "id": "ゆえに: karena (khidmat, berupa sifat); ために: karena (biasa).",
+        "same": true
       },
       {
         "pattern": "〜だけに",
@@ -1275,7 +1277,7 @@
             "id": "Saya dengar Anda baru-baru ini pindah ke kota ini."
           },
           "task": {
-            "en": "Say yes, with a newcomer's humble set phrase: since you are still new here, you may cause trouble, and you ask for their goodwill.",
+            "en": "Say yes, with a newcomer's humble set phrase: since you are still new here, you may cause trouble, and you ask for his goodwill.",
             "fr": "Dis oui, avec la formule humble de qui vient d'arriver : comme tu es là depuis peu, tu risques de causer du souci, et tu demandes sa bienveillance.",
             "es": "Di que sí, con la fórmula humilde de quien acaba de llegar: como llevas poco aquí, puede que causes molestias, y pides su indulgencia.",
             "id": "Jawab ya, dengan ungkapan baku pendatang baru yang merendah: karena masih baru di sini, kamu mungkin akan merepotkan, dan kamu memohon kebaikannya."
@@ -1897,8 +1899,7 @@
         "fr": "L'attitude de ce magasin est d'une impolitesse extrême.",
         "es": "La actitud de esa tienda es extremadamente descortés.",
         "id": "Sikap toko itu teramat tidak sopan.",
-        "register": "written",
-        "contrast": true
+        "register": "written"
       },
       {
         "jp": "危険極まりない道を、彼は一人で歩いた。",
@@ -1996,10 +1997,10 @@
             "id": "Sikap pelanggan itu teramat tidak sopan."
           },
           "ask": {
-            "en": "極まる, with no ない. How does the meaning change?",
-            "fr": "極まる, sans ない. Comment le sens change-t-il ?",
-            "es": "極まる, sin ない. ¿Cómo cambia el sentido?",
-            "id": "極まる, tanpa ない. Bagaimana maknanya berubah?"
+            "en": "極まる, with no ない. Does the meaning change?",
+            "fr": "極まる, sans ない. Le sens change-t-il ?",
+            "es": "極まる, sin ない. ¿Cambia el sentido?",
+            "id": "極まる, tanpa ない. Apakah maknanya berubah?"
           },
           "choices": [
             {
@@ -7540,7 +7541,8 @@
         "en": "Near twins; や否や also takes natural reactions, が早いか a deliberate dash.",
         "fr": "Quasi jumeaux ; や否や accepte aussi les réactions naturelles, が早いか un élan délibéré.",
         "es": "Casi equivalentes; や否や admite también reacciones naturales, が早いか un impulso deliberado.",
-        "id": "Nyaris kembar; や否や juga bisa untuk reaksi spontan, が早いか untuk gerakan cepat yang disengaja."
+        "id": "Nyaris kembar; や否や juga bisa untuk reaksi spontan, が早いか untuk gerakan cepat yang disengaja.",
+        "same": true
       },
       {
         "pattern": "〜たとたんに",
@@ -7990,7 +7992,8 @@
         "en": "Near twins; や否や also takes natural reactions, が早いか a deliberate dash.",
         "fr": "Quasi jumeaux ; や否や accepte aussi les réactions naturelles, が早いか un élan délibéré.",
         "es": "Casi equivalentes; や否や admite también reacciones naturales, が早いか un impulso deliberado.",
-        "id": "Nyaris kembar; や否や juga bisa untuk reaksi spontan, が早いか untuk gerakan cepat yang disengaja."
+        "id": "Nyaris kembar; や否や juga bisa untuk reaksi spontan, が早いか untuk gerakan cepat yang disengaja.",
+        "same": true
       },
       {
         "pattern": "〜たとたんに",
@@ -8442,8 +8445,7 @@
         "fr": "À peine ai-je rangé que les enfants mettent à nouveau le désordre.",
         "es": "Apenas ordeno, los niños vuelven a desordenar la habitación.",
         "id": "Baru saja saya bereskan, anak-anak sudah mengacak-acak kamar lagi.",
-        "register": "neutral",
-        "contrast": true
+        "register": "neutral"
       },
       {
         "jp": "注意したそばから、また同じことをする。",
@@ -9182,10 +9184,11 @@
     "compare": [
       {
         "pattern": "〜かたがた",
-        "en": "がてら: a walk that doubles as an errand; かたがた: a formal visit with two purposes.",
-        "fr": "がてら : une promenade qui sert aussi de course ; かたがた : une visite formelle à deux fins.",
-        "es": "がてら: un paseo que sirve también de mandado; かたがた: una visita formal con dos fines.",
-        "id": "がてら: jalan-jalan yang sekalian jadi kesempatan untuk urusan lain; かたがた: kunjungan resmi dengan dua tujuan."
+        "en": "Near twins: がてら is the everyday one (a walk that doubles as an errand); かたがた the formal one, often a courtesy call.",
+        "fr": "Quasi jumeaux : がてら est le mot courant (une promenade qui sert aussi de course) ; かたがた le mot soutenu, souvent pour une visite de politesse.",
+        "es": "Casi equivalentes: がてら es el habitual (un paseo que sirve también de mandado); かたがた, el formal, a menudo para una visita de cortesía.",
+        "id": "Nyaris kembar: がてら yang sehari-hari (jalan-jalan sekaligus mengurus hal lain); かたがた yang resmi, sering untuk kunjungan kesopanan.",
+        "same": true
       },
       {
         "pattern": "〜ながら",
@@ -9490,14 +9493,14 @@
           },
           "choices": [
             "がてら",
-            "かたがた",
+            "ながら",
             "のかたわら"
           ],
           "why": {
-            "en": "A jog that doubles as an errand: がてら. かたがた is for a formal call with two purposes (お礼かたがた), and かたわら for a side activity kept up over years, not for one outing.",
-            "fr": "Un jogging qui sert aussi de course : がてら. かたがた est pour une visite de politesse à deux buts (お礼かたがた), et かたわら pour une activité annexe de longue durée, pas pour une sortie.",
-            "es": "Salir a correr y, de paso, hacer un mandado: がてら. かたがた es para una visita formal con dos fines (お礼かたがた), y かたわら para una actividad paralela mantenida durante años, no para una salida.",
-            "id": "Joging yang sekalian menjadi urusan lain: がてら. かたがた untuk kunjungan resmi dengan dua tujuan (お礼かたがた), dan かたわら untuk kegiatan sampingan selama bertahun-tahun, bukan untuk satu kepergian."
+            "en": "A jog that doubles as an errand: がてら. ながら needs a verb (ジョギングしながら) and joins two acts at the same moment; かたわら is for a side activity kept up over years, not for one outing.",
+            "fr": "Un jogging qui sert aussi de course : がてら. ながら demande un verbe (ジョギングしながら) et joint deux actions simultanées ; かたわら est pour une activité annexe de longue durée, pas pour une sortie.",
+            "es": "Salir a correr y, de paso, hacer un mandado: がてら. ながら pide un verbo (ジョギングしながら) y une dos acciones simultáneas; かたわら es para una actividad paralela mantenida durante años, no para una salida.",
+            "id": "Joging yang sekalian menjadi urusan lain: がてら. ながら memerlukan kata kerja (ジョギングしながら) dan menggabungkan dua tindakan serentak; かたわら untuk kegiatan sampingan selama bertahun-tahun, bukan untuk satu kepergian."
           }
         },
         {
@@ -11779,8 +11782,7 @@
         "fr": "Il a étudié d'arrache-pied pour devenir médecin.",
         "es": "Estudió a más no poder para llegar a ser médico.",
         "id": "Dia belajar mati-matian guna menjadi dokter.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "約束を果たすべく、彼は再びこの町に戻った。",
@@ -11788,8 +11790,7 @@
         "fr": "Pour tenir sa promesse, il est revenu dans cette ville.",
         "es": "Para cumplir su promesa, regresó a esta ciudad.",
         "id": "Guna menepati janjinya, dia kembali lagi ke kota ini.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "問題を解決すべく、会社は調査を始めた。",
@@ -14822,10 +14823,10 @@
           {
             "who": "them",
             "jp": "わたしが席を立ったら、前に立っていた人が待ってましたとばかりにすわったんですよ。",
-            "en": "When I got up, the person standing in front of me sat down as if to say « at last! »",
-            "fr": "Quand j'ai quitté ma place, la personne debout devant moi s'est assise comme pour dire « enfin ! »",
-            "es": "Cuando me levanté, la persona que estaba de pie delante de mí se sentó como diciendo «¡por fin!».",
-            "id": "Waktu saya berdiri dari kursi, orang yang berdiri di depan saya duduk, seolah berkata “akhirnya!”"
+            "en": "When I got up, the person standing in front of me sat down as if to say « I've been waiting for this! »",
+            "fr": "Quand j'ai quitté ma place, la personne debout devant moi s'est assise comme pour dire « j'attendais ça ! »",
+            "es": "Cuando me levanté, la persona que estaba de pie delante de mí se sentó como diciendo «¡lo estaba esperando!».",
+            "id": "Waktu saya berdiri dari kursi, orang yang berdiri di depan saya duduk, seolah berkata “sudah kutunggu-tunggu!”"
           },
           {
             "who": "me",
@@ -16855,8 +16856,7 @@
         "fr": "Ce plat est le comble du luxe.",
         "es": "Se podría decir que este plato es el colmo del lujo.",
         "id": "Hidangan ini bisa disebut puncak kemewahan.",
-        "register": "formal",
-        "contrast": true
+        "register": "formal"
       },
       {
         "jp": "初めて舞台に立ち、感激の極みだった。",
@@ -18120,10 +18120,11 @@
     "compare": [
       {
         "pattern": "〜にしろ〜にしろ",
-        "en": "であれ: whatever it is (formal); にしろ〜にしろ: whether A or B (everyday).",
-        "fr": "であれ : quel que soit (formel) ; にしろ〜にしろ : que ce soit A ou B (courant).",
-        "es": "であれ: sea cual sea (formal); にしろ〜にしろ: ya sea A o B (cotidiano).",
-        "id": "であれ: apa pun itu (resmi); にしろ〜にしろ: entah A atau B (sehari-hari)."
+        "en": "Same meaning: であれ is formal; にしろ is the everyday form (何にしろ, A にしろ B にしろ).",
+        "fr": "Même sens : であれ est soutenu ; にしろ en est la forme courante (何にしろ, A にしろ B にしろ).",
+        "es": "Mismo sentido: であれ es formal; にしろ es la forma cotidiana (何にしろ, A にしろ B にしろ).",
+        "id": "Maknanya sama: であれ bersifat resmi; にしろ bentuk sehari-harinya (何にしろ, A にしろ B にしろ).",
+        "same": true
       },
       {
         "pattern": "〜にかかわらず",
@@ -23449,10 +23450,10 @@
         },
         {
           "notion": {
-            "en": "After a span of time: 一瞬にして",
-            "fr": "Après une durée : 一瞬にして",
-            "es": "Tras un lapso: 一瞬にして",
-            "id": "Setelah rentang waktu: 一瞬にして"
+            "en": "After a span of time: 一夜にして",
+            "fr": "Après une durée : 一夜にして",
+            "es": "Tras un lapso: 一夜にして",
+            "id": "Setelah rentang waktu: 一夜にして"
           },
           "jp": "火事で、古い駅舎は一夜にして消えてしまった。",
           "tr": {
@@ -24584,10 +24585,11 @@
     "compare": [
       {
         "pattern": "〜がてら",
-        "en": "かたがた: a formal visit with two purposes; がてら: a casual outing serving two ends.",
-        "fr": "かたがた : une visite formelle à deux fins ; がてら : une sortie familière servant deux fins.",
-        "es": "かたがた: una visita formal con dos fines; がてら: una salida informal que sirve para dos cosas.",
-        "id": "かたがた: kunjungan resmi dengan dua tujuan; がてら: sekali jalan yang santai untuk dua tujuan."
+        "en": "Near twins: かたがた is the formal one, often a courtesy call; がてら the everyday one, a casual outing serving two ends.",
+        "fr": "Quasi jumeaux : かたがた est le mot soutenu, souvent pour une visite de politesse ; がてら le mot courant, une sortie familière servant deux fins.",
+        "es": "Casi equivalentes: かたがた es el formal, a menudo para una visita de cortesía; がてら, el habitual, una salida informal que sirve para dos cosas.",
+        "id": "Nyaris kembar: かたがた yang resmi, sering untuk kunjungan kesopanan; がてら yang sehari-hari, sekali jalan santai untuk dua tujuan.",
+        "same": true
       },
       {
         "pattern": "〜ながら",
@@ -25233,10 +25235,10 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What have they done, and how does the speaker feel?",
+            "en": "What has happened, and how does the speaker feel?",
             "fr": "Que s'est-il passé, et que ressent la personne qui parle ?",
-            "es": "¿Qué ha hecho, y cómo se siente quien habla?",
-            "id": "Apa yang dia lakukan, dan bagaimana perasaan pembicara?"
+            "es": "¿Qué ha pasado, y cómo se siente quien habla?",
+            "id": "Apa yang terjadi, dan bagaimana perasaan pembicara?"
           },
           "jp": "あれほど注意したのに、今度はお客にまで文句を言うしまつだ。",
           "tr": {
@@ -26803,10 +26805,10 @@
       "twists": [
         {
           "notion": {
-            "en": "In tears",
-            "fr": "En larmes",
-            "es": "Entre lágrimas",
-            "id": "Berlinang air mata"
+            "en": "After a noun: 涙ながらに",
+            "fr": "Après un nom : 涙ながらに",
+            "es": "Tras un sustantivo: 涙ながらに",
+            "id": "Setelah kata benda: 涙ながらに"
           },
           "jp": "彼は涙ながらに、駅で家族と別れた。",
           "tr": {
@@ -28212,7 +28214,7 @@
             {
               "en": "From South America first, and only later to Japan.",
               "fr": "D'abord en Amérique du Sud, et seulement ensuite au Japon.",
-              "es": "De Sudamérica de vuelta a Japón.",
+              "es": "Desde Sudamérica primero, y solo después a Japón.",
               "id": "Dari Amerika Selatan lebih dulu, baru kemudian ke Jepang."
             },
             {
@@ -28751,7 +28753,8 @@
         "en": "Both exclaim a degree; のなんのって is more colloquial and vivid.",
         "fr": "Les deux s'exclament sur un degré ; のなんのって est plus familier et plus vif.",
         "es": "Ambos expresan con una exclamación un grado extremo; のなんのって es más coloquial y expresivo.",
-        "id": "Keduanya adalah seruan tentang tingkat yang ekstrem; のなんのって lebih bernada obrolan dan lebih hidup."
+        "id": "Keduanya adalah seruan tentang tingkat yang ekstrem; のなんのって lebih bernada obrolan dan lebih hidup.",
+        "same": true
       },
       {
         "pattern": "〜てたまらない",
@@ -29512,13 +29515,13 @@
             {
               "en": "Forget about it for good and never bring it up.",
               "fr": "L'oublier pour de bon et ne plus jamais en parler.",
-              "es": "Olvidarse de él para siempre.",
+              "es": "Olvidarse de él para siempre y no volver a mencionarlo.",
               "id": "Melupakannya selamanya dan tak pernah membahasnya lagi."
             },
             {
               "en": "Settle it first, before tasting anything.",
               "fr": "Le régler d'abord, avant de goûter quoi que ce soit.",
-              "es": "Resolverlo antes que nada.",
+              "es": "Resolverlo antes de probar nada.",
               "id": "Membereskannya dulu, sebelum mencicipi apa pun."
             }
           ],
@@ -29579,10 +29582,10 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "What does the speaker set aside, and what is praised?",
-            "fr": "Que met de côté la personne qui parle, et qu'est-ce qui est vanté ?",
-            "es": "¿Qué deja de lado quien habla, y qué elogia?",
-            "id": "Apa yang dikesampingkan pembicara, dan apa yang dipuji?"
+            "en": "What does the speaker say about the rooms and the hot spring?",
+            "fr": "Que dit la personne qui parle des chambres et de la source chaude ?",
+            "es": "¿Qué dice quien habla de las habitaciones y de las aguas termales?",
+            "id": "Apa kata pembicara tentang kamar dan pemandian air panasnya?"
           },
           "jp": "あの旅館は、部屋のせまさはさておき、温泉がすばらしい。",
           "tr": {
@@ -30132,7 +30135,7 @@
         {
           "kind": "meaning",
           "ask": {
-            "en": "How does the speaker feel about being refused?",
+            "en": "How does the speaker feel about the refusal?",
             "fr": "Que ressent la personne qui parle face à ce refus ?",
             "es": "¿Cómo se siente quien habla tras el rechazo?",
             "id": "Bagaimana perasaan pembicara tentang penolakan itu?"
@@ -30470,10 +30473,10 @@
             "id": "Apakah ada yang ditulis tentang keluarga sopirnya?"
           },
           "task": {
-            "en": "Read out the mayor's line: the mayor cannot help feeling for the families.",
-            "fr": "Lis-lui la phrase du maire : impossible de ne pas compatir avec eux.",
-            "es": "Léele la frase del alcalde: no puede evitar compadecerse de ellos.",
-            "id": "Bacakan ucapan wali kota: dia tidak dapat menahan rasa iba kepada mereka."
+            "en": "Read out the mayor's line: the mayor cannot help feeling for the driver's family.",
+            "fr": "Lis-lui la phrase du maire : impossible de ne pas compatir avec la famille du chauffeur.",
+            "es": "Léele la frase del alcalde: no puede evitar compadecerse de la familia del conductor.",
+            "id": "Bacakan ucapan wali kota: dia tidak dapat menahan rasa iba kepada keluarga sopir itu."
           },
           "choices": [
             "はい、『ご家族には、同情を禁じ得ない』とあります。",
@@ -31934,7 +31937,7 @@
             {
               "en": "That he has likely stopped talking to them too.",
               "fr": "Qu'il ne leur parle sans doute plus non plus.",
-              "es": "Que seguramente tampoco les habla: si ni a su hermano, a nadie.",
+              "es": "Que seguramente ya tampoco les habla.",
               "id": "Bahwa dia mungkin juga tidak lagi bicara dengan mereka."
             },
             {
@@ -34862,7 +34865,7 @@
             {
               "en": "Just one, or any similar way, will do.",
               "fr": "Une seule, ou toute autre du même genre, suffit.",
-              "es": "Basta con una: cualquiera de las dos, u otra parecida, sirve.",
+              "es": "Basta una, u otra manera parecida.",
               "id": "Satu saja, atau cara serupa lainnya, cukup."
             },
             {
@@ -40428,10 +40431,10 @@
               "id": "Boleh: tidak ada halangan."
             },
             {
-              "en": "That it is a good idea: the teacher told them to bring one.",
-              "fr": "Que c'est une bonne idée : le professeur leur a dit d'en apporter un.",
-              "es": "Que es buena idea: les dijo que llevaran uno.",
-              "id": "Dianjurkan: guru menyuruh mereka membawanya."
+              "en": "That it is a good idea: the teacher told us to bring one.",
+              "fr": "Que c'est une bonne idée : le professeur nous a dit d'en apporter un.",
+              "es": "Que es buena idea: nos dijo que lleváramos uno.",
+              "id": "Dianjurkan: guru menyuruh kami membawanya."
             },
             {
               "en": "That it is not allowed: it would cause a problem.",
@@ -43107,10 +43110,10 @@
             }
           ],
           "why": {
-            "en": "ようにも〜ない means wanting or trying and not managing: the pain is the obstacle, so the speaker did not get up. Not slowly, and not by choice.",
-            "fr": "ようにも〜ない veut dire vouloir ou essayer sans y parvenir : la douleur est l'obstacle, donc pas moyen de se lever. Ni lentement, ni par choix.",
-            "es": "ようにも〜ない es querer o intentar sin lograrlo: el dolor es el obstáculo, así que no se levantó. Ni despacio, ni por decisión propia.",
-            "id": "ようにも〜ない berarti ingin atau mencoba, tetapi tidak berhasil: rasa sakit itulah penghalangnya, jadi pembicara tidak berdiri. Bukan berdiri pelan-pelan, bukan pula karena pilihan."
+            "en": "ようにも〜ない means wanting or trying and not managing: the pain is the obstacle, so the speaker did not get up at all, not even with difficulty. Nor was it a choice.",
+            "fr": "ようにも〜ない veut dire vouloir ou essayer sans y parvenir : la douleur est l'obstacle, donc pas moyen de se lever, même avec difficulté. Et ce n'était pas un choix.",
+            "es": "ようにも〜ない es querer o intentar sin lograrlo: el dolor es el obstáculo, así que no se levantó en absoluto, ni siquiera con dificultad. Y no fue por decisión propia.",
+            "id": "ようにも〜ない berarti ingin atau mencoba, tetapi tidak berhasil: rasa sakit itulah penghalangnya, jadi pembicara sama sekali tidak berdiri, dengan susah payah pun tidak. Bukan pula karena pilihan."
           }
         },
         {
@@ -43631,7 +43634,7 @@
           "choices": [
             {
               "en": "As a flat statement: it was the drivers' effort.",
-              "fr": "Comme une affirmation nette : c'est l'effort des conducteurs.",
+              "fr": "Comme une affirmation nette : c'était l'effort des conducteurs.",
               "es": "Como afirmación tajante: fue el esfuerzo de los maquinistas.",
               "id": "Sebagai pernyataan datar: itu berkat usaha para masinis."
             },
@@ -44220,9 +44223,9 @@
             },
             {
               "en": "Asking whether the listener is a primary-school pupil.",
-              "fr": "Elle demande, sans arrière-pensée, si l'autre va encore en primaire.",
-              "es": "Pregunta, sin segundas intenciones, si quien escucha va a primaria.",
-              "id": "Bertanya dengan sungguh-sungguh apakah lawan bicaranya murid SD."
+              "fr": "Elle demande si l'autre est un élève de l'école primaire.",
+              "es": "Pregunta si quien escucha estudia en la escuela primaria.",
+              "id": "Bertanya apakah lawan bicaranya murid sekolah dasar."
             },
             {
               "en": "Offering to wake the listener up every morning.",
@@ -45254,7 +45257,7 @@
           },
           "jp": "美しい映像が独特の音楽と相まって、この映画は見る人に強い印象を残す。",
           "tr": {
-            "en": "The beautiful images, combined with the distinctive music, leave this film with a strong impression on viewers.",
+            "en": "With its beautiful images and distinctive music working together, this film leaves a strong impression on viewers.",
             "fr": "Les belles images, alliées à une musique singulière, font que ce film laisse une forte impression aux spectateurs.",
             "es": "Las bellas imágenes, unidas a una música singular, hacen que esta película deje una fuerte impresión en quien la ve.",
             "id": "Gambar yang indah, berpadu dengan musik yang khas, membuat film ini meninggalkan kesan kuat bagi penontonnya."
@@ -45971,10 +45974,10 @@
             "してくれて"
           ],
           "why": {
-            "en": "A wish that someone would do something is ～てくれない + ものか: してくれない. してくれなかった would look back at the past, and してくれて is a て-form that cannot stand before ものか.",
-            "fr": "Souhaiter que quelqu'un fasse quelque chose se dit ～てくれない + ものか : してくれない. してくれなかった regarderait le passé, et してくれて est une forme て qui ne peut pas précéder ものか.",
-            "es": "Desear que alguien haga algo es ～てくれない + ものか: してくれない. してくれなかった miraría al pasado, y してくれて es una forma て que no puede ir ante ものか.",
-            "id": "Harapan agar seseorang melakukan sesuatu adalah ～てくれない + ものか: してくれない. してくれなかった akan menengok ke masa lalu, dan してくれて adalah bentuk て yang tidak bisa berada di depan ものか."
+            "en": "A wish that someone would do something is 〜てくれない + ものか: してくれない. してくれなかった would look back at the past, and してくれて is a て-form that cannot stand before ものか.",
+            "fr": "Souhaiter que quelqu'un fasse quelque chose se dit 〜てくれない + ものか : してくれない. してくれなかった regarderait le passé, et してくれて est une forme て qui ne peut pas précéder ものか.",
+            "es": "Desear que alguien haga algo es 〜てくれない + ものか: してくれない. してくれなかった miraría al pasado, y してくれて es una forma て que no puede ir ante ものか.",
+            "id": "Harapan agar seseorang melakukan sesuatu adalah 〜てくれない + ものか: してくれない. してくれなかった akan menengok ke masa lalu, dan してくれて adalah bentuk て yang tidak bisa berada di depan ものか."
           }
         },
         {
