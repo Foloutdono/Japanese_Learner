@@ -44,8 +44,6 @@ GROUP BY 1 ORDER BY 2 DESC;
 -- description: Plafonds par défaut du code : ask 40, composition 30, translation_review 60, deep_analysis 150, exam_paper 5, conversation_talk 80 (répliques), conversation_review 60 (corrections), lyrics_sort 20 (chansons triées), song_transcribe 5 (chansons écoutées), OCR 20, compréhension générée 10 (variables d'env. sur Render).
 WITH c AS (
   SELECT feature, user_id, day, count FROM daily_usage
-  UNION ALL SELECT 'ocr', user_id, day, count FROM ocr_usage
-  UNION ALL SELECT 'comprehension', user_id, day, count FROM comprehension_usage
 ), caps(feature, cap) AS (VALUES ('ask', 40), ('composition', 30), ('translation_review', 60),
                              ('deep_analysis', 150), ('exam_paper', 5),
                              ('conversation_talk', 80), ('conversation_review', 60), ('lyrics_sort', 20),

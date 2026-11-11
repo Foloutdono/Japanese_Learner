@@ -91,7 +91,7 @@ def _seed(uid):
                 "INSERT INTO user_profiles (user_id, username) VALUES (%s, %s)",
                 (uid, f"probe-{uid[-8:]}"),
             )
-            cur.execute("INSERT INTO ocr_usage (user_id, day, count) VALUES (%s, CURRENT_DATE, 1)", (uid,))
+            cur.execute("INSERT INTO daily_usage (user_id, feature, day, count) VALUES (%s, 'ocr', CURRENT_DATE, 1)", (uid,))
             cur.execute(
                 "INSERT INTO dictionary_favorites (user_id, kind, key) VALUES (%s, 'kanji', '駅')",
                 (uid,),
@@ -146,7 +146,7 @@ def test_delete_user_rows_empties_every_table_and_keeps_other_users():
             with conn.cursor() as cur:
                 seeded = {t: _count(cur, t, c, uid) for t, c, _w in PLAN}
                 assert seeded["review_log"] >= 1 and seeded["card_modes"] >= 1
-                assert seeded["user_profiles"] == 1 and seeded["ocr_usage"] == 1
+                assert seeded["user_profiles"] == 1 and seeded["daily_usage"] == 1
                 assert seeded["dictionary_favorites"] == 1
                 assert seeded["phrase_history"] == 1
                 assert seeded["credit_ledger"] == 1

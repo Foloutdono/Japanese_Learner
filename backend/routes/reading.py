@@ -8,7 +8,8 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from core.credits import local_today, require_pass, resets_at
+from core import daily_limit
+from core.credits import require_pass, resets_at
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
@@ -2129,75 +2130,19 @@ def _pool_add(user_id: str, level: str, lang: str, data: dict) -> None:
 _DAILY_GENERATION_LIMIT = int(os.environ.get("COMPREHENSION_DAILY_LIMIT", "10"))
 
 
-def _init_comprehension_usage() -> None:
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            # Deliberately the same shape as ocr_usage. This was written
-            # as "two counters is a coincidence, three is a pattern",
-            # and the third came: 作文's tutor review (plan 125) counts
-            # in the shared daily_usage(user_id, feature, day, count)
-            # of core/daily_limit.py. This table and ocr_usage stay
-            # where they are until moving them is worth a migration --
-            # a one-shot INSERT ... SELECT each and one line here.
-            cur.execute(
-                """
-                CREATE TABLE IF NOT EXISTS comprehension_usage (
-                    user_id TEXT NOT NULL,
-                    day     DATE NOT NULL,
-                    count   INTEGER NOT NULL DEFAULT 0,
-                    PRIMARY KEY (user_id, day)
-                )
-                """
-            )
-            enable_rls(cur, "comprehension_usage")
-        conn.commit()
-    finally:
-        conn.close()
-
-
-try:
-    _init_comprehension_usage()
-except Exception:  # pragma: no cover - a missing DB must not stop import
-    logger.exception("comprehension_usage could not be initialised")
+# Counted in core/daily_limit.py's daily_usage (plan 320), whose rules
+# are this counter's own: the learner's day, claimed before the call,
+# a database failure counted as under the cap. It had a table of its
+# own, comprehension_usage, from before the shared counter existed;
+# scripts/migrate_daily_usage.py folds its rows in and drops it.
+COMPREHENSION_FEATURE = "comprehension"
 
 
 def _claim_generation_slot(user_id: str) -> int:
-    """Increment today's generation counter and return the new value.
-
-    A failure here returns 0 -- under the cap -- rather than refusing:
-    a database hiccup must not cost the learner their exercise, and the
-    pool miss that got us here has already established that the
-    alternative is nothing at all."""
-    try:
-        conn = db_conn()
-    except Exception:
-        return 0
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
-                (user_id,),
-            )
-            row = cur.fetchone()
-            cur.execute(
-                """
-                INSERT INTO comprehension_usage (user_id, day, count)
-                VALUES (%s, %s, 1)
-                ON CONFLICT (user_id, day)
-                DO UPDATE SET count = comprehension_usage.count + 1
-                RETURNING count
-                """,
-                (user_id, local_today(row[0] if row else None)),
-            )
-            (count,) = cur.fetchone()
-        conn.commit()
-        return count
-    except Exception:
-        logger.exception("comprehension generation counter failed")
-        return 0
-    finally:
-        conn.close()
+    """Take one of today's generation slots and return how many are
+    taken, this one included (0 when the counter could not be read:
+    a hiccup must not cost the learner their exercise)."""
+    return daily_limit.claim(user_id, COMPREHENSION_FEATURE, _DAILY_GENERATION_LIMIT)
 
 
 def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
@@ -2311,11 +2256,13 @@ def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: 
                 )
         else:
             rng = random.Random()
-            data = _call_llm_comprehension(
-                level, lang,
-                grammar_seeds=_pick_grammar_seeds(level, rng, avoid),
-                word_seeds=_pick_word_seeds(level, rng),
-            )
+            # A generation no model was paid for gives its slot back.
+            with daily_limit.refund_unbilled(user_id, COMPREHENSION_FEATURE):
+                data = _call_llm_comprehension(
+                    level, lang,
+                    grammar_seeds=_pick_grammar_seeds(level, rng, avoid),
+                    word_seeds=_pick_word_seeds(level, rng),
+                )
             # Before the decoration, which consumes the word lists.
             _pool_add(user_id, level, lang, data)
 
