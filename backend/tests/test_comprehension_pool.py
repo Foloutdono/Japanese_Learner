@@ -149,6 +149,21 @@ def test_each_bucket_is_its_own_pool(client, calls, empty_pool):
     assert len(calls) == 2
 
 
+def test_a_lang_outside_the_app_s_is_read_as_english(client, calls, empty_pool):
+    """Plan 211: a lang keys the pool, so one taken as sent was a fresh
+    model call, a pool row nobody reads, and the client's text in the
+    prompt. A region tag is the language; anything else is English."""
+    _get(client, lang="en")
+    with acting_as(SECOND_LEARNER):
+        _get(client, lang="en1")
+    assert len(calls) == 1
+    assert not any("en1" in m["content"] for m in calls[0])
+
+    _get(client, lang="fr-FR")
+    langs = {l for (l,) in _sql("SELECT lang FROM comprehension_pool", fetch=True)}
+    assert langs == {"en", "fr"}
+
+
 # ── what makes it safe ───────────────────────────────────────
 def test_a_pooled_exercise_keeps_the_glosses_its_next_reader_needs(client, calls, empty_pool):
     """The decoration pops each sentence's word list as it folds the

@@ -2277,6 +2277,10 @@ def _decorate_for(data: dict, user_id: str, level: str) -> dict:
 
 @router.get("/api/reading/comprehension")
 def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: str = Depends(get_user_id)):
+    # The pool is keyed by lang and the prompt names it (plan 211): taken
+    # as sent, `en1` was a model call, a junk pool row nobody is served
+    # again, and the client's text in the system prompt.
+    lang = known_lang(lang)
     level = resolve_level(user_id, level)
     avoid = _recent_grammar_patterns(user_id)
 
