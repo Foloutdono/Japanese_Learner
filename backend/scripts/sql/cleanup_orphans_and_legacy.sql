@@ -81,7 +81,6 @@ WITH app_users AS (
     UNION SELECT user_id FROM translation_log
     UNION SELECT user_id FROM exam_attempts
     UNION SELECT user_id FROM frequency_overrides
-    UNION SELECT user_id FROM ocr_usage
     UNION SELECT user_id FROM dictionary_favorites
 ),
 orphans AS (
@@ -156,7 +155,6 @@ DECLARE
         ['translation_log',     'column',  'user_id'],
         ['exam_attempts',       'column',  'user_id'],
         ['frequency_overrides', 'column',  'user_id'],
-        ['ocr_usage',           'column',  'user_id'],
         ['dictionary_favorites', 'column', 'user_id'],
         ['credit_ledger',       'column',  'user_id'],
         ['user_profiles',       'column',  'user_id']
@@ -193,7 +191,6 @@ BEGIN
         UNION SELECT user_id FROM translation_log
         UNION SELECT user_id FROM exam_attempts
         UNION SELECT user_id FROM frequency_overrides
-        UNION SELECT user_id FROM ocr_usage
         UNION SELECT user_id FROM dictionary_favorites
     ) a
     WHERE NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id::text = a.uid)

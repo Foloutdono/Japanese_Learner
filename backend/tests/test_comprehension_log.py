@@ -43,7 +43,7 @@ def _reset_generation_counter():
         conn = db_conn()
         try:
             with conn.cursor() as cur:
-                cur.execute("DELETE FROM comprehension_usage WHERE user_id = %s",
+                cur.execute("DELETE FROM daily_usage WHERE feature = 'comprehension' AND user_id = %s",
                             (DEV_USER_ID,))
             conn.commit()
         finally:

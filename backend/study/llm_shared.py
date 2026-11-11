@@ -784,12 +784,10 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
         )
 
     last_status = None
-    media = vision or audio
-    # Closed on the way out: a Session holds a pool of open
-    # connections, and one was left to the garbage collector per call.
+    # Closed on every way out: a Session holds a pool of open sockets,
+    # and one left per call is a leak on a server that makes dozens.
     session = requests.Session()
     try:
-
         for provider, model in attempts:
             # Re-checked inside the loop, not just when `attempts` was built:
             # an earlier model in this same call may have just killed the
@@ -893,14 +891,15 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                         provider.name, status, response.text[:300],
                     )
                     break
-                if status == 400 and media:
+                if status == 400 and (vision or audio):
                     # A 400 on a request that carries the learner's own
-                    # photo or recording is as likely to be about that file
-                    # (corrupt past its magic bytes, too large in pixels or
-                    # seconds) as about the model, so it retires nothing:
-                    # one bad upload must not switch image reading off for
-                    # every learner until the process restarts. On to the
-                    # next model, for this request only.
+                    # photo or recording is as likely to be about that
+                    # file (corrupt past its magic bytes, too large in
+                    # pixels or seconds) as about the model, so it
+                    # retires nothing: one bad upload must not switch
+                    # image reading off for every learner until the
+                    # process restarts. On to the next model, for this
+                    # request only.
                     logger.warning("%s rejected this request's media (400); not remembered", label)
                     break
                 if status in _PERMANENT_MODEL_STATUSES:
@@ -912,10 +911,10 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                     break
                 if status not in _RETRYABLE_STATUSES:
                     break
+
+        raise LLMUnavailable(
+            "All LLM providers failed. Last error: "
+            + ("no model gave a usable reply" if last_status == 200 else str(last_status or "no response"))
+        )
     finally:
         session.close()
-
-    raise LLMUnavailable(
-        "All LLM providers failed. Last error: "
-        + ("no model gave a usable reply" if last_status == 200 else str(last_status or "no response"))
-    )

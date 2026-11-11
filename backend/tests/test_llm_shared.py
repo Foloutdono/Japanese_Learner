@@ -47,14 +47,15 @@ class FakeSession:
         self.default = default or FakeResponse(500)
         self.calls = []
         self.bodies = []
+        self.closed = 0
+
+    def close(self):
+        self.closed += 1
 
     def post(self, url, headers=None, json=None, timeout=None):
         self.calls.append(json["model"])
         self.bodies.append(json)
         return self.by_model.get(json["model"], self.default)
-
-    def close(self):
-        self.closed = True
 
 
 def _provider(name, models, reasoning_body=None):
@@ -176,11 +177,6 @@ class ChatProviderFallbackTest(unittest.TestCase):
         self.assertEqual(self._chat(), "answer")
         self.assertIn(("alpha", "a1"), llm_shared._DEAD_MODELS)
 
-    def test_the_session_is_closed(self):
-        session = self._session({"a1": FakeResponse(200, "answer")})
-        self._chat()
-        self.assertTrue(getattr(session, "closed", False))
-
     def test_retryable_status_is_never_remembered(self):
         # A 429 is temporary — remembering it would take a model out of
         # rotation for the whole process over a momentary rate limit.
@@ -222,6 +218,20 @@ class ChatProviderFallbackTest(unittest.TestCase):
         with self.assertRaises(LLMUnavailable):
             self._chat()
         self.assertEqual(len(session.calls), 3)
+
+    # ── the session ──────────────────────────────────────────────
+    def test_the_session_is_closed_after_an_answer(self):
+        session = self._session({"a1": FakeResponse(200, "answer")})
+        self.assertEqual(self._chat(), "answer")
+        self.assertEqual(session.closed, 1)
+
+    def test_the_session_is_closed_when_every_provider_fails(self):
+        session = self._session({
+            "a1": FakeResponse(404), "a2": FakeResponse(404), "b1": FakeResponse(404),
+        })
+        with self.assertRaises(LLMUnavailable):
+            self._chat()
+        self.assertEqual(session.closed, 1)
 
     def test_no_provider_configured_is_llm_unavailable(self):
         with mock.patch.object(llm_shared, "PROVIDERS", []):

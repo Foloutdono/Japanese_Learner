@@ -1,4 +1,3 @@
-import { ChevronIcon } from '../ui/Icons'
 import { levelName } from '../../domain/duel'
 
 // ── 対戦 — the small parts every duels screen draws (plan 279) ──────

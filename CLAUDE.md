@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **320**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **321**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -1034,6 +1034,16 @@ history was folded into the rollup.
 
 ```bash
 python -m scripts.recount_known_checks  # report; --yes to apply, --user to scope
+```
+
+And one after the deploy that carries plan 320, which moved the OCR and
+comprehension ceilings onto `core/daily_limit.py`: it folds the rows of
+their old tables (`ocr_usage`, `comprehension_usage`) into `daily_usage`
+as `ocr` and `comprehension`, adding a day counted in both, and drops
+the two tables, which nothing reads or erases any more.
+
+```bash
+python -m scripts.migrate_daily_usage  # report (the run, rolled back); --yes to apply
 ```
 
 And one after any deploy that changes the voice (plan 121 did, from edge-tts

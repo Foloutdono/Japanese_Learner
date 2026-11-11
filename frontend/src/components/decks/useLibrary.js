@@ -61,9 +61,8 @@ export function useLibrary(session) {
   const [structure, setStructure] = useState('all')
   const [loading, setLoading] = useState(true)
   const [failed, setFailed]   = useState(false)
-  // Bumped to ask for the same page again: More after a page that
-  // failed retries it, rather than stepping past it to the next and
-  // leaving its decks out of the shelf for good.
+  // Asks the same page again: More after a failed page retries it, where
+  // stepping on would skip its decks for good.
   const [attempt, setAttempt] = useState(0)
 
   const debounceRef = useRef(null)

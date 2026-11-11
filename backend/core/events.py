@@ -346,7 +346,8 @@ _RUN_DOORS = frozenset({"today", "learn", "practice", "deck", "ride", "exam", "o
 # ai_refund. A ration added there is added here, or its rows lose it.
 _AI_FEATURES = frozenset({"ask", "composition", "translation_review", "deep_analysis",
                           "exam_paper", "line_translation", "song_transcribe",
-                          "conversation_talk", "conversation_review", "lyrics_sort"})
+                          "conversation_talk", "conversation_review", "lyrics_sort",
+                          "ocr", "comprehension"})
 
 VALUES: dict[str, dict[str, frozenset[str]]] = {
     # Why the gate's first request failed (plan 312): its 45 s ran out,
