@@ -338,12 +338,16 @@ def _handle_candidates(base: str):
     """The name as it is, when it is long enough to be a username, then
     the name numbered 2, 3, ... 999 (a long name gives up letters to its
     number, within USERNAME_MAX). In order and without chance, so the
-    migration's report is what its run does."""
+    migration's report is what its run does. Every candidate is a
+    username USERNAME_RE accepts: a one-letter name skips J2 ... J9,
+    two characters, and starts at J10."""
     if len(base) >= 3:
         yield base
     for n in range(2, 1000):
         digits = str(n)
-        yield f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+        candidate = f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+        if len(candidate) >= 3:
+            yield candidate
 
 
 def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
