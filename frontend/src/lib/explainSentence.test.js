@@ -3,6 +3,7 @@ import { explainErrorText } from './explainSentence'
 import { ApiError } from './api'
 import en from '../locales/en/index.js'
 import fr from '../locales/fr/index.js'
+import es from '../locales/es/index.js'
 
 describe('explainErrorText', () => {
   it('names the spent day on a 429, from an ApiError or explainSentence\'s own Error', () => {
@@ -18,7 +19,7 @@ describe('explainErrorText', () => {
     expect(explainErrorText(undefined, en)).toBe(en.explainFailed)
   })
 
-  it('is worded in both languages', () => {
-    for (const t of [en, fr]) expect(typeof t.explainLimitReached).toBe('string')
+  it('is worded in every language', () => {
+    for (const t of [en, fr, es]) expect(typeof t.explainLimitReached).toBe('string')
   })
 })
