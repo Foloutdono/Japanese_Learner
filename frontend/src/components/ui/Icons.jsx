@@ -115,6 +115,14 @@ export function CheckCircleIcon({ size = 18, className }) {
   )
 }
 
+export function BoltIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className} strokeLinejoin="round">
+      <polygon points="13 2 4 14 11 14 10 22 20 9 13 9 13 2" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export function BooksIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>
