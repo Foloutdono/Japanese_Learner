@@ -752,8 +752,10 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
         )
 
     # The ONLY thing `vision` changes is which model tuple is walked.
-    # Everything else -- retry, the 400/404-vs-401/402/403 split, the
-    # dead-model and dead-provider memory -- is shared deliberately: a
+    # Everything else -- retry, the 404-vs-401/402/403 split, the
+    # dead-model and dead-provider memory -- is shared deliberately (a
+    # 400 alone is not: with media in the request it may be the file's,
+    # and is never remembered there, see below): a
     # vision model goes stale exactly the way a text model does, and the
     # primary here fails transiently often enough that the retry matters
     # MORE, not less. A provider with an empty tuple is skipped rather
@@ -888,6 +890,17 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                         "(credentials rejected, or credit/quota exhausted). %s",
                         provider.name, status, response.text[:300],
                     )
+                    break
+                if status == 400 and (vision or audio):
+                    # A 400 on a request that carries the learner's own
+                    # photo or recording is as likely to be about that
+                    # file (corrupt past its magic bytes, too large in
+                    # pixels or seconds) as about the model, so it
+                    # retires nothing: one bad upload must not switch
+                    # image reading off for every learner until the
+                    # process restarts. On to the next model, for this
+                    # request only.
+                    logger.warning("%s rejected this request's media (400); not remembered", label)
                     break
                 if status in _PERMANENT_MODEL_STATUSES:
                     _DEAD_MODELS.add((provider.name, model))

@@ -157,6 +157,26 @@ class ChatProviderFallbackTest(unittest.TestCase):
         self._chat()
         self.assertEqual(session.calls, ["a1", "a2", "a2"])
 
+    def test_a_400_on_a_media_request_retires_nothing(self):
+        # A learner's corrupt photo can draw a 400 that is about the
+        # file, not the model: remembered, a few bad uploads would turn
+        # OCR off for everyone until the process restarted.
+        for flag in ("vision", "audio"):
+            with self.subTest(flag=flag), \
+                 mock.patch.object(llm_shared, "PROVIDERS", [
+                     Provider(name="alpha", url="https://alpha.test", api_key="k",
+                              models=(), vision_models=("v1", "v2"), audio_models=("v1", "v2")),
+                 ]):
+                session = self._session({"v1": FakeResponse(400), "v2": FakeResponse(200, "answer")})
+                self.assertEqual(llm_shared.chat([{"role": "user", "content": "x"}], **{flag: True}), "answer")
+                self.assertEqual(session.calls, ["v1", "v2"])
+                self.assertEqual(llm_shared._DEAD_MODELS, set())
+
+    def test_a_400_on_a_text_request_still_retires_the_model(self):
+        self._session({"a1": FakeResponse(400), "a2": FakeResponse(200, "answer")})
+        self.assertEqual(self._chat(), "answer")
+        self.assertIn(("alpha", "a1"), llm_shared._DEAD_MODELS)
+
     def test_retryable_status_is_never_remembered(self):
         # A 429 is temporary — remembering it would take a model out of
         # rotation for the whole process over a momentary rate limit.
