@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { postResult } from '../lib/postResult'
-import { explainSentence } from '../lib/explainSentence'
+import { explainSentence, explainErrorText } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { runSource, logLabel } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
@@ -263,7 +263,7 @@ export default function ReadingRun({ session }) {
       .then(d => { if (analysisPhraseRef.current === key) setAnalysis(d) })
       .catch(e => {
         if (analysisPhraseRef.current !== key) return
-        setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+        setExplainError(explainErrorText(e, t))
       })
       .finally(() => { if (analysisPhraseRef.current === key) setExplaining(false) })
   }
