@@ -76,7 +76,6 @@ beforeHide(kind => leaveScreen({ ended: kind === 'pagehide' }))
 
 // ── For tests ─────────────────────────────────────────────────────
 export function _current() { return current && { route: current.route, tab: current.tab } }
-export function _uses() { return new Map(uses) }
 export function _resetScreen() {
   current?.watch.stop()
   current = null

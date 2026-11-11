@@ -2634,11 +2634,6 @@ def _kana_key(text: str) -> str:
     return "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in text)
 
 
-def _an_affix_card(entry: dict) -> bool:
-    meaning = entry.get("meaning") or ""
-    return "suffix" in meaning or "counter" in meaning or meaning.startswith(("-", "~", "〜"))
-
-
 def _read_apart_wrongly(run, hits) -> dict | None:
     """The pool word a run spells where the deck has a card for each of
     its parts and the cards say nothing of it (plan 272): a loanword
