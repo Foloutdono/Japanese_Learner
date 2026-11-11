@@ -61,6 +61,9 @@ export function useLibrary(session) {
   const [structure, setStructure] = useState('all')
   const [loading, setLoading] = useState(true)
   const [failed, setFailed]   = useState(false)
+  // Asks the same page again: More after a failed page retries it, where
+  // stepping on would skip its decks for good.
+  const [attempt, setAttempt] = useState(0)
 
   const debounceRef = useRef(null)
   const searchRef   = useRef(null)
@@ -100,7 +103,7 @@ export function useLibrary(session) {
       .catch(() => { if (live) { setLoading(false); setFailed(true) } })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `narrowed` is these two.
-  }, [session, sort, page, term, structure])
+  }, [session, sort, page, term, structure, attempt])
 
   // Only the structures the library actually holds, in the app's own
   // order: deckTypes.js declares the order (and the glyph and the
@@ -150,7 +153,8 @@ export function useLibrary(session) {
 
   function nextPage() {
     playUi('click-mode-selection')
-    setPage(p => p + 1)
+    if (failed) setAttempt(a => a + 1)
+    else setPage(p => p + 1)
   }
 
   return {

@@ -140,6 +140,9 @@ class _Session:
     def __init__(self):
         self.models = []
 
+    def close(self):
+        pass
+
     def post(self, url, headers=None, json=None, timeout=None):
         self.models.append(json["model"])
 

@@ -47,6 +47,10 @@ class FakeSession:
         self.default = default or FakeResponse(500)
         self.calls = []
         self.bodies = []
+        self.closed = 0
+
+    def close(self):
+        self.closed += 1
 
     def post(self, url, headers=None, json=None, timeout=None):
         self.calls.append(json["model"])
@@ -194,6 +198,20 @@ class ChatProviderFallbackTest(unittest.TestCase):
         with self.assertRaises(LLMUnavailable):
             self._chat()
         self.assertEqual(len(session.calls), 3)
+
+    # ── the session ──────────────────────────────────────────────
+    def test_the_session_is_closed_after_an_answer(self):
+        session = self._session({"a1": FakeResponse(200, "answer")})
+        self.assertEqual(self._chat(), "answer")
+        self.assertEqual(session.closed, 1)
+
+    def test_the_session_is_closed_when_every_provider_fails(self):
+        session = self._session({
+            "a1": FakeResponse(404), "a2": FakeResponse(404), "b1": FakeResponse(404),
+        })
+        with self.assertRaises(LLMUnavailable):
+            self._chat()
+        self.assertEqual(session.closed, 1)
 
     def test_no_provider_configured_is_llm_unavailable(self):
         with mock.patch.object(llm_shared, "PROVIDERS", []):
