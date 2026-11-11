@@ -423,7 +423,15 @@ runtime purpose.
 - **Model calls are rationed and costed.** A new feature that calls a model
   goes through `core/daily_limit.py` (`daily_usage`) for its daily ceiling and
   into `scripts/llm_cost_model.py` for its cost. Nothing the learner typed is
-  kept.
+  kept. The slot is claimed before the call, and the call is made inside
+  `daily_limit.refund_unbilled(user_id, feature)`, which gives the slot
+  back when it fails with `LLMUnavailable` and `llm_shared`'s meter says
+  no model was paid (2026-11-11): an outage costs nothing, while a reply
+  that was refused, unreadable or timed out mid-answer keeps its slot. A
+  worker off the request opens it in its own thread.
+  `tests/test_ai_refund.py` fails on a module that claims without it,
+  and the feature goes in `events._AI_FEATURES` (and `track.js`), or its
+  `ai_use` and `ai_refund` rows lose their `feature`.
 - **No learner can flood the server (plan 211).** The API is one worker:
   `core/concurrency.py` runs a learner's requests a few at a time, and
   both DB pools wait for a connection (`core/pool.py`) rather than fail.

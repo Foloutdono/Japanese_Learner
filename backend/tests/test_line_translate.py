@@ -127,8 +127,11 @@ def test_a_model_that_is_down_is_a_503_and_nothing_is_kept(client, monkeypatch, 
         raise LLMUnavailable("no provider")
 
     monkeypatch.setattr(line_translate, "chat", down)
+    before = _used(line_translate.LINE_TRANSLATION_FEATURE)
     response = client.post(f"/api/video/session/{session_id}/translations", json={"lang": "fr", "index": 0})
     assert response.status_code == 503
+    # No model was paid: the day's block is given back.
+    assert _used(line_translate.LINE_TRANSLATION_FEATURE) == before
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -267,3 +270,15 @@ def test_a_line_spelled_out_in_romaji_is_never_shown_nor_kept(monkeypatch):
     assert out == ["Their concern is still us", "It is hot today"]
     assert found == {"関心はまだ僕ら": "Their concern is still us"}
     assert "1. 関心はまだ僕ら" in asked[-1] and "今日は暑い" not in asked[-1]
+
+
+def _used(feature: str) -> int:
+    from core.auth import DEV_USER_ID
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COALESCE(SUM(count), 0) FROM daily_usage WHERE user_id = %s AND feature = %s",
+                        (DEV_USER_ID, feature))
+            return cur.fetchone()[0]
+    finally:
+        conn.close()

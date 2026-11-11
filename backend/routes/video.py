@@ -447,21 +447,23 @@ def _with_translations(cues: list[dict], translated: dict) -> list[dict]:
 
 
 # ── 歌 — the song's worker (plan 317) ─────────────────────────────
-def _song_worker(session_id: int, wav: bytes, lyrics: list[str]) -> None:
+def _song_worker(session_id: int, wav: bytes, lyrics: list[str], user_id: str) -> None:
     """Runs off-request, as _video_worker does: the song heard as a
     Track (study/song_transcribe.py), then the same lines, analysis and
     storage as a subtitle file's. The audio dies with this thread, and
     the place the route held for it (song_transcribe.hold) is given back
     however the thread ends."""
     try:
-        _hear_song(session_id, wav, lyrics)
+        _hear_song(session_id, wav, lyrics, user_id)
     finally:
         song_transcribe.release()
 
 
-def _hear_song(session_id: int, wav: bytes, lyrics: list[str]) -> None:
+def _hear_song(session_id: int, wav: bytes, lyrics: list[str], user_id: str) -> None:
     try:
-        cues = song_transcribe.transcribe(wav, lyrics or None)
+        # The day's slot is given back if no model was paid to hear it.
+        with daily_limit.refund_unbilled(user_id, song_transcribe.FEATURE):
+            cues = song_transcribe.transcribe(wav, lyrics or None)
     except song_transcribe.SongError as e:
         logger.info("Song session %s gave no lines: %s", session_id, e)
         _fail_session(session_id, str(e), e.code)
@@ -487,9 +489,9 @@ def _hear_song(session_id: int, wav: bytes, lyrics: list[str]) -> None:
             logger.exception("Could not mark song session %s failed", session_id)
 
 
-def _start_song_worker(session_id: int, wav: bytes, lyrics: list[str]) -> None:
+def _start_song_worker(session_id: int, wav: bytes, lyrics: list[str], user_id: str) -> None:
     threading.Thread(
-        target=_song_worker, args=(session_id, wav, lyrics),
+        target=_song_worker, args=(session_id, wav, lyrics, user_id),
         name=f"song-session:{session_id}", daemon=True,
     ).start()
 
@@ -784,7 +786,9 @@ async def create_song_session(request: Request, user_id: str = Depends(get_user_
         name = name[:_MAX_SONG_NAME] or "song"
 
         # The day's allowance, claimed before the model is asked, as every
-        # ration is (core/daily_limit.py): a song that then fails costs one.
+        # ration is (core/daily_limit.py): a song a model heard costs one
+        # however it ends; one no model could be reached for is given
+        # back by the worker (_hear_song).
         used = await run_in_threadpool(
             daily_limit.claim, user_id, song_transcribe.FEATURE, song_transcribe.SONG_DAILY_LIMIT,
         )
@@ -795,7 +799,7 @@ async def create_song_session(request: Request, user_id: str = Depends(get_user_
             )
 
         session_id = await run_in_threadpool(_open_session, user_id, "song", name, None, None, False, None)
-        _start_song_worker(session_id, wav, lyrics)
+        _start_song_worker(session_id, wav, lyrics, user_id)
         started = True
     finally:
         if not started:
