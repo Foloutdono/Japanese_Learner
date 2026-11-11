@@ -235,6 +235,90 @@ content passes (`tests/test_content_filter.py` runs it over every text
 the app teaches). It is the door, not the moderation: what passes it can
 still be reported.
 
+## Guideline 2.1: the information App Review asks a new app for
+
+A first submission can come back "Guideline 2.1 - Information Needed"
+(1.1.6 did, on 2026-11-11). Nothing is wrong with the build: the reviewer
+wants six things in **App Review Information › Notes**, then a resubmit.
+The note below answers them and fits the field's 4,000 characters. Fill
+in the three `<…>` and check each line still says what the app does:
+it is a statement to Apple.
+
+```text
+GUIDELINE 2.1 — INFORMATION REQUESTED
+
+1. SCREEN RECORDING (iPhone, latest iOS, from launch): <LINK>
+Shows registration, sign-in, a review session, the dictionary, the deck library with Report and Block, the duels with Report and Block, and account deletion.
+
+2. PURPOSE AND AUDIENCE
+Tsuji is a Japanese-learning app for self-taught learners, from the first kana to JLPT N1, who read English, French or Spanish. Learners usually juggle a flashcard app, a dictionary, a grammar book and exam papers. Tsuji is one place for all of it: spaced-repetition review of kana, vocabulary, kanji and grammar; reading, listening, dictation, translation and conversation practice; JLPT-style mock exams; a dictionary with a sentence analyzer; decks learners make and share.
+
+3. ACCESS
+No setup or sample file is needed. On the first screen, "Board" starts at once as a guest, or "Have an account?" signs in:
+  Email: <DEMO EMAIL>   Password: <DEMO PASSWORD>
+Five tabs: Today (the day's reviews), Learn (courses and decks), Practice (exercises and mock exams), Dictionary, Profile.
+- Registration: Board, then "Create my account" (email and password, confirmed by a link sent by email), or Continue with Google.
+- Account deletion: Profile > Settings > Account > Delete your account. It erases the account and all its data at once.
+- User-generated content: Learn > Decks > Library lists decks published by learners. A deck's "..." menu has "Report the deck" and "Block <author>". Profile > Duels: a player's card has Report and Block. Text is filtered for slurs before it is published, reports are reviewed within 24 hours, and offending content and accounts are removed. Contact: contact.tsujijapanese@gmail.com (also Settings > Write to us).
+- Paid content: none. The app has no in-app purchase, no subscription and no external payment. "Credits" are a free allowance that refills by itself over time; they cannot be bought.
+
+4. EXTERNAL SERVICES
+- Supabase (EU): authentication and database.
+- Google Sign-In, through Supabase: optional sign-in.
+- Render (Frankfurt): our API server. Vercel: serves the web content and relays requests to our server.
+- AI models (Google Gemini, with OpenAI and OpenRouter as fallbacks): sentence analysis, feedback on a learner's translation or composition, generated exercises and mock exams, reading text in a photo, transcribing a learner's own audio file. No account data is sent with a request.
+- Japanese speech is synthesized on our own server (VOICEVOX Nemo engine, self-hosted).
+- YouTube's official embedded player, when a learner studies the Japanese subtitles of a video. The app does not download, convert or store video or audio.
+- Discord: a private webhook that alerts the developer to a new message or report (no user text is sent).
+No advertising, analytics or tracking SDK. Usage statistics are first-party.
+
+5. REGIONS
+The app works the same in every region. Features and content do not vary by country. The interface is in English, French and Spanish, chosen by the device language or in Settings.
+
+6. REGULATED INDUSTRY / THIRD-PARTY MATERIAL
+Not a regulated industry. The courses, lessons, exercises and exams are our own. Reference data is used under open licences and credited in the app (Profile > Settings > Credits): JMdict, KANJIDIC2 and RADKFILE (EDRDG, CC BY-SA 4.0), KanjiVG (CC BY-SA 3.0), Tatoeba sentences (CC BY 2.0 FR), VOICEVOX Nemo and Namine Ritsu voices (used under their terms), open-licensed typefaces. The app is not affiliated with the JLPT; its mock exams are original.
+```
+
+Before pasting:
+
+- **The demo account** is a real account with a confirmed address, past
+  the boarding, with a few reviews behind it. Its password goes in the
+  note and in the Sign-in fields above it, never in this file.
+- **The library must hold a deck the demo account did not publish**, or
+  there is nothing to report or block: Report and Block are on other
+  learners' decks only.
+- **The recording** is made on a physical iPhone on the latest iOS
+  (Control Centre › Screen Recording), uploaded where the link opens
+  without signing in (an unlisted video, a shared drive file), and
+  attached to the reply in App Review's messages as well. One take, in
+  this order, about three minutes:
+  1. Launch from the home screen; **Board**; the boarding's questions.
+  2. **Create my account** with an email and a password; the
+     confirmation link, opened; back in the app.
+  3. Today: one short review run. Then a glance at Learn, Practice
+     (start one exercise), Dictionary (search a word, open the analyzer).
+  4. Learn › Decks › Library: open a deck, its **···** menu,
+     **Report the deck** (pick a reason, send), then **Block** its
+     author and confirm.
+  5. Profile › Duels › Friends: find a second account by its exact
+     username, open its card, **Report**, **Block**.
+  6. Profile › Settings: sign out, sign in again with the same account.
+  7. Profile › Settings › Account › **Delete your account**, confirmed;
+     the app returns to the first screen.
+  Say nothing about paid content beyond the note: there is none to show.
+- The note states there is **no purchase** of any kind. It is true while
+  `HAS_STORE` and `HAS_PAYWALL` are false (`domain/credits.js`,
+  `domain/paywall.js`). The build that flips either needs its In-App
+  Purchase products submitted with it (guideline 3.1.1) and this note
+  rewritten.
+
+One thing the note cannot answer: the sign-in screen offers **Continue
+with Google** and no equivalent that meets guideline 4.8 (Sign in with
+Apple is the usual one). Email and password do not exempt it, since the
+exemption is for apps that use their own sign-in *exclusively*. Expect
+it to be raised; the fix is Sign in with Apple beside Google, or no
+Google button in the iOS shell.
+
 ## The widget and its App Group (plan 156)
 
 The iPhone widget is an app extension, `TsujiWidget` (bundle id
