@@ -2142,6 +2142,10 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'No conectado',
   linkGoogleDesc:    'Agrega Google a esta cuenta y «Continuar con Google» la abrirá en lugar de una nueva y vacía.',
+  // La misma oferta para Apple, solo en el iPhone (plan 321).
+  linkAppleLabel:    'Apple',
+  linkAppleCap:      'No conectado',
+  linkAppleDesc:     'Agrega Apple a esta cuenta y «Continuar con Apple» la abrirá en lugar de una nueva y vacía.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -2567,6 +2571,8 @@ const boarding = {
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continuar con Google',
+  // El título que Apple da a su botón, en sus palabras (plan 321).
+  continueWithApple: 'Continuar con Apple',
   orWithEmail: 'o con un correo electrónico',
   // 改札 — a round trip that came back refused (lib/authRedirect.js).
   // Both name what happened rather than "something went wrong": on the
@@ -2575,6 +2581,8 @@ const boarding = {
   // reason, not a shrug.
   oauthAlreadyLinked: 'Esa cuenta de Google ya pertenece a otro pase.',
   oauthSignInInstead: 'Iniciar sesión con esa cuenta de Google',
+  oauthAlreadyLinkedApple: 'Esa cuenta de Apple ya pertenece a otro pase.',
+  oauthLinkingOffApple: 'Ahora mismo no se puede agregar Apple a este pase. Un correo electrónico, sí.',
   nativeReturnNote: 'Sesión iniciada. Volviendo a la app…',
   nativeReturnOpen: 'Abrir Tsuji',
   oauthLinkingOff: 'Ahora mismo no se puede agregar Google a este pase. Un correo electrónico, sí.',
@@ -2772,6 +2780,7 @@ const boarding = {
   brdKeepSent: (email) => `Enlace enviado a ${email}`,
   brdKeepChange: 'Cambiar',
   brdKeptGoogle: 'Guardado en tu cuenta de Google',
+  brdKeptApple: 'Guardado en tu cuenta de Apple',
   brdKeptEmail: (email) => `Guardado · ${email}`,
   brdKeptAccount: 'Guardado en tu cuenta',
   brdKeptSwitch: 'Cambiar de cuenta',

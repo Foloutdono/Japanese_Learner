@@ -232,8 +232,9 @@ export default function BoardingFlow({
   const [sheet, setSheet] = useState(() => (resumed?.sheet === 'account' && guest ? 'account' : null))
   const [edited, setEdited] = useState(() => ({ ...UNEDITED, ...(resumed?.edited ?? {}) }))
   // How the card was kept here: 'google' (the round trip, or the native
-  // sheet), 'password' (an address and a password, plan 270), 'link' (an
-  // address waiting on its confirmation). null is not kept here.
+  // sheet), 'apple' (the iPhone's sheet, plan 321), 'password' (an
+  // address and a password, plan 270), 'link' (an address waiting on its
+  // confirmation). null is not kept here.
   const [keptBy, setKeptBy] = useState(() => (!guest && resumed?.keeping === 'google' ? 'google' : null))
   // The address an account was just made with here (plan 270), until the
   // session that carries it arrives; and one waiting on its confirmation.
@@ -596,11 +597,11 @@ export default function BoardingFlow({
   // Where the card lives: an account the learner boarded with, or one
   // kept here; an address waiting on its link; or this device alone.
   const user = session?.user ?? null
-  const viaGoogle = keptBy === 'google'
-    || user?.app_metadata?.provider === 'google'
-    || (user?.identities ?? []).some(i => i.provider === 'google')
+  const via = provider => keptBy === provider
+    || user?.app_metadata?.provider === provider
+    || (user?.identities ?? []).some(i => i.provider === provider)
   const kept = !guest
-    ? { state: viaGoogle ? 'google' : 'account', email: user?.email ?? null }
+    ? { state: via('google') ? 'google' : via('apple') ? 'apple' : 'account', email: user?.email ?? null }
     : keptBy === 'password' ? { state: 'account', email: keptEmail }
     : linkSent ? { state: 'sent', email: linkSent } : { state: 'device' }
 

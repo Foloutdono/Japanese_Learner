@@ -83,6 +83,27 @@ describe('the iOS shell', () => {
     expect(project.match(/PrivacyInfo\.xcprivacy in Resources \*\/,/g)).toHaveLength(2)
   })
 
+  // 林檎 (plan 321): Sign in with Apple, offered beside Google because
+  // guideline 4.8 refuses an iPhone app with Google alone. Each of these
+  // missing fails where nobody on Linux can see it: an unsigned build, a
+  // plugin JS cannot find, a file Xcode never compiles.
+  it('signs in with Apple through its own plugin, entitled and compiled', () => {
+    const entitlements = read('ios/App/App/App.entitlements')
+    expect(entitlements).toMatch(/<key>com\.apple\.developer\.applesignin<\/key>\s*<array>\s*<string>Default<\/string>/)
+    // Never the widget's: it signs nobody in.
+    expect(read('ios/App/TsujiWidget/TsujiWidget.entitlements')).not.toContain('applesignin')
+    const plugin = read('ios/App/App/TsujiAppleSignInPlugin.swift')
+    const jsName = plugin.match(/jsName = "(\w+)"/)[1]
+    expect(read('src/lib/native.js')).toContain(`registerPlugin('${jsName}')`)
+    expect(read('ios/App/App/TsujiBridgeViewController.swift')).toContain('registerPluginInstance(TsujiAppleSignInPlugin())')
+    // In the App target's Sources, the phase TsujiWidgetPlugin.swift is in.
+    const appSources = project.match(/\/\* Sources \*\/ = \{[^}]*TsujiWidgetPlugin\.swift in Sources[^}]*\}/)[0]
+    expect(appSources).toContain('TsujiAppleSignInPlugin.swift in Sources')
+    // The nonce reaches Apple hashed, and the email is all that is asked.
+    expect(plugin).toContain('request.nonce = TsujiAppleSignInPlugin.sha256(nonce)')
+    expect(plugin).toContain('request.requestedScopes = [.email]')
+  })
+
   // The WebView's navigator.language follows the languages the shell
   // declares, so a language the app speaks but the shell does not reaches
   // the web app as the fallback: a Spanish iPhone opened in French until

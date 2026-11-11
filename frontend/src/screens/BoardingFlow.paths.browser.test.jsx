@@ -55,6 +55,7 @@ const nudgeState = { current: 'prompt' }
 const requestNudge = vi.fn(async () => false)
 vi.mock('../lib/platform', () => ({
   isNative: () => nudgeRef.current,
+  canSignInWithApple: () => false,
   canNudge: () => nudgeRef.current,
   requestNudgePermission: () => requestNudge(),
   nudgePermission: async () => nudgeState.current,

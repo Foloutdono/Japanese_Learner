@@ -91,6 +91,26 @@ export function openAuthTab(url, scheme) {
   })
 }
 
+// ── 林檎 — Sign in with Apple, on the iPhone's own sheet (plan 321) ──
+// No browser and no redirect: the system draws the sheet over the app
+// and answers in-process (ios/App/App/TsujiAppleSignInPlugin.swift).
+// `nonce` is sent raw; the plugin hands Apple its SHA-256, and Supabase
+// checks the token's against the same raw value (lib/oauth.js).
+const TsujiAppleSignIn = registerPlugin('TsujiAppleSignIn')
+
+/** Resolves { identityToken, authorizationCode }, or null when the
+ *  learner closed the sheet. Anything else throws. */
+export async function signInWithApple(nonce) {
+  try {
+    const answer = await TsujiAppleSignIn.authorize({ nonce })
+    if (!answer?.identityToken) throw new Error('apple: no identity token')
+    return answer
+  } catch (err) {
+    if (err?.code === 'CANCELLED') return null
+    throw err
+  }
+}
+
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

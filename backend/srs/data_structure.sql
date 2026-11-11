@@ -1352,3 +1352,17 @@ CREATE TABLE pvp_ratings (
 );
 ALTER TABLE pvp_ratings ENABLE ROW LEVEL SECURITY;
 CREATE INDEX pvp_ratings_rating ON pvp_ratings (rating DESC, user_id);
+
+-- ── 林檎 — the Sign in with Apple grant ─────────────────────────────
+-- Owned by core/apple_signin.py (plan 321). The refresh token a sign-in's
+-- authorization code was exchanged for, kept for one purpose: revoking
+-- the learner's grant with Apple when the account is deleted, as Apple
+-- asks of an app that offers Sign in with Apple. Nothing else of Apple's
+-- answer is kept. No cascade from auth (ADR 0010): DELETE /api/account
+-- revokes it and clears the row; scripts/purge_orphans.py clears it.
+CREATE TABLE apple_grants (
+    user_id       TEXT PRIMARY KEY,
+    refresh_token TEXT NOT NULL,
+    kept_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE apple_grants ENABLE ROW LEVEL SECURITY;

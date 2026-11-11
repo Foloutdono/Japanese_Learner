@@ -366,7 +366,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "boarding_done": {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
-        "kept":      frozenset({"google", "password", "link", "already", "none"}),
+        "kept":      frozenset({"google", "apple", "password", "link", "already", "none"}),
         # The door the learner came in by (plan 313, lib/arrival.js): the
         # link's ?src=, else the class of the page that sent them, else
         # the store (the native app), else nothing known.

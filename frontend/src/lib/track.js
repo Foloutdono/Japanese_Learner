@@ -164,7 +164,7 @@ export const VALUES = {
   boarding_done: {
     level_how: ['pick', 'test'],
     placed: ['N5', 'N4', 'N3', 'N2', 'N1'],
-    kept: ['google', 'password', 'link', 'already', 'none'],
+    kept: ['google', 'apple', 'password', 'link', 'already', 'none'],
     source: ['tiktok', 'instagram', 'youtube', 'reddit', 'search', 'store', 'other', 'direct'],
   },
   run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },

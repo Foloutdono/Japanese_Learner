@@ -7437,3 +7437,16 @@ Main took plan 318 too (the home screen widget's board, #543), so this plan is 3
 | 319 | **Main took plan 318 too** (the widget's board, #543): this plan's citations moved to 319, the next free number to 320 | DONE |
 
 Open: the first person still agrees in the French of some examples and translations (« je suis allé », « je me suis endormi », about 140 texts by a rough count; N1's pass neutralised a few): the learner's own lines never agree, but an example's « je » is not ruled on, which is the owner's call. Main has moved since this branch began (its detector, `LOCAL_REV` and CLAUDE.md), so the merge will meet conflicts there. The Indonesian (plan 312's branch) follows the source: `git diff ddfcfb07..claude/relaxed-cerf-p22722 -- backend/content/grammar/` lists every text it must take again.
+
+## Plan 321 — 林檎, Sign in with Apple beside Google on the iPhone (2026-11-11)
+
+App Review's guideline 4.8 refuses an iPhone app that offers Google sign-in without an equivalent that lets the learner keep their address private (the email account and the guest pass are not one). Drafted as plan 295 on its branch; that number was taken on main meanwhile, so it ships as 321.
+
+| Phase | What | Status |
+|---|---|---|
+| 321 | **Apple first beside Google, in the iOS shell only** (`lib/oauth.js`'s `providersHere`): the Welcome's sign-in, the boarding's account sheet (Apple writes no stash: its sheet never leaves the page), Settings › Account's guest offer and a link slip per identity a pass lacks; refusals name Apple (`authErrors`), `boarding_done.kept` gains `apple`; fr, en, es (and es-ES's añadir) | DONE |
+| 321 | **The system's sheet** (`TsujiAppleSignInPlugin.swift`, registered on the bridge, compiled into the App target, `com.apple.developer.applesignin`): a hashed nonce, the email alone asked; `signInWithIdToken` to sign in, `linkIdentity` with the token to keep a guest's pass | DONE |
+| 321 | **The grant revoked with the account**: the one-use code posted to `POST /api/account/apple`, exchanged for a refresh token kept in `apple_grants` (`core/apple_signin.py`, RLS closed, in the deletion PLAN), revoked by `DELETE /api/account` before the rows, never waiting on Apple. Needs `APPLE_TEAM_ID` / `APPLE_KEY_ID` / `APPLE_PRIVATE_KEY` on Render | DONE |
+| 321 | **Docs**: `docs/oauth.md` (the flow; Apple, Render and Supabase settings), `docs/release.md`, `privacy.html` and `delete-account.html` in three languages, a CLAUDE.md rule | DONE |
+
+Open: the Swift is compiled first by the next tag's `ios` job and tried first on a TestFlight build. Apple stays the iPhone's: an account made with it opens elsewhere only once it has another key (Google from Settings › Account, or an address; a private-relay address needs Supabase's sender registered with Apple, which needs a custom SMTP first).

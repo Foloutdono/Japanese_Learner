@@ -24,6 +24,7 @@
 		8BC990B4760D831BD99C8A1F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 94F0E8AAE3D3BBE3FAFC3507 /* PrivacyInfo.xcprivacy */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		D73D5B85225D8F37C6A493DE /* TsujiWidgetPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4FA5EA118E6B3F0669BB21 /* TsujiWidgetPlugin.swift */; };
+		7F183A7630E9E1217845DF2C /* TsujiAppleSignInPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0438F29D9651B9325701F480 /* TsujiAppleSignInPlugin.swift */; };
 		FDDF6A72093B146DEE32AB8A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C42B4C28BA55A97934F37111 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -76,6 +77,7 @@
 		F2CF38688AD35692A2E27658 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B62DF1466C67B48441D61D97 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DB4FA5EA118E6B3F0669BB21 /* TsujiWidgetPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TsujiWidgetPlugin.swift; sourceTree = "<group>"; };
+		0438F29D9651B9325701F480 /* TsujiAppleSignInPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TsujiAppleSignInPlugin.swift; sourceTree = "<group>"; };
 		DE07936D8A3094165F8E49D5 /* TsujiWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TsujiWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -154,6 +156,7 @@
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
 				DB4FA5EA118E6B3F0669BB21 /* TsujiWidgetPlugin.swift */,
+				0438F29D9651B9325701F480 /* TsujiAppleSignInPlugin.swift */,
 				556312820C808DE4EA168AD6 /* TsujiBridgeViewController.swift */,
 				455874A384B830EC329E9954 /* App.entitlements */,
 				94F0E8AAE3D3BBE3FAFC3507 /* PrivacyInfo.xcprivacy */,
@@ -286,6 +289,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
 				D73D5B85225D8F37C6A493DE /* TsujiWidgetPlugin.swift in Sources */,
+				7F183A7630E9E1217845DF2C /* TsujiAppleSignInPlugin.swift in Sources */,
 				26EF206A980FC477E6AA24D8 /* TsujiBridgeViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

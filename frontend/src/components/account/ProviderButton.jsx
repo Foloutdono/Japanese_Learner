@@ -20,9 +20,27 @@ function GoogleMark({ size = 18 }) {
   )
 }
 
+// 林檎 (plan 321) — Apple's mark, drawn in the button's own colour:
+// Apple's rule for a custom Sign in with Apple button is that the logo
+// and the title share one colour, black or white, and --text-primary is
+// the one or the other in each theme. Its shape is Apple's and is not
+// redrawn.
+function AppleMark({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+    </svg>
+  )
+}
+
+const MARKS = { google: GoogleMark, apple: AppleMark }
+
 /**
  * Sign in with Google — or, with `link`, put Google onto the account
  * already signed in, so a guest keeps everything they have earned.
+ * `provider="apple"` is the same button for Apple, which only the
+ * iPhone's shell offers (lib/oauth.js's providersHere, plan 321) and
+ * which never leaves the page.
  *
  * On the web this button never "finishes": the page leaves for Google
  * and comes back as a fresh load, so the busy state simply stays up
@@ -31,7 +49,7 @@ function GoogleMark({ size = 18 }) {
  * BoardingFlow's stash).
  */
 export function ProviderButton({
-  link = false, className = 'auth-provider', label = null,
+  provider = 'google', link = false, className = 'auth-provider', label = null,
   onBeforeRedirect = null, onDone = null, onError = null,
 }) {
   const { t } = useLang()
@@ -41,7 +59,7 @@ export function ProviderButton({
     if (busy) return
     setBusy(true)
     onBeforeRedirect?.()
-    const r = await connectProvider({ provider: 'google', link })
+    const r = await connectProvider({ provider, link })
     // The web is already on its way out; leaving `busy` set keeps the
     // button from inviting a second tap during the navigation.
     if (r.redirecting) return
@@ -54,10 +72,11 @@ export function ProviderButton({
     if (!r.cancelled) onError?.(authErrorMessage(r, t))
   }
 
+  const Mark = MARKS[provider] ?? GoogleMark
   return (
-    <button type="button" className={className} onClick={go} disabled={busy}>
-      <span className="auth-provider__mark"><GoogleMark /></span>
-      <span>{label ?? t.continueWithGoogle}</span>
+    <button type="button" className={className} onClick={go} disabled={busy} data-provider={provider}>
+      <span className="auth-provider__mark"><Mark /></span>
+      <span>{label ?? (provider === 'apple' ? t.continueWithApple : t.continueWithGoogle)}</span>
     </button>
   )
 }

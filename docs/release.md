@@ -180,6 +180,14 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
   the reviewer (Settings › Account), a **test account**, the support and
   privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group,
   and the **guideline 1.2 note** below in the review notes.
+- **Sign in with Apple** (plan 321), which guideline 4.8 asks for beside
+  Google: the App ID `app.tsuji` with *Sign In with Apple* enabled (not the
+  widget's), a Sign in with Apple key whose `.p8` and Key ID go on Render as
+  `APPLE_*`, the Apple provider enabled in Supabase with `app.tsuji` as its
+  Client ID, and Supabase's mail sender registered for Apple's private relay.
+  The steps are in `docs/oauth.md`, "Sign in with Apple". Without the App ID
+  capability the tag's `ios` job fails at signing, since `App.entitlements`
+  asks for it.
 
 ## Guideline 1.2 — what learners publish (plan 310)
 

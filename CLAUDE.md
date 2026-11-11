@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **321**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **322**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -623,6 +623,15 @@ runtime purpose.
   request. An iOS target that calls one of Apple's required-reason APIs
   (UserDefaults, file dates) names it in its `PrivacyInfo.xcprivacy`.
   `src/native.shells.test.js` holds all of it.
+- **On the iPhone, Apple stands beside Google (plan 321).** App Review's
+  4.8 refuses an iPhone app that offers Google alone, so every place a
+  provider button is drawn maps over `providersHere()` (`lib/oauth.js`):
+  Apple first, in the iOS shell only, through the system's sheet
+  (`TsujiAppleSignInPlugin.swift`) and `signInWithIdToken` or
+  `linkIdentity` with its token, never a redirect. A new door that offers
+  Google offers Apple the same way. The sign-in's one-use code is kept as
+  a grant the account's deletion revokes (`core/apple_signin.py`,
+  `apple_grants`), as Apple asks; `docs/oauth.md` has the dashboards.
 - **An assumption is not history (plan 224).** A card the level rule
   marked known and nobody has asked about (`SRSEngine.is_assumed`) is
   the app's guess about a self-declared level. Its first answer is a
