@@ -30,6 +30,7 @@ from itertools import zip_longest
 from study import card_index
 from study.difficulty import LEVELS
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES_FOR_SOURCE
+from study.main_modes import Modes
 from content.kana_data import SYLLABARY_SETS
 
 # The stops a level stands behind are JLPT stops. Kana is a different
@@ -41,12 +42,13 @@ SPREAD_DAYS = 42
 SPREAD_WEEKS = SPREAD_DAYS // 7
 
 
-def primary_mode(source: str) -> str:
-    """The mode a known card is checked in: the source's first graded
-    mode (kanji → meaning, word → meaning, rule → meaning). One row per
-    item, not one per drill, so a level change never floods the run with
-    five kinds of check for the same word."""
-    return MODES_FOR_SOURCE[source][0]
+def primary_mode(source: str, modes: Modes | None = None) -> str:
+    """The mode a known card is checked in: the line's main mode, the
+    learner's choice (`modes`, plan 273) or else the source's first
+    graded mode (kanji → meaning, word → meaning, rule → the ladder).
+    One row per item, not one per drill, so a level change never floods
+    the run with five kinds of check for the same word."""
+    return modes.main_of(source) if modes is not None else MODES_FOR_SOURCE[source][0]
 
 
 def stops_behind(level: str) -> list[str]:
@@ -66,7 +68,7 @@ def stops_between(lower: str, upper: str) -> list[str]:
     return list(LEVELS[LEVELS.index(lower) + 1:LEVELS.index(upper) + 1])
 
 
-def known_batches(stops) -> list[tuple[str, str, list[str]]]:
+def known_batches(stops, modes: Modes | None = None) -> list[tuple[str, str, list[str]]]:
     """(source, mode, raw ids) per source over `stops` -- the units
     seed_known writes, whose first checks fall in this order. An item
     the primary mode cannot serve (a kana-only word under word→meaning
@@ -81,7 +83,7 @@ def known_batches(stops) -> list[tuple[str, str, list[str]]]:
     and study/level_fit can tell which one the learner stands on."""
     out = []
     for source in JLPT_SOURCES:
-        mode = primary_mode(source)
+        mode = primary_mode(source, modes)
         decks = [card_index.raw_ids(source, stop, mode) for stop in stops]
         ids = [raw for dealt in zip_longest(*decks) for raw in dealt if raw is not None]
         # Once each: two kana-only words with the same reading share an
@@ -119,14 +121,22 @@ def kana_sets_for(known: str | None) -> tuple[str, ...]:
     return _KANA_SETS_FOR.get(known or "none", ())
 
 
-def kana_batch(known: str | None) -> tuple[str, list[str]]:
+def kana_batch(known: str | None, modes: Modes | None = None) -> tuple[str, list[str]]:
     """(mode, raw ids) for the signs `known` covers -- the unit
     seed_known writes, like known_batches above. Empty for 'none'."""
-    mode = primary_mode(KANA)
+    mode = primary_mode(KANA, modes)
     ids: list[str] = []
     for set_name in kana_sets_for(known):
         ids.extend(card_index.raw_ids(KANA, set_name, mode))
     return mode, list(dict.fromkeys(ids))
+
+
+def line_ids(source: str, mode: str) -> list[str]:
+    """Every card of a line that `mode` serves, deck after deck in the
+    line's order, once each -- what a change of the line's main mode
+    looks through for the cards it marks known (plan 273)."""
+    ids = [raw for deck in card_index.deck_keys(source) for raw in card_index.raw_ids(source, deck, mode)]
+    return list(dict.fromkeys(ids))
 
 
 def item_batches(stops) -> list[list[str]]:

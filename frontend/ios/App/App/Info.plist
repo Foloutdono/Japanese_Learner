@@ -4,18 +4,22 @@
 <dict>
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
-	<!-- fr, as the web app is: a device in neither of the two languages
-	     gets French (lib/locale.js pickInitialLang), here as there. -->
+	<!-- en, as the web app is: a device in none of the app's languages
+	     gets English (lib/locale.js pickInitialLang), here as there. The
+	     WebView's navigator.language follows the languages listed below,
+	     so a language missing from them reaches the web app as this one. -->
 	<key>CFBundleDevelopmentRegion</key>
-	<string>fr</string>
+	<string>en</string>
 	<key>CFBundleDisplayName</key>
         <string>Tsuji</string>
-	<!-- The languages the shell speaks (plan 215): the usage prompts below
-	     are said in each through fr.lproj / en.lproj's InfoPlist.strings. -->
+	<!-- The languages the shell speaks (plans 215, 302), lib/locale.js's
+	     SUPPORTED_LANGS: the usage prompts below are said in each through
+	     its lproj's InfoPlist.strings (native.shells.test.js holds them). -->
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>fr</string>
 		<string>en</string>
+		<string>es</string>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
@@ -45,6 +49,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

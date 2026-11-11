@@ -26,19 +26,21 @@ from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
+from core import daily_limit
 from core.db import db_conn
 from core.rls import enable_rls
 from core.auth import get_user_id
 from core.history import HISTORY_LIMIT, trim_history
 from core.srs_instance import srs
-from study import line_translate, morphology
+from study import line_translate, lyrics_sort, morphology, song_transcribe
+from study.llm_shared import LLMUnavailable, hears_audio
 from study.analysis import LOCAL_REV, analyze_local, attach_user_state
 from study.captions import (
     parse_track, parse_pasted_transcript, parse_video_id, fetch_youtube_track,
     proxy_configured, CaptionParseError, CaptionFetchError,
 )
 from study.cue_sentences import sentences_from_cues
-from study.line_cut import MAX_LINE_WIDTH, cut_line, line_width
+from study.line_cut import CUT_REV, TARGET_LINE_WIDTH, cut_line, line_width
 from study.word_timing import align_cues
 from study.sentences import MAX_SENTENCES
 # _analyze_sentence already bundles local + optional-deep + per-user
@@ -67,8 +69,8 @@ _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
 _MULTIPART_OVERHEAD_BYTES = 64 * 1024
 # Files an upload may carry: the track, the recognised one it is timed
 # by, and the video's own translation in each of
-# study/line_translate.TRACK_LANGS (plan 242).
-_MAX_UPLOAD_FILES = 4
+# study/line_translate.TRACK_LANGS (plan 242; three since plan 302).
+_MAX_UPLOAD_FILES = 2 + len(line_translate.TRACK_LANGS)
 
 # Same reasoning and same values as routes/exams.py's own constants --
 # see that module's comment. Not shared as an import: a generic
@@ -180,6 +182,11 @@ def _ensure_video_schema() -> None:
             cur.execute(
                 "ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS translations JSONB NOT NULL DEFAULT '{}'::jsonb"
             )
+            # Which lines are the song (plan 264, study/lyrics_sort.py),
+            # as {"rev": SORT_REV, "kinds": {line text: kind}}: by the
+            # text, as the translations are. NULL is a session nobody
+            # has made a lyrics deck of. Additive.
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS lyrics_sort JSONB")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -378,9 +385,9 @@ def _materialize(session_id: int, cues: list[dict], translated: dict, timing: st
             translations.setdefault(lang, {}).setdefault(s["text"], text)
 
     analyzed = []
-    for s in kept:
+    for k, s in enumerate(kept):
         if s["japanese"]:
-            analysis = analyze_local(s["text"])
+            analysis = analyze_local(s["text"], **_neighbours(kept, k))
         else:
             # Kept, not dropped. A Korean verse or an English ad-lib is
             # part of the track the learner is reading along with, so it
@@ -397,6 +404,7 @@ def _materialize(session_id: int, cues: list[dict], translated: dict, timing: st
         if s.get("word_times"):
             analysis["word_times"] = s["word_times"]
         analysis["local_rev"] = LOCAL_REV
+        analysis["cut_rev"] = CUT_REV
         analyzed.append(analysis)
 
     conn = db_conn()
@@ -436,6 +444,54 @@ def _with_translations(cues: list[dict], translated: dict) -> list[dict]:
         tr = {lang: lines[i] for lang, lines in read.items() if lines[i]}
         out.append({**cue, "tr": tr} if tr else cue)
     return out
+
+
+# ── 歌 — the song's worker (plan 317) ─────────────────────────────
+def _song_worker(session_id: int, wav: bytes, lyrics: list[str]) -> None:
+    """Runs off-request, as _video_worker does: the song heard as a
+    Track (study/song_transcribe.py), then the same lines, analysis and
+    storage as a subtitle file's. The audio dies with this thread, and
+    the place the route held for it (song_transcribe.hold) is given back
+    however the thread ends."""
+    try:
+        _hear_song(session_id, wav, lyrics)
+    finally:
+        song_transcribe.release()
+
+
+def _hear_song(session_id: int, wav: bytes, lyrics: list[str]) -> None:
+    try:
+        cues = song_transcribe.transcribe(wav, lyrics or None)
+    except song_transcribe.SongError as e:
+        logger.info("Song session %s gave no lines: %s", session_id, e)
+        _fail_session(session_id, str(e), e.code)
+        return
+    except LLMUnavailable as e:
+        logger.warning("No model heard song session %s: %s", session_id, e)
+        _fail_session(session_id, "No model could hear the song. Please try again later.", "song_unavailable")
+        return
+    except Exception:  # pragma: no cover - defensive
+        logger.exception("Unexpected error hearing song session %s", session_id)
+        _fail_session(session_id, "Something went wrong hearing this song. Please try again.", "song_failed")
+        return
+    try:
+        _materialize(session_id, cues, {}, None, None, None, None)
+    except Exception:
+        logger.exception("Unexpected error preparing song session %s", session_id)
+        try:
+            _fail_session(
+                session_id, "Something went wrong reading this transcript. Please try again.",
+                "transcript_failed",
+            )
+        except Exception:
+            logger.exception("Could not mark song session %s failed", session_id)
+
+
+def _start_song_worker(session_id: int, wav: bytes, lyrics: list[str]) -> None:
+    threading.Thread(
+        target=_song_worker, args=(session_id, wav, lyrics),
+        name=f"song-session:{session_id}", daemon=True,
+    ).start()
 
 
 def _start_worker(session_id: int, source: str, source_ref: str, content: str | None,
@@ -667,6 +723,89 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     )
 
 
+# ── 歌 — a song from its audio (plan 317) ──────────────────────────
+# A route of its own rather than a fourth branch of create_video_session:
+# a song's body is a WAV some megabytes long where every other ingest is
+# a megabyte of text at most, and it spends a model call the learner's
+# daily allowance counts. The session it opens is an ordinary one
+# (source "song", named by the file), polled, listed and reopened as
+# every other is; only the audio is not kept, here or anywhere.
+_MAX_SONG_BODY = song_transcribe.MAX_WAV_BYTES + 4 * song_transcribe.MAX_LYRICS_CHARS + _MULTIPART_OVERHEAD_BYTES
+# What a song is called on the shelf, at most.
+_MAX_SONG_NAME = 120
+
+
+@router.post("/api/video/song")
+async def create_song_session(request: Request, user_id: str = Depends(get_user_id)):
+    """A multipart upload {audio, lyrics?, name?}: the song as a 16 kHz
+    mono PCM WAV (the client's lib/songAudio.js), the lyrics pasted, if
+    any, and the file's own name. 202 with the session, as the other
+    ingests answer; its worker hears the song and makes its lines."""
+    if not request.headers.get("content-type", "").startswith("multipart/form-data"):
+        raise _refusal(400, "bad_body", "Expected a multipart upload")
+    try:
+        declared = int(request.headers.get("content-length", ""))
+    except ValueError:
+        declared = None
+    if declared is not None and declared > _MAX_SONG_BODY:
+        raise _refusal(413, "song_too_long", "The song is too long")
+    # Asked before anything is read or counted: a deployment with no
+    # model that hears says so at once, rather than a minute later.
+    if not hears_audio():
+        raise _refusal(503, "song_unavailable", "This server has no model that hears a song")
+    # A place among the songs this process holds (song_transcribe._HELD),
+    # taken before the body is read or the day's allowance counted: a full
+    # house is told to come back, and costs the learner nothing. From here
+    # the place is the worker's to give back, or this route's if it ends
+    # before the worker starts.
+    if not song_transcribe.hold():
+        raise _refusal(503, "song_busy", "Too many songs are being heard right now")
+    started = False
+    try:
+        form = await request.form()
+        upload = form.get("audio")
+        if upload is None or not hasattr(upload, "read"):
+            raise _refusal(400, "song_required", "audio is required")
+        wav = await upload.read(song_transcribe.MAX_WAV_BYTES + 1)
+        if len(wav) > song_transcribe.MAX_WAV_BYTES:
+            raise _refusal(413, "song_too_long", "The song is too long")
+        try:
+            seconds = song_transcribe.wav_seconds(wav)
+        except ValueError:
+            raise _refusal(400, "song_not_wav", "The song must arrive as a PCM WAV")
+        if seconds > song_transcribe.MAX_SECONDS + 1:
+            raise _refusal(413, "song_too_long", "The song is too long")
+        if seconds < 1:
+            raise _refusal(400, "song_too_short", "The song is too short to hear")
+        lyrics_field = form.get("lyrics")
+        lyrics = song_transcribe.lyric_lines(lyrics_field if isinstance(lyrics_field, str) else None)
+        name_field = form.get("name")
+        name = ((name_field if isinstance(name_field, str) else "") or upload.filename or "").strip()
+        name = name[:_MAX_SONG_NAME] or "song"
+
+        # The day's allowance, claimed before the model is asked, as every
+        # ration is (core/daily_limit.py): a song that then fails costs one.
+        used = await run_in_threadpool(
+            daily_limit.claim, user_id, song_transcribe.FEATURE, song_transcribe.SONG_DAILY_LIMIT,
+        )
+        if used > song_transcribe.SONG_DAILY_LIMIT:
+            raise _refusal(
+                429, "song_allowance",
+                f"Daily limit of {song_transcribe.SONG_DAILY_LIMIT} songs reached",
+            )
+
+        session_id = await run_in_threadpool(_open_session, user_id, "song", name, None, None, False, None)
+        _start_song_worker(session_id, wav, lyrics)
+        started = True
+    finally:
+        if not started:
+            song_transcribe.release()
+    return JSONResponse(
+        status_code=202,
+        content={"sessionId": session_id, "status": "generating", "windowCapped": False},
+    )
+
+
 def _load_session(session_id: int, user_id: str) -> dict | None:
     conn = db_conn()
     try:
@@ -698,6 +837,19 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     }
 
 
+def _neighbours(lines: list[dict], k: int) -> dict:
+    """The lines either side of line `k`, as the context it is read in
+    (plan 272, analysis.analyze_local): a cue's line is a piece of what
+    is said, and the tokenizer reads a word by its neighbours. Only a
+    Japanese neighbour: an English ad-lib is no context."""
+    def text(j: int) -> str:
+        if 0 <= j < len(lines) and lines[j].get("japanese", not lines[j].get("foreign")):
+            return lines[j].get("text") or ""
+        return ""
+
+    return {"before": text(k - 1), "after": text(k + 1)}
+
+
 def _current(session_id: int, sentences: list[dict]) -> list[dict]:
     """The session's lines, each analysed by the local tier as it reads
     today -- a line stored under another LOCAL_REV is analysed again,
@@ -713,41 +865,58 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
     tokenizer nothing is remade -- "analysis unavailable" is no
     improvement on an older analysis.
 
-    A line wider than study/line_cut.MAX_LINE_WIDTH, stored before the
-    lines were held to it (plan 235), is cut as a new session's would
-    be, each piece analysed and timed on its own. The session's indices
-    move with it, which is why every route that reads a line by its
-    index reads it through here."""
+    A line wider than study/line_cut.TARGET_LINE_WIDTH, stored before
+    the lines were held to today's rule (plan 235, then two rows on a
+    phone, 2026-10-20), is cut as a new session's would be, each piece
+    analysed and timed on its own, and carries the rule's CUT_REV after,
+    cut or not, so a line with nowhere clean to cut is tried once. The
+    session's indices move with it, which is why every route that reads
+    a line by its index reads it through here."""
     if not morphology.MORPHOLOGY_AVAILABLE:
         return sentences
 
     def wide(s):
-        return not s.get("foreign") and line_width(s.get("text") or "") > MAX_LINE_WIDTH
+        return (not s.get("foreign") and s.get("cut_rev") != CUT_REV
+                and line_width(s.get("text") or "") > TARGET_LINE_WIDTH)
 
     if all(s.get("local_rev") == LOCAL_REV and not wide(s) for s in sentences):
         return sentences
-    fresh = []
+    # The lines first, cut where they are cut, so that each is read with
+    # the lines either side of it as they will stand (_neighbours).
+    lines = []
     changed = False
     for s in sentences:
         if s.get("foreign"):
             changed |= s.get("local_rev") != LOCAL_REV
-            fresh.append({**s, "local_rev": LOCAL_REV})
+            lines.append(({**s, "local_rev": LOCAL_REV}, None))
             continue
         pieces = cut_line(s["text"], s.get("cue_start"), s.get("cue_end"), s.get("word_times")) if wide(s) else None
         if s.get("local_rev") == LOCAL_REV and (pieces is None or len(pieces) == 1):
-            # Current, and nowhere to cut it.
-            fresh.append(s)
+            # Current, and nowhere to cut it: kept, and marked tried.
+            if pieces is not None:
+                changed = True
+                s = {**s, "cut_rev": CUT_REV}
+            lines.append((s, None))
             continue
         changed = True
         for piece in pieces or [{"text": s["text"], "start": s.get("cue_start"), "end": s.get("cue_end"),
                                   **({"words": s["word_times"]} if s.get("word_times") else {})}]:
-            fresh.append({
-                **analyze_local(piece["text"]), "cue_start": piece["start"], "cue_end": piece["end"],
-                **({"word_times": piece["words"]} if piece.get("words") else {}),
-                "local_rev": LOCAL_REV,
-            })
+            lines.append((None, piece))
     if not changed:
         return sentences
+    texts = [{"text": kept["text"] if kept else piece["text"], "foreign": bool(kept and kept.get("foreign"))}
+             for kept, piece in lines]
+    fresh = []
+    for k, (kept, piece) in enumerate(lines):
+        if kept is not None:
+            fresh.append(kept)
+            continue
+        fresh.append({
+            **analyze_local(piece["text"], **_neighbours(texts, k)), "cue_start": piece["start"],
+            "cue_end": piece["end"],
+            **({"word_times": piece["words"]} if piece.get("words") else {}),
+            "local_rev": LOCAL_REV, "cut_rev": CUT_REV,
+        })
     # Best effort: a failed save costs the next opening the same few
     # milliseconds a line, never the answer.
     try:
@@ -970,6 +1139,7 @@ _SOURCE_NAMES = {
     "youtube": "the Japanese subtitles of a YouTube video",
     "upload": "a video's Japanese subtitle file",
     "paste": "a video's Japanese transcript",
+    "song": "the lyrics of a Japanese song",
 }
 
 
@@ -1033,7 +1203,7 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     states = srs.get_user_states(user_id)
     context = _line_context(session, sentences, index, payload.title, payload.channel)
     explained = _analyze_sentence(text, deep=True, lang=payload.lang, states=states, user_id=user_id,
-                                  context=context)
+                                  context=context, local_context=_neighbours(sentences, index))
 
     # A Cue is a Sentence, and a Sentence's cue times are part of it.
     # _analyze_sentence builds from TEXT alone -- analyze_local is pure
@@ -1075,3 +1245,76 @@ def translate_video_lines(session_id: int, payload: TranslationsPayload,
     sentences = _current(session_id, session["sentences"] or [])
     return translated_block(user_id, "video_sessions", session_id, sentences,
                             session["translations"], payload, "video")
+
+
+# ── 歌 — which lines are the song (plan 264) ─────────────────────
+# The lyrics import's second step (components/decks/LyricsImportSheet.jsx):
+# the session's lines sorted into the song and the rest -- a spoken
+# intro, the credits, a sound cue -- by study/lyrics_sort.py, which the
+# learner then corrects before the deck is made. Kept on the session by
+# the line's text under SORT_REV, so asking again costs nothing.
+#
+# Never a refusal the learner cannot go on from: a spent ration or a
+# model that will not answer still returns every line, sorted by the
+# patterns alone, with `sorted` false and the `reason` the sheet words.
+# Such a sort is not kept, so the next look asks the model again.
+def _stored_kinds(raw) -> dict:
+    if isinstance(raw, dict) and raw.get("rev") == lyrics_sort.SORT_REV and isinstance(raw.get("kinds"), dict):
+        return raw["kinds"]
+    return {}
+
+
+@router.post("/api/video/session/{session_id}/lyrics")
+def sort_video_lyrics(session_id: int, user_id: str = Depends(get_user_id)):
+    """{"sorted", "reason", "kinds"}: one of lyrics_sort.KINDS per line
+    of the session, in order (the indices GET /api/video/session/{id}
+    reads its sentences by); `sorted` says whether the model sorted
+    them, and `reason` ("over_limit" | "ai_unavailable") why not."""
+    session = _load_session(session_id, user_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session["status"] != "ready":
+        raise HTTPException(status_code=409, detail="Session is not ready yet")
+    sentences = _current(session_id, session["sentences"] or [])
+    known = _stored_kinds(_load_lyrics_sort(session_id))
+    # The file's name says which song it is more often than not
+    # ("YOASOBI - 夜に駆ける.srt"); a link's video id says nothing.
+    about = session["source_ref"] if session["source"] == "upload" else ""
+    try:
+        kinds, fresh = lyrics_sort.sort_lines(user_id, sentences, known, about)
+    except lyrics_sort.OverLimit:
+        return {"sorted": False, "reason": "over_limit",
+                "kinds": lyrics_sort.sort_by_patterns(sentences, known)}
+    except LLMUnavailable:
+        logger.warning("Lyrics sort unavailable for session %s", session_id)
+        return {"sorted": False, "reason": "ai_unavailable",
+                "kinds": lyrics_sort.sort_by_patterns(sentences, known)}
+    if fresh:
+        # Best effort: a failed save costs the next look a call, never
+        # this answer.
+        try:
+            conn = db_conn()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "UPDATE video_sessions SET lyrics_sort = %s WHERE id = %s AND user_id = %s",
+                        (json.dumps({"rev": lyrics_sort.SORT_REV, "kinds": {**known, **fresh}},
+                                    ensure_ascii=False), session_id, user_id),
+                    )
+                conn.commit()
+            finally:
+                conn.close()
+        except Exception:
+            logger.exception("Could not store the lyrics sort of video session %s", session_id)
+    return {"sorted": True, "reason": None, "kinds": kinds}
+
+
+def _load_lyrics_sort(session_id: int):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT lyrics_sort FROM video_sessions WHERE id = %s", (session_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    return row[0] if row else None

@@ -259,6 +259,12 @@ def build_reading_mondai(spec: dict, pool: list[dict], used_words: set, used_pro
     for word in pool:
         if len(questions) >= spec["count"]:
             break
+        # A word the deck writes in kana has no written form to read:
+        # it printed an empty prompt over its reading's four spellings.
+        # The exams pass a pool of kanji words; the placement test passes
+        # its whole level, and one paper in four drew such an item.
+        if not word["kanji"]:
+            continue
         key = (word["kanji"], word["kana"])
         if key in used_words or word["kanji"] in used_prompts:
             continue
@@ -295,6 +301,9 @@ def build_orthography_mondai(spec: dict, pool: list[dict], used_words: set, used
     for word in pool:
         if len(questions) >= spec["count"]:
             break
+        # Nor a kanji spelling to choose (see build_reading_mondai).
+        if not word["kanji"]:
+            continue
         key = (word["kanji"], word["kana"])
         reading = word["kana"].split("/")[0].strip()
         if key in used_words or reading in used_prompts:

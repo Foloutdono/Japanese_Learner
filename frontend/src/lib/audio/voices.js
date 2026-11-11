@@ -157,7 +157,9 @@ if (typeof window !== 'undefined') {
       const ctx = getAudioContext()
       if (!ctx) return
       const buses = HALL_BUSES.map(busFor).filter(Boolean)
-      const late = deadline.didTimeout || performance.now() - since > HALL_WAIT_MS
+      // No deadline is a clock standing in for idle time (a test's fake
+      // one): there is no room to measure, so it is taken as late.
+      const late = !deadline || deadline.didTimeout || performance.now() - since > HALL_WAIT_MS
       if (!warmHall(ctx, buses, deadline, late)) ask()
     })
     ask()

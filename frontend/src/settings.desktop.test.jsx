@@ -15,6 +15,13 @@ import './index.css'
 // prints a title (plan 139): the rail's station and the lit door name
 // them, and both headings are clipped for a screen reader.
 
+// The paywall is switched off (domain/paywall.js's HAS_PAYWALL) while the
+// plans are reworked; this test covers the offer's doors, which stay.
+vi.mock('./domain/paywall', async o => ({
+  ...(await o()),
+  offerable: credits => !(credits?.unlimited || credits?.plan === 'pass'),
+}))
+
 vi.mock('./lib/api', () => ({
   api: p => p,
   // A learner at N4, so the destination has a stop to stand at.
@@ -322,9 +329,10 @@ describe('settings on the desk', () => {
     }
   })
 
-  // The themes beside the language (plan 139), the two languages one
-  // over the other down the screens' height (plan 145): the row's two
-  // cards end level, and neither holds a short pair of cards at its top.
+  // The themes beside the language (plan 139), the languages one over
+  // the other down the screens' height (plan 145; three since plan 302):
+  // the row's two cards end level, and neither holds a short stack of
+  // cards at its top.
   it('stands the languages down the theme screens\' height', async () => {
     await page.viewport(1440, 900)
     try {
@@ -332,11 +340,14 @@ describe('settings on the desk', () => {
       await settle()
       const [theme, lang] = [...document.querySelectorAll('.stg-pair > .slip')].map(c => c.getBoundingClientRect())
       near(theme.height, lang.height)
-      const [fr, en] = [...document.querySelectorAll('.lang-pick')].map(b => b.getBoundingClientRect())
-      expect(en.top).toBeGreaterThan(fr.bottom)
-      near(fr.height, en.height)
+      const picks = [...document.querySelectorAll('.lang-pick')].map(b => b.getBoundingClientRect())
+      expect(picks.length).toBeGreaterThan(1)
+      for (let i = 1; i < picks.length; i++) {
+        expect(picks[i].top).toBeGreaterThan(picks[i - 1].bottom)
+        near(picks[i].height, picks[0].height)
+      }
       const screens = document.querySelector('.theme-picks').getBoundingClientRect()
-      expect(en.bottom).toBeGreaterThanOrEqual(screens.bottom - 1)
+      expect(picks.at(-1).bottom).toBeGreaterThanOrEqual(screens.bottom - 1)
     } finally {
       await page.viewport(1100, 800)
     }
@@ -426,7 +437,7 @@ describe('the list under the pass (plan 182)', () => {
     const lists = [...document.querySelectorAll('.desk-settings__list .stg-list')]
     expect(lists.map(l => [...l.querySelectorAll('.stg-row')].map(r => r.dataset.page))).toEqual([
       ['display', 'sound'],
-      ['agenda', 'reviews', 'rating', 'reading', 'help', 'write'],
+      ['agenda', 'reviews', 'modes', 'rating', 'reading', 'help', 'write'],
       ['account', 'transfer', 'credits'],
       ['pass'],
     ])

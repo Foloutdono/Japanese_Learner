@@ -146,17 +146,19 @@ class RankingTests(unittest.TestCase):
         """placement_lists.json feeds the audit's rotation without a
         tokenizer; a deck change that forgets `--write-lists` lands here."""
         current = json.load(open(report.LISTS_FILE, encoding="utf-8"))
-        self.assertEqual(current, report.candidate_lists())
+        self.assertEqual(current, report.candidate_lists(report.measure(self.rank, self.lookups)))
 
     def test_the_lists_are_candidates_with_the_shape_the_audit_reads(self) -> None:
         lookups = self.lookups
         above = report.placed_above(self.rank, lookups)
         self.assertTrue(all(report._RANK[i["lists_say"]] < report._RANK[i["level"]] for i in above))
         # A kanji card is matched with its reading: 来る read きたる is
-        # not the N5 来る (くる), and 人 read じん not 人 (ひと).
+        # not the N5 来る (くる), and the N1 東 read あずま not the N5 東
+        # (ひがし). (人 read じん was the second example until plan 260:
+        # it is the lists' N5 ～人, and an N5 card now.)
         keys = {i["key"] for i in above}
         self.assertNotIn("来る::きたる", keys)
-        self.assertNotIn("人::じん", keys)
+        self.assertNotIn("東::あずま", keys)
         missing = report.listed_not_here(self.rank, lookups)
         self.assertTrue(all(not report._is_pattern(i["expression"]) for i in missing))
         # A list word the deck holds in kana is present.
@@ -164,3 +166,21 @@ class RankingTests(unittest.TestCase):
         frequent = report.frequent_not_here(self.rank)
         self.assertTrue(all(i["rank"] <= report.FREQUENT_BAND for i in frequent))
         self.assertTrue(all(i["meaning"] for i in frequent))
+
+    def test_an_affix_row_places_the_bare_card(self) -> None:
+        """The lists write counters and affixes with a tilde (～枚, ～さん,
+        御～) and a counter's ヶ as か (～か月); the deck writes the bare
+        word, so a row matched only as written placed nothing, and the N1
+        shelf held さん, 枚 and 冊 unseen (plan 260). Still a pair: the
+        suffix ～人 is 人 read じん, never 人 read ひと's level."""
+        by_pair, by_kana = report._jlpt_index()
+        self.assertEqual(by_pair[("枚", "まい")], "N5")
+        self.assertEqual(by_pair[("ヶ月", "かげつ")], "N5")
+        self.assertEqual(by_pair[("御", "ご")], "N4")
+        self.assertEqual(by_kana["さん"], "N5")
+        self.assertEqual(by_pair[("人", "じん")], "N5")
+        self.assertEqual(by_pair[("来る", "きたる")], "N1")
+        # A counter still above the lists is on the audit's list now.
+        above = {(i["key"], i["level"]): i["lists_say"]
+                 for i in report.placed_above(self.rank, self.lookups)}
+        self.assertEqual(above.get(("区::く", "N1")), "N4")

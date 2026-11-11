@@ -1,9 +1,11 @@
 import { forgetCachedJson } from '../lib/cachedJson'
+import { forgetWarm } from '../lib/warm'
 import { clearAhead } from '../lib/platform'
 import { forgetAheadPlan } from './ahead'
 import { forgetAgenda } from './agenda'
 import { forgetBasics } from './basics'
 import { forgetCredits } from './credits'
+import { forgetDuels } from './duels'
 import { forgetForecast } from './forecast'
 import { forgetShown } from './guide'
 import { forgetJourney } from './journey'
@@ -12,6 +14,7 @@ import { forgetPracticeStops } from './practiceStop'
 import { forgetSummary } from './profileSummary'
 import { forgetStats } from './stats'
 import { forgetToday } from './today'
+import { forgetModes } from './learnerModes'
 
 // ── 改札を出る — what the leaving learner takes with them ─────────
 // Signing out does NOT reload the page. Welcome, the sign-in and the
@@ -28,6 +31,9 @@ import { forgetToday } from './today'
 //   the stats     the distance on every line
 //   the journey   the standing the pass's back judges (five minutes'
 //                 TTL, the longest of them)
+//   the duels     the Elo, the record and the friends/requests waiting
+//                 (plan 279), a thirty-second TTL that the next
+//                 learner should not have to wait out
 //   the record    what was done at each grade of each practice
 //                 platform (the desk's Practice gate, plan 130), and
 //                 at each stop of a practice station (plan 159)
@@ -51,7 +57,9 @@ import { forgetToday } from './today'
 export function forgetAccount() {
   forgetSummary()
   forgetCredits()
+  forgetDuels()
   forgetToday()
+  forgetModes()
   forgetBasics()
   forgetStats()
   forgetJourney()
@@ -62,5 +70,6 @@ export function forgetAccount() {
   forgetAheadPlan()
   forgetAgenda()
   forgetCachedJson()
+  forgetWarm()
   clearAhead()
 }

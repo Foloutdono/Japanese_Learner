@@ -6,6 +6,7 @@
 # test file writes papers under, wiped before and after.
 import copy
 import json
+import random
 
 import pytest
 
@@ -72,6 +73,150 @@ def test_length_must_not_answer():
     assert any("the longest" in t for t in exam_seed.length_tells([always_longest]))
     rotating = _paper_of([_mcq([3, 4, 5, 9], i % 4) for i in range(20)])
     assert exam_seed.length_tells([rotating]) == []
+
+
+def _star(right: int) -> dict:
+    # はじめ is the choice every other one is a character from: index 0
+    ids = ["c1", "c2", "c3", "c4"]
+    return {"id": "q", "choices": [{"id": i, "textJp": t} for i, t in zip(ids, ["はじめ", "はしめ", "ばじめ", "ぱじめ"])],
+            "answer": ids[right]}
+
+
+def test_the_choice_nearest_to_the_others_must_not_be_the_answer():
+    always_the_centre = _paper_of([_star(0) for _ in range(50)])
+    assert any("most like the others" in t for t in exam_seed.likeness_tells([always_the_centre]))
+    one_in_four = _paper_of([_star(i % 4) for i in range(50)])
+    assert exam_seed.likeness_tells([one_in_four]) == []
+    assert exam_seed.likeness_tells([_paper_of([_star(0) for _ in range(10)])]) == []     # too few to say
+
+
+def _cycling(n: int) -> list[dict]:
+    """n questions whose key sits in slot 1, 2, 3, 4, 1, 2 ..."""
+    ids = ["c1", "c2", "c3", "c4"]
+    return [{"id": f"q{i}", "choices": [{"id": ids[j], "textJp": f"{i}-{j}"} for j in range(4)], "answer": ids[i % 4]}
+            for i in range(n)]
+
+
+def _words(paper: dict) -> list[tuple[list[str], str]]:
+    qs = paper["sections"][0]["mondai"][0]["questions"]
+    return [(sorted(c["textJp"] for c in q["choices"]), next(c["textJp"] for c in q["choices"] if c["id"] == q["answer"])) for q in qs]
+
+
+def test_keys_that_step_through_the_slots_are_not_a_seed():
+    assert any("one slot after" in t for t in exam_seed.rotation_tells([_paper_of(_cycling(50))]))
+    rng = random.Random(5)
+    ids = ["c1", "c2", "c3", "c4"]
+    scattered = [{"id": f"q{i}", "choices": [{"id": ids[j], "textJp": f"{i}-{j}"} for j in range(4)], "answer": ids[rng.randrange(4)]}
+                 for i in range(50)]
+    assert exam_seed.rotation_tells([_paper_of(scattered)]) == []
+    assert exam_seed.rotation_tells([_paper_of(_cycling(12))]) == []      # too few steps to say
+
+
+def test_a_sentence_order_item_shown_in_its_right_order_is_not_a_seed_and_is_re_placed():
+    paper = _first("n4-grammar-01")
+    q = next(q for m in paper["sections"][0]["mondai"] for q in m["questions"] if "pieces" in q)
+    q["pieces"] = sorted(q["pieces"], key=lambda p: q["order"].index(p["id"]))
+    assert _about(exam_seed.problems("n4-grammar-01", paper), q["id"], "right order")
+    data = {"examId": "n4-grammar-01", "papers": [{"n": 1, "paper": paper}]}
+    assert exam_seed.reslot(data) >= 1
+    assert not _about(exam_seed.problems("n4-grammar-01", paper), q["id"], "right order")
+    assert q["order"] and sorted(p["id"] for p in q["pieces"]) == sorted(q["order"])      # same pieces, same answer
+
+
+def test_reslot_moves_the_keys_and_nothing_else():
+    paper = _paper_of(_cycling(50))
+    before = _words(paper)
+    data = {"examId": "x-vocab-01", "papers": [{"n": 1, "paper": paper}]}
+    assert exam_seed.reslot(data) == 50
+    assert _words(paper) == before                      # the same four words, the same one right
+    assert exam_seed.rotation_tells([paper]) == []
+    slots = [next(i for i, c in enumerate(q["choices"]) if c["id"] == q["answer"]) for q in paper["sections"][0]["mondai"][0]["questions"]]
+    assert all(slots.count(k) in (12, 13) for k in range(4))        # and the slots stay balanced
+    assert [c["id"] for c in paper["sections"][0]["mondai"][0]["questions"][0]["choices"]] == ["c1", "c2", "c3", "c4"]
+
+
+# ── What the choices give away, and the level (plan 257) ─────────────
+
+def _grammar_question(texts: list[str], answer: int) -> tuple[dict, str]:
+    paper = _first("n5-grammar-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(texts)]
+    q["answer"] = f"c{answer + 1}"
+    return paper, q["id"]
+
+
+def _about(found: list[str], qid: str, what: str) -> list[str]:
+    return [p for p in found if p.startswith(qid + ":") and what in p]
+
+
+def test_choices_one_character_apart_are_not_a_seed():
+    paper, qid = _grammar_question(["ほしいです", "たいです", "ましょう", "たくです"], 1)
+    assert _about(exam_seed.problems("n5-grammar-01", paper), qid, "one small difference")
+
+
+def test_a_shared_frame_is_a_seed():
+    paper, qid = _grammar_question(["がください", "をください", "にください", "でください"], 1)
+    assert not _about(exam_seed.problems("n5-grammar-01", paper), qid, "small difference")
+
+
+def test_a_listening_item_may_offer_figures_a_character_apart():
+    paper = _first("n4-listening-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(["5時", "5時半", "6時", "7時半"])]
+    q["answer"] = "c1"
+    assert not _about(exam_seed.problems("n4-listening-01", paper), q["id"], "small difference")
+
+
+def test_a_kanji_above_the_level_is_not_a_seed():
+    paper = _first("n5-grammar-01")
+    paper["sections"][0]["mondai"][0]["questions"][0]["promptJp"] += "曇"
+    assert any("kanji outside N5: 曇" in p for p in exam_seed.problems("n5-grammar-01", paper))
+
+
+def test_a_grammar_point_above_the_level_is_not_a_seed():
+    paper = _first("n5-grammar-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["promptJp"] = "あしたは　雨が　ふるそうです。"          # 〜そうだ（伝聞） is an N4 point
+    found = exam_seed.problems("n5-grammar-01", paper)
+    assert _about(found, q["id"], "grammar above N5: 〜そうだ（伝聞） (N4)")
+
+
+def test_a_fill_in_stem_without_its_blank_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = next(q for m in paper["sections"][0]["mondai"] if m["id"] == "moji_3" for q in m["questions"])
+    assert not _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "fill-in stem")
+    q["promptJp"] = q["promptJp"].replace("＿＿＿＿", "とても")
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "fill-in stem has one ＿＿＿＿, not none")
+    q["promptJp"] = "＿＿＿＿＿＿ " + q["promptJp"]
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "fill-in stem")
+
+
+def test_a_paraphrase_whose_underline_left_the_stem_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = next(q for m in paper["sections"][0]["mondai"] if m["id"] == "moji_4" for q in m["questions"])
+    assert not _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "underlined word")
+    q["underlineJp"] = "ぜんぜんちがう"
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "underlined word 'ぜんぜんちがう' is not in the stem")
+
+
+def test_a_made_up_reading_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = paper["sections"][0]["mondai"][0]["questions"][0]
+    q["promptJp"] = "初め"
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(["ぱじめ", "はじめ", "はしめ", "ばじめ"])]
+    q["answer"] = "c2"
+    found = exam_seed.problems("n5-vocab-01", paper)
+    assert _about(found, q["id"], "'ぱじめ' is no reading")
+    assert _about(found, q["id"], "one small difference")        # and a star: はじめ is the centre
+
+
+def test_a_wrong_spelling_of_the_word_itself_is_not_a_seed():
+    paper = _first("n5-vocab-01")
+    q = paper["sections"][0]["mondai"][1]["questions"][0]
+    q["promptJp"] = "かう"
+    q["choices"] = [{"id": f"c{i + 1}", "textJp": t} for i, t in enumerate(["買う", "飼う", "貫う", "貴う"])]
+    q["answer"] = "c1"
+    assert _about(exam_seed.problems("n5-vocab-01", paper), q["id"], "'飼う' is also a spelling read かう")
 
 
 # ── The loader ────────────────────────────────────────────────

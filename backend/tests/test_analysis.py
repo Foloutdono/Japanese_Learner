@@ -188,26 +188,34 @@ class AnalyzeLocalTests(unittest.TestCase):
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_a_word_written_in_kana_is_never_matched_to_a_homophone(self) -> None:
         # The pool is JMdict less the deck: its one row read その is 苑,
-        # "garden", and its one row read あんな the Anna era. まじか is
-        # slang UniDic reads as 間近 (まぢか), "near".
-        for sentence, surface in (("その本をください。", "その"), ("あんな人はいない。", "あんな"),
-                                  ("まじかよ", None)):
+        # "garden", and its one row read あんな the Anna era.
+        for sentence, surface in (("その本をください。", "その"), ("あんな人はいない。", "あんな")):
             with self.subTest(sentence=sentence):
                 r = analyze_local(sentence)
                 pooled = [t["surface"] for t in r["tokens"] if (t["vocab_match"] or {}).get("pool")]
                 self.assertEqual(pooled, [])
-                if surface:
-                    self.assertIn(surface, [t["surface"] for t in r["tokens"]])
+                self.assertIn(surface, [t["surface"] for t in r["tokens"]])
+        # まじか is slang UniDic reads as 間近 (まぢか), "near": it is まじ,
+        # "serious", and か (plan 272), and never the archaic まじ,
+        # "cannot", JMdict files under the same row.
+        pooled = {t["surface"]: t["vocab_match"]["entry"] for t in analyze_local("まじかよ")["tokens"]
+                  if (t["vocab_match"] or {}).get("pool")}
+        self.assertEqual(list(pooled), ["まじ"])
+        self.assertEqual(pooled["まじ"]["meaning"], "serious")
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
-    def test_deck_words_are_never_folded_into_a_pool_compound(self) -> None:
-        # 電話 + 番号 are two N5 cards; the pool's 電話番号 does not take
-        # them. A number is the deck's to read, never the pool's: 二十
-        # read にじゅう shares a kanji and a reading with 二重, "double".
+    def test_deck_words_fold_into_a_pool_compound_as_its_parts(self) -> None:
+        # 電話 + 番号 are two N5 cards and the pool's 電話番号 is one word: it
+        # reads as the word, its two cards kept as its parts (plan 280). A
+        # number is the deck's to read, never the pool's: 二十 read にじゅう
+        # shares a kanji and a reading with 二重, "double".
         r = analyze_local("電話番号と三千円と二十人")
-        surfaces = [t["surface"] for t in r["tokens"]]
-        self.assertEqual(surfaces[:2], ["電話", "番号"])
-        for t in r["tokens"]:
+        phone = r["tokens"][0]
+        self.assertEqual(phone["surface"], "電話番号")
+        self.assertEqual(phone["vocab_match"]["entry"]["meaning_fr"], "numéro de téléphone")
+        self.assertEqual([p["vocab_match"]["raw_id"] for p in phone["parts"]],
+                         ["vocab_N5_電話_でんわ", "vocab_N5_番号_ばんごう"])
+        for t in r["tokens"][1:]:
             self.assertFalse((t["vocab_match"] or {}).get("pool"), t["surface"])
 
     def test_distinctive_grammar_point_produces_a_grammar_card_id(self) -> None:
@@ -240,16 +248,17 @@ class AnalyzeLocalTests(unittest.TestCase):
 
     def test_a_point_carries_its_gloss_in_both_languages(self) -> None:
         """Plan 095: a chip says what its rule does without the sheet
-        being opened. The gloss is the catalogue's {en, fr} pair rather
-        than one language, because this result is pure and shared across
-        every learner -- the screen picks the language (frontend
-        grammarGloss.js), and the copy a token carries is the same one,
-        so a particle's row can print it too."""
+        being opened. The gloss is the catalogue's {en, fr} pair (and its
+        Spanish since plan 302) rather than one language, because this
+        result is pure and shared across every learner -- the screen picks
+        the language (frontend grammarGloss.js), and the copy a token
+        carries is the same one, so a particle's row can print it too."""
         r = analyze_local("今日は学校へ行きません。")
         wa = next(g for g in r["grammar"] if g["pattern"] == "は")
-        self.assertEqual(set(wa["meaning"]), {"en", "fr"})
-        self.assertTrue(wa["meaning"]["en"] and wa["meaning"]["fr"])
+        self.assertEqual(set(wa["meaning"]), {"en", "fr", "es"})
+        self.assertTrue(wa["meaning"]["en"] and wa["meaning"]["fr"] and wa["meaning"]["es"])
         self.assertTrue(wa["structure"])
+        self.assertTrue(wa["structure_es"])
         on_token = next(g for t in r["tokens"] for g in t["grammar"] if g["raw_id"] == wa["raw_id"])
         self.assertEqual(on_token["meaning"], wa["meaning"])
         self.assertEqual(on_token["structure"], wa["structure"])
@@ -358,6 +367,69 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual(r["text"], "何でもいい")
 
 
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class EveryPartTests(unittest.TestCase):
+    """Plan 266: a number and a name say what they are, and a set phrase
+    is one word whose letters lend no particle to a marker."""
+
+    def _token(self, sentence: str, surface: str) -> dict:
+        return next(t for t in analyze_local(sentence)["tokens"] if t["surface"] == surface)
+
+    def test_a_number_is_one_token_with_its_figure(self) -> None:
+        tok = self._token("九千三百五十円のおつりです。", "九千三百五十")
+        self.assertEqual(tok["number"], 9350)
+        self.assertEqual(tok["gloss"], {"en": "9,350", "fr": "9\u202f350", "es": "9,350"})
+        self.assertIsNone(tok["vocab_match"])
+        self.assertEqual(self._token("駅で三十分待ちました。", "三十")["gloss"]["en"], "30")
+        self.assertEqual(self._token("三万五千人が来た。", "三万五千")["number"], 35000)
+
+    def test_a_date_reads_its_number_whole(self) -> None:
+        # 十 + 八日 was "ten" and "the eighth day": the eighteenth is 18
+        # and the day.
+        r = analyze_local("十八日はいかがでしょうか。")
+        self.assertEqual([t["surface"] for t in r["tokens"][:2]], ["十八", "日"])
+        self.assertEqual(r["tokens"][0]["number"], 18)
+
+    def test_digits_read_one_by_one_keep_their_cards(self) -> None:
+        # A telephone's number is said digit by digit: no 3,456.
+        r = analyze_local("三四五六の七八一二番です。")
+        self.assertFalse(any("number" in t for t in r["tokens"]))
+        self.assertEqual(self._token("三四五六の七八一二番です。", "三")["vocab_match"]["raw_id"], "vocab_N5_三_さん")
+        # A lone numeral the deck teaches keeps its card.
+        self.assertEqual(self._token("十時に来ます。", "十")["vocab_match"]["raw_id"], "vocab_N5_十_じゅう/とお")
+
+    def test_a_name_says_it_is_one(self) -> None:
+        for sentence, surface, kind in (
+            ("田中さんは今日、元気そうですね。", "田中", "family name"),
+            ("マルタンと申します。", "マルタン", "a person's name"),
+            ("新宿です。", "新宿", "place name"),
+            ("ゆきさん、こんにちは。", "ゆき", "given name"),
+        ):
+            with self.subTest(surface=surface):
+                tok = self._token(sentence, surface)
+                self.assertIsNone(tok["vocab_match"])
+                self.assertEqual(tok["gloss"]["en"], kind)
+                self.assertTrue(tok["gloss"]["fr"])
+        # Written in hiragana with no honorific, a name is the tokenizer's
+        # guess: the ゆう of ゆうがた was 夕方 cut in two -- and since plan
+        # 272 ゆうがた is read whole, 夕方, no name at all.
+        evening = self._token("ゆうがた、雨がふった。", "ゆうがた")
+        self.assertNotIn("gloss", evening)
+        self.assertEqual(evening["vocab_match"]["entry"]["kanji"], "夕方")
+        # A card the name is read like is no gloss of a name.
+        self.assertNotIn("gloss", self._token("ゆきがふりました。", "ゆき"))
+
+    def test_a_set_phrase_lends_no_particle(self) -> None:
+        r = analyze_local("では、何時ごろがよろしいですか。")
+        patterns = {g["pattern"] for g in r["grammar"]}
+        self.assertFalse({"で", "は", "〜は〜が"} & patterns)
+        self.assertIn("が", patterns)
+        # A pattern written in one piece inside a set phrase is its make
+        # and stays: いらっしゃいませ is いらっしゃる told.
+        self.assertIn("いらっしゃる／おっしゃる／なさる",
+                      {g["pattern"] for g in analyze_local("いらっしゃいませ。")["grammar"]})
+
+
 class AttachUserStateTests(unittest.TestCase):
     """attach_user_state adds per-learner SRS stats and the
     unknown/off-deck counts. Built against a hand-written states dict,
@@ -393,6 +465,7 @@ class AttachUserStateTests(unittest.TestCase):
         def states(state):
             return {("u:" + raw_id, "vocab.flashcard.f2b"): {
                 "state": state, "total_reviews": 0, "correct_reviews": 0,
+                "answers": 0, "correct_answers": 0,
                 "due": False, "interval_days": None, "next_review": None,
             }}
 
@@ -506,3 +579,33 @@ class MergeDeepTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class LineContextTests(unittest.TestCase):
+    """A line of a longer text read inside the lines either side (plan
+    272): MeCab chooses a word by its neighbours, and a subtitle's line
+    read alone lost them."""
+
+    def test_a_line_reads_its_last_word_by_what_follows(self) -> None:
+        # やまの おく alone ends on the verb 置く, "to put"; the story's
+        # next line makes it 奥, "the depths" of the mountain.
+        line = "むかし むかし やまの おく"
+        alone = analyze_local(line)["tokens"][-1]
+        within = analyze_local(line, after="に ちいさな きつねが すんでいました")["tokens"][-1]
+        self.assertEqual(alone["surface"], "おく")
+        self.assertEqual(alone["pos"], "verb")
+        self.assertEqual(within["pos"], "noun")
+
+    def test_the_result_is_the_line_s_alone(self) -> None:
+        line = "ぷらそにかの合唱のみなさんが"
+        result = analyze_local(line, before="バンドメンバーとそして", after="いてくれるので、")
+        self.assertEqual(result["text"], line)
+        self.assertEqual("".join(t["surface"] for t in result["tokens"]), line)
+        self.assertTrue(all(0 <= t["start"] < t["end"] <= len(line) for t in result["tokens"]))
+        self.assertTrue(all(0 <= s and e <= len(line) for g in result["grammar"] for s, e in g["segments"]))
+
+    def test_a_word_across_the_edge_reads_the_line_alone(self) -> None:
+        # ありがとう straddles the cut: the line is read as it was alone.
+        line = "うございます"
+        self.assertEqual(analyze_local(line, before="ありがと")["tokens"], analyze_local(line)["tokens"])

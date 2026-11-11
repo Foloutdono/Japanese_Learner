@@ -4,6 +4,7 @@ import { apiJson } from '../../lib/api'
 import { playClick, playUi } from '../../lib/audio'
 import { refreshToday } from '../../stores/today'
 import { Sheet } from '../chrome/Sheet'
+import { UndoIcon } from '../ui/Icons'
 import { Seg } from '../chrome/Console'
 import { useDesk } from '../../hooks/useDesk'
 import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
@@ -72,7 +73,7 @@ export function ComebackSheet({ offer, secondsPerReview, session, onClose }) {
   }
 
   return (
-    <Sheet open onClose={onClose} jp={t.cbJp} cap={t.cbCap} label={t.cbLabel} className="tdy-sheet cb-sheet" initialFocus=".cb-sheet .svc--on">
+    <Sheet open onClose={onClose} title={t.cbCap} icon={UndoIcon} line="var(--accent2)" label={t.cbLabel} className="tdy-sheet cb-sheet" initialFocus=".cb-sheet .svc--on">
       <div className="cb-lead">
         <p className="cb-lead__hello">{offer.days_away > 1 ? t.cbAway(offer.days_away) : t.cbPiled}</p>
         <p className="slip__hint">{t.cbOwed(offer.owed)}</p>

@@ -36,6 +36,11 @@
 // was the one kind with nowhere to put it. It takes 仮名's own glyph
 // and pigment from config/tabs.js, like every type here.
 //
+// 'lyrics' (plan 264) is a song's deck: what a mixed one holds, its
+// words and its lines, under its own name so its own study modes can
+// come later. It takes 解析's pigment, the analyser's, whose pipeline
+// every song comes through (the shelf's import too), and 歌 for a name.
+//
 // The structure now decides what a deck can hold BOTH ways: app cards
 // browsed in from its source, and personal cards written in its shape. The
 // old model had that backwards for personal cards — a kanji deck accepted
@@ -49,6 +54,7 @@ export function deckTypes(t) {
     { value: 'kanji',    label: t.kanjiType,    desc: t.deckKanjiDesc,    glyph: '漢', color: 'var(--line-kanji)' },
     { value: 'grammar',  label: t.grammarType,  desc: t.deckGrammarDesc,  glyph: '文', color: 'var(--line-grammar)' },
     { value: 'mixed',    label: t.mixedType,    desc: t.mixedDesc,        glyph: '混', color: 'var(--text-secondary)' },
+    { value: 'lyrics',   label: t.lyricsType,   desc: t.lyricsDesc,       glyph: '歌', color: 'var(--line-kaiseki)' },
   ]
 }
 

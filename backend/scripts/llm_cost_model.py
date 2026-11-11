@@ -57,10 +57,12 @@ MODEL_IDS = {
 # the allowed-kanji list (N5 103 chars ... N1 2,212) is worth caching.
 FEATURES = {
     "reading_comprehension": (
-        34, 2700, 3000,
+        34, 2800, 3400,
         "26 exercises/mo x 1.3 attempts (_COMPREHENSION_ATTEMPTS=3, most "
-        "pass first). In: 6.5k-char template + kanji list + seeds. Out: a "
-        "250-char passage, 10 questions, a per-sentence breakdown. This row "
+        "pass first). In: 7k-char template + kanji list + seeds. Out: a "
+        "250-char passage, 10 questions each with its sentence and a line "
+        "on why (plan 301b, ~40 tokens a question), a per-sentence "
+        "breakdown. This row "
         "is now the COLD-POOL worst case -- one learner alone in their "
         "(level, lang) bucket. Since plan 092 the answer is pooled and "
         "shared, so divide these calls by the learners sharing a bucket: "
@@ -117,12 +119,16 @@ FEATURES = {
         "ASK_DAILY_LIMIT caps it at 40/day, which bounds the abuse row.",
     ),
     "phrase_analysis": (
-        50, 400, 500,
+        50, 650, 580,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "
         "practice draws on ~220 fixed sentences). Only the misses bill. "
         "DEEP_DAILY_LIMIT caps the misses at 150/day (plan 211) -- the "
         "analyzer, the runs' explain and a video line alike -- which bounds "
-        "the abuse row.",
+        "the abuse row. Since plan 311 the construction is a frame, a part "
+        "a line with its role: a longer system block (~650 tokens, stable) "
+        "and a little more out than the paragraph it replaced; a reply "
+        "whose frame is not the line's is the next model's turn, rare "
+        "enough to leave out of the count.",
     ),
     "line_translation": (
         30, 900, 700,
@@ -138,6 +144,30 @@ FEATURES = {
         "(plan 242): the 30 is an upper bound. "
         "LINE_TRANSLATION_DAILY_LIMIT caps it at 60 blocks/day (1,200 "
         "lines), which bounds the abuse row.",
+    ),
+    "lyrics_sort": (
+        4, 1400, 900,
+        "Which lines of a song are the song (plan 264): the lyrics import "
+        "on the deck shelf asks it once a song, every line numbered in one "
+        "call (150 a call past that). In: a ~550-token system block "
+        "(stable, cached) and ~50 lines. Out: a key and a word a line. "
+        "Kept on the session by the line's text, so a second look costs "
+        "nothing, and a sound cue or a credit a pattern can tell is never "
+        "asked. Four songs a month. LYRICS_SORT_DAILY_LIMIT caps it at 20 "
+        "songs/day, which bounds the abuse row.",
+    ),
+    "song_transcription": (
+        4, 8000, 1800,
+        "A song heard (plan 317): a learner adds one as an audio file, "
+        "sent as a 16 kHz WAV of seven minutes at most to a model that "
+        "takes audio (GOOGLE_AUDIO_MODEL). In: the audio at 32 tokens a "
+        "second -- a four-minute song is 7,680 -- and a short prompt, or "
+        "the pasted lyrics numbered. Out: ~40 lines and their times, or "
+        "their numbers and times. Audio input bills above text on most "
+        "models (Gemini 3.1 Flash-Lite: $0.50/1M against $0.25), so the "
+        "input column understates this row by up to half. Four songs a "
+        "month. SONG_DAILY_LIMIT caps it at 5 songs/day, which bounds the "
+        "abuse row.",
     ),
     "ocr_vision": (
         20, 1400, 400,

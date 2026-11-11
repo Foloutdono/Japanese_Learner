@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { apiJson, apiFetch } from '../lib/api'
-import { explainSentence } from '../lib/explainSentence'
+import { explainSentence, explainErrorText } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
@@ -9,6 +9,7 @@ import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lo
 import { Loading } from '../components/ui/Loading'
 import { ChevronIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
+import { QuestionReport } from '../components/feedback/FeedbackSheet'
 
 // ── A sat question, made something to study ──
 // Under each question the review opens: the question's sentence with
@@ -75,7 +76,7 @@ export default function ExamStudy({ session, examId, revision, question }) {
     explainSentence(session, key, lang)
       .then(d => { if (sentenceRef.current === key) setAnalysis(d) })
       .catch(e => {
-        if (sentenceRef.current === key) setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+        if (sentenceRef.current === key) setExplainError(explainErrorText(e, t))
       })
       .finally(() => { if (sentenceRef.current === key) setExplaining(false) })
   }
@@ -96,6 +97,7 @@ export default function ExamStudy({ session, examId, revision, question }) {
         {desk ? t.examStudyOpen : open ? t.examStudyHide : t.examStudyOpen}
         {desk && <ChevronIcon direction={open ? 'up' : 'down'} size={14} />}
       </button>
+      <QuestionReport examId={examId} revision={revision} question={question} />
 
       {open && (
         failed ? (

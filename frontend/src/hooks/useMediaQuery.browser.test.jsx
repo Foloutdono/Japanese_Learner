@@ -62,7 +62,7 @@ describe('useMediaQuery', () => {
     installFake(false)
     const screen = await render(<Probe />)
     expect(listeners.length).toBe(1)
-    screen.unmount()
+    await screen.unmount()
     expect(listeners.length).toBe(0)
   })
 })

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { postReview as sendReview, staleCards } from '../lib/reviews'
@@ -104,7 +104,7 @@ export default function VocabRun({ session }) {
     const url = studyBy === 'level'
       ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : studyBy === 'theme'
-      ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      ? `/api/vocab/theme/${theme}/cards?level=${themeLevel}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
     const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
     return (data.cards ?? []).map(c => ({ ...c, lang }))
@@ -124,6 +124,8 @@ export default function VocabRun({ session }) {
     mode,
     checkCached,
   })
+  const currentId = useRef(card?.card_id)
+  useEffect(() => { currentId.current = card?.card_id }, [card?.card_id])
 
   // The written form to quiz on — some vocab entries are kana-only (no
   // kanji), so fall back to kana for both the prompt and the choices.
@@ -144,22 +146,30 @@ export default function VocabRun({ session }) {
       updateCurrent(cur => ({ ...cur, lang: targetLang }))
       return
     }
-    const words = [wordForm(cardToTranslate), ...(cardToTranslate.hints?.indice_1 ?? []).map(wordForm)]
-    const unique = [...new Set(words.filter(Boolean))]
-    Promise.all(unique.map(word =>
-      apiFetch(`/api/translation/vocab?word=${encodeURIComponent(word)}&lang=${targetLang}`, session)
-        .then(r => r.json())
+    // Each word with its kana: a written form several cards share (後 is
+    // あと and うしろ) is answered by the card itself, not the form's map.
+    const kanaOf = new Map()
+    for (const entry of [cardToTranslate, ...(cardToTranslate.hints?.indice_1 ?? [])]) {
+      const word = wordForm(entry)
+      if (word && !kanaOf.has(word)) kanaOf.set(word, entry.kana || '')
+    }
+    Promise.all([...kanaOf].map(([word, kana]) =>
+      apiJson(`/api/translation/vocab?word=${encodeURIComponent(word)}&kana=${encodeURIComponent(kana)}&lang=${targetLang}`, session)
         .then(data => [word, data.translation || ''])
     )).then(entries => {
+      // The learner may have moved on while this was out: the card in
+      // hand is then another one, and stamping it with targetLang would
+      // mark it translated when it is not.
+      if (currentId.current !== cardToTranslate.card_id) return
       const map = translatedMap(entries)
-      updateCurrent(cur => ({
+      updateCurrent(cur => cur.card_id !== cardToTranslate.card_id ? cur : ({
         ...applyTranslations(cur, wordForm, map),
         lang: targetLang,
       }))
       setSelected(prev => retranslateSelection(
         prev, cardToTranslate.hints?.indice_1, wordForm, map,
       ))
-    })
+    }).catch(() => {})  // the card keeps the language it has
   }
 
   // Re-translate the card in hand when the UI language changes, or

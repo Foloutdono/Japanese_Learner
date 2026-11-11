@@ -52,7 +52,8 @@ its own consequence, chosen by what it costs the learner:
 | kanji above the level | more than one in twenty | softened to kana, never retried alone | softened to kana |
 | a seed point missing | `contains_pattern` | fed back, asked again | accepted; only the points found are claimed |
 | the breakdown drifts from the text | concatenation, whitespace aside | fed back, asked again | the breakdown wins |
-| grammar above the level, length | — | feedback only | ignored |
+| grammar above the level | the mock papers' detector, `exam_levels.grammar_above` (since plan 261) | feedback only | ignored |
+| length | — | feedback only | ignored |
 
 Vocabulary is the one hard gate because it is the one that makes a text
 unreadable at its level and has no repair. Kanji has a repair — a real N5

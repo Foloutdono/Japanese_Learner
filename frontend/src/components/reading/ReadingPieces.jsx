@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { CardTransition } from '../study/CardTransition'
 import PromptCard from '../study/PromptCard'
 import { SentenceCheck } from '../study/PracticeCard'
-import { EyeOffIcon, PlayIcon } from '../ui/Icons'
+import { EyeOffIcon, PlayIcon, RollIcon } from '../ui/Icons'
 import { runKey } from '../../lib/keyGuards'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
@@ -24,12 +24,14 @@ import { useReadingPace, setReadingPace } from '../../stores/readingPace'
  *  `running` says whether the label is a countdown (role="timer");
  *  `aside` is a control at the end of the label's line, under the
  *  hairline, which keeps the whole width -- the reading pace's chip
- *  (PaceChip). Comprehension draws its window with it too. */
-export function Clock({ fill, label, low = false, running = true, aside = null }) {
+ *  (PaceChip). Comprehension draws its window with it too. `smooth` is
+ *  for a fill told its place a few times a second (a roll's): the bar
+ *  glides between the reports instead of stepping. */
+export function Clock({ fill, label, low = false, running = true, aside = null, smooth = false }) {
   return (
     <div className={`timer${aside ? ' timer--aside' : ''}`}>
       <div className="timer__bar" aria-hidden="true">
-        <span className={`timer__fill${low ? ' timer__fill--low' : ''}`} style={{ width: `${fill * 100}%` }} />
+        <span className={`timer__fill${low ? ' timer__fill--low' : ''}`} style={{ width: `${fill * 100}%`, ...(smooth && { transitionDuration: '0.3s' }) }} />
       </div>
       <span className="timer__label" role={running ? 'timer' : undefined}>{label}</span>
       {aside}
@@ -74,6 +76,27 @@ export function PaceChip({ session }) {
       onClick={() => setReadingPace(next, session).catch(() => {})}
     >
       {t.readingPaceShort[pace]}
+    </button>
+  )
+}
+
+/** The text's way of showing, on the clock's other end (plan 258):
+ *  lit while the text rolls up its card, pressed to roll it or to put
+ *  it back whole. The mirror of PaceChip, out of the flow as it is --
+ *  the card under the clock has no line to spare. */
+export function RollChip({ rolling, onToggle }) {
+  const { t } = useLang()
+  const label = rolling ? t.rollWhole : t.rollText
+  return (
+    <button
+      type="button"
+      className={`chip roll-chip${rolling ? ' chip--on' : ''}`}
+      aria-pressed={rolling}
+      aria-label={label}
+      title={label}
+      onClick={onToggle}
+    >
+      <RollIcon size={16} />
     </button>
   )
 }

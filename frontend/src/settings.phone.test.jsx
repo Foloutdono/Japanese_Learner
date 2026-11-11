@@ -1,8 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
+import { page } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
+// The app's own face (main.jsx loads it), so a width measured here is the
+// learner's, not the machine's fallback: a runner whose fallback is
+// DejaVu Sans set Español (Latinoamérica) 31px wider and cut Agregar
+// short at 360px, where Space Grotesk leaves room to spare.
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/space-grotesk/latin-700.css'
 
 // ── Settings on a phone (plan 139) ───────────────────────────────
 // The pass printed with its contract over the list, and the pages they
@@ -12,7 +19,11 @@ import './index.css'
 //      the chart and clear of each other on a track ~150px wide (the
 //      first draw printed four ticks over each other and cut the dates
 //      off at the screen's edge);
-//   3. the themes stand three across, drawn.
+//   3. the themes stand three across, drawn;
+//   4. the languages stand one per row, each name and its sample on
+//      one line, its flag before it (plan 302: two across left the third
+//      alone, and three across broke the words in two), each sample
+//      its own (plan 303: the two Spanishes said Hoy · Diccionario alike).
 
 const JOURNEY = {
   goalStartLevel: 'N4', goalLevel: 'N3', goalTargetDate: '2027-03-12', goalSetAt: '2026-09-01T00:00:00+00:00',
@@ -65,6 +76,9 @@ async function mount(path) {
       </MemoryRouter>
     </LangProvider>
   )
+  await document.fonts.load('700 16px "Space Grotesk"', 'Español')
+  await document.fonts.load('400 13px "Space Grotesk"', 'Agregar')
+  await document.fonts.ready
   await settle()
 }
 
@@ -130,6 +144,19 @@ describe('Settings at phone width', () => {
     for (const t of ticks) expect(t.right).toBeLessThanOrEqual(chart.right + 1)
   })
 
+  it('dials a pace of one\'s own inside the page, its steps thumb targets', async () => {
+    await mount('/profile/settings/service')
+    document.querySelector('.svc-row[data-pace="own"]').click()
+    await settle(50)
+    const page = box(document.querySelector('.svc-chart'))
+    const own = box(document.querySelector('.svc-own'))
+    expect(own.left).toBeGreaterThanOrEqual(page.left - 1)
+    expect(own.right).toBeLessThanOrEqual(page.right + 1)
+    for (const step of document.querySelectorAll('.svc-own__step')) expect(box(step).height).toBeGreaterThanOrEqual(44)
+    // The dial is the row's own, inside its ring, not under the chart.
+    expect(document.querySelector('.svc-own-row--on .svc-own')).not.toBeNull()
+  })
+
   it('draws the three themes three across', async () => {
     await mount('/profile/settings/display')
     const picks = [...document.querySelectorAll('.theme-pick')].map(box)
@@ -137,5 +164,70 @@ describe('Settings at phone width', () => {
     expect(Math.round(picks[0].top)).toBe(Math.round(picks[2].top))
     expect(document.querySelectorAll('.theme-pick .theme-mini__face')).toHaveLength(4)
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
+  })
+
+  it('stands the languages one per row, each on one line', async () => {
+    await mount('/profile/settings/display')
+    const picks = [...document.querySelectorAll('.lang-pick')]
+    // French, English, and Spanish twice: Latin America's and Spain's (plan 303).
+    expect(picks).toHaveLength(4)
+    const page = box(document.querySelector('.lang-picks'))
+    picks.forEach((pick, i) => {
+      const [whole, name, words] = [pick, pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')].map(box)
+      // Its flag before its name, drawn (never an emoji, which Windows lacks).
+      const flag = pick.querySelector('.lang-pick__name > svg.lang-flag')
+      expect(flag).not.toBeNull()
+      expect(box(flag).height).toBeGreaterThan(8)
+      if (i) expect(whole.top).toBeGreaterThan(box(picks[i - 1]).bottom)
+      expect(Math.round(whole.width)).toBe(Math.round(page.width))
+      // Side by side, and the words in one line: never wrapped under the name.
+      expect(words.left).toBeGreaterThan(name.right)
+      expect(words.top).toBeLessThan(name.bottom)
+      expect(words.height).toBeLessThan(name.height * 1.5)
+    })
+    // A sample tells its language from the others: Agregar beside Añadir.
+    const samples = picks.map(pick => pick.querySelector('.lang-pick__sample').textContent)
+    expect(new Set(samples).size, samples.join(' / ')).toBe(picks.length)
+  })
+
+  // A container query, which a mid-test resize does reach (the lane's
+  // note is about matchMedia). Español (Latinoamérica) and Agregar need
+  // about 286px (plan 303), which a 360px phone's row holds: every
+  // sample stands whole beside its name, never cut short.
+  it('keeps every sample whole on a 360px phone', async () => {
+    await page.viewport(360, 740)
+    try {
+      await mount('/profile/settings/display')
+      const picks = [...document.querySelectorAll('.lang-pick')]
+      expect(picks).toHaveLength(4)
+      for (const pick of picks) {
+        const [name, words] = [pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')]
+        expect(getComputedStyle(words).display, name.textContent).not.toBe('none')
+        expect(words.scrollWidth, words.textContent).toBeLessThanOrEqual(words.clientWidth)
+        expect(box(words).left).toBeGreaterThan(box(name).right)
+      }
+    } finally {
+      await page.viewport(390, 844)
+    }
+  })
+
+  // A 320px phone's row (278px) does not: it drops the samples and keeps
+  // every name on its one line, never broken in two.
+  it('keeps every language on one line on a 320px phone, without its sample', async () => {
+    await page.viewport(320, 640)
+    try {
+      await mount('/profile/settings/display')
+      const picks = [...document.querySelectorAll('.lang-pick')]
+      expect(picks).toHaveLength(4)
+      const one = box(picks[0].querySelector('.lang-pick__name')).height
+      for (const pick of picks) {
+        const name = pick.querySelector('.lang-pick__name')
+        expect(box(name).height, name.textContent).toBeLessThan(one * 1.5)
+        expect(name.scrollWidth, name.textContent).toBeLessThanOrEqual(pick.clientWidth)
+        expect(getComputedStyle(pick.querySelector('.lang-pick__sample')).display).toBe('none')
+      }
+    } finally {
+      await page.viewport(390, 844)
+    }
   })
 })

@@ -72,10 +72,15 @@ const KEY = {
 }
 
 // The plates arrive staggered (index.css's `arrive`), and a well's face
-// is chosen from its measured room: wait for both.
+// is chosen from its measured room: wait for both. The arrivals by their
+// own end, not the timer's: a slow runner can still be lifting the last
+// plates when it fires.
 const settle = async (ms = 620) => {
   await new Promise(r => setTimeout(r, ms))
   await document.fonts.ready
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
 }
 // The shell's frame without the shell: the content column beside a
 // rail's width of nothing, which is what the desk leaves a screen.
@@ -136,7 +141,8 @@ describe('every platform\'s specimen on the Practice gate (plans 165, 254)', () 
       expect(w.scrollWidth, nameOf(plate)).toBeLessThanOrEqual(w.clientWidth + 1)
       expect(w.getAttribute('aria-hidden')).toBe('true')
     }
-    const [reading, comprehension, translation, dictation, composition, conversation, exam] = plates().map(well)
+    // The registry's order, its three groups (plan 290), the paper last.
+    const [reading, comprehension, dictation, translation, composition, conversation, exam] = plates().map(well)
     expect(reading.querySelector('.prc-spec__jp').textContent).toBe(CARDS.reading.N4.card.jp)
     expect(reading.querySelector('.prc-spec__clock')).not.toBeNull()
     expect(translation.querySelector('.prc-spec__prompt').textContent).toBe(CARDS.translation.N4.card.en)

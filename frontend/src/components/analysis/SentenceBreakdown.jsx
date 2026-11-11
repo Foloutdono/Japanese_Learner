@@ -7,10 +7,11 @@ import { GrammarChips } from './GrammarChips'
 import { GrammarPoints } from './GrammarPoints'
 import { LevelBadge } from './LevelBadge'
 import { SpeakButton } from './SpeakButton'
+import { Frame } from './Frame'
 import { wordRowsOf } from './rows'
 import { grammarGloss } from './grammarGloss'
 import { coversToken, numberedPointsOf } from './grammarSpans'
-import { isUnknownToken, lineState, tokState, wordGloss } from './tokens'
+import { isUnknownToken, lineState, tokFurigana, tokState, wordGloss } from './tokens'
 import { useLight } from './useLight'
 
 export function Legend({ t }) {
@@ -101,10 +102,12 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numb
       .filter(Boolean)
     const run = []
     for (let k = i; k <= j; k += 1) run.push(word(tokens[k], k))
+    // The point's words with no gap between them, the one word they make
+    // (plan 272): てくれる, ので.
     out.push(
       <span key={`pt-${i}`} className="bkd-frame">
         {numbers.length > 0 && <span className="bkd-frame__n" aria-hidden="true">{numbers.join('·')}</span>}
-        {run}
+        <span className="bkd-frame__words">{run}</span>
       </span>,
     )
     i = j + 1
@@ -151,10 +154,12 @@ export function WordRows({ analysis, t, onTokenClick }) {
         const entry = head.vocab_match?.entry
         const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
         // The card's reading beside the card's name; the sentence's own
-        // where the card names none (a name the course has no card for).
+        // where the card names none (a name the course has no card for),
+        // over a kanji only: a kana word spells its own sound, and パーティー
+        // read in hiragana is ぱあてぃー, a word nobody writes.
         const reading = entry?.kana
           ? (entry.kana !== name ? entry.kana : '')
-          : (row.reading !== row.surface ? row.reading : '')
+          : (row.reading !== row.surface ? tokFurigana(row) : '')
         const meaning = wordGloss(head, lang)
         const level = head.vocab_match?.level ?? null
         // The ending as the sentence wrote it (ます, ませんでした), its
@@ -219,8 +224,9 @@ export function WordRows({ analysis, t, onTokenClick }) {
 //               `translation`, one row per word, a numbered card per
 //               rule (and, once bought, what each does here -- plan
 //               095), and the `note` (else the deep tier's
-//               explanation) last and quiet. `sentenceText` is what
-//               prints when there is no analysis to draw from.
+//               explanation: since plan 311 the line's frame, drawn as
+//               the analyser's sheet draws it) last. `sentenceText` is
+//               what prints when there is no analysis to draw from.
 //
 // `onGrammarOpen(point)` makes each grammar card a door to the point's
 // dictionary entry; the screen decides what opens — a
@@ -258,7 +264,9 @@ export function SentenceBreakdown({
             follows; else the button that buys it -- the one thing left
             to do, so on the desk it stands on the panel's floor rather
             than under the last card (.bkd__foot, plan 160). */}
-        {noteText
+        {note == null && analysis?.frame?.length
+          ? <Frame frame={analysis.frame} analysis={analysis} onPoint={openGrammar} t={t} />
+          : noteText
           ? <span className="prose__ai">{noteText}</span>
           : onExplain && available && (
             <div className="bkd__explain bkd__foot">

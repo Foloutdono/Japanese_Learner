@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import { parkPointer } from './testing/parkPointer'
 import './index.css'
 
 // ── 号車 — a line's station on the narrowest desk (plan 251) ─────────
@@ -55,7 +56,15 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: VocabScreen } = await import('./screens/VocabScreen')
 const { default: GrammarScreen } = await import('./screens/GrammarScreen')
-const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
+// Past the timer, the cars' arrival itself (@keyframes arrive, a 10px
+// rise): the timer fires before it has ended, and a car read in flight
+// is not where it stands.
+const settle = async (ms = 300) => {
+  await new Promise(r => setTimeout(r, ms))
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
+}
 const rect = el => el.getBoundingClientRect()
 const cars = () => [...document.querySelectorAll('.desk-platforms > .platform-grid .platform-card')]
 
@@ -74,6 +83,11 @@ function mount(entry, route) {
 describe('a line\'s station at 1100px (plan 251)', () => {
   it('stands grammar\'s seven cars three to a row, at their floor, and lets the page scroll', async () => {
     await mount('/learn/grammar/N5', <Route path="/learn/grammar/:level" element={<GrammarScreen session={null} />} />)
+    // Under no pointer: the lane's pointer is shared, a file before this
+    // one may have left it where a car now stands, and a hovered car
+    // lifts a pixel -- one row's cars read 356 and 357, and three rows
+    // counted four.
+    await parkPointer()
     await settle()
     const all = cars()
     expect(all).toHaveLength(7)

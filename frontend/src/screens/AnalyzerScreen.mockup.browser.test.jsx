@@ -143,6 +143,10 @@ const hidden = el => {
 
 beforeEach(() => {
   apiJson.mockReset()
+  // The furigana dial is remembered by the browser since plan 263
+  // (displayPrefs.js), and every file in this lane shares one: each test
+  // opens on the default, whatever the last one turned it to.
+  try { window.localStorage.removeItem('tsuji.anlDisplay') } catch { /* none kept */ }
   apiJson.mockResolvedValue({ sentences: SENTENCES, truncated: 0 })
   apiUpload.mockReset()
   apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })

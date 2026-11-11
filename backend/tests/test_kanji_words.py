@@ -256,8 +256,9 @@ class TestReadingShares:
 
     def test_the_courses_counts_ride_on_the_entry(self):
         shares = kanji_words("生", "en")["shares"]
-        assert shares["total"] == 55
-        assert shares["readings"]["セイ"] == 27 and shares["readings"]["ショウ"] == 8
+        # 生涯 (#360) is the ninth ショウ.
+        assert shares["total"] == 56
+        assert shares["readings"]["セイ"] == 27 and shares["readings"]["ショウ"] == 9
         assert shares["whole"] == 3
 
     def test_every_word_is_counted_once_so_the_shares_add_up(self):

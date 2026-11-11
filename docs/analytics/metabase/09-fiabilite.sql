@@ -30,6 +30,7 @@ GROUP BY 1, 2 ORDER BY 3 DESC;
 -- title: Démarrages réussis et ratés par jour
 -- display: line
 -- size: 12x6
+-- description: Un raté = un démarrage dont la première demande a échoué ; une ligne par démarrage depuis le plan 312, une par tentative avant.
 SELECT (at AT TIME ZONE 'Europe/Paris')::date AS "Jour",
        count(*) FILTER (WHERE name = 'app_open') AS "Démarrages",
        count(*) FILTER (WHERE name = 'boot_timeout') AS "Ratés (45 s)",
@@ -43,12 +44,12 @@ GROUP BY 1 ORDER BY 1;
 -- title: Erreurs côté client par écran
 -- display: table
 -- size: 12x6
-SELECT props->>'route' AS "Écran", props->>'where' AS "Nature",
+SELECT props->>'route' AS "Écran", props->>'step' AS "Étape", props->>'where' AS "Nature",
        count(*) AS "Fois", count(DISTINCT user_id) AS "Apprenants", max(at) AS "Dernière"
 FROM event_log
 WHERE name = 'client_error' AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
-GROUP BY 1, 2 ORDER BY 3 DESC;
+GROUP BY 1, 2, 3 ORDER BY 4 DESC;
 
 -- ==== question
 -- title: Vitesse des pages (P75)

@@ -297,6 +297,9 @@ describe('the written tour', () => {
     for (const [i, q] of KA.quiz.entries()) {
       expect(root().dataset.stop).toBe('quiz')
       expect(root().querySelector('.tour__notion-count').textContent).toBe(`Question ${i + 1} of ${KA.quiz.length}`)
+      // The quiz's segment fills a question checked at a time (plan 264).
+      expect(root().querySelector('.tour__track-name').textContent).toBe('The quiz')
+      expect(root().querySelector('.tour__stop-fill').style.width).toBe(`${Math.round((i / KA.quiz.length) * 100)}%`)
       const rightQ = q.choices.findIndex(c => c.correct)
       const wrongQ = q.choices.findIndex(c => !c.correct)
       expect(root().querySelector('.tour__notion-head').textContent.length).toBeGreaterThan(0)

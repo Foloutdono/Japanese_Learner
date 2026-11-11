@@ -12,17 +12,80 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const auth = {
   signInAnonymously: vi.fn(),
   updateUser: vi.fn(),
+  setSession: vi.fn(),
 }
 vi.mock('./supabase', () => ({ supabase: { auth } }))
 // The confirmation's return is lib/oauth.js's to decide (and its test's
 // to pin); here it is only carried onto the call.
 vi.mock('./oauth', () => ({ emailRedirectTarget: () => 'https://app.test/' }))
 
-const { isGuest, startGuest, claimAccount } = await import('./guest')
+const {
+  isGuest, startGuest, claimAccount, parkGuest, forgetParkedGuest, shouldAskToKeep, noteAskedToKeep,
+} = await import('./guest')
+
+// The node lane has no localStorage: a Map stands in for it.
+const store = new Map()
+vi.stubGlobal('localStorage', {
+  getItem: k => (store.has(k) ? store.get(k) : null),
+  setItem: (k, v) => { store.set(k, String(v)) },
+  removeItem: k => { store.delete(k) },
+})
 
 beforeEach(() => {
   auth.signInAnonymously.mockReset()
   auth.updateUser.mockReset()
+  auth.setSession.mockReset()
+  store.clear()
+})
+
+describe('a pass put down at the boarding', () => {
+  const guest = { access_token: 'a', refresh_token: 'r', user: { is_anonymous: true } }
+
+  it('is taken up again by the next Board, not minted anew', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({ data: { session: guest }, error: null })
+    expect(await startGuest()).toEqual({ ok: true })
+    expect(auth.setSession).toHaveBeenCalledWith({ access_token: 'a', refresh_token: 'r' })
+    expect(auth.signInAnonymously).not.toHaveBeenCalled()
+  })
+
+  it('is used once: the Board after it mints', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({ data: { session: guest }, error: null })
+    await startGuest()
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    await startGuest()
+    expect(auth.signInAnonymously).toHaveBeenCalledTimes(1)
+    expect(auth.setSession).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to minting when the old tokens are dead', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({ data: {}, error: { message: 'refresh_token_not_found' } })
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    expect(await startGuest()).toEqual({ ok: true })
+    expect(auth.signInAnonymously).toHaveBeenCalledTimes(1)
+  })
+
+  it('never takes back a pass that became an account', async () => {
+    parkGuest(guest)
+    auth.setSession.mockResolvedValue({
+      data: { session: { user: { is_anonymous: false } } }, error: null,
+    })
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    await startGuest()
+    expect(auth.signInAnonymously).toHaveBeenCalledTimes(1)
+  })
+
+  it('is not kept for a real account, nor once forgotten', async () => {
+    parkGuest({ access_token: 'a', refresh_token: 'r', user: { email: 'a@b.co' } })
+    expect(store.size).toBe(0)
+    parkGuest(guest)
+    forgetParkedGuest()
+    auth.signInAnonymously.mockResolvedValue({ data: { session: { user: {} } }, error: null })
+    await startGuest()
+    expect(auth.setSession).not.toHaveBeenCalled()
+  })
 })
 
 describe('who is a guest', () => {
@@ -131,5 +194,57 @@ describe('claiming the pass', () => {
     await claimAccount({ email: 'a@b.co', password: 'hunter22', lang: 'fr' })
     expect(auth.updateUser).toHaveBeenCalledWith(
       { email: 'a@b.co', password: 'hunter22', data: { lang: 'fr' } }, { emailRedirectTo: 'https://app.test/' })
+  })
+})
+
+// Plan 270: a guest is asked for an account further and further apart --
+// a day, two, four, a week, two weeks, a month, then never -- and never
+// one whose address is on its way or who has an account.
+describe('asking a guest to keep the card', () => {
+  const guest = { user: { id: 'g1', is_anonymous: true } }
+  const day = (d, h = 9) => new Date(2026, 9, d, h)
+
+  it('asks a guest never asked', () => {
+    expect(shouldAskToKeep(guest, day(1))).toBe(true)
+  })
+
+  it('waits a day, two, four, a week, two weeks and a month, then stops', () => {
+    // The day of each ask, counted from the first.
+    let at = 1
+    noteAskedToKeep('g1', day(at))
+    for (const gap of [1, 2, 4, 7, 14, 30]) {
+      const due = new Date(2026, 9, at + gap, 9)
+      expect(shouldAskToKeep(guest, new Date(2026, 9, at + gap - 1, 23))).toBe(false)
+      expect(shouldAskToKeep(guest, due)).toBe(true)
+      noteAskedToKeep('g1', due)
+      at += gap
+    }
+    expect(shouldAskToKeep(guest, new Date(2027, 9, 1))).toBe(false)
+  })
+
+  it('counts two asks on one day once', () => {
+    noteAskedToKeep('g1', day(1, 8))
+    noteAskedToKeep('g1', day(1, 20))
+    expect(shouldAskToKeep(guest, day(2))).toBe(true)
+  })
+
+  it('keeps each user apart', () => {
+    noteAskedToKeep('other', day(1))
+    expect(shouldAskToKeep(guest, day(1))).toBe(true)
+  })
+
+  it('never asks an account, or a guest whose address is on its way', () => {
+    expect(shouldAskToKeep({ user: { id: 'a1', is_anonymous: false, email: 'a@b.c' } }, day(1))).toBe(false)
+    expect(shouldAskToKeep({ user: { ...guest.user, new_email: 'a@b.c' } }, day(1))).toBe(false)
+    expect(shouldAskToKeep(null, day(1))).toBe(false)
+  })
+
+  it('reads an unreadable note as none', () => {
+    store.set('tsuji.keepAsked', 'not json')
+    expect(shouldAskToKeep(guest, day(1))).toBe(true)
+    store.set('tsuji.keepAsked', JSON.stringify({ g1: '2026-10-01' }))
+    expect(shouldAskToKeep(guest, day(1))).toBe(true)
+    noteAskedToKeep('g1', day(1))
+    expect(shouldAskToKeep(guest, day(1))).toBe(false)
   })
 })

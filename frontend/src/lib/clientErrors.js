@@ -7,22 +7,35 @@
 // quote what was on the screen or what was typed into it, which is the
 // rule the whole trail exists to keep (backend/core/events.py).
 //
-// One row per (screen, kind) a minute, the way lib/apiTrail.js dedupes:
-// an error thrown on every frame is one problem, not sixty rows.
+// One row per (screen, step, kind) a minute, the way lib/apiTrail.js
+// dedupes: an error thrown on every frame is one problem, not sixty rows.
 import { routePattern } from './routePattern'
 import { track } from './track'
 
 const GAP_MS = 60_000
 const last = new Map()
 
+// The step of the boarding or the first ride on screen, as their
+// boarding_step / ride_step name it, or null. Those flows live on one
+// route each, so the route alone could not say where a learner lost
+// their boarding (2026-10-16: an error on `/` and the learner gone,
+// with nothing to say which question had thrown). A step name the
+// app wrote, closed in events.VALUES like every string the trail keeps.
+let step = null
+
+/** Set by hooks/useErrorStep.js while a flow's step is on screen. */
+export function noteStep(name) {
+  step = name ?? null
+}
+
 export function recordClientError(where, pathname = window.location.pathname) {
   const route = routePattern(pathname)
   if (!route) return
-  const key = `${route}:${where}`
+  const key = `${route}:${step ?? ''}:${where}`
   const now = Date.now()
   if (now - (last.get(key) ?? -Infinity) < GAP_MS) return
   last.set(key, now)
-  track('client_error', { route, where })
+  track('client_error', step ? { route, step, where } : { route, where })
 }
 
 let watching = false
@@ -41,4 +54,4 @@ export function watchClientErrors() {
   window.addEventListener('unhandledrejection', () => recordClientError('rejection'))
 }
 
-export function _reset() { last.clear() }
+export function _reset() { last.clear(); step = null }

@@ -12,12 +12,19 @@ import { FITS, FONT_FACES, drawFeedHud, font, formatOf, palette } from './draw.j
 import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
-import { PRINT_HOURS, loadPrint } from './app.js'
+import { PRINT_HOURS, PRINT_SEASONS, loadPrint, standInOpts, standInSays } from './app.js'
+import { printSeason } from '../src/domain/printHour.js'
 import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
 import { voiceSpan } from './echo.js'
+import { STYLES as CHALLENGE_STYLES, challengeCommand, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, drawChallenge } from './challenge.js'
+import { SCENERY_IDS } from './sceneries.js'
 import { FPS as SHORT_FPS, chars, depsFor as depsOfWord, drawShortFrame, recipeOf, shortTimeline } from './short.js'
-import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, timeline, WIDE } from './long.js'
+import { LONG_SITE, TALL, describe as describeLong, drawLong, fitShort, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, stillAt, timeline, WIDE } from './long.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
+import { BEFORE_309, TUNABLES, changed, tuned, tuneFlag, tunablesFor } from './tune.js'
+import { FEEDS } from './feeds.js'
+import { drawFeature, featureCommand, featureItems, featurePage, featurePlan, featurePreview } from './feature.js'
+import { STYLES as WORDS_STYLES, drawWords, loadPictures, wordsCommand, wordsFiles, wordsItems, wordsPage, wordsPlan, wordsStillAt, wordsTimeline } from './words.js'
 
 const STORE = 'tsuji-carousel'
 const $ = sel => document.querySelector(sel)
@@ -34,17 +41,35 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { long: 'Video', promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { long: 'Video', words: 'Short', feature: 'Feature', challenge: 'Text', promo: 'Story', echo: 'Word', sentence: 'Sentence', short: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
-  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
+  source: 'sentence', level: 'N5', longFormat: 'long', kanaSet: 'hiragana', story: 'pitch', hour: 'day', season: 'now', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20', 'promo:comprehension': 'n5-33:q5' },
   view: 'compare', type: 'plates', format: 'post', fit: 'tiktok', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
   picks: {}, types: {}, ending: 'mark',
   // Plan 234: the conversion carousel, its look, its length, the feature it shows.
   design: 'clarte', length: '5', feature: 'auto',
+  // Plan 247: how a reading challenge's text moves.
+  challengeStyle: 'scroll',
+  // Plan 275: the answer is left to the comments (the default) or shown on the screen.
+  challengeAnswer: 'comments',
+  // Plan 309: what a reading challenge's text stands on (sceneries.js).
+  challengeScenery: 'bay',
+  // Plan 260: the question a reading challenge asks, by text (1-based); the default where none is set.
+  challengeQ: {},
+  // Plan 248: the values tuned in the Tune panel (tune.js), only those changed.
+  tune: {},
+  // Plan 251: the feed whose post a 9:16 video's fields hold.
+  feed: 'shorts',
+  // Plan 252: a vocabulary short's look.
+  wordsStyle: 'card',
 }
 const state = load()
+// The type drawn: the one chosen (state.type) where the item can be drawn
+// as it, else the walk. The choice is kept, so an item without Build or
+// a visit to the promo stories does not lose it (plan 248).
+let shown = state.type
 const files = new Map()
 const work = document.createElement('canvas')
 
@@ -56,11 +81,24 @@ function load() {
     if (saved.ending && !ENDING_IDS.includes(saved.ending)) delete saved.ending
     if (saved.design && ![...DESIGNS, 'classic'].includes(saved.design)) delete saved.design
     if (saved.hour && !PRINT_HOURS.includes(saved.hour)) delete saved.hour
+    if (saved.season && saved.season !== 'now' && !PRINT_SEASONS.includes(saved.season)) delete saved.season
     if (saved.story && !STORIES.includes(saved.story)) delete saved.story
     if (saved.fit && !FITS.includes(saved.fit)) delete saved.fit
+    if (saved.challengeStyle && !CHALLENGE_STYLES.includes(saved.challengeStyle)) delete saved.challengeStyle
+    if (saved.challengeAnswer && !['comments', 'shown'].includes(saved.challengeAnswer)) delete saved.challengeAnswer
+    if (saved.challengeScenery && !SCENERY_IDS.includes(saved.challengeScenery)) delete saved.challengeScenery
+    if (saved.feed && !FEEDS.includes(saved.feed)) delete saved.feed
+    if (saved.wordsStyle && !WORDS_STYLES.includes(saved.wordsStyle)) delete saved.wordsStyle
+    // No video carries music since plan 273: a visit saved before it forgets its switch.
+    delete saved.bed
+    // A source, a format or a view saved before a rename is forgotten, not drawn as a blank stage.
+    if (saved.source && !SOURCES.some(x => x.id === saved.source)) delete saved.source
+    if (saved.format && !(saved.format in FORMATS)) delete saved.format
+    if (saved.view && !['compare', 'single', 'looks'].includes(saved.view)) delete saved.view
     return {
       ...DEFAULTS, ...saved, type, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) },
-      picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) },
+      picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) }, tune: changed(saved.tune),
+      challengeQ: saved.challengeQ && typeof saved.challengeQ === 'object' ? { ...saved.challengeQ } : {},
     }
   } catch {
     return structuredClone(DEFAULTS)
@@ -95,27 +133,49 @@ async function banksOf(names) {
   await Promise.all([...new Set(names)].map(async n => { out[n] = await fetchJson(n) }))
   return out
 }
-const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.level)) : fetchJson(fileFor(sourceOf(state.source))))
+const dataNow = () => (state.source === 'long' ? banksOf(longListFiles(state.level)) : state.source === 'words' ? banksOf(wordsFiles(state.level)) : fetchJson(fileFor(sourceOf(state.source))))
 
 // Where the app's own files are, as the page sees them: the print, the voices.
 const BASE = '../'
-// Today's print of the hour, for the promo stories: fetched once an hour.
+// Today's print of the hour, for the promo stories and the challenges:
+// fetched once an hour and a season, the day's own unless one is chosen
+// (plan 267), and once a scenery and the parts its dials bring out (plan
+// 309). A print decoded is large: the four last asked for are kept.
 const prints = new Map()
-function printFor(hour) {
-  if (!prints.has(hour)) prints.set(hour, loadPrint(hour, { base: BASE }).catch(e => { prints.delete(hour); throw e }))
-  return prints.get(hour)
+const KEPT_PRINTS = 4
+const seasonOf = () => (PRINT_SEASONS.includes(state.season) ? state.season : null)
+function printFor(hour, season = seasonOf(), { scenery = 'bay', falls = false, bursts = false } = {}) {
+  const key = `${scenery}|${season || 'now'}|${hour}|${falls}|${bursts}`
+  const kept = prints.get(key)
+  // Asked for again, it is the last to go.
+  if (kept) prints.delete(key)
+  const P = kept || loadPrint(hour, { base: BASE, season, scenery, falls, bursts }).catch(e => {
+    if (prints.get(key) === P) prints.delete(key)
+    throw e
+  })
+  prints.set(key, P)
+  while (prints.size > KEPT_PRINTS) prints.delete(prints.keys().next().value)
+  return P
 }
 // A word echo's voice (plan 232): voices/index.json names each reading's
 // clip; the clip is decoded once, and where its voice starts and stops
-// measured from the sound.
+// measured from the sound. Published as an artifact, whose files are
+// counted, the clips travel in one file (plan 248): the index names it
+// (`pack`), and it holds each clip as a data URI under its name.
 const spoken = new Map()
+let voiceIndex = null
+const voicesOf = () => (voiceIndex ||= (async () => {
+  const index = await (await fetch('voices/index.json', { cache: 'no-cache' })).json()
+  if (index.pack) index.packed = await (await fetch(`voices/${index.pack}`, { cache: 'no-cache' })).json()
+  return index
+})().catch(e => { voiceIndex = null; throw e }))
 function voiceFor(reading) {
   if (!spoken.has(reading)) {
     spoken.set(reading, (async () => {
-      const index = await (await fetch('voices/index.json', { cache: 'no-cache' })).json()
+      const index = await voicesOf()
       const file = index.words[reading]
       if (!file) throw new Error(`no voice for ${reading}`)
-      const src = `voices/${file}`
+      const src = index.packed?.[file] || `voices/${file}`
       const audio = await decoded(src)
       return { src, ...voiceSpan(audio.getChannelData(0), audio.sampleRate) }
     })().catch(e => { spoken.delete(reading); throw e }))
@@ -178,14 +238,20 @@ let listCache = []
 let listShown = []
 let listToken = 0
 const LIST_MAX = 400
+// A list or a redraw that fails says so, rather than leaving the last
+// item on screen as if it were the one picked (plan 248).
+const failed = e => status(`The studio could not draw this (${e.message}). Pick again, or reload the page.`)
 async function renderList() {
+  try { await listNow() } catch (e) { failed(e) }
+}
+async function listNow() {
   // Only the latest call draws: a slower file for a level left behind
   // never overwrites the list of the one picked after it.
   const mine = ++listToken
   const data = await dataNow()
   if (mine !== listToken) return
   const src = sourceOf(state.source)
-  let items = state.source === 'long' ? longItems(data, state.level, state.lang) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
+  let items = state.source === 'long' ? longItems(data, state.level, state.lang, state.longFormat) : state.source === 'words' ? wordsItems(data, state.level, state.lang) : state.source === 'feature' ? featureItems(state.lang) : itemsOf(state.source, data, state.lang, src.levels ? state[setKey(src)] : null)
   if (src.byLevel) items = items.filter(x => x.tag === state.level)
   listCache = items
   const q = $('#search').value.trim().toLowerCase()
@@ -196,7 +262,11 @@ async function renderList() {
   $('#count').textContent = shown.length > LIST_MAX ? `first ${LIST_MAX} of ${shown.length}` : `${shown.length}`
   $('#list-name').textContent = state.source === 'promo' ? PROMO.en.lists[state.story] : LIST_NAME[state.source]
   const current = currentId(items)
-  for (const x of shown.slice(0, LIST_MAX)) {
+  // The item picked is always in the list, even past the first rows (Random reaches them all).
+  const rows = shown.slice(0, LIST_MAX)
+  const picked = shown.find(x => x.id === current)
+  if (picked && !rows.includes(picked)) rows.unshift(picked)
+  for (const x of rows) {
     const li = document.createElement('li')
     const b = document.createElement('button')
     b.type = 'button'
@@ -225,6 +295,107 @@ function currentId(items = listCache) {
   return items.some(x => x.id === id) ? id : items[0]?.id
 }
 
+// ── Tune (plan 248) ──────────────────────────────────────────
+// The values tune.js lets a maker set for the source in view, a slider
+// each, grouped as the registry groups them: kept with the rest of the
+// studio, read by the preview and written into every render command.
+let tuneFor = null
+// A value of 0 or 1 alone is a switch, and says so; one with no unit, its figure.
+const isSwitch = t => t.min === 0 && t.max === 1 && t.step === 1
+const shownValue = (t, v) => (isSwitch(t) ? (v ? 'on' : 'off') : t.unit === '×' ? `${v}×` : t.unit ? `${v} ${t.unit}` : String(v))
+function renderTune() {
+  const ts = tunablesFor(state.source)
+  tuneFor = state.source
+  $('#tune-field').hidden = !ts.length
+  const box = $('#tune')
+  box.replaceChildren()
+  let before = false
+  for (const name of new Set(ts.map(t => t.group))) {
+    const set = document.createElement('fieldset')
+    set.className = 'tune__group'
+    const legend = document.createElement('legend')
+    legend.textContent = name
+    set.append(legend, ...ts.filter(t => t.group === name).map(tuneRow))
+    // The look before plan 309, one press away, beside the dials that
+    // changed it: once in the panel, as it sets every one of them.
+    if (!before && ts.some(t => t.group === name && t.key in BEFORE_309)) {
+      set.append(beforeButton())
+      before = true
+    }
+    box.append(set)
+  }
+  syncTune()
+}
+function beforeButton() {
+  const b = document.createElement('button')
+  b.type = 'button'
+  b.className = 'btn btn--quiet'
+  b.id = 'tune-before'
+  b.textContent = 'Look before plan 309'
+  // Every dial back to what it was, the rest of the tune kept.
+  b.addEventListener('click', () => setTune({ ...state.tune, ...BEFORE_309 }))
+  return b
+}
+function tuneRow(t) {
+  const id = `tune-${t.key.replace(/\W/g, '-')}`
+  const row = document.createElement('div')
+  row.className = 'tune__row'
+  row.dataset.tune = t.key
+  const label = document.createElement('label')
+  label.htmlFor = id
+  label.textContent = t.label
+  const out = document.createElement('output')
+  out.htmlFor = id
+  const reset = document.createElement('button')
+  reset.type = 'button'
+  reset.className = 'tune__reset'
+  reset.textContent = 'Reset'
+  reset.setAttribute('aria-label', `Reset ${t.label}`)
+  const input = document.createElement('input')
+  Object.assign(input, { type: 'range', id, min: t.min, max: t.max, step: t.step, value: tuned(state.tune, t.key) })
+  // Dragged, the figure follows; let go, the preview is drawn again.
+  input.addEventListener('input', () => { out.value = shownValue(t, +input.value) })
+  input.addEventListener('change', () => setTune({ ...state.tune, [t.key]: +input.value }))
+  reset.addEventListener('click', () => {
+    const rest = { ...state.tune }
+    delete rest[t.key]
+    setTune(rest)
+    input.value = t.def
+    input.focus()
+  })
+  row.append(label, out, reset, input)
+  if (t.hint) {
+    const hint = document.createElement('small')
+    hint.textContent = `${t.hint} (default ${shownValue(t, t.def)})`
+    row.append(hint)
+  }
+  return row
+}
+function setTune(tune) {
+  state.tune = changed(tune)
+  save()
+  syncTune()
+  render()
+}
+/** Each row's figure and reset, and the count of changed values, as the tune now stands. */
+function syncTune() {
+  let n = 0
+  for (const row of document.querySelectorAll('#tune [data-tune]')) {
+    const key = row.dataset.tune
+    const t = TUNABLES.find(x => x.key === key)
+    const v = tuned(state.tune, key)
+    const moved = key in state.tune
+    n += moved
+    row.classList.toggle('is-changed', moved)
+    row.querySelector('output').value = shownValue(t, v)
+    row.querySelector('.tune__reset').hidden = !moved
+    const input = row.querySelector('input')
+    if (+input.value !== v) input.value = v
+  }
+  $('#tune-count').textContent = n ? `${n} changed` : 'defaults'
+  $('#tune-reset').hidden = !n
+}
+
 function renderToggles() {
   const box = $('#toggles')
   box.replaceChildren()
@@ -247,23 +418,23 @@ function renderToggles() {
   // The chosen type's own options.
   const tbox = $('#type-toggles')
   tbox.replaceChildren()
-  const theirs = state.types[state.type] || {}
-  for (const [key, def] of TYPE_OPTIONS[state.type] || []) {
+  const theirs = state.types[shown] || {}
+  for (const [key, def] of TYPE_OPTIONS[shown] || []) {
     const label = document.createElement('label')
     label.className = 'check'
     const input = document.createElement('input')
     input.type = 'checkbox'
     input.checked = theirs[key] ?? def
     input.addEventListener('change', () => {
-      state.types[state.type] = { ...(state.types[state.type] || {}), [key]: input.checked }
+      state.types[shown] = { ...(state.types[shown] || {}), [key]: input.checked }
       save()
       render()
     })
     label.append(input, ` ${TOGGLE_LABELS[key] || key}`)
     tbox.append(label)
   }
-  tbox.closest('.field').hidden = !(TYPE_OPTIONS[state.type] || []).length
-  $('#type-name').textContent = T.types[state.type].name
+  tbox.closest('.field').hidden = !(TYPE_OPTIONS[shown] || []).length
+  $('#type-name').textContent = T.types[shown].name
 }
 
 // ── The last slide ────────────────────────────────────────────
@@ -293,7 +464,7 @@ function renderTypes(pl) {
     b.dataset.set = `type:${ty.id}`
     b.disabled = !ok
     b.title = ok ? T.types[ty.id].desc : `${T.types[ty.id].desc} (not for this item)`
-    b.setAttribute('aria-pressed', String(state.type === ty.id))
+    b.setAttribute('aria-pressed', String(shown === ty.id))
     const jp = document.createElement('b')
     jp.lang = 'ja'
     jp.textContent = ty.jp
@@ -308,15 +479,19 @@ function renderQuestions(pl) {
   const box = $('#questions')
   box.replaceChildren()
   const field = box.closest('.field')
-  field.hidden = !pl?.quizzes?.length
+  // Only where the deck drawn asks them: the mock exam, the walk's end in
+  // the classic look, a passage's caption (plan 248).
+  const asks = shown === 'exam' || !DESIGNS.includes(state.design) || pl?.source === 'passage'
+  field.hidden = !pl?.quizzes?.length || !asks
   if (field.hidden) return
   // As many as the deck asks: three on a mock exam, one at the walk's end.
-  const chosen = new Set(picked(pl, state.picks[pickKey()], state.type === 'exam' ? 3 : 1).map(q => q.id))
+  const chosen = new Set(picked(pl, state.picks[pickKey()], shown === 'exam' ? 3 : 1).map(q => q.id))
   for (const q of pl.quizzes) {
     const b = document.createElement('button')
     b.type = 'button'
     b.className = 'chip'
     b.setAttribute('aria-pressed', String(chosen.has(q.id)))
+    b.dataset.q = q.id
     b.textContent = q.label
     b.title = q.ask
     b.addEventListener('click', () => {
@@ -343,11 +518,26 @@ let captionFor = ''
 let titleFor = ''
 
 async function render() {
+  try { await renderNow() } catch (e) { failed(e) }
+}
+async function renderNow() {
+  const fk = focusKey()
   const mine = ++token
   stopPlayer()
-  document.body.dataset.mode = state.source === 'long' ? 'long' : ''
+  // A video (a long one, a reading challenge) has a page and a command, not slides.
+  document.body.dataset.mode = videoSource() ? 'long' : ''
+  document.body.dataset.video = ['challenge', 'words', 'feature'].includes(state.source) ? state.source : ''
+  // A 9:16 video is posted to three feeds, a post each (plan 251): Reels
+  // and TikTok take a caption alone.
+  const feeds = ['challenge', 'words', 'feature'].includes(state.source) || (state.source === 'long' && state.longFormat === 'short')
+  document.body.dataset.feeds = feeds ? 'on' : ''
+  document.body.dataset.post = feeds && state.feed !== 'shorts' ? 'caption' : ''
+  if (tuneFor !== state.source) renderTune()
+  $('#hour-field').hidden = !['promo', 'challenge'].includes(state.source)
   const funnel = DESIGNS.includes(state.design)
-  document.body.dataset.design = funnel ? 'funnel' : 'classic'
+  // A promo story and a word echo draw the ground and the handle whatever
+  // the look, so they keep those controls (plan 248).
+  document.body.dataset.design = funnel && !['promo', 'echo'].includes(state.source) ? 'funnel' : 'classic'
   if (state.view === 'looks' && !funnel) state.view = 'compare'
   // A render a newer one has overtaken stops at its next await, before it
   // touches the page or the state.
@@ -356,6 +546,9 @@ async function render() {
   if (!listCache.length) await renderList()
   if (mine !== token) return
   if (state.source === 'long') return renderLong(mine)
+  if (state.source === 'words') return renderWords(mine)
+  if (state.source === 'challenge') return renderChallenge(mine)
+  if (state.source === 'feature') return renderFeature(mine)
   const id = currentId()
   const deps = await depsFor(data, id)
   if (mine !== token) return
@@ -381,32 +574,36 @@ async function render() {
   opts.picks = state.picks[pickKey()]
   // A type the item cannot be drawn as falls back to the walk.
   const types = TYPES.map(x => x.id).filter(x => available(x, pl))
-  if (!types.includes(state.type)) { state.type = types.includes('plates') ? 'plates' : types[0]; renderToggles() }
+  const drawn = types.includes(state.type) ? state.type : types.includes('plates') ? 'plates' : types[0]
+  if (drawn !== shown) { shown = drawn; renderToggles() }
   for (const el of document.querySelectorAll('[data-promo]')) el.hidden = el.dataset.promo === 'only' ? !promo : clipped
   $('#export-clip').hidden = !clipped
-  $('#export-clip').textContent = echo ? 'Download the clip (.mp4, 10 s, with the voice)' : 'Download the cover clip (.mp4, 7 s, with sound)'
+  $('#export-clip').textContent = echo ? 'Download the clip (.mp4, with the voice)' : 'Download the cover clip (.mp4, 7 s, with sound)'
   renderKanjiPicker(pl)
   renderTypes(pl)
   renderQuestions(pl)
+  refocus(fk)
   await fonts(sampleText(pl))
   if (mine !== token) return
   // A story is 9:16 at TikTok's margins, whatever the post's format.
   const fmt = clipped ? FORMATS.story : formatOf(state.format, state.fit)
   // Nothing is laid over a slide at normal margins: the guide shows them alone.
-  $('#safe-label').textContent = fmt.fit === 'normal' ? 'Show the margins' : 'Show the feed’s overlays'
+  $('#safe-label').textContent = fmt.fit === 'normal' ? 'Show the margins' : fmt.fit === 'instagram' ? 'Show Instagram’s crop' : 'Show the feed’s overlays'
   // All looks (plan 234): the type kept, in each look, to pick one from.
   const looks = state.view === 'looks' && !clipped
-  const ids = state.view === 'compare' ? types : [state.type]
+  const ids = state.view === 'compare' ? types : [shown]
   current = {
     plan: pl, fmt, figures,
     decks: looks
-      ? DESIGNS.map(design => ({ id: state.type, design, slides: deck(state.type, pl, fmt, { ...opts, design }) }))
+      ? DESIGNS.map(design => ({ id: shown, design, slides: deck(shown, pl, fmt, { ...opts, design }) }))
       : ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })),
   }
   $('#export-short').hidden = clipped
   $('#copy-short').hidden = clipped
+  // A story that plays whole has its own download (plan 281).
+  $('#export-story-clip').hidden = !current.decks[0]?.slides.clips?.story
   const typeName = id => (promo ? PROMO.en.names[state.story] : T.types[id].name)
-  $('#export-name').textContent = typeName(state.type)
+  $('#export-name').textContent = typeName(shown)
   const stage = $('#stage')
   stage.replaceChildren()
   stage.dataset.view = state.view
@@ -478,7 +675,7 @@ async function render() {
     const strip = document.createElement('div')
     strip.className = 'strip'
     for (const id of ENDING_IDS) {
-      const slide = endingSlide(id, state.type, pl, fmt, opts)
+      const slide = endingSlide(id, shown, pl, fmt, opts)
       const fig = document.createElement('button')
       fig.type = 'button'
       fig.className = 'slide slide--ending'
@@ -496,13 +693,14 @@ async function render() {
   }
   // The caption is written when the item or its language changes, never
   // over the reader's own edits on a redraw.
-  const captionKey = `${state.source}|${state.story}|${pl.id}|${state.lang}|${state.type === 'spelling'}|${state.type === 'impostor'}`
+  // The questions picked are in it too: a passage's caption asks the one picked.
+  const captionKey = `${state.source}|${state.story}|${pl.id}|${state.lang}|${shown === 'spelling'}|${shown === 'impostor'}|${(state.picks[pickKey()] || []).join(',')}`
   if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
   // The title names the type and the questions asked too (plan 229l).
-  const asked = state.type === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
-  const titleKey = `${captionKey}|${state.type}|${asked}`
-  if (titleKey !== titleFor) { $('#title').value = titleOf(pl, state.type, asked); titleFor = titleKey; countTitle() }
-  $('#export').disabled = false
+  const asked = shown === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
+  const titleKey = `${captionKey}|${shown}|${asked}`
+  if (titleKey !== titleFor) { $('#title').value = titleOf(pl, shown, asked); titleFor = titleKey; countTitle() }
+  $('#export').disabled = busy.has('#export')
 }
 
 // ── The long videos (plan 233) ────────────────────────────────
@@ -524,18 +722,36 @@ async function renderLong(mine) {
   const short = state.longFormat === 'short'
   const size = short ? TALL : WIDE
   const { kind, opts } = longPick(id, state.level, state.lang, short ? 'short' : 'long')
-  const pl = short ? fitShort(longPlan(kind, banks, opts)) : longPlan(kind, banks, opts)
+  // A short at the margins chosen (plan 239): TikTok's, Instagram's or none.
+  for (const el of document.querySelectorAll('[data-short]')) el.hidden = !short
+  const pl = short ? fitShort(longPlan(kind, banks, { ...opts, fit: state.fit, tune: state.tune })) : longPlan(kind, banks, { ...opts, tune: state.tune })
   const tl = timeline(pl)
   const page = describeLong(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
-  await fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title)
+  // A pictured scene's pictures (plan 269), loaded before the first frame.
+  await Promise.all([fonts(JSON.stringify(pl.items).slice(0, 40000) + pl.title + page.title), loadScenePictures(pl)])
   if (mine !== token) return
   current = { plan: pl, fmt: size, decks: [], long: { id, page, tl } }
+  // A reply video's stations are its questions (plan 249).
+  mountVideo({
+    id, jp: '長編', title: pl.title, label: 'Long video', size, tl, start: 4.5,
+    count: `about ${clock(tl.seconds)} · ${pl.kind === 'reply' ? `${tl.of} questions` : `${tl.of} stations`} · ${short ? '9:16 short' : '16:9'}`,
+    draw: (ctx, t) => drawLong(ctx, pl, tl, t),
+  })
+  // The video's page: written when the video or its language changes.
+  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}|${state.fit}|${state.feed}`
+  if (key !== captionFor) fillPost(page, key)
+  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long', state.fit) + tuneFlag(state.tune, 'long')
+}
+/** A video in the stage (plans 233, 252): its head, its frames played in
+ *  place, a scrub bar, its chapters. The preview is silent: the voices
+ *  are made, and every line measured, where it is rendered. */
+function mountVideo({ id, jp: station, title, label, size, tl, start, count, draw: paint }) {
   const stage = $('#stage')
   stage.replaceChildren()
   stage.dataset.view = 'long'
   const row = document.createElement('section')
   row.className = 'deck'
-  row.setAttribute('aria-label', 'Long video')
+  row.setAttribute('aria-label', label)
   const head = document.createElement('div')
   head.className = 'deck__head'
   const name = document.createElement('h2')
@@ -543,11 +759,11 @@ async function renderLong(mine) {
   const jp = document.createElement('span')
   jp.lang = 'ja'
   jp.className = 'deck__jp'
-  jp.textContent = '長編'
-  name.append(jp, ` ${pl.title}`)
+  jp.textContent = station
+  name.append(jp, ` ${title}`)
   const n = document.createElement('span')
   n.className = 'deck__count'
-  n.textContent = `about ${clock(tl.seconds)} · ${pl.items.length} stations · ${short ? '9:16 short' : '16:9'}`
+  n.textContent = count
   head.append(name, n)
   const screen = document.createElement('div')
   screen.className = 'player'
@@ -555,7 +771,7 @@ async function renderLong(mine) {
   c.width = size.w
   c.height = size.h
   c.style.aspectRatio = `${size.w} / ${size.h}`
-  if (short) c.style.maxWidth = '420px'
+  if (size.h > size.w) c.style.maxWidth = '420px'
   c.setAttribute('aria-label', 'The video, drawn frame by frame')
   screen.append(c)
   const bar = document.createElement('div')
@@ -580,13 +796,12 @@ async function renderLong(mine) {
   chapters.className = 'chapters'
   row.append(head, screen, bar, note, chapters)
   stage.append(row)
-  player = { c, pl, tl, t: Math.min(player?.id === id ? player.t : 4.5, tl.seconds), raf: 0, id, play, scrub, time }
+  player = { c, tl, t: Math.min(player?.id === id ? player.t : start, tl.seconds), raf: 0, id, play, scrub, time }
   const draw = () => {
-    drawLong(c.getContext('2d'), pl, tl, player.t)
+    paint(c.getContext('2d'), player.t)
     scrub.value = String(player.t)
     time.textContent = `${clock(player.t)} / ${clock(tl.seconds)}`
   }
-  player.draw = draw
   const seek = t => { player.t = Math.max(0, Math.min(tl.seconds, t)); draw() }
   for (const ch of tl.chapters) {
     const li = document.createElement('li')
@@ -614,24 +829,262 @@ async function renderLong(mine) {
     player.raf = requestAnimationFrame(tick)
   })
   draw()
-  // The video's page: written when the video or its language changes.
-  const key = `long|${id}|${state.level}|${state.lang}|${state.longFormat}`
-  if (key !== captionFor) {
-    $('#caption').value = page.description
-    $('#title').value = page.title
-    $('#tags').value = page.tags
-    captionFor = key
-    titleFor = key
-    countTitle()
+}
+// ── The vocabulary shorts (plan 252) ──────────────────────────
+// A level's deck or a theme's words, nine at a time, as a card on washi
+// or a quiz on sumi (words.js); made by the same command as the shorts.
+async function renderWords(mine) {
+  const id = currentId()
+  const banks = await banksOf(wordsFiles(state.level))
+  if (mine !== token) return
+  const pl = wordsPlan(banks, id, { lang: state.lang, style: state.wordsStyle, tune: state.tune, fit: state.fit })
+  const tl = wordsTimeline(pl)
+  const page = wordsPage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE, banks['index.json']?.figures)
+  await Promise.all([fonts(`${JSON.stringify(pl.items)}${pl.title}${page.title}語彙主題`), loadPictures(pl)])
+  if (mine !== token) return
+  current = { plan: pl, fmt: TALL, decks: [], words: { id, page, tl } }
+  mountVideo({
+    id, jp: '語彙', title: pl.title, label: 'Word short', size: TALL, tl, start: wordsStillAt(pl, tl),
+    count: `about ${clock(tl.seconds)} · ${pl.items.length} words · ${pl.style === 'quiz' ? 'quiz' : 'card'} · 9:16`,
+    draw: (ctx, t) => drawWords(ctx, pl, tl, t),
+  })
+  const key = `words|${id}|${state.level}|${state.lang}|${state.wordsStyle}|${state.fit}|${state.feed}`
+  if (key !== captionFor) fillPost(page, key)
+  $('#command').textContent = wordsCommand(pl, tuneFlag(state.tune, 'words'))
+}
+// ── The practice features (plan 270) ──────────────────────────
+// Each feature of the Practice tab as the app runs it, recorded where it
+// is made (the command opens the app in a browser, its API answered from
+// bank/promo.json): the studio shows the gate it ends on, its page and
+// its posts, and the command.
+async function renderFeature(mine) {
+  const id = currentId()
+  const banks = { 'promo.json': await fetchJson('promo.json') }
+  if (mine !== token) return
+  const pl = featurePlan(banks, id, { lang: state.lang, fit: state.fit, hour: state.hour })
+  const tl = featurePreview(pl)
+  const print = await printFor(pl.hour).catch(e => { status(`Today's print did not load (${e.message}).`); return null })
+  if (mine !== token) return
+  const page = featurePage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE)
+  await fonts(`${pl.end}${pl.title}${page.title}${pl.beats.map(b => b.say).join('')}実践`)
+  if (mine !== token) return
+  current = { plan: pl, fmt: TALL, decks: [], feature: { id, page, tl } }
+  mountVideo({
+    id, jp: pl.jp, title: pl.title, label: 'Feature video', size: TALL, tl, start: 1.6,
+    count: `${pl.beats.length} beats, recorded in the app when made · its gate here · 9:16`,
+    draw: (ctx, t) => drawFeature(ctx, pl, tl, t, [], print),
+  })
+  const key = `feature|${id}|${state.lang}|${state.fit}|${state.feed}`
+  if (key !== captionFor) fillPost(page, key)
+  $('#command').textContent = featureCommand(id, state.lang, state.fit, pl.hour)
+}
+// ── The reading challenges (plan 247) ─────────────────────────
+// A comprehension text as a 9:16 video over Today's print: going slowly
+// up the screen as a film's credits do, or read along by the app's
+// reader. Drawn here as it is made; the scroll is encoded here too, with
+// the app's sounds, and the voice of the one read along is made where it
+// is rendered (the command below), every word timed on it.
+const CHAPTER = { hook: 'Hook', reading: 'Reading', question: 'Question', answer: 'Answer', cta: 'The app' }
+// A scenery whose prints do not load (not drawn yet, or not served with
+// the studio) has the bay stand in, at the hour and season asked for and
+// with the parts its dials bring out (its petals, its fireworks), so the
+// frame is lit as that hour is; else the last print drawn. It says so,
+// rather than leave a blank page, in the render's own words (plan 309,
+// app.js standInSays: "has no prints yet" only where its own are not
+// there). A render overtaken by a newer one says nothing: its scenery is
+// no longer the one in view.
+let lastPrint = null
+let standInSaid = ''
+async function challengePrint(pl, mine) {
+  const asked = challengePrintOpts(pl)
+  let failure = null
+  const P = await printFor(state.hour, seasonOf(), asked).catch(e => { failure = e; return null })
+  if (mine !== token) return null
+  if (P) {
+    lastPrint = P
+    // Its own print back, the word that another stood in goes.
+    if (standInSaid && $('#status').textContent === standInSaid) status('')
+    return { P, standIn: '' }
   }
-  $('#command').textContent = longCommand(id, state.level, state.lang, short ? 'short' : 'long')
+  console.warn(`reading challenge: ${failure.message}`)
+  // The bay as it would have stood, dialled as asked, unless the bay is what failed.
+  const instead = standInOpts(asked)
+  let bayFailure = instead ? null : failure
+  const bay = instead ? await printFor(state.hour, seasonOf(), instead).catch(e => { bayFailure = e; return null }) : null
+  if (mine !== token) return null
+  const before = bay ?? lastPrint
+  const says = standInSays(pl, failure.message, bay ? 'bay' : lastPrint ? 'last' : null)
+  standInSaid = before ? says.said : standInSays({ ...pl, scenery: 'bay' }, bayFailure.message).said
+  status(standInSaid)
+  // Nothing is made on a print standing in for the one asked, nor on the
+  // ground for another scenery (its buttons say why, `standIn`); Today's
+  // print failing with nothing to stand in still draws on the ground, as
+  // it did before plan 309.
+  return { P: before, standIn: before || instead ? says.label : '' }
+}
+const QUESTION_KINDS = { comprehension: 'about the text', inference: 'reading between the lines', grammar: 'grammar', vocabulary: 'a word' }
+async function renderChallenge(mine) {
+  const data = await fetchJson('comprehension.json')
+  if (mine !== token) return
+  const id = currentId()
+  const pl = challengePlan(data, id, { lang: state.lang, style: state.challengeStyle, hour: state.hour, season: seasonOf(), scenery: state.challengeScenery, question: state.challengeQ[id], hide: state.challengeAnswer !== 'shown', tune: state.tune })
+  // The text's questions to choose from, the one asked selected (plan 260).
+  const pick = $('#challenge-q')
+  pick.replaceChildren(...challengeQuestions(data, id, state.lang).map(q => {
+    const o = document.createElement('option')
+    o.value = String(q.n)
+    o.textContent = `${q.n} · ${QUESTION_KINDS[q.type] || q.type} · ${q.ask}${q.first ? ' (default)' : ''}`
+    return o
+  }))
+  pick.value = String(pl.q.n)
+  const tl = challengeTimeline(pl)
+  const got = await challengePrint(pl, mine)
+  if (!got) return
+  const { P, standIn } = got
+  await fonts(JSON.stringify(pl))
+  if (mine !== token) return
+  const page = challengePage(pl, tl, state.lang === 'en' ? `${LONG_SITE}/en` : LONG_SITE)
+  current = { plan: pl, fmt: FORMATS.story, decks: [], challenge: { id, tl, P, page, standIn } }
+  const stage = $('#stage')
+  stage.replaceChildren()
+  stage.dataset.view = 'long'
+  const row = document.createElement('section')
+  row.className = 'deck'
+  row.setAttribute('aria-label', 'Reading challenge')
+  const head = document.createElement('div')
+  head.className = 'deck__head'
+  const name = document.createElement('h2')
+  name.className = 'deck__name'
+  const jp = document.createElement('span')
+  jp.lang = 'ja'
+  jp.className = 'deck__jp'
+  jp.textContent = '速読'
+  name.append(jp, ` ${pl.title}`)
+  const n = document.createElement('span')
+  n.className = 'deck__count'
+  n.textContent = `${clock(tl.seconds)} · ${pl.sents.length} sentences · ${pl.style === 'scroll' ? 'scroll' : 'read along'} · 9:16`
+  head.append(name, n)
+  const screen = document.createElement('div')
+  screen.className = 'player'
+  const c = document.createElement('canvas')
+  c.width = FORMATS.story.w
+  c.height = FORMATS.story.h
+  c.style.aspectRatio = `${c.width} / ${c.height}`
+  c.style.maxWidth = '420px'
+  c.setAttribute('aria-label', 'The video, drawn frame by frame')
+  screen.append(c)
+  const bar = document.createElement('div')
+  bar.className = 'player__bar'
+  const play = document.createElement('button')
+  play.type = 'button'
+  play.className = 'btn btn--quiet'
+  play.textContent = 'Play'
+  const scrub = document.createElement('input')
+  scrub.type = 'range'
+  scrub.min = '0'
+  scrub.max = String(tl.seconds)
+  scrub.step = '0.05'
+  scrub.setAttribute('aria-label', 'Where in the video')
+  const time = document.createElement('span')
+  time.className = 'player__time'
+  bar.append(play, scrub, time)
+  const note = document.createElement('p')
+  note.className = 'player__note'
+  note.textContent = pl.style === 'scroll'
+    ? 'A silent preview: the app’s sounds are laid under it when it is downloaded or rendered.'
+    : 'A silent preview, timed on a guess: the voice is made, and every word lit on it, when the video is rendered (the command below).'
+  const chapters = document.createElement('ol')
+  chapters.className = 'chapters'
+  row.append(head, screen, bar, note, chapters)
+  stage.append(row)
+  const key = `challenge|${id}|${state.lang}|${state.challengeStyle}|${state.challengeAnswer}|${pl.scenery}|${state.season}|${state.hour}|${pl.q.n}`
+  const reading = tl.segs.find(sg => sg.key === 'reading')
+  player = { c, pl, tl, t: Math.min(player?.key === key ? player.t : reading.start + 12, tl.seconds), raf: 0, id, key, play, scrub, time }
+  const draw = () => {
+    drawChallenge(c.getContext('2d'), pl, tl, player.t, P)
+    scrub.value = String(player.t)
+    time.textContent = `${clock(player.t)} / ${clock(tl.seconds)}`
+  }
+  player.draw = draw
+  const seek = t => { player.t = Math.max(0, Math.min(tl.seconds, t)); draw() }
+  for (const sg of tl.segs) {
+    const li = document.createElement('li')
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'chip'
+    b.textContent = `${clock(sg.start)} ${CHAPTER[sg.key]}`
+    b.addEventListener('click', () => seek(sg.start + (sg.key === 'reading' ? 1.2 : 1.6)))
+    li.append(b)
+    chapters.append(li)
+  }
+  scrub.addEventListener('input', () => seek(Number(scrub.value)))
+  play.addEventListener('click', () => {
+    if (player.raf) { stopPlayer(); play.textContent = 'Play'; return }
+    if (player.t >= tl.seconds - 0.05) player.t = 0
+    play.textContent = 'Pause'
+    let last = performance.now()
+    const tick = now => {
+      player.t = Math.min(tl.seconds, player.t + (now - last) / 1000)
+      last = now
+      draw()
+      if (player.t >= tl.seconds) { player.raf = 0; play.textContent = 'Play'; return }
+      player.raf = requestAnimationFrame(tick)
+    }
+    player.raf = requestAnimationFrame(tick)
+  })
+  draw()
+  // The post, for the feed chosen: a switch of feed keeps the player where it is.
+  if (`${key}|${state.feed}` !== captionFor) fillPost(page, `${key}|${state.feed}`)
+  $('#command').textContent = challengeCommand(pl)
+  // The scroll is made here, whole; the one read along needs the voice
+  // engine; none is made on a print standing in for its scenery's.
+  $('#export-video').disabled = pl.style !== 'scroll' || !!standIn
+  $('#export-video').textContent = standIn
+    || (pl.style === 'scroll' ? `Download the video (.mp4, ${clock(tl.seconds)})` : 'Read along is made by the command (the voice)')
+}
+// A challenge's file name: its text, what it stands on unless the bay, its print's season and hour, its language.
+const challengeName = (id, plan) => `tsuji-challenge-${safeName(id)}-${plan.scenery !== 'bay' ? `${plan.scenery}-` : ''}${plan.season ? `${plan.season}-` : ''}${plan.hour}-${state.lang}`
+async function exportChallenge() {
+  const ch = current.challenge
+  if (!ch || current.plan.style !== 'scroll' || ch.standIn) return
+  // What is drawn, captured when it starts: another text picked meanwhile is not mixed in.
+  const { tl, P } = ch
+  const plan = current.plan
+  await encodeClip({
+    btn: '#export-video', name: challengeName(ch.id, plan), said: 'reading challenge',
+    fmt: FORMATS.story, fps: tl.fps, seconds: tl.seconds,
+    sounds: tl.sfx,
+    frame: (ctx, t) => { drawChallenge(ctx, plan, tl, t, P) },
+  })
 }
 async function exportThumb() {
+  if (current.challenge) {
+    if (current.challenge.standIn) {
+      status(`${current.challenge.standIn}: no thumbnail of it is made on another print.`)
+      return
+    }
+    const c = document.createElement('canvas')
+    c.width = FORMATS.story.w
+    c.height = FORMATS.story.h
+    drawChallenge(c.getContext('2d'), current.plan, current.challenge.tl, 1.6, current.challenge.P)
+    const result = await offer(`${challengeName(current.challenge.id, current.plan)}.png`, await png(c))
+    status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
+    return
+  }
+  if (current.words) {
+    const c = document.createElement('canvas')
+    c.width = TALL.w
+    c.height = TALL.h
+    drawWords(c.getContext('2d'), current.plan, current.words.tl, wordsStillAt(current.plan, current.words.tl))
+    const result = await offer(`tsuji-words-${safeName(current.words.id.replace(/:/g, '-'))}-${current.plan.style}-${state.lang}.png`, await png(c))
+    status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
+    return
+  }
   if (!current.long) return
   const c = document.createElement('canvas')
   c.width = current.fmt.w
   c.height = current.fmt.h
-  drawLong(c.getContext('2d'), current.plan, current.long.tl, current.plan.format === 'short' ? 3.4 : 4.5)
+  drawLong(c.getContext('2d'), current.plan, current.long.tl, stillAt(current.plan, current.long.tl))
   const name = `tsuji-${current.plan.format === 'short' ? 'short-' : ''}${safeName(current.long.id.replace(':', '-'))}-${state.level}-${state.lang}.png`
   const result = await offer(name, await png(c))
   status(result === 'saved' ? 'Saved the thumbnail.' : MESSAGE[result])
@@ -669,8 +1122,9 @@ function safeZone(fmt) {
   z.style.setProperty('--b', `${safe.b / h * 100}%`)
   z.style.setProperty('--l', `${safe.l / w * 100}%`)
   z.style.setProperty('--r', `${safe.r / w * 100}%`)
-  // On a 9:16 slide for TikTok, its photo view itself: its bars, its buttons.
-  if (h === 1920 && fmt.fit === 'tiktok') {
+  // On a 9:16 slide, the feed itself: TikTok's photo view, its bars and
+  // its buttons; Instagram's feed, what its 4:5 crop cuts and its header.
+  if (h === 1920 && fmt.fit !== 'normal') {
     const hud = document.createElement('canvas')
     hud.width = w
     hud.height = h
@@ -740,6 +1194,8 @@ function downloadsApi() {
     downloads = window.claude?.use
       ? Promise.race([window.claude.use('downloads'), new Promise(r => setTimeout(() => r(null), 10000))]).catch(() => null)
       : Promise.resolve(null)
+    // A handshake that timed out is tried again on the next download, not given up for the visit.
+    if (window.claude?.use) downloads.then(api => { if (!api) downloads = undefined })
   }
   return downloads
 }
@@ -766,17 +1222,24 @@ async function offer(filename, blob) {
 const png = canvas => new Promise(r => canvas.toBlob(r, 'image/png'))
 const safeName = s => String(s).replace(/[\\/:*?"<>|.\s]+/g, '-').replace(/^-+|-+$/g, '')
 // A slide at normal margins says so in its file's name.
-const fmtName = fmt => (fmt.fit === 'normal' ? `${fmt.id}-normal` : fmt.id)
-const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${fmtName(current.fmt)}`
+const fmtName = fmt => (fmt.fit && fmt.fit !== 'tiktok' ? `${fmt.id}-${fmt.fit}` : fmt.id)
+// A file names its item, its type, its look, its format and its language,
+// so the English and the French, or two looks, never overwrite each other.
+const lookName = d => (d?.design || (DESIGNS.includes(state.design) ? state.design : 'classic'))
+const baseName = (d = viewing?.d) => `tsuji-${state.source}-${safeName(current.plan.id)}-${d?.id || shown}-${lookName(d)}-${fmtName(current.fmt)}-${state.lang}`
 
 async function exportZip() {
   // What was on screen when it started: a click during the export changes
   // neither the size the slides are drawn at nor the file's name.
-  const d = current.decks.find(x => x.id === state.type) ?? current.decks[0]
+  // In All looks, the look chosen; elsewhere the type drawn.
+  const d = current.decks.find(x => x.id === shown && (!x.design || x.design === state.design)) ?? current.decks[0]
   const fmt = current.fmt
-  const name = `tsuji-${state.source}-${safeName(current.plan.id)}-${d.id}-${fmtName(fmt)}`
+  const name = baseName(d)
+  const title = $('#title').value
+  const caption = $('#caption').value
   const btn = $('#export')
   btn.disabled = true
+  busy.add('#export')
   status('Drawing the slides…')
   try {
     if (typeof JSZip === 'undefined') {
@@ -789,28 +1252,34 @@ async function exportZip() {
     for (let i = 0; i < d.slides.length; i++) {
       zip.file(`${String(i + 1).padStart(2, '0')}-${d.slides[i].key}.png`, await png(full(d.slides[i], fmt)))
     }
-    zip.file('title.txt', $('#title').value)
-    zip.file('caption.txt', $('#caption').value)
+    zip.file('title.txt', title)
+    zip.file('caption.txt', caption)
     const result = await offer(`${name}.zip`, await zip.generateAsync({ type: 'blob' }))
     status(result === 'saved' ? `Saved ${d.slides.length} slides, the title and the caption.` : MESSAGE[result])
   } catch (e) {
     status(`The export failed (${e.message}).`)
   } finally {
+    busy.delete('#export')
     btn.disabled = false
   }
 }
 async function exportOne() {
   if (!viewing) return
   const { d, i } = viewing
-  const result = await offer(`${baseName()}-${i + 1}.png`, await png(full(d.slides[i], current.fmt)))
+  const result = await offer(`${baseName(d)}-${i + 1}.png`, await png(full(d.slides[i], current.fmt)))
   status(result === 'saved' ? `Saved slide ${i + 1}.` : MESSAGE[result])
 }
 // ── The clips (plan 231) ──────────────────────────────────────
 // A promo story's cover, or its call to action, in motion, seven
-// seconds, encoded here as the feeds take a video: H.264 in an MP4
-// (WebCodecs, muxed by mp4-muxer).
+// seconds, or a story played whole (plan 281), encoded here as the feeds
+// take a video: H.264 in an MP4 (WebCodecs, muxed by mp4-muxer).
 const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm'
-const CLIPS = { cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' }, end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' } }
+const CLIPS = {
+  cover: { btn: '#export-clip', name: 'cover', said: 'cover clip' },
+  end: { btn: '#export-end-clip', name: 'cta', said: 'call-to-action clip' },
+  // A story played whole, beat after beat (the duels', plan 281).
+  story: { btn: '#export-story-clip', name: 'story', said: 'story' },
+}
 async function exportClip(which = 'cover') {
   const d = current.decks[0]
   const clip = d?.slides.clips?.[which]
@@ -818,7 +1287,13 @@ async function exportClip(which = 'cover') {
   const echo = current.plan.source === 'echo'
   const { btn, name: kind, said } = echo ? { btn: '#export-clip', name: 'echo', said: 'clip' } : CLIPS[which]
   const name = echo ? `tsuji-echo-${safeName(current.plan.id)}-${state.lang}` : `tsuji-${kind}-${state.story}-${safeName(current.plan.id)}-${state.lang}`
-  const print = clip.print ? await printFor(state.hour) : null
+  let print = null
+  try {
+    print = clip.print ? await printFor(state.hour) : null
+  } catch (e) {
+    status(`Today's print did not load (${e.message}).`)
+    return
+  }
   await encodeClip({
     btn, name, said, fmt: current.fmt, fps: clip.fps, seconds: clip.seconds, sounds: clip.sounds,
     frame: async (ctx, t) => { clip.draw(ctx, t, print ? await print.moment(t) : null) },
@@ -827,8 +1302,8 @@ async function exportClip(which = 'cover') {
 
 // ── A carousel as a short video (plan 233) ────────────────────
 // Its slides standing, each held as long as it reads, swiped to the
-// next, with the app's sounds (short.js). The voice and the music are
-// the render command's: long/render.mjs --carousel.
+// next, with the app's sounds (short.js). The voice is the render
+// command's: long/render.mjs --carousel.
 function shortRecipe() {
   // What the carousel is drawn from, without the studio's memory of every other one.
   const rest = Object.fromEntries(Object.entries(state).filter(([key]) => !['ids', 'picks', 'kanaSet', 'story'].includes(key)))
@@ -837,26 +1312,39 @@ function shortRecipe() {
 }
 async function exportShort() {
   if (!current.plan || clippedSource()) return
-  const fmt = FORMATS.story
-  const slides = deck(state.type, current.plan, fmt, { ...state, figures: current.figures, picks: state.picks[pickKey()] })
+  const fmt = formatOf('story', state.fit)
+  const slides = deck(shown, current.plan, fmt, { ...state, figures: current.figures, picks: state.picks[pickKey()] })
   work.width = fmt.w
   work.height = fmt.h
   const counts = slides.map(sl => chars(sl, work.getContext('2d')))
-  const tl = shortTimeline(slides, counts)
+  const tl = shortTimeline(slides, counts, null, null, state.tune)
   await encodeClip({
-    btn: '#export-short', name: `tsuji-short-${state.source}-${safeName(current.plan.id)}-${state.type}-${state.lang}`, said: 'short video',
+    btn: '#export-short', name: `tsuji-short-${state.source}-${safeName(current.plan.id)}-${shown}-${state.lang}`, said: 'short video',
     fmt, fps: SHORT_FPS, seconds: tl.seconds, sounds: tl.sfx,
     frame: (ctx, t) => { drawShortFrame(ctx, slides, tl, t, fmt) },
   })
 }
-const clippedSource = () => ['promo', 'echo', 'long'].includes(state.source)
+const clippedSource = () => ['promo', 'echo', 'long', 'challenge', 'words', 'feature'].includes(state.source)
+const videoSource = () => ['long', 'challenge', 'words', 'feature'].includes(state.source)
 
 /** A clip encoded as the feeds take a video, H.264 in an MP4 with its sounds. */
+// The H.264 level a size and a rate need: 4.0 holds 1080×1920 at 30
+// frames a second, 4.2 at 60 (245,760 and 522,240 macroblocks a second).
+const avcCodec = (w, h, fps) => (Math.ceil(w / 16) * Math.ceil(h / 16) * fps > 245_760 ? 'avc1.64002A' : 'avc1.640028')
+// The exports in flight, by their button: a redraw never re-enables one (plan 248).
+const busy = new Set()
 async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, frame }) {
   const btn = $(sel)
   btn.disabled = true
+  busy.add(sel)
+  // Its own canvas: a redraw, a PNG or another export never resizes it between two frames.
+  const canvas = document.createElement('canvas')
+  canvas.width = fmt.w
+  canvas.height = fmt.h
   try {
-    const config = { codec: 'avc1.640028', width: fmt.w, height: fmt.h, bitrate: 8_000_000, framerate: fps }
+    // The bitrate tuned for thirty frames a second, scaled with the rate.
+    const bitrate = Math.round(tuned(state.tune, 'export.mbps') * 1e6 * Math.max(1, fps / 30))
+    const config = { codec: avcCodec(fmt.w, fmt.h, fps), width: fmt.w, height: fmt.h, bitrate, framerate: fps }
     if (typeof VideoEncoder === 'undefined' || !(await VideoEncoder.isConfigSupported(config)).supported) {
       status('This browser cannot encode H.264 video: open the studio in Chrome, Edge or Safari.')
       return
@@ -865,7 +1353,7 @@ async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, fra
     let sound = null
     if (sounds.length && typeof AudioEncoder !== 'undefined') {
       for (const [codec, muxed] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
-        const audio = { codec, sampleRate: RATE, numberOfChannels: 2, bitrate: 160_000 }
+        const audio = { codec, sampleRate: RATE, numberOfChannels: 2, bitrate: tuned(state.tune, 'export.audio') * 1000 }
         if ((await AudioEncoder.isConfigSupported(audio)).supported) { sound = { audio, muxed }; break }
       }
     }
@@ -876,27 +1364,35 @@ async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, fra
       video: { codec: 'avc', width: fmt.w, height: fmt.h, frameRate: fps },
       ...(sound ? { audio: { codec: sound.muxed, numberOfChannels: 2, sampleRate: RATE } } : {}),
     })
+    // The sound is scored first, while every clip it names is still there:
+    // a clip let go during a long export is a revoked address.
+    let mix = null
+    if (sound) {
+      status(`Scoring the ${said}…`)
+      mix = await clipAudio(sounds, seconds, await loadVoices(BASE))
+    }
     let failed = null
     const encoder = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failed = e } })
     encoder.configure(config)
     const frames = Math.round(seconds * fps)
-    work.width = fmt.w
-    work.height = fmt.h
-    const ctx = work.getContext('2d')
+    const ctx = canvas.getContext('2d')
+    const key = Math.max(1, Math.round(tuned(state.tune, 'export.keyframe') * fps))
+    let said5 = -1
     for (let i = 0; i < frames && !failed; i++) {
       await frame(ctx, i / fps)
-      const vf = new VideoFrame(work, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) })
-      encoder.encode(vf, { keyFrame: i % fps === 0 })
+      const vf = new VideoFrame(canvas, { timestamp: Math.round((i * 1e6) / fps), duration: Math.round(1e6 / fps) })
+      encoder.encode(vf, { keyFrame: i % key === 0 })
       vf.close()
-      if (i % 10 === 0) status(`Drawing the ${said}… ${Math.round((i / frames) * 100)}%`)
+      // Told every five per cent, not every few frames: a screen reader reads each.
+      const pct = Math.floor((i / frames) * 20) * 5
+      if (pct !== said5) { said5 = pct; status(`Drawing the ${said}… ${pct}%`) }
       // The encoder keeps up: never more than a second of frames waiting.
       while (encoder.encodeQueueSize > fps) await new Promise(r => setTimeout(r, 10))
     }
     await encoder.flush()
+    encoder.close()
     if (failed) throw failed
-    if (sound) {
-      status(`Scoring the ${said}…`)
-      const mix = await clipAudio(sounds, seconds, await loadVoices(BASE))
+    if (mix) {
       const audio = new AudioEncoder({ output: (chunk, meta) => muxer.addAudioChunk(chunk, meta), error: e => { failed = e } })
       audio.configure(sound.audio)
       const step = RATE / 10
@@ -910,6 +1406,7 @@ async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, fra
         data.close()
       }
       await audio.flush()
+      audio.close()
       if (failed) throw failed
     }
     muxer.finalize()
@@ -918,6 +1415,7 @@ async function encodeClip({ btn: sel, name, said, fmt, fps, seconds, sounds, fra
   } catch (e) {
     status(`The ${said} failed (${e.message}).`)
   } finally {
+    busy.delete(sel)
     btn.disabled = false
   }
 }
@@ -927,20 +1425,38 @@ function status(msg) {
 }
 
 // ── The caption to post with it ───────────────────────────────
+/** A video's post in the fields: a 16:9 video's YouTube page, a 9:16
+ *  one's for the feed chosen (plan 251). */
+function fillPost(page, key) {
+  const post = page.feeds?.[state.feed] || page
+  $('#caption').value = post.caption ?? post.description
+  $('#title').value = post.title ?? ''
+  $('#tags').value = post.tags ?? ''
+  captionFor = key
+  titleFor = key
+  countTitle()
+}
 function captionOf(pl) {
   const c = pl.caption
   const fr = pl.lang === 'fr'
   const base = fr ? ['#japonais', '#apprendrelejaponais'] : ['#japanese', '#learnjapanese']
   const tags = [...base, ...c.tags.map(t => `#${t}`), '#日本語', '#nihongo', '#tsuji'].join(' ')
+  // A reading challenge never gives its answer away: the sentence as the
+  // post sets it, and the question (plan 254).
+  if (shown === 'read') {
+    const R = pl.t.readPost
+    const jp = (pl.script === 'kana' && c.kana ? c.kana : c.jp).replace(/。$/, '')
+    return [`${R.hook}${pl.emoji ? ` ${pl.emoji}` : ''}`, jp, R.ask, tags].join('\n\n')
+  }
   // A passage's line is the question picked for it, not always its first.
   const tr = pl.source === 'passage' ? picked(pl, state.picks[pickKey()], 1)[0]?.ask || c.tr : c.tr
   // A spelling quiz never prints the kanji it asks for: the word in kana.
-  const spelling = state.type === 'spelling'
+  const spelling = shown === 'spelling'
   const jp = spelling ? /（(.+)）/.exec(c.jp)?.[1] || c.jp : c.jp
   const head = [jp, c.romaji, tr].filter(Boolean).join('\n')
   // The point once: a lesson's ask names it already.
   const ask = spelling ? pl.t.spellingAsk
-    : state.type === 'impostor' && pl.impostor ? pl.t.modes.impostorAsk(pl.impostor.name)
+    : shown === 'impostor' && pl.impostor ? pl.t.modes.impostorAsk(pl.impostor.name)
       : c.point && !c.ask.includes(c.point) ? `${c.ask} · ${c.point}` : c.ask
   return `${head}\n\n${ask}\n\n${tags}`
 }
@@ -957,18 +1473,32 @@ async function copyField(id, name) {
 /** The title's length against the feed's limit. */
 function countTitle() {
   // A video's title is YouTube's, a hundred characters at most.
-  const max = state.source === 'long' ? 100 : TITLE_MAX
+  const max = videoSource() ? 100 : TITLE_MAX
   $('#title').maxLength = max
   $('#title-count').textContent = `${[...$('#title').value].length}/${max}`
 }
 
 // ── Controls ──────────────────────────────────────────────────
+// A button pressed is often drawn again: the focus goes back to its new
+// self, so the keyboard carries on from it rather than from the top (plan 248).
+function focusKey() {
+  const el = document.activeElement
+  if (!el || el === document.body) return null
+  for (const a of ['set', 'source', 'level', 'q']) if (el.dataset?.[a]) return [a, el.dataset[a]]
+  return null
+}
+function refocus(key) {
+  if (!key || (document.activeElement && document.activeElement !== document.body)) return
+  document.querySelector(`[data-${key[0]}="${CSS.escape(key[1])}"]`)?.focus()
+}
 function sync() {
+  const fk = focusKey()
   for (const el of document.querySelectorAll('[data-set]')) {
     const [key, value] = el.dataset.set.split(':')
     el.setAttribute('aria-pressed', String(String(state[key]) === value))
   }
   $('#romaji').checked = state.romaji
+  $('#season-now').textContent = `As today · ${printSeason(new Date())}`
   $('#safe').checked = state.safe
   $('#handle').value = state.handle
   renderSources()
@@ -976,6 +1506,7 @@ function sync() {
   renderToggles()
   renderEndings()
   save()
+  refocus(fk)
 }
 
 async function switchList() {
@@ -993,8 +1524,15 @@ function wire() {
     const [key, value] = b.dataset.set.split(':')
     state[key] = value
     if (key === 'type') state.view = 'single'
-    if (key === 'lang') { sync(); renderList().then(render); return }
+    // A reply short is a scene, its 16:9 two (plan 249b): the list is the format's.
+    if (key === 'lang' || key === 'longFormat') { sync(); renderList().then(render); return }
     sync()
+    render()
+  })
+  // A reading challenge's question, kept for its text (plan 260).
+  $('#challenge-q').addEventListener('change', e => {
+    state.challengeQ = { ...state.challengeQ, [currentId()]: Number(e.target.value) }
+    save()
     render()
   })
   $('#sources').addEventListener('click', e => {
@@ -1022,7 +1560,7 @@ function wire() {
   })
   $('#search').addEventListener('input', () => renderList())
   $('#random').addEventListener('click', async () => {
-    const pool = listShown.slice(0, LIST_MAX).filter(x => x.id !== currentId())
+    const pool = listShown.filter(x => x.id !== currentId())
     if (!pool.length) return
     state.ids[idKey()] = pool[Math.floor(Math.random() * pool.length)].id
     state.kanji = ''
@@ -1041,16 +1579,19 @@ function wire() {
   $('#export').addEventListener('click', exportZip)
   $('#export-clip').addEventListener('click', () => exportClip('cover'))
   $('#export-end-clip').addEventListener('click', () => exportClip('end'))
-  $('#copy').addEventListener('click', () => copyField('#caption', state.source === 'long' ? 'Description' : 'Caption'))
+  $('#export-story-clip').addEventListener('click', () => exportClip('story'))
+  $('#copy').addEventListener('click', () => copyField('#caption', videoSource() && document.body.dataset.post !== 'caption' ? 'Description' : 'Caption'))
   $('#copy-tags').addEventListener('click', () => copyField('#tags', 'Tags'))
   $('#copy-command').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText($('#command').textContent); status('Command copied: run it from frontend/.') } catch { status('Select the command and copy it.') }
   })
   $('#export-thumb').addEventListener('click', exportThumb)
+  $('#export-video').addEventListener('click', exportChallenge)
   $('#export-short').addEventListener('click', exportShort)
+  $('#tune-reset').addEventListener('click', () => setTune({}))
   $('#copy-short').addEventListener('click', async () => {
     const cmd = `VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --carousel ${recipeOf(shortRecipe())}`
-    try { await navigator.clipboard.writeText(cmd); status('Command copied: run it from frontend/ for the short with its voice and music.') } catch { status(cmd) }
+    try { await navigator.clipboard.writeText(cmd); status('Command copied: run it from frontend/ for the short with its voice.') } catch { status(cmd) }
   })
   $('#copy-title').addEventListener('click', () => copyField('#title', 'Title'))
   $('#title').addEventListener('input', countTitle)
@@ -1063,8 +1604,14 @@ function wire() {
     if (e.key === 'ArrowLeft') step(-1)
     if (e.key === 'ArrowRight') step(1)
   })
+  // The thumbnails are drawn for the screen's pixel density; a resize that
+  // keeps it redraws nothing, so a playing preview plays on (plan 248).
   let resize
-  window.addEventListener('resize', () => { clearTimeout(resize); resize = setTimeout(render, 200) })
+  let density = window.devicePixelRatio
+  window.addEventListener('resize', () => {
+    clearTimeout(resize)
+    resize = setTimeout(() => { if (window.devicePixelRatio !== density) { density = window.devicePixelRatio; render() } }, 200)
+  })
 }
 
 async function start() {

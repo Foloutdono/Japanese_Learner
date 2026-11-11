@@ -306,6 +306,17 @@ def test_reporting_is_idempotent_and_hides_nothing(client, published):
     assert published in [d["id"] for d in client.get("/api/decks/library").json()["results"]]
 
 
+def test_a_first_report_rings_the_bell_and_a_changed_reason_does_not(client, published, monkeypatch):
+    from core import bell
+    rung = []
+    monkeypatch.setattr(bell, "ring", rung.append)
+    client.post(f"/api/decks/{published}/report", json={"reason": "spam"})
+    client.post(f"/api/decks/{published}/report", json={"reason": "offensive"})
+    [post] = rung
+    assert post["thread_name"] == f"Paquet · n°{published} · spam"
+    assert "1 signalement en tout" in post["content"]
+
+
 def test_a_reason_outside_the_set_is_refused(client, published):
     assert client.post(f"/api/decks/{published}/report",
                        json={"reason": "I just don't like it"}).status_code == 400

@@ -99,6 +99,7 @@ export const STRINGS = {
     like: 'Like this one:',
     types: {
       plates: { name: 'Station plates', desc: 'The guided walk: word by word, then the point' },
+      read: { name: 'Read it', desc: 'Can you read it? Its words a card each, then the answer and a bonus' },
       exam: { name: 'Mock exam', desc: 'Questions in the JLPT’s forms, then the answers' },
       compare: { name: 'This or that', desc: 'Two things learners mix up, side by side' },
       build: { name: 'Build it', desc: 'The sentence put together, piece by piece' },
@@ -182,7 +183,7 @@ export const STRINGS = {
     },
     cta: {
       plates: 'Save it for your next review.',
-      exam: n => `How many out of ${n}? Comment your score.`,
+      exam: n => (n > 1 ? `How many out of ${n}? Comment your score.` : 'Did you get it? Tell us in the comments.'),
       compare: 'Which one do you mix up? Tell us in the comments.',
       build: 'Build one of your own in the comments.',
       list: 'Save the list for later.',
@@ -192,7 +193,10 @@ export const STRINGS = {
       dialogue: 'How many did you get right? Comment your score.',
       trap: 'Did you fall for it? Tell us in the comments.',
       impostor: 'Found them all? Comment your score.',
+      read: 'Could you read it? Tell us in the comments.',
     },
+    // Read it's caption, which never gives the answer away (plan 254).
+    readPost: { hook: 'Today’s tiny Japanese reading challenge', ask: 'Can you read it and guess what it means? Swipe for the answer 👉' },
     pos: {
       noun: 'noun', verb: 'verb', adjective: 'adjective', adverb: 'adverb', particle: 'particle',
       copula: 'copula', pronoun: 'pronoun', auxiliary: 'ending', adnominal: 'determiner',
@@ -305,6 +309,7 @@ export const STRINGS = {
     like: 'Comme celle-ci :',
     types: {
       plates: { name: 'Plaques de gare', desc: 'La visite guidée : mot à mot, puis le point' },
+      read: { name: 'Lis-la', desc: 'Tu sais la lire ? Ses mots une carte chacun, puis la réponse et un bonus' },
       exam: { name: 'Examen blanc', desc: 'Des questions façon JLPT, puis les réponses' },
       compare: { name: 'Ceci ou cela', desc: 'Deux choses qu’on confond, côte à côte' },
       build: { name: 'Construis-la', desc: 'La phrase montée morceau par morceau' },
@@ -388,7 +393,7 @@ export const STRINGS = {
     },
     cta: {
       plates: 'Garde-le pour ta prochaine révision.',
-      exam: n => `Combien sur ${n} ? Donne ton score en commentaire.`,
+      exam: n => (n > 1 ? `Combien sur ${n} ? Donne ton score en commentaire.` : 'Tu as trouvé ? Dis-le en commentaire.'),
       compare: 'Lequel tu confonds ? Dis-le en commentaire.',
       build: 'Construis la tienne en commentaire.',
       list: 'Garde la liste pour plus tard.',
@@ -398,7 +403,9 @@ export const STRINGS = {
       dialogue: 'Combien de bonnes réponses ? Donne ton score en commentaire.',
       trap: 'Tu es tombé dans le piège ? Dis-le en commentaire.',
       impostor: 'Tu les as tous trouvés ? Donne ton score en commentaire.',
+      read: 'Tu as su la lire ? Dis-le-nous en commentaire.',
     },
+    readPost: { hook: 'Le petit défi de lecture japonais du jour', ask: 'Tu sais la lire et deviner ce qu’elle veut dire ? Glisse pour la réponse 👉' },
     pos: {
       noun: 'nom', verb: 'verbe', adjective: 'adjectif', adverb: 'adverbe', particle: 'particule',
       copula: 'copule', pronoun: 'pronom', auxiliary: 'terminaison', adnominal: 'déterminant',
@@ -447,6 +454,9 @@ export function weld(text) {
  *  an opening mark never ends a line on its own (plan 229j). */
 const curly = text => String(text ?? '').replace(/«\s*/g, '“').replace(/\s*»/g, '”')
 export const weldIf = (lang, text) => (lang === 'fr' ? weld(text) : curly(text))
+/** A text quoted as its language quotes: « … » in French, held to it by
+ *  no-break spaces, “…” in English (plan 248). */
+export const quoted = (lang, text) => (lang === 'fr' ? `«\u00a0${text}\u00a0»` : `“${text}”`)
 
 /** A point's form in the reader's language, or none: the catalogue writes
  *  it in English, and carousel_bank.py turns the French over where it can. */

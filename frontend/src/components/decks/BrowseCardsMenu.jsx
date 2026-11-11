@@ -37,10 +37,12 @@ const SEARCH_DEBOUNCE_MS = 300
 // DeckDetailScreen for the same table and why it is duplicated.
 // 'standard' has no app source, so its Browse menu offers nothing; a
 // 'mixed' deck (plan 215) takes every source, kana through the
-// dictionary's ＋ since there is no kana tab.
+// dictionary's ＋ since there is no kana tab, and a 'lyrics' one (plan
+// 264) the same.
 const SOURCE_FOR_TYPE = {
   kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],
   mixed: ['kanji', 'vocab', 'grammar', 'kana'],
+  lyrics: ['kanji', 'vocab', 'grammar', 'kana'],
 }
 
 function allowedSourcesFor(type) {

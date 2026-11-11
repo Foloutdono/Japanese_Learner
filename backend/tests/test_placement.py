@@ -54,6 +54,15 @@ class PaperValidityTests(unittest.TestCase):
             # Four distinct texts — a duplicated choice is a broken item.
             self.assertEqual(len({c["textJp"] for c in q["choices"]}), 4, q["id"])
 
+    def test_no_seed_prints_an_empty_prompt(self) -> None:
+        """A word the deck writes in kana, put on a reading item, printed
+        no prompt at all over its four spellings -- on one paper in four
+        (80 of the first 300 seeds). Seed 99 missed it until plan 260
+        moved cards between levels and reshuffled the pools."""
+        for seed in range(30):
+            for q in flatten_questions(build_placement_paper(seed)):
+                self.assertTrue(q["promptJp"], (seed, q["id"]))
+
     def test_strip_answers_leaves_no_answer_key(self) -> None:
         for q in strip_answers(self.questions):
             self.assertNotIn("answer", q)

@@ -32,6 +32,18 @@ SELECT step AS "Étape", n AS "Apprenants" FROM (
 ) s ORDER BY o;
 
 -- ==== question
+-- title: Embarqués par source
+-- display: bar
+-- size: 12x6
+-- description: Par où sont arrivés les apprenants qui finissent l'embarquement (plan 313) : le ?src= des liens, sinon le site qui les a envoyés, sinon le store ; « direct » quand rien n'est connu.
+SELECT coalesce(props->>'source', 'avant le plan 313') AS "Source",
+       count(DISTINCT user_id) AS "Apprenants"
+FROM event_log
+WHERE name = 'boarding_done' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
 -- title: Embarquement, étape par étape
 -- display: bar
 -- size: 12x8
@@ -88,7 +100,7 @@ GROUP BY 1, 2, 3 ORDER BY 4 DESC;
 -- title: La carte : champs changés, nom, compte
 -- display: table
 -- size: 12x7
--- description: boarding_done depuis le plan 247 (la carte est le formulaire) : pour chaque façon dont la carte a été laissée (google = gardée avec Google, link = un lien envoyé à une adresse, already = un compte déjà là, none = un invité), combien d'embarquements ont changé l'objectif, le rythme, l'heure ou les lignes dans leur feuille, et combien de cartes portent un nom. Les valeurs par défaut sont ce que la plupart gardent, ou non.
+-- description: boarding_done depuis le plan 247 (la carte est le formulaire) : pour chaque façon dont la carte a été laissée (google = gardée avec Google, password = par un mot de passe, link = un lien envoyé à une adresse, already = un compte déjà là, none = un invité), combien d'embarquements ont changé l'objectif, le rythme, l'heure ou les lignes dans leur feuille, et combien de cartes portent un nom. Les valeurs par défaut sont ce que la plupart gardent, ou non. Avant la PR #467, kept manquait à tout embarquement passé par l'étape du niveau (les deux kana connus) et named à ceux qui ont passé le test : ces lignes sortent de la question, qui ne voit alors que les apprenants ne lisant pas encore les deux kana. Lire une fenêtre qui commence après son déploiement.
 SELECT coalesce(props->>'kept', '—') AS "Carte",
        count(DISTINCT user_id) AS "Apprenants",
        count(*) FILTER (WHERE (props->>'edited_goal')::boolean) AS "Objectif changé",

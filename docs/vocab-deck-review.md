@@ -857,6 +857,180 @@ the old 割::かつ row, which the `term_only` match had filled with
 割【わり】's senses all along. 8,045 → 8,055 cards. The absent lemmas
 went 178 → 161 and the occurrences 419 → 315.
 
+### 260 — the levels two signals agree on (DONE, 2026-10-20)
+
+A review of every card's level against what the repo can measure, with
+one rule for a move, applied to the whole deck rather than to the cards
+that looked wrong:
+
+- **A card moves down only when two signals outside it agree.** The
+  community lists (`jlpt_tanos.json`, the deck's own ancestor) put the
+  word lower, *and* the app puts it in front of a learner lower: a
+  grammar point of that level teaches it, or a sentence of that level
+  has it. The sentences are every one the app shows -- the reading bank,
+  the catalogue's examples, its tours, the conversation bank, dictation,
+  12,599 in all -- read through the breakdown's own lookups and then by
+  hand, because those lookups badge a kana word as a kanji card it is
+  not (ホット as ほっと, ゆうびんきょく as 曲, はかった as 諮る, よる
+  "night" as 因る): none of those counted.
+- **It goes to the level both support**, the lists' or the app's when
+  the app's is higher: 階 is N5 in the lists, but no N5 sentence counts
+  floors, so it stops at N4.
+- **A word the lists do not have** (自信, 曲, 指示, スピード) moves to
+  the lowest level whose sentences use it, and only when its subtitle
+  rank sits inside that level's own range (at or above the level's 75th
+  percentile: N5 3,127, N4 4,753, N3 4,861, N2 14,661).
+- **A transitive and its intransitive move together** where the lists
+  hold both at the target (揃える/揃う, 溜める/溜まる, 代わる/代える).
+- **A spelling changes only on the evidence #360's 然して had**: JMdict
+  marks the word usually kana, its kanji form carries no priority tag,
+  and the course's sentences never write the kanji. 又 is the one card
+  that passes; 頃, 御 (お) and 毎 (ごと) carry priority tags and keep
+  their kanji.
+
+95 cards moved, all down (`vocab_renames.MOVES`, "Plan 260"). The
+largest group is the counters and affixes. The lists write them with a
+tilde (～枚, ～さん), which `placement_report` could not match, so the
+N1 shelf held さん, 歳, 枚, 冊, 匹 and ぐらい although the N5 lesson of
+助数詞 teaches 枚 and names 冊 and 匹, the N5 lesson 〜くらい／〜ぐらい
+is ぐらい, and N5 sentences say すずきさん, 二十さい and 五さつ. The
+report matches those rows now (`_jlpt_index` keys a ～ row as the bare
+word too, still paired with its reading, so ～人 じん is never 人 ひと),
+so the counters still above the lists (区, 員,
+製, 軒, 式, 年生, 番目 and the N2 rows) are on the audit's list
+rather than invisible. The rest are words of the first lessons held at
+N2 and N3 (どんな, ひらがな, カタカナ, よろしく, また), N1 words the
+lists and the app's N2 and N3 sentences agree on, and 24 of the lists'
+N3 the deck held at N2 since the old level-2 split, each in a sentence
+at N3 or below.
+
+**What moved with them.** Ten rows of the reading bank had counted a
+moved word as one of their two words of the level (失礼 at N3, 中身
+and 揃える at N2, 曲 at N1): each takes a word of its level the deck
+already files there, in the smallest change that keeps its sense and
+its translation (人前 is no card, so 相手に失礼; 便利で手頃; 一通り
+確認; 各地の知事; 看病しながら; 蓄えた; 心身の疲れ; 世話を引き受けて;
+懐かしいメロディー), each through `reading_bank_report --check`, and
+the 挑戦 row keeps its words and takes 司法 for its focus.
+`LEVEL_WORDS_FLOOR` moves down with the cards, as it did for plan 227:
+the words left the level they were counted at, not the bank. Seven of
+the moved words had written sentences (plan 227) above their new level:
+the five now at N5 have new ones in the N5 bank's own style (whole
+words in kana, N5 grammar), 御 and おとなしい a word in kana each.
+
+And the placement test, rebuilt from its seed over the moved deck,
+showed a bug it had always had: `exam_kanji_gen`'s reading item took a
+word the deck writes in kana and printed an empty prompt over four
+spellings, on 80 of the first 300 papers. The exams never pass it such
+a word; the placement test passes its whole level. It skips them now,
+and `test_placement` holds thirty seeds to a prompt each.
+
+**Left, each for a reason:**
+
+- **The kana card below its kanji card** (いす / 椅子, おもしろい /
+  面白い, ほんとう / 本当: about eighty of the lists' "placed above"
+  cards) is plan 112's open decision, the owner's, and nothing here
+  touches it.
+- **One signal is not two.** A word the lists put lower with no
+  sentence or lesson below its card stays where it is and is the
+  audit's: 死, 産む, 怒り, ストレス, 区, 員, 製 among them. So is a
+  word only a sentence puts lower, the lists silent and the rank out of
+  range (グラフ, 割り込む).
+- **The lists are not always right.** 160 N1 cards the lists put at N3
+  with nothing in the app saying so (諮る, 享受, 刊行, 年鑑, 女史) are
+  the lists' estimate against the deck's, and stay.
+- **A card stopped short of the lists stays on their list.** 階, 日,
+  度 and 台 (N4, the lists N5), 驚き and 挑戦 (N2, the lists N3) went
+  as far as the app's sentences go, and `placed_above` still shows them:
+  the next placement slice should read this section before it proposes
+  the rest of the way.
+- **No card moves up.** 寒気 and 引き出す (N4, the lists N1 and N2)
+  may be low, but `test_a_rename_that_changes_the_level_moves_down_never_up`
+  forbids it for a reason: a move up takes the card out of a lower
+  learner's deck. It would be a retirement and a new card.
+- **A card whose first gloss is another word**: 通 (つう) leads with
+  *connoisseur*, an N1 sense, though the lists' ～通 is the N2 counter.
+  The gloss is the audit's first.
+- **近付く keeps its spelling**: the subtitles write 近づく nine times
+  in ten and the course always, but its pair 近付ける would be left in
+  the other spelling. A spelling question for both, not a level one.
+
+Deploy, then `python -m scripts.migrate_vocab_ids --yes`: it renames
+each learner's rows and rewrites `deck_cards.level` from the target id.
+
+### The placement audits' proposals (#360's B, #439's 体重; 2026-10-28)
+
+#360 applied its A findings; its proposals waited. Decision 1 settles
+most of them: a word the course's sentences say has a card, at the
+lowest level a sentence or the lists give it (plan 153's rule).
+
+| level | added | the lowest sentence that says it |
+|---|---|---|
+| N5 | もしもし, ただいま | N5 grammar and conversation (ただいま is a wrong reply's greeting at N5, the adverb from N4: the card carries both) |
+| N4 | 専門 | N2 comprehension (専門の業者), the lists' N4; JMdict gives it no sentence, so two are written |
+| N3 | 体重, 主人, 自宅, 生涯, 地面, イメージ | N3 comprehension (体重, 店の主人), conversation (ご自宅) and exam paper (地面); 生涯 and イメージ are the lists' N3 |
+| N2 | 勝手, 全力, 行方, 職場, 自ら | N2 grammar, or the lists' N2 |
+| N1 | 内緒, バッテリー | an N1 exam reading (内緒) and N1 grammar (スマホのバッテリー); the lists' N1 |
+
+Each took its pool row's senses (`pool_moves.json`), so a learner who
+held it as a pool card keeps it after `migrate_pool_cards`.
+
+#360's B5, the class behind 然して: ten cards whose only spelling
+is one JMdict flags rare for a word it marks usually kana, while the
+course writes the kana, became kana cards at their level (`MOVES`):
+纏める, 漸く, 狡い, 飽くまで, 若しかして, 纏め, 外方, 填まる, 嘗て, 態々.
+Two did not:
+
+- **傲る (N1, "to be haughty") stays.** The course's おごる is 奢る, "to
+  treat", in nine sentences of ten (おごるよ, コーヒーをおごってね),
+  which the pool glosses right today; a kana おごる card would gloss
+  them all "haughty". 奢る has no card, though N3 sentences say it:
+  the next placement slice's to propose.
+- **朝御飯 is the owner's call.** Not usually kana, and one of four N5
+  cards (御飯, 朝御飯, 昼御飯, 晩御飯) that spell 御 where the course
+  writes ご or kana. The four move together or not at all.
+
+#360 counted only the `jp` and `sentence` fields, so it read 地面, 内緒,
+イメージ and バッテリー as unused: the exam seeds and N1 grammar say
+them, and they are above. Not added, the lists and a rank alone (#360's
+B4 rest, #439's 菌): 正体, 台詞, 所有, 親父, お袋, 折, 狩り, パパ, リード,
+ノー, 菌 (the course's 菌 is 黴菌, its own card).
+
+Deploy, then `migrate_vocab_ids --yes` and `migrate_pool_cards --yes`.
+
+### 314 — お願いします at N5, the owner's call (2026-11-09)
+
+Plan 314's breakdown reads a closing お願いします as the deck's "please"
+(`card_lookup.resolve_please`), where it had read 願う "to desire". The
+deck held the word twice, in kanji at N1 and in kana at N2: plan 112's
+open pair, a kana card below its kanji card. So the N5 pages, which say
+it from the first conversation, showed an N1 or an N2 card.
+
+The owner moved it to N5, over plan 260's rule: the lists put it at N2,
+where two signals would have stopped. Both cards became one N5 card,
+`vocab_N5_お願いします_おねがいします` (two `MOVES` lines, "Plan 314"),
+since the same word twice at one level is the duplicate 106b and 112
+merged.
+
+- **The spelling is the lists'.** Decision 3: a card's level is the
+  word's, not its kanji's (願 is N3, as 写 is N4 under 写真). The N5 and
+  N4 pages that keep to their kanji write it in kana, which finds the
+  card: the fold, and `FOLDED_FORMS` for the dictionary and the kana
+  index.
+- **The gloss tells it from its neighbours.** ください and どうぞ are
+  "please" at N5 too, so the card reads "please (asking for something,
+  or a favour)", in French and Spanish as well.
+- **The written sentences went.** `example_added.json` holds only words
+  JMdict gives none; the kana card had two, and the kanji card has its
+  own.
+- **It counts as itself.** The fold no longer keeps お, 願う and する as
+  its parts, so an N5 page that says お願いします counts the card, and
+  no 願う (`LOCAL_REV` 47).
+
+The deck is 7,979. Deploy, then `migrate_vocab_ids --yes`: it moves both
+cards' rows onto the N5 card, merging where a learner held both, and a
+pin or a favourite kept under the kana card's key (`KEY_MOVES`).
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104

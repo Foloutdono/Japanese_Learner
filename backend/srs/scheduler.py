@@ -15,8 +15,8 @@ MAX_DIFFICULTY = 3.5
 
 # ── What each grade does ─────────────────────────────────────
 # 0..5 is the canonical scale and stays that way whichever rating bar
-# the learner is using. The four-button bar is this same scale with its
-# two extremes left off (see frontend/src/domain/ratingScales.js), so a
+# the learner is using. The four-button bar is this same scale with
+# Forgot (0) and Almost (2) left off (see frontend/src/domain/ratingScales.js), so a
 # stored quality means exactly what it always meant and a learner can
 # switch bars without their own history changing under them.
 #

@@ -7,13 +7,11 @@ import '@fontsource/space-grotesk/latin-500.css'
 import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
-// ── 机 — the vocabulary's sources on a 1,440px window (plan 183) ─────
-// The page as the owner drew it (pick C): the lead, its gate in a column
-// of its own beside its words, and three stops in the strip, the row
-// shared by as many as were started; the 41 tiers whole in their plate,
-// seven or more cells to a row, and the themes in two columns. The
-// narrowest desk's version is vocabSources.desktop's; a short window's,
-// vocabSources.short's.
+// ── 机 — the vocabulary's sources on a 1,440px window (plan 267) ─────
+// The page as the owner drew it (pick C3): the five doors and the gate
+// on one row, the 41 tiers whole in their band, twenty or so doors to a
+// row, and the themes six to a row. The narrowest desk's version is
+// vocabSources.desktop's; a short window's, vocabSources.short's.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -105,82 +103,58 @@ async function mount() {
   await settle()
 }
 const $ = s => document.querySelector(s)
-const strip = () => $('.desk-sources--resume > .desk-resume')
-const lead = () => strip().querySelector('.desk-resume__card--lead')
-const others = () => [...strip().querySelectorAll(':scope > a.desk-resume__card')]
-const plates = () => [...document.querySelectorAll('.desk-sources__lower > .desk-source')]
-const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
-const cells = () => [...plates()[1].querySelectorAll('.desk-source__cells > a')]
+const doors = () => [...document.querySelectorAll('.desk-linedoors__line .route-stop')]
+const gateCell = () => $('.desk-linedoors__gate')
+const tierBand = () => $('.desk-band--tiers')
+const themeBand = () => $('.desk-band--themes')
+const cells = () => [...tierBand().querySelectorAll('.desk-source__cells > a')]
+const themes = () => [...themeBand().querySelectorAll('.desk-source__rows > a')]
 const near = (a, b) => Math.abs(a - b) < 2
-// The gate's breathing ring stands 9px out of its pill, and the reader's
-// ripples as far: all of it inside the card.
+const box = el => el.getBoundingClientRect()
+// The gate's reader ripples as far as 9px out of its pill: all of it
+// inside its door.
 const RING = 9
-const gateInside = card => {
-  const c = card.getBoundingClientRect()
-  const g = card.querySelector('button.btn-depart--gate').getBoundingClientRect()
+const gateInside = () => {
+  const c = box(gateCell())
+  const g = box(gateCell().querySelector('button.btn-depart--gate'))
   return g.left - RING >= c.left && g.right + RING <= c.right && g.top - RING >= c.top && g.bottom + RING <= c.bottom
 }
 
-afterEach(() => {
-  STATS.items.vocab.N4.started = 0
-  STARTED = MET
-})
+afterEach(() => { STARTED = MET })
 
-describe('the vocabulary\'s sources on a wide desk (plan 183)', () => {
-  it('fills the strip with three stops beside the lead, the most met first, the gate and the air round it in its card', async () => {
-    STATS.items.vocab.N4.started = 40
+describe('the vocabulary\'s sources on a wide desk (plan 267)', () => {
+  it('stands the gate as the line\'s last door, beside the five, the air round it in its door', async () => {
     await mount()
-    expect($('.desk-sources--narrow')).toBeNull()
-    expect(others().map(o => o.getAttribute('href'))).toEqual([
-      '/learn/vocab/N4', '/learn/vocab/tier/1?size=200', '/learn/vocab/tier/5?size=200',
-    ])
-    const card = lead()
-    expect(card.classList.contains('desk-resume__card--split')).toBe(true)
-    expect(gateInside(card)).toBe(true)
-    // The gate beside the words, so the strip is a row of words high, not
-    // the words and the gate under them.
-    const words = card.querySelector('.desk-resume__name').getBoundingClientRect()
-    const gate = card.querySelector('button.btn-depart--gate').getBoundingClientRect()
-    expect(gate.left).toBeGreaterThan(words.right)
-    expect(card.getBoundingClientRect().height).toBeLessThan(200)
-    const band = $('.desk-resume').getBoundingClientRect()
-    expect(others().at(-1).getBoundingClientRect().right).toBeGreaterThan(band.right - 2)
-    for (const o of others()) {
-      const label = o.querySelector('.desk-resume__label')
-      expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
+    const ds = doors().map(box)
+    const g = box(gateCell())
+    expect(near(g.top, ds[0].top)).toBe(true)
+    expect(g.left).toBeGreaterThanOrEqual(ds[4].right - 1)
+    expect(gateInside()).toBe(true)
+    // Each level's name whole, the doors one height.
+    for (const d of doors()) {
+      const name = d.querySelector('.route-stop__jp')
+      expect(name.scrollWidth).toBeLessThanOrEqual(name.clientWidth + 1)
+      expect(near(box(d).height, ds[0].height)).toBe(true)
     }
   })
 
-  it('shares the row among what was started: one stop takes the rest of it, none leaves the lead the whole', async () => {
-    STARTED = { 1: 18 }
-    await mount()
-    expect(others()).toHaveLength(1)
-    const band = $('.desk-resume').getBoundingClientRect()
-    expect(others()[0].getBoundingClientRect().width).toBeLessThan(lead().getBoundingClientRect().width)
-    expect(near(others()[0].getBoundingClientRect().right, band.right)).toBe(true)
-    expect(gateInside(lead())).toBe(true)
-  })
-
-  it('leaves the lead the whole row when nothing else is started', async () => {
-    STARTED = {}
-    await mount()
-    expect(others()).toHaveLength(0)
-    const band = $('.desk-resume').getBoundingClientRect()
-    expect(near(lead().getBoundingClientRect().width, band.width)).toBe(true)
-    expect(lead().classList.contains('desk-resume__card--split')).toBe(true)
-    expect(gateInside(lead())).toBe(true)
-  })
-
-  it('draws the 41 tiers whole, seven or more to a row, and the themes in two columns', async () => {
+  it('draws the 41 tiers whole, a score of doors to a row, and the themes six across', async () => {
     await mount()
     const cs = cells()
     const grid = cs[0].parentElement
-    expect(getComputedStyle(grid).gridTemplateColumns.split(' ').length).toBeGreaterThanOrEqual(7)
+    expect(getComputedStyle(grid).gridTemplateColumns.split(' ').length).toBeGreaterThanOrEqual(16)
     expect(grid.scrollHeight).toBeLessThanOrEqual(grid.clientHeight + 1)
-    const [a, b, c] = rows(plates()[2]).map(r => r.getBoundingClientRect())
-    expect(near(a.top, b.top)).toBe(true)
-    expect(b.left).toBeGreaterThan(a.right)
-    expect(near(c.left, a.left)).toBe(true)
-    for (const p of plates()) expect(p.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(cs[4].classList.contains('desk-source__cell--met')).toBe(true)
+    const rs = themes().map(box)
+    const firstRow = rs.filter(r => near(r.top, rs[0].top))
+    expect(firstRow.length).toBeGreaterThanOrEqual(5)
+    expect(box(themeBand()).bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
+  })
+
+  it('leaves a tier nobody opened unlit', async () => {
+    STARTED = {}
+    await mount()
+    expect(cells().some(c => c.classList.contains('desk-source__cell--met'))).toBe(false)
   })
 })

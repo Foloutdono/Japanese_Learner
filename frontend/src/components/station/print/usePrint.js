@@ -1,21 +1,24 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import PRINT from './print.json'
+import { printHour, printName } from '../../../domain/printHour'
 
 // ── 浮世絵 — the print behind Today's gate (plan 205) ─────────────
 // The owner's pick of the canvas "Tsuji — Today, the visit card"
 // (round 9): the gate drawn on a print of the hour, the dial its sun or
-// its moon. The print is drawn ahead of time (scripts/today-print, a
-// file per hour and frame under public/today/print/<rev>/) and laid
-// behind the gate; the dial and the lines under it are the app's, live,
-// placed in the print's own units so they stand where the canvas put
-// them.
+// its moon; in the season of the canvas "Tsuji — Today, the seasons"
+// (plan 261), so the year turns the print as the hour does. The print is
+// drawn ahead of time (scripts/today-print, a file per print and frame
+// under public/today/print/<rev>/) and laid behind the gate; the dial
+// and the lines under it are the app's, live, placed in the print's own
+// units so they stand where the canvas put them.
 
 export { PRINT }
 
-// Which print the hour shows: one rule with the ambiance's (plan 219).
-export { printHour } from '../../../domain/printHour'
+// Which print the hour shows: one rule with the ambiance's (plan 219);
+// and which the season does, by the month (plan 261).
+export { printHour, printName, printSeason } from '../../../domain/printHour'
 
-// A print fetched once a visit: the hour's file is a few hundred
+// A print fetched once a visit: a print's file is a few hundred
 // kilobytes, and an hour's turn is the only reason to fetch another.
 const scenes = new Map()
 const loading = new Map()
@@ -35,11 +38,12 @@ function loadScene(key) {
   return loading.get(key)
 }
 
-/** The hour's print for the frame, or null until it has come (or when
- *  it cannot: the gate stands on the sky's colours without it). Nothing
- *  is fetched before the frame has said which print it takes. */
-export function usePrintScene(hour, device) {
-  const key = device ? `${hour}-${device}` : null
+/** The print (`spring-dawn`, domain/printHour's printName) for the
+ *  frame, or null until it has come (or when it cannot: the gate stands
+ *  on the sky's colours without it). Nothing is fetched before the frame
+ *  has said which print it takes. */
+export function usePrintScene(name, device) {
+  const key = device ? `${name}-${device}` : null
   const [got, setGot] = useState(null)
   useEffect(() => {
     if (!key || scenes.has(key)) return undefined
@@ -50,10 +54,10 @@ export function usePrintScene(hour, device) {
   return got === key || scenes.has(key) ? scenes.get(key) : null
 }
 
-/** Fetch an hour's print ahead of the moment it is shown: a month's
- *  finish turns the print to night under a veil (plan 250). */
-export function preloadPrint(hour, device) {
-  const key = device ? `${hour}-${device}` : null
+/** Fetch a print ahead of the moment it is shown: a month's finish
+ *  turns the print to night under a veil (plan 250). */
+export function preloadPrint(name, device) {
+  const key = device ? `${name}-${device}` : null
   if (key && !scenes.has(key)) loadScene(key)
 }
 
@@ -67,6 +71,19 @@ const LIFT = { phone: 56, desk: 64 }
 // that width, would swell the dial and lose its foreground under the
 // gate.
 const WIDE = 0.7
+
+/** The print the gate will stand on at this hour, fetched before Today
+ *  is opened (lib/warm.js, plan 292) with the two papers laid over it.
+ *  Which device's print the frame takes is decided once it is measured;
+ *  this guesses it the same way from the window, Today's frame being the
+ *  window less the chrome. A wrong guess costs the fetch it would have
+ *  made anyway. */
+export function preloadHourPrint(desk, now = new Date()) {
+  if (typeof window === 'undefined') return
+  const device = desk || window.innerWidth / window.innerHeight > WIDE ? 'desk' : 'phone'
+  preloadPrint(printName(now, printHour(now)), device)
+  for (const paper of ['grain', 'paper']) new Image().src = `/today/print/${PRINT.rev}/${paper}.png`
+}
 
 // Where the lines stand under the dial's rings, in the print's units:
 // the minutes and the hour they end (or, on a cleared day, what the day
@@ -115,8 +132,8 @@ export function usePrintFrame(layout, anchorRef = null) {
 }
 
 /** The print's inks and geometry as the gate's custom properties. */
-export function printVars(hour, print, box) {
-  const look = PRINT.hours[hour]
+export function printVars(name, print, box) {
+  const look = PRINT.prints[name]
   const frame = PRINT.frames[print]
   const { u, x, y } = box ?? { u: 1, x: 0, y: 0 }
   return {

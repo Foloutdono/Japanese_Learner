@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { saveBlob } from '../lib/platform'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -23,9 +23,11 @@ import { ChoiceField, LongField, PairsField, ReadingOfField } from '../component
 import { pairRows } from '../components/decks/importCards'
 import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
+import { MoreRow } from '../components/decks/MoreRow'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
-import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PencilIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
+import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PencilIcon, PlusIcon, SearchIcon, BooksIcon, FollowIcon } from '../components/ui/Icons'
 import { composing } from '../lib/keyGuards'
+import { errorKey } from '../domain/duel'
 
 // The name the export endpoint chose, out of its Content-Disposition.
 // Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
@@ -57,12 +59,14 @@ function filenameFromDisposition(header) {
 // A deck has ONE STRUCTURE, and it decides both halves: which app cards
 // can be browsed in, and which personal cards can be written. `standard`
 // is a plain front/back pair with no app source behind it; `mixed` (plan
-// 215) takes every source's cards, and writes front/back pairs.
+// 215) and `lyrics` (plan 264) take every source's cards, and write
+// front/back pairs.
 const SOURCE_FOR_TYPE = {
   kanji: ['kanji'], vocab: ['vocab'], grammar: ['grammar'],
   mixed: ['kana', 'kanji', 'vocab', 'grammar'],
+  lyrics: ['kana', 'kanji', 'vocab', 'grammar'],
 }
-const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar', 'mixed']
+const STRUCTURES = ['standard', 'kanji', 'vocab', 'grammar', 'mixed', 'lyrics']
 
 // A browsed-in card is tagged with the pigment of the section it came
 // from — the same colours components/decks/deckTypes.js gives the deck
@@ -344,6 +348,8 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected]     = useState(new Set())
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // The open editor's own deletion, asked in the same sheet.
+  const [confirmingCard, setConfirmingCard] = useState(false)
   // The desk's card table past its first rows (plan 154).
   const [showAll, setShowAll] = useState(false)
   // The More sheet (plan 071): import, export and the deck's own
@@ -384,14 +390,39 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
 
   // ── The library, from the deck's own page ───────────────────
   const [busy, setBusy] = useState(false)
+  // The library reads a deck before it takes it in (plan 310, the
+  // owner's pick B of the three drawn): a refusal keeps the sheet open
+  // and says there which field it was -- the name, with its field to
+  // change it in, since no other screen renames a deck; the description;
+  // or a card, by its front, with the way to its editor, which says it
+  // again (`refusedCard`, C's line). Never the word itself.
+  const [refusal, setRefusal] = useState(null)
+  const [renameTo, setRenameTo] = useState('')
+  const [refusedCard, setRefusedCard] = useState(null)
+  const refusedDeckCard = refusal?.field === 'card'
+    ? cards.find(c => c.origin === 'custom' && c.id === refusal.card_id)
+    : null
 
   function publish(on) {
     if (busy) return
     setBusy(true)
     playUi('click-screen-selection')
+    send(on)
+  }
+
+  // The request itself, for publish() and for the rename that publishes.
+  function send(on) {
+    setRefusal(null)
     apiFetch(`/api/decks/${deck_id}/publish`, session, { method: on ? 'POST' : 'DELETE' })
-      .then(r => r.json())
-      .then(body => {
+      .then(async r => {
+        const body = await r.json().catch(() => null)
+        if (on && body?.detail?.code === 'content_refused') {
+          setRefusal(body.detail)
+          setRenameTo(deck?.name ?? '')
+          setBusy(false)
+          return
+        }
+        if (!r.ok) throw new Error(`publish ${r.status}`)
         track(on ? 'deck_publish' : 'deck_unpublish', on
           ? { structure: deck?.type, cards: cards.length }
           : { structure: deck?.type, followers: body?.followers ?? 0 })
@@ -402,6 +433,30 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       .catch(() => { setBusy(false); setMoreOpen(false) })
   }
 
+  function renameAndPublish() {
+    const name = renameTo.trim()
+    if (!name || busy) return
+    setBusy(true)
+    playUi('click-screen-selection')
+    apiFetch(`/api/decks/${deck_id}`, session, { method: 'PATCH', body: JSON.stringify({ name }) })
+      .then(r => (r.ok ? r.json() : Promise.reject(r)))
+      .then(renamed => {
+        setDeck(d => ({ ...d, name: renamed?.name ?? name }))
+        onChanged?.()
+        send(true)
+      })
+      .catch(() => setBusy(false))
+  }
+
+  function openRefusedCard() {
+    const card = refusedDeckCard
+    if (!card) return
+    playUi('click-screen-selection')
+    closeMore()
+    startEdit(card)
+    setRefusedCard(card.id)
+  }
+
   function unfollow() {
     if (busy) return
     setBusy(true)
@@ -409,6 +464,20 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     apiFetch(`/api/decks/${deck_id}/subscribe`, session, { method: 'DELETE' })
       .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
       .catch(() => { setBusy(false); setConfirmingUnfollow(false) })
+  }
+
+  // The unfollow's second way out (plan 310, the owner's pick): a
+  // follower meets the author here, not in the library, and a block ends
+  // the follow anyway (study/duel_friends.block), so it stands beside it.
+  const [blockFailed, setBlockFailed] = useState(null)
+  function unfollowAndBlock() {
+    if (busy || !deck?.author) return
+    setBusy(true)
+    setBlockFailed(null)
+    playUi('click-screen-selection')
+    apiJson('/api/pvp/blocks', session, { method: 'POST', body: JSON.stringify({ username: deck.author }) })
+      .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
+      .catch(e => { setBusy(false); setBlockFailed(errorKey(e)) })
   }
 
   function makeItMine() {
@@ -442,10 +511,14 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     /* eslint-disable react-hooks/set-state-in-effect -- this IS the route param's synchronisation; see the deck effect above. */
     setBusy(false)
     setMoreOpen(false)
+    setRefusal(null)
+    setRefusedCard(null)
     setConfirmingDeck(false)
     setConfirmingMine(false)
     setConfirmingUnfollow(false)
+    setBlockFailed(null)
     setConfirmingDelete(false)
+    setConfirmingCard(false)
     setSelectMode(false)
     setSelected(new Set())
     setAdding(false)
@@ -479,7 +552,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const closeBrowse = useCallback(() => setShowBrowse(false), [])
   // The same for More, whose dock on the desk (DeskDock) keys its Esc
   // on it. Closing More also drops a deletion that was being asked.
-  const closeMore = useCallback(() => { setMoreOpen(false); setConfirmingDeck(false) }, [])
+  const closeMore = useCallback(() => { setMoreOpen(false); setConfirmingDeck(false); setRefusal(null) }, [])
 
   // Fetched rather than linked: the endpoint needs the bearer token, and
   // a bare <a href> to /api/... sends no Authorization header, so it
@@ -610,6 +683,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     if (desk && adding && !editing) { setAdding(false); return }
     if (!desk || editing || !formTyped()) resetForm()
     setEditing(null)
+    setRefusedCard(null)
     setAdding(true)
     if (desk) { setShowBrowse(false); closeMore() }
   }
@@ -654,9 +728,23 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     setForm(Object.fromEntries(Object.keys({ ...blank, ...fields }).map(k => [k, fields[k] ?? blank[k]])))
     setNotes(card.notes || '')
     setEditing(card.id)
+    setRefusedCard(null)
     setAdding(true)
     if (desk) { setShowBrowse(false); closeMore() }
   }
+
+  // On a phone the form opens over the list, so a card pressed far down
+  // it would open its editor out of sight: the page is carried up to it
+  // (its scroll-margin clears the HUD). Smoothly, unless the phone has
+  // asked for stillness. The desk's form is held in view by its slot.
+  const formRef = useRef(null)
+  useEffect(() => {
+    if (desk || editing == null) return
+    const el = formRef.current
+    if (!el?.scrollIntoView) return
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    el.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' })
+  }, [desk, editing])
 
   function openBrowse() {
     playUi('click-mode-selection')
@@ -685,8 +773,16 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     setSaving(true)
     const body = JSON.stringify({ fields: form, notes })
     // A refused save (a 400 names what is missing) used to be read as
-    // the card itself and put in the list, as a row of nothing.
-    const ok = r => (r.ok ? r.json() : Promise.reject(r))
+    // the card itself and put in the list, as a row of nothing. A deck
+    // others read is read again on every save (plan 310): its refusal
+    // is said in the form, on the card.
+    const refusedAs = editing ?? 'new'
+    const ok = async r => {
+      if (r.ok) { setRefusedCard(null); return r.json() }
+      const said = r.status === 422 ? await r.json().catch(() => null) : null
+      if (said?.detail?.code === 'content_refused') setRefusedCard(refusedAs)
+      throw r
+    }
     if (editing) {
       apiFetch(`/api/decks/${deck_id}/cards/${editing}`, session, {
         method: 'PUT',
@@ -711,6 +807,29 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         .catch(() => {})
         .finally(saved)
     }
+  }
+
+  // The editor's Delete: the card it has open, without a trip through
+  // Select. One DELETE however often the confirm is pressed (plan 211).
+  const editedCard = editing != null ? cards.find(c => c.origin === 'custom' && c.id === editing) : null
+  const deletingCardRef = useRef(false)
+  function deleteEdited() {
+    if (!editedCard || deletingCardRef.current) return
+    deletingCardRef.current = true
+    playUi('click-screen-selection')
+    const card = editedCard
+    deleteCard(card)
+      .then(r => {
+        if (!r.ok) return
+        const key = cardKey(card)
+        setCards(prev => prev.filter(c => cardKey(c) !== key))
+        setSelected(prev => { if (!prev.has(key)) return prev; const next = new Set(prev); next.delete(key); return next })
+        setAdding(false)
+        setEditing(null)
+        resetForm()
+      })
+      .catch(() => {})
+      .finally(() => { deletingCardRef.current = false; setConfirmingCard(false) })
   }
 
   function toggleSelect(key) {
@@ -788,11 +907,14 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // On the desk it stands in the column's dock (plan 123), whose caption
   // says what the phone's label says.
   const cardForm = adding && (
-    <div className="form deckdetail-form">
+    <div className="form deckdetail-form" ref={formRef}>
       {!desk && (
         <span className="form__label">
           {editing ? t.editCard : t.newCard}
         </span>
+      )}
+      {refusedCard != null && refusedCard === (editing ?? 'new') && (
+        <p className="deckdetail-form__refused" role="alert">{t.cardRefused}</p>
       )}
       <div className="deckdetail-form__fields">
         {/* One input per field the structure declares. A kanji card
@@ -871,6 +993,13 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           className="btn-secondary">
           {t.cancel}
         </button>
+        {editedCard && (
+          <button type="button" aria-haspopup="dialog"
+            onClick={() => { playUi('click-mode-selection'); setConfirmingCard(true) }}
+            className="btn-secondary btn-secondary--danger">
+            <TrashIcon size={14} /> {t.delete}
+          </button>
+        )}
         <button onClick={saveCard} disabled={!formComplete() || saving}
           className="btn-primary">
           {editing ? t.save : t.addCard}
@@ -885,21 +1014,39 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // cards in and out. One list of rows, each a glyph and its word, the
   // library's saying where the deck stands; the deletion a list of its
   // own at the end, in the danger's ink, arming the question that fills.
-  const moreRow = (key, icon, label, onClick, { hint, danger = false, disabled = false } = {}) => (
-    <button key={key} type="button" className={`more-row${danger ? ' more-row--danger' : ''}`}
-      onClick={onClick} disabled={disabled} aria-haspopup={danger ? 'dialog' : undefined}>
-      <span className="more-row__icon" aria-hidden="true">{icon}</span>
-      <span className="more-row__text">
-        <span className="more-row__label">{label}</span>
-        {hint && <span className="more-row__hint">{hint}</span>}
-      </span>
-    </button>
+  const moreRow = (key, icon, label, onClick, opts = {}) => (
+    <MoreRow key={key} icon={icon} label={label} onClick={onClick} {...opts} />
   )
   const libraryRow = cards.length > 0 && deck?.visibility !== 'public'
     ? moreRow('publish', <BooksIcon size={16} />, t.libraryPublish, () => publish(true), { hint: t.libraryPublishHint, disabled: busy })
     : deck?.visibility === 'public'
       ? moreRow('unpublish', <CrossIcon size={16} />, t.libraryUnpublish, () => publish(false), { hint: t.libraryPublished, disabled: busy })
       : null
+  // B (plan 310): under the row that was tapped, why the library said
+  // no, and the way to change it.
+  const refusalRows = refusal && (
+    refusal.field === 'name' ? (
+      <>
+        <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedName}</span>
+        <input value={renameTo} onChange={e => setRenameTo(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !composing(e) && renameAndPublish()}
+          placeholder={t.deckNamePlaceholder} aria-label={t.deckNamePlaceholder}
+          className="field" />
+        <button type="button" className="btn-primary" disabled={busy || !renameTo.trim()} onClick={renameAndPublish}>
+          {t.libraryRename}
+        </button>
+      </>
+    ) : refusal.field === 'card' ? (
+      <>
+        <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedCard(refusedDeckCard?.front)}</span>
+        {refusedDeckCard && (
+          <button type="button" className="btn-secondary" onClick={openRefusedCard}>{t.libraryOpenCard}</button>
+        )}
+      </>
+    ) : (
+      <span className="sheet__q sheet__q--danger" role="alert">{t.libraryRefusedDescription}</span>
+    )
+  )
   const moreRows = withCards => {
     const rows = [
       withCards && allowCustom && moreRow('import', <ImportIcon size={16} />, t.import, () => { setMoreOpen(false); setShowImport(true) }),
@@ -909,6 +1056,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     return (
       <>
         {rows.length > 0 && <div className="more-list">{rows}</div>}
+        {refusal && !confirmingDeck && refusalRows}
         {!confirmingDeck && (
           <div className="more-list">
             {moreRow('delete', <TrashIcon size={16} />, t.deleteDeck, () => { playUi('click-mode-selection'); setConfirmingDeck(true) }, { danger: true })}
@@ -1193,7 +1341,9 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       {/* The one part of the page that scrolls, so the head and the gate
           over it never leave the window. */}
       <div className="dk-scroll">
-        {(deskSlot || adding) && <div className="desk-deck__slot">{deskSlot}</div>}
+        {/* An edit's form follows the table down (sticky): a card opened
+            far down the list keeps its form in view while it scrolls. */}
+        {(deskSlot || adding) && <div className={`desk-deck__slot${editing ? ' desk-deck__slot--edit' : ''}`}>{deskSlot}</div>}
 
         {loading && <Loading />}
 
@@ -1421,7 +1571,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
 
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine} initialFocus=".btn-secondary">
+        title={t.libraryMakeMine} sub={deck?.name ?? t.deckFallbackTitle} icon={ImportIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">{t.libraryMakeMineConfirm}</span>
         <button type="button" className="btn-primary" disabled={busy} onClick={makeItMine}>
           {t.libraryMakeMine}
@@ -1431,22 +1581,29 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         </button>
       </Sheet>
 
-      <Sheet open={confirmingUnfollow} onClose={() => setConfirmingUnfollow(false)}
-        jp={deck?.name ?? t.deckFallbackTitle}
-        cap={withdrawn ? t.libraryRemove : t.libraryUnfollow} initialFocus=".btn-secondary">
+      <Sheet open={confirmingUnfollow} onClose={() => { setConfirmingUnfollow(false); setBlockFailed(null) }}
+        title={withdrawn ? t.libraryRemove : t.libraryUnfollow} sub={deck?.name ?? t.deckFallbackTitle}
+        icon={FollowIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">
           {withdrawn ? t.libraryRemoveConfirm : t.libraryUnfollowConfirm}
         </span>
+        {blockFailed && <span className="sheet__q sheet__q--danger" role="alert">{t[blockFailed]}</span>}
         <button type="button" className="btn-primary btn-primary--danger" disabled={busy}
           onClick={unfollow}>
           {withdrawn ? t.libraryRemove : t.libraryUnfollow}
         </button>
-        <button type="button" className="btn-secondary" onClick={() => setConfirmingUnfollow(false)}>
+        {!withdrawn && deck?.author && (
+          <button type="button" className="btn-secondary btn-secondary--danger" disabled={busy}
+            onClick={unfollowAndBlock}>
+            {t.libraryUnfollowBlock(deck.author)}
+          </button>
+        )}
+        <button type="button" className="btn-secondary" onClick={() => { setConfirmingUnfollow(false); setBlockFailed(null) }}>
           {t.cancel}
         </button>
       </Sheet>
 
-      <Sheet open={moreOpen && !desk} onClose={closeMore} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
+      <Sheet open={moreOpen && !desk} onClose={closeMore} title={deck?.name ?? t.deckFallbackTitle} icon={BooksIcon} line="var(--line-decks)">
         {moreRows(true)}
         {confirmingDeck && (
           <>
@@ -1467,7 +1624,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           deletion asks in a dialog of its own, as the three other
           irreversibles here do (plan 120). */}
       <Sheet open={desk && confirmingDeck} onClose={() => setConfirmingDeck(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck} initialFocus=".btn-secondary">
+        title={t.deleteDeck} sub={deck?.name ?? t.deckFallbackTitle} icon={TrashIcon} line="var(--line-decks)" initialFocus=".btn-secondary">
         <span className="sheet__q">
           {deck?.followers > 0
             ? t.libraryDeleteFollowed(deck.followers)
@@ -1487,8 +1644,10 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       <Sheet
         open={confirmingDelete}
         onClose={() => setConfirmingDelete(false)}
-        jp={t.cardsCount(selected.size)}
-        cap={t.delete}
+        title={t.delete}
+        sub={t.cardsCount(selected.size)}
+        icon={TrashIcon}
+        line="var(--line-decks)"
         initialFocus=".btn-secondary"
       >
         <span className="sheet__q">{t.deleteCardsConfirm}</span>
@@ -1496,6 +1655,24 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           <TrashIcon size={14} /> {t.delete}
         </button>
         <button type="button" className="btn-secondary" onClick={() => setConfirmingDelete(false)}>{t.cancel}</button>
+      </Sheet>
+
+      {/* The open card's deletion, from its editor: its front stands
+          where the selection puts its count. */}
+      <Sheet
+        open={confirmingCard && Boolean(editedCard)}
+        onClose={() => setConfirmingCard(false)}
+        title={t.delete}
+        sub={editedCard?.front ?? ''}
+        icon={TrashIcon}
+        line="var(--line-decks)"
+        initialFocus=".btn-secondary"
+      >
+        <span className="sheet__q">{t.deleteCardConfirm}</span>
+        <button type="button" className="btn-primary btn-primary--danger" onClick={deleteEdited}>
+          <TrashIcon size={14} /> {t.delete}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingCard(false)}>{t.cancel}</button>
       </Sheet>
 
       {showImport && (

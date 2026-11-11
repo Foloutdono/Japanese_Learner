@@ -18,8 +18,10 @@
 # that. All four are deliberately NOT built here; _generate_listening_
 # paper_once skips them with a loud log message, the same way
 # exam_vocab_gen.py already skips 語形成 ("no generator yet").
+import json
 import logging
 import random
+import re
 
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_topics import LISTENING_TOPICS, pick_topics
@@ -27,7 +29,7 @@ from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_j
 from study.exam_pipeline import generate_paper
 from study import voice_engine
 from study.exam_tts import synthesize_dialogue, TTSFailed
-from study.llm_shared import soften_kanji, llm_configured
+from study.llm_shared import soften_kanji, llm_configured, chat
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +123,9 @@ def _soften_or_fail(text: str, level: str, q_id: str, what: str) -> str:
     return softened
 
 
-def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) -> dict:
+def _prepare_listening_mcq_item(item, level: str, q_id: str) -> dict:
+    """The item validated and softened to the level's kanji: the text a
+    learner will hear and read, before any audio is made for it."""
     context, turns, question_jp, choices_text, correct_index = _validate_listening_mcq_item(item, q_id)
 
     # Out-of-level kanji is SOFTENED to kana here rather than rejected.
@@ -145,6 +149,71 @@ def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) 
     # includes the correct answer, two right answers.
     if len(set(choices_text)) != 4:
         raise GenerationFailed(f"{q_id}: choices collapsed into duplicates once softened to kana")
+
+    return {
+        "context": context, "turns": turns, "question": question_jp,
+        "choices": choices_text, "correct": correct_index,
+    }
+
+
+# ── The key, checked by a reader who has not seen it (plan 258) ──
+# The model that writes a dialogue also writes which choice is right, and
+# nothing else says it is: a paper once shipped asking who may sit in
+# "this chair" -- which the dialogue says is Takeshi's -- keyed to the
+# speaker who asked, and the learner who answered Takeshi was marked
+# wrong. So a second call reads each finished script and the question
+# WITHOUT the key and says which choice it makes right; an item it does
+# not agree with, or finds ambiguous, is dropped before its audio is made.
+# Fail closed, as exam_vocab_gen's paraphrase check does: a reply that
+# cannot be read keeps no item of the batch.
+_KEY_CHECK_PROMPT = """Below are {n} JLPT listening questions, each a \
+Japanese dialogue, a spoken question about it and 4 numbered printed \
+choices. For EACH, work out from the dialogue alone which choice is \
+correct.
+
+Reply 0 for a question when no choice is clearly right, when more than \
+one choice could be right, or when the question can be read in more than \
+one way. Be strict: a learner is marked wrong for disagreeing with the \
+answer you give.
+
+{items_block}
+
+Respond with ONLY JSON, an array of exactly {n} integers, one per \
+question in order: 1-4 for the choice that is right, or 0."""
+
+
+def _script_lines(p: dict) -> str:
+    lines = [f"{t['speaker']}: {t['textJp']}" for t in p["turns"]]
+    return "\n".join(([p["context"]] if p["context"] else []) + lines)
+
+
+def _keys_agree(prepared: list[dict]) -> list[bool]:
+    """One bool per prepared item: did a reader who never saw the key
+    pick the key. LLMUnavailable is not caught, as in the batch loop."""
+    items_block = "\n\n".join(
+        f"[{i + 1}]\n{_script_lines(p)}\nQuestion: {p['question']}\n"
+        + "\n".join(f"{n + 1}. {c}" for n, c in enumerate(p["choices"]))
+        for i, p in enumerate(prepared)
+    )
+    prompt = _KEY_CHECK_PROMPT.format(n=len(prepared), items_block=items_block)
+    try:
+        content = chat([
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": "Answer the questions."},
+        ], reasoning=False, task="exam-listening-key")
+        cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        return [False] * len(prepared)
+    if not isinstance(data, list) or len(data) != len(prepared):
+        return [False] * len(prepared)
+    return [d == p["correct"] + 1 and isinstance(d, int) and not isinstance(d, bool)
+            for d, p in zip(data, prepared)]
+
+
+def _finish_listening_mcq_question(p: dict, q_id: str, number: int) -> dict:
+    context, turns, question_jp = p["context"], p["turns"], p["question"]
+    choices_text, correct_index = p["choices"], p["correct"]
 
     # Narrator reads the scene-setting line and the question; A/B read
     # the dialogue itself -- three distinct voices (study/exam_tts.py's
@@ -227,12 +296,22 @@ def _build_listening_mcq_mondai(spec: dict, level: str, rng: random.Random) -> d
         # call above) -- synthesize_dialogue is a content-keyed,
         # idempotent call per question on our own voice engine, not
         # part of the token budget.
-        for item in items:
+        prepared = []
+        for i, item in enumerate(items):
+            try:
+                prepared.append(_prepare_listening_mcq_item(item, level, f"{spec['id']}_b{calls}_{i + 1}"))
+            except GenerationFailed as e:
+                logger.warning("Listening-mcq item for %s failed: %s", spec["id"], e)
+        agreed = _keys_agree(prepared) if prepared else []
+        for p, ok in zip(prepared, agreed):
             if len(questions) >= spec["count"]:
                 break
+            if not ok:
+                logger.warning("Listening-mcq item for %s dropped: its key is not the one a reader of the script picks", spec["id"])
+                continue
             q_id = f"{spec['id']}_q{len(questions) + 1}"
             try:
-                q = _build_one_listening_mcq_question(item, level, q_id, len(questions) + 1)
+                q = _finish_listening_mcq_question(p, q_id, len(questions) + 1)
             except GenerationFailed as e:
                 logger.warning("Listening-mcq item for %s failed: %s", spec["id"], e)
                 continue

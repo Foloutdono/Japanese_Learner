@@ -1,46 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 発車案内 — the day's train on the home screen (plan 156,
-     TrainWidget.java). Drawn on sumi (bg-panel) with the panel's two
-     inks (text-on-panel, text-on-panel-soft), as the canvas drew it:
-     the count and what it takes, the word on the right, the lines'
-     stripe, and Depart in the gate's gold. RemoteViews takes only the
-     plainest views, so the stripe is a bitmap the provider draws. -->
+<!-- 発車案内 — the day's train on the home screen (plan 156; redrawn in
+     plan 293, the owner's pick C of the canvas "Tsuji — widgets &
+     notifications"; settled and glazed in plan 318, the owner's A in the
+     colour 5, glass, of the canvas "Tsuji — the home-screen widget,
+     again"). The mark and the learner's hour at the head, Depart as the
+     app's own gate at the foot, and the room between given to the train:
+     the count over its minutes and new cards with the lines' stripe under
+     the count it splits, and the word they know past a hairline as tall
+     as the board's middle, both centred in it. The ground is sumi seen
+     through (widget_bg), and the inks are the panel's, the soft one a
+     step lighter to hold over a bright wallpaper. This is the wide
+     board; widget_train_narrow.xml is the 2×2's, and TrainWidget.java
+     picks between them by the size the launcher gives and sets the
+     measures for its height (fit): the paddings here are the board as
+     drawn. RemoteViews inflates only the plainest views (no bare View),
+     so the hairlines are ImageViews and the stripe a bitmap the provider
+     draws. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:paddingStart="18dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="18dp"
+    android:paddingBottom="16dp">
 
     <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/widget_mark" />
+
+        <TextView
+            android:id="@+id/widget_hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="#cdc0a6"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_body"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/widget_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.18"
-                android:maxLines="1"
-                android:textAllCaps="true"
-                android:textColor="#b3a488"
-                android:textSize="11sp"
-                android:textStyle="bold" />
 
             <LinearLayout
                 android:id="@+id/widget_figures"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
                 android:baselineAligned="true"
                 android:orientation="horizontal">
 
@@ -49,78 +80,154 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
+                    android:fontFeatureSettings="tnum"
                     android:includeFontPadding="false"
+                    android:maxLines="1"
                     android:textColor="#f3ecdf"
-                    android:textSize="40sp"
+                    android:textSize="42sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/widget_unit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="#b3a488"
-                    android:textSize="15sp" />
+                    android:textColor="#cdc0a6"
+                    android:textSize="16sp" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/widget_meta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:paddingTop="4dp"
+                android:textColor="#cdc0a6"
+                android:textSize="13sp" />
+
+            <!-- The stripe under the count it splits: its gap above is
+                 this frame's padding, so fit can set it on any Android. -->
+            <FrameLayout
+                android:id="@+id/widget_stripe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="12dp">
+
+                <ImageView
+                    android:id="@+id/widget_stripe_bars"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:importantForAccessibility="no"
+                    android:scaleType="fitXY" />
+            </FrameLayout>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/widget_word"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:gravity="end"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:layout_marginStart="18dp"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/widget_jp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="serif"
-                android:includeFontPadding="false"
-                android:maxLines="1"
-                android:textColor="#f3ecdf"
-                android:textSize="32sp"
-                android:textStyle="bold" />
+            <ImageView
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                android:importantForAccessibility="no"
+                android:scaleType="fitXY"
+                android:src="@drawable/widget_line" />
 
-            <TextView
-                android:id="@+id/widget_reading"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:maxLines="1"
-                android:textColor="#b3a488"
-                android:textSize="13sp" />
+                android:layout_height="match_parent"
+                android:layout_marginStart="18dp"
+                android:gravity="center_vertical"
+                android:minWidth="92dp"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/widget_meaning"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:maxWidth="150dp"
-                android:textColor="#f3ecdf"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/widget_reading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="0.12"
+                    android:maxLines="1"
+                    android:textColor="#cdc0a6"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/widget_jp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="serif"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textColor="#f3ecdf"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_meaning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:maxWidth="120dp"
+                    android:textColor="#cdc0a6"
+                    android:textSize="13sp" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/widget_stripe"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_marginTop="12dp"
-        android:importantForAccessibility="no"
-        android:scaleType="fitXY" />
-
-    <TextView
+    <!-- Depart: its height is the reader's and this frame's padding (40dp
+         as drawn, 36 where the board is tight), set by fit. -->
+    <FrameLayout
         android:id="@+id/widget_depart"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/widget_button"
-        android:gravity="center"
-        android:textColor="#1c1811"
-        android:textSize="15sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/widget_gate"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="4dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/widget_reader"
+                android:importantForAccessibility="no"
+                android:padding="8dp"
+                android:src="@drawable/widget_scan" />
+
+            <ImageView
+                android:layout_width="2dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="10dp"
+                android:importantForAccessibility="no"
+                android:scaleType="fitXY"
+                android:src="@drawable/widget_gate_line" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_depart_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:maxLines="1"
+            android:textColor="#1c1811"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </FrameLayout>
 </LinearLayout>

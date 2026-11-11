@@ -89,6 +89,39 @@ describe('useDialog', () => {
     expect(document.activeElement).toBe(last)
   })
 
+  it('lands on a roving tab stop\'s own member and wraps over Tab\'s stops alone', async () => {
+    // The paged sheets' shape (plans 290, 291): a strip of roundels that
+    // is one tab stop, the page in view's, over pages of which the others
+    // are inert; and a hidden file input off the Tab order.
+    function Paged() {
+      const dialogRef = useDialog(() => {})
+      return (
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Pages">
+          <button type="button" tabIndex={-1}>One</button>
+          <button type="button" tabIndex={0}>Two</button>
+          <button type="button" tabIndex={-1}>Three</button>
+          <section inert><button type="button">Off before</button></section>
+          <section><button type="button">Board</button></section>
+          <section inert><button type="button">Off after</button></section>
+          <input type="file" tabIndex={-1} aria-hidden="true" />
+        </div>
+      )
+    }
+    const screen = await render(<Paged />)
+    const stop = screen.getByText('Two').element()
+    const board = screen.getByText('Board').element()
+    expect(document.activeElement).toBe(stop)
+
+    board.focus()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
+    expect(document.activeElement).toBe(stop)
+
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
+    )
+    expect(document.activeElement).toBe(board)
+  })
+
   it('restores focus to the opener on unmount', async () => {
     const onClose = vi.fn()
     // Mount without the dialog first and focus the opener button, so that

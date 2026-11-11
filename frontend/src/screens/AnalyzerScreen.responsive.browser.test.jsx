@@ -108,7 +108,8 @@ async function goToPlatform(screen, key) {
   await leaveResult(screen)
   const idx = { text: 0, photo: 1, video: 2 }[key]
   // The control is the desk's; under it the page is the passages and
-  // the line over them (plan 136), whose own file input takes a file.
+  // the line over them (plan 136), whose ＋ holds the other ways in
+  // (plan 317b): startFromFile opens it for its subtitle file.
   const opts = screen.container.querySelectorAll('.anl-sources .seg__opt')
   if (opts.length) opts[idx].click()
   await settle(30)
@@ -133,7 +134,14 @@ async function startFromFile(screen) {
       }],
     })
   await goToPlatform(screen, 'video')
-  const input = screen.container.querySelector('input[type="file"]')
+  // Under the desk the subtitle file is a row of the line's ＋ (plan
+  // 317b), its input in the sheet the ＋ opens.
+  let input = screen.container.querySelector('input[type="file"]')
+  if (!input) {
+    screen.container.querySelector('.anl-entry__add').click()
+    await settle(60)
+    input = document.querySelector('.anl-ways input[type="file"]')
+  }
   const dt = new DataTransfer()
   const srt = ['1', '00:00:01,000 --> 00:00:04,000', '犬', ''].join('\n')
   dt.items.add(new File([srt], 'x.srt', { type: 'text/plain' }))
@@ -143,6 +151,10 @@ async function startFromFile(screen) {
 }
 
 beforeEach(async () => {
+  // The furigana dial is remembered by the browser since plan 263
+  // (displayPrefs.js), and every file in this lane shares one: each test
+  // opens on the default, whatever the last one turned it to.
+  try { window.localStorage.removeItem('tsuji.anlDisplay') } catch { /* none kept */ }
   // The lane's iframe is 414px wide by default — a phone, in effect —
   // and since 2026-09-11 the working rail is built at 1100px and up
   // only (AnalyzerScreen's `wide`). This file's subject is the screen
@@ -179,8 +191,8 @@ describe('AnalyzerScreen structure', () => {
     const panels = screen.container.querySelectorAll('[id^="anl-panel-"]')
     expect(panels.length).toBe(1)
     expect(panels[0].id).toBe('anl-panel-text')
-    // And the three platforms are one control over the page.
-    expect(screen.container.querySelectorAll('.anl-sources .seg__opt').length).toBe(3)
+    // And the four platforms are one control over the page.
+    expect(screen.container.querySelectorAll('.anl-sources .seg__opt').length).toBe(4)
   })
 
   // ── Boarding another platform is a NEW JOB ──

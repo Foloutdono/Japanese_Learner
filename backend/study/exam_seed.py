@@ -34,12 +34,16 @@
 import hashlib
 import json
 import logging
+import random
+import re
 from pathlib import Path
 
 from study.exam_audio_repair import questions_with_audio, turns_from_script
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_catalogue import EXAM_GENERATORS, KIND_META
+from study.exam_levels import kanji_outside, paper_grammar_above
 from study.exam_scoring import flatten_questions
+from study.exam_tells import centre, outlier, tell
 from study.exam_tts import content_key
 from study.exam_validation import paper_gives_answer_away, validate_answer_balance, validate_content
 
@@ -111,9 +115,12 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     it is. The paper-level checks the generators run (exam_pipeline:
     validate_content, the answer-position balance), the one the route
     runs before serving (paper_gives_answer_away), completeness, a
-    sentence-order ★ on a middle slot (exam_grammar_gen.star_slot), and,
-    for listening, that every clip can be remade from its own script
-    (study/exam_audio_repair.py), since no seed ships its audio."""
+    sentence-order ★ on a middle slot (exam_grammar_gen.star_slot), the
+    choices' looks (choice_tells) and the level of what is printed -- no
+    kanji and no grammar point above the paper's level
+    (study/exam_levels.py, plan 257) -- and, for listening, that every
+    clip can be remade from its own script (study/exam_audio_repair.py),
+    since no seed ships its audio."""
     _version, kind, level, _generate = EXAM_GENERATORS[exam_id]
     out = []
     if paper.get("level") != level:
@@ -129,10 +136,93 @@ def problems(exam_id: str, paper: dict) -> list[str]:
     for q in flat:
         if "pieces" in q and q.get("starIndex") not in (1, 2):
             out.append(f"{q.get('id')}: the ★ is on the first or last piece, answered by punctuation")
+        if "pieces" in q and [p.get("id") for p in q["pieces"]] == q.get("order"):
+            out.append(f"{q.get('id')}: the pieces are shown in their right order, so the sentence reads top to bottom")
+    out += choice_tells(paper, level)
+    out += kanji_item_problems(paper, level)
+    out += item_shape_problems(paper, level)
+    out += [f"{where}: kanji outside {level}: {chars}" for where, chars in kanji_outside(paper, kind)]
+    out += [f"{where}: grammar above {level}: {pattern} ({point_level})"
+            for where, pattern, point_level in paper_grammar_above(paper, kind)]
     for q in questions_with_audio(paper):
         turns = turns_from_script(q.get("scriptJp") or "")
         if turns is None or q.get("audioSrc") != f"/exam-audio/{content_key(turns)}.mp3":
             out.append(f"{q.get('id')}: audioSrc is not the clip of its scriptJp")
+    return out
+
+
+def _kinds(level: str) -> dict[str, str]:
+    """The blueprint's type of each mondai id at `level` (the stored papers
+    all say mcq-text)."""
+    return {m["id"]: m["type"] for s in LEVEL_BLUEPRINT[level]["sections"] for m in s["mondai"]}
+
+
+# What the choices give away by how they look beside each other
+# (study/exam_tells.py, plan 257): an answer that is one of two choices a
+# character apart, or the one choice nearest to all the others, is found
+# without reading the question. A listening item is spared the first: its
+# choices are the figures and places the recording gives (5時 / 5時半 /
+# 6時), and what tells them apart is heard.
+def choice_tells(paper: dict, level: str) -> list[str]:
+    kinds = _kinds(level)
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            blueprint = kinds.get(m.get("id"))
+            groups = [m.get("questions") or []]
+            for passage in m.get("passages") or []:
+                groups += [passage.get("blanks") or [], passage.get("questions") or []]
+            for q in (q for group in groups for q in group):
+                choices = [c.get("textJp") or "" for c in q.get("choices") or []]
+                if len(choices) != 4 or q.get("audioSrc"):
+                    continue
+                answer = next((i for i, c in enumerate(q["choices"]) if c.get("id") == q.get("answer")), None)
+                why = tell(choices)
+                if why:
+                    out.append(f"{q.get('id')}: {why}: {' / '.join(choices)}")
+                elif blueprint in ("kanji-reading", "kanji-orthography") and answer in (centre(choices), outlier(choices)):
+                    out.append(f"{q.get('id')}: the answer is the choice most or least like the others: {' / '.join(choices)}")
+    return out
+
+
+# A 漢字読み item's wrong readings are readings (no ぱじめ), none is a
+# reading of the word, and a 表記 item's wrong spellings are no spelling of
+# the word (study/exam_kanji_choices.py, plan 257).
+def kanji_item_problems(paper: dict, level: str) -> list[str]:
+    from study import exam_kanji_choices as kc
+
+    kinds = _kinds(level)
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            check = {"kanji-reading": kc.reading_item_problems, "kanji-orthography": kc.orthography_item_problems}.get(kinds.get(m.get("id")))
+            for q in m.get("questions") or [] if check else []:
+                choices = [c.get("textJp") or "" for c in q.get("choices") or []]
+                answer = next((i for i, c in enumerate(q.get("choices") or []) if c.get("id") == q.get("answer")), None)
+                if len(choices) == 4 and answer is not None:
+                    out += [f"{q.get('id')}: {why}" for why in check(q.get("promptJp") or "", choices, answer)]
+    return out
+
+
+# A fill-in item has its blank and a paraphrase item its underline. A stem
+# edited by hand can lose either, and then shows a finished sentence over
+# four loose words, which no other check notices (plan 257).
+def item_shape_problems(paper: dict, level: str) -> list[str]:
+    kinds = _kinds(level)
+    out = []
+    for section in paper.get("sections") or []:
+        for m in section.get("mondai") or []:
+            kind = kinds.get(m.get("id"))
+            for q in m.get("questions") or []:
+                prompt = q.get("promptJp") or ""
+                if kind == "vocab-context":
+                    blanks = re.findall(r"＿+", prompt)
+                    if len(blanks) != 1 or len(blanks[0]) != 4:
+                        out.append(f"{q.get('id')}: a fill-in stem has one ＿＿＿＿, not {blanks or 'none'}")
+                elif kind == "vocab-paraphrase":
+                    underline = q.get("underlineJp") or ""
+                    if not underline or underline not in prompt:
+                        out.append(f"{q.get('id')}: the underlined word {underline!r} is not in the stem")
     return out
 
 
@@ -170,6 +260,140 @@ def length_tells(papers: list[dict]) -> list[str]:
             out.append(f"picking {name} choice wins {share:.0%} ({wins:.1f} of {items}); "
                        f"length must say nothing, {low:.0%} to {high:.0%}")
     return out
+
+
+# The choice nearest to all the others (study/exam_tells.centre) is what a
+# set of wrong choices written by editing the right one leaves the right
+# one: picked blind, it was the answer of 95% of the old 漢字読み items and
+# of 45% of the N4 grammar ones. Across an exam id's seeds, a blind pick of
+# it must win about as often as a blind pick of four.
+LIKENESS_TELL = 0.36
+LIKENESS_MIN_ITEMS = 40       # fewer items than this say nothing
+
+
+def likeness_tells(papers: list[dict]) -> list[str]:
+    items = hits = 0
+    for paper in papers:
+        for q in flatten_questions(paper):
+            choices = q.get("choices") or []
+            right = [i for i, c in enumerate(choices) if c.get("id") == q.get("answer")]
+            if len(choices) != 4 or len(right) != 1 or q.get("audioSrc"):
+                continue
+            middle = centre([c.get("textJp") or "" for c in choices])
+            if middle is not None:
+                items += 1
+                hits += middle == right[0]
+    if items < LIKENESS_MIN_ITEMS or hits / items <= LIKENESS_TELL:
+        return []
+    return [f"picking the choice most like the others wins {hits / items:.0%} ({hits} of {items}); "
+            f"looks must say nothing, {LIKENESS_TELL:.0%} at most"]
+
+
+# Which slot the key sits in must not step through the slots. A seed writer
+# who spreads the keys by hand counts 1, 2, 3, 4, 1, 2 ...: the balance
+# check (validate_answer_balance, a slot at most 60% of a paper) passes it,
+# and a learner who has seen the first answer has the next ones (the keys of
+# n3-vocab-01's 言い換え stepped one slot on 98% of the time; a blind pick
+# of four does 25%). Per mondai, over an exam id's ten papers.
+ROTATION_TELL = 0.40
+ROTATION_MIN_STEPS = 20
+
+
+def _key_runs(papers: list[dict]) -> dict[str, list[list[dict]]]:
+    """mondai id -> the runs of consecutive 4-choice questions that carry
+    their key in the choices (a passage's questions are one run, a cloze
+    passage's blanks another), in paper order. A listening question's
+    choices are the figures its recording gives, in their own order."""
+    out: dict[str, list[list[dict]]] = {}
+    for paper in papers:
+        for section in paper.get("sections") or []:
+            for m in section.get("mondai") or []:
+                groups = [m.get("questions") or []]
+                for passage in m.get("passages") or []:
+                    groups += [(passage.get("blanks") or []) + (passage.get("questions") or [])]
+                for group in groups:
+                    run = [q for q in group if len(q.get("choices") or []) == 4 and not q.get("audioSrc")
+                           and any(c.get("id") == q.get("answer") for c in q["choices"])]
+                    if run:
+                        out.setdefault(m.get("id"), []).append(run)
+    return out
+
+
+def _slot(q: dict) -> int:
+    return next(i for i, c in enumerate(q["choices"]) if c.get("id") == q.get("answer"))
+
+
+def _steps(runs: list[list[dict]]) -> tuple[int, int, int]:
+    """(steps, steps one slot on, steps to the same slot) over the runs."""
+    n = on = same = 0
+    for run in runs:
+        slots = [_slot(q) for q in run]
+        for a, b in zip(slots, slots[1:]):
+            n += 1
+            on += (b - a) % 4 == 1
+            same += a == b
+    return n, on, same
+
+
+def rotation_tells(papers: list[dict]) -> list[str]:
+    out = []
+    for mondai, runs in _key_runs(papers).items():
+        n, on, _same = _steps(runs)
+        if n >= ROTATION_MIN_STEPS and on / n > ROTATION_TELL:
+            out.append(f"{mondai}: the key sits one slot after the previous one {on / n:.0%} of the time "
+                       f"({on} of {n}); a blind pick does 25%, at most {ROTATION_TELL:.0%}")
+    return out
+
+
+def reslot(data: dict) -> int:
+    """Move the keys of every mondai `rotation_tells` names to a balanced,
+    unpatterned set of slots, and the pieces of a sentence-order item shown
+    in their right order out of it, in place, and return how many questions
+    were moved. Position only: no choice's text changes and the same one is still
+    the key, so nothing that reads the content can tell this ran. The
+    result is seeded by the exam id and the mondai, so it is repeatable."""
+    papers = [entry["paper"] for entry in data["papers"]]
+    flagged = {m.split(":", 1)[0] for m in rotation_tells(papers)}
+    moved = 0
+    # a sentence-order item shown in its right order reads top to bottom
+    for paper in papers:
+        for section in paper.get("sections") or []:
+            for m in section.get("mondai") or []:
+                for q in m.get("questions") or []:
+                    if "pieces" in q and [p.get("id") for p in q["pieces"]] == q.get("order"):
+                        rng = random.Random(f"{data.get('examId')}:{q.get('id')}:{paper.get('title')}")
+                        while [p.get("id") for p in q["pieces"]] == q["order"]:
+                            rng.shuffle(q["pieces"])
+                        moved += 1
+    for mondai, runs in _key_runs(papers).items():
+        if mondai not in flagged:
+            continue
+        rng = random.Random(f"{data.get('examId')}:{mondai}")
+        questions = [q for run in runs for q in run]
+        for _ in range(500):
+            slots = [i % 4 for i in range(len(questions))]
+            rng.shuffle(slots)
+            at = iter(slots)
+            n = on = same = 0
+            for run in runs:
+                chosen = [next(at) for _ in run]
+                for a, b in zip(chosen, chosen[1:]):
+                    n += 1
+                    on += (b - a) % 4 == 1
+                    same += a == b
+            if n and on / n <= 0.30 and same / n <= 0.30:
+                break
+        at = iter(slots)
+        for q in questions:
+            slot = next(at)
+            key = next(c for c in q["choices"] if c.get("id") == q.get("answer"))
+            rest = [c for c in q["choices"] if c is not key]
+            rng.shuffle(rest)
+            rest.insert(slot, key)
+            q["choices"] = [{"id": f"c{i + 1}", "textJp": c["textJp"]} for i, c in enumerate(rest)]
+            q["answer"] = f"c{slot + 1}"
+            moved += 1
+    return moved
 
 
 def authored_texts(paper: dict) -> list[str]:
@@ -224,6 +448,8 @@ def exam_problems(exam_id: str) -> list[str]:
                 out.append(f"{exam_id} #{e.get('n')}: shares a text with #{seen[t]}: {t[:40]}...")
             seen.setdefault(t, e.get("n"))
     out += [f"{exam_id}: {t}" for t in length_tells([e["paper"] for e in entries])]
+    out += [f"{exam_id}: {t}" for t in likeness_tells([e["paper"] for e in entries])]
+    out += [f"{exam_id} {t}" for t in rotation_tells([e["paper"] for e in entries])]
     return out
 
 

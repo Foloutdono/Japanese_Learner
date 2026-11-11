@@ -21,6 +21,7 @@
 #   POST   /api/onboarding/ride/done      stamp tutorial_at (finished or skipped)
 #   DELETE /api/onboarding/ride/done      clear it (Settings' replay)
 #   POST   /api/onboarding/guided/{gate}  note a gate's guide as seen
+#   POST   /api/onboarding/news/{item}    note a new feature as told (plan 287)
 #   DELETE /api/onboarding/guided         forget them all (Settings' replay)
 #
 # The placement round trip is stateless by design: the paper is a pure
@@ -28,6 +29,7 @@
 # rather than storing it. See placement.py's header for why this is not
 # a 21st EXAM_GENERATORS entry.
 import json
+import logging
 import random
 import re
 from datetime import date, datetime, timezone
@@ -45,7 +47,9 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.lines import clean_lines
 from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level, resolve_level
-from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, clean_card_name, ensure_profile_row
+from routes.profile import (
+    _profile_row, apply_kana_rule, apply_level_rule, claim_handle, clean_card_name, ensure_profile_row,
+)
 from routes.reading import _display_seconds, phrase_to_romaji
 from study.furigana import align_sentence
 from routes.vocab import _build_vocab_card
@@ -59,6 +63,7 @@ from study.placement import PER_LEVEL, build_placement_paper, recommend_level, s
 from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 _SEED_BITS = 32
 
@@ -286,7 +291,8 @@ def start_climb(user_id: str = Depends(get_user_id)):
 def answer_climb(payload: ClimbPayload, user_id: str = Depends(get_user_id)):
     """The next question, or, once a level is not cleared (or N1 is),
     where to board. Never the answer key."""
-    return {"seed": payload.seed, **walk(payload.seed, payload.answers, stop=payload.stop)}
+    step = walk(payload.seed, payload.answers, stop=payload.stop)
+    return {"seed": payload.seed, **step}
 
 
 @router.post("/api/onboarding/placement")
@@ -317,7 +323,9 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
     # A replay of the office below the level it last stored is a move
     # down, and gives back what that level assumed (plan 224), as
     # Settings' does; anything else seeds as the first boarding did.
-    previous = _profile_row(user_id)[1]
+    previous_row = _profile_row(user_id)
+    previous = previous_row[1]
+    first_boarding = previous_row[3] is None
     has_goal = payload.goalLevel is not None
     conn = db_conn()
     try:
@@ -373,6 +381,15 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         conn.commit()
     finally:
         conn.close()
+    # 署名 → handle (plan 247b): the first boarding's name is the public
+    # username too, when it spells one. The card is already saved, so a
+    # failure here costs the boarding nothing: the handle stays as drawn.
+    username = None
+    if first_boarding and payload.cardName:
+        try:
+            username = claim_handle(user_id, payload.cardName)
+        except Exception:
+            logger.exception("the handle could not be claimed from the card name")
     # Write-through so this worker's resolver serves the new level
     # immediately rather than after its TTL (core/user_level.py).
     note_stored_level(user_id, payload.jlptLevel)
@@ -401,6 +418,8 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         "notifications": payload.notifications,
         "lines": payload.lines,
         "cardName": payload.cardName,
+        # The handle the name became, null when the learner's stayed.
+        "username": username,
     }
 
 
@@ -651,17 +670,40 @@ def mark_guided(gate: str, user_id: str = Depends(get_user_id)):
     # The first time wins, like every stamp here: a guide replayed from
     # Settings clears the map first (DELETE below), so a second POST on
     # a gate already in it is a double-tap and changes nothing.
+    # Today's guide shows the duels' key since plan 287, so its end is
+    # the key's news told too: the sheet that announces it is for the
+    # learners whose Today guide ended before (profile.duels_news_open).
     now = datetime.now(timezone.utc).isoformat()
     (guided,) = _stamp(
         """
         UPDATE user_profiles
-        SET guided = CASE WHEN guided ? %s THEN guided ELSE guided || %s::jsonb END
+        SET guided = CASE WHEN guided ? %s THEN guided ELSE guided || %s::jsonb END,
+            duels_news_at = CASE WHEN %s THEN COALESCE(duels_news_at, NOW()) ELSE duels_news_at END
         WHERE user_id = %s
         RETURNING guided
         """,
-        (gate, json.dumps({gate: now})), user_id,
+        (gate, json.dumps({gate: now}), gate == "today"), user_id,
     )
     return {"guided": guided}
+
+
+# 新しい — a feature told once, by its column (plan 287). A closed set:
+# the item names a column, so it is never taken from the path as is.
+NEWS = {"duels": "duels_news_at"}
+
+
+@router.post("/api/onboarding/news/{item}")
+def mark_news(item: str, user_id: str = Depends(get_user_id)):
+    """Today's sheet announcing a feature was put away, whichever way:
+    the first time wins, as every stamp here."""
+    column = NEWS.get(item)
+    if column is None:
+        raise HTTPException(status_code=422, detail="unknown news")
+    (at,) = _stamp(
+        f"UPDATE user_profiles SET {column} = COALESCE({column}, NOW()) WHERE user_id = %s RETURNING {column}",
+        (), user_id,
+    )
+    return {"item": item, "at": at.isoformat()}
 
 
 @router.delete("/api/onboarding/guided")

@@ -48,6 +48,7 @@ import random
 from functools import lru_cache
 
 from content.grammar_points_data import localise
+from study.furigana import hold_word
 from study.grammar_examples import BLANK
 from study.grammar_tour import _parts
 
@@ -83,6 +84,9 @@ def cut(jp: str, filling: str) -> tuple[list[dict], list[dict]] | None:
         if not part.get("highlight"):
             question.append(part)
         elif not (question and question[-1].get("blank")):
+            # The word before the hole a part of its own, which the
+            # client holds the hole to (furigana.hold_word).
+            question = hold_word(question, filled, at)
             question.append({"text": BLANK, "blank": True})
     return question, [{k: v for k, v in p.items() if k != "highlight"} for p in marked]
 

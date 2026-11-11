@@ -1,7 +1,7 @@
 import logging
 import random
 from fastapi import APIRouter, Depends, HTTPException, Query
-from core.auth import get_user_id, prefixed, unprefixed
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
@@ -49,8 +49,8 @@ MAX_BATCH = 25
 
 
 class ReviewPayload(BaseModel):
-    card_id:    str
-    mode:       str
+    card_id:    str = Field(max_length=CARD_ID_MAX)
+    mode:       str = Field(max_length=MODE_MAX)
     quality:    int
     # The card's stage *before* this review, exactly as it was handed
     # back on the card payload (see _build_grammar_card's "stage" field
@@ -358,7 +358,7 @@ def mark_tutorials(cards: list[dict], user_id: str) -> list[dict]:
 def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
                   new_limit: int | None = None):
     """
-    Shared by /api/grammar/card and /api/grammar/cards: resolves the
+    Used by /api/grammar/cards: resolves the
     level, picks up to
     `count` due/new card ids (excluding anything already sitting
     unreviewed in the caller's queue), and builds the full payload for
@@ -435,26 +435,13 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     return grammar_list, cards
 
 
-@router.get("/api/grammar/card")
-def get_grammar_card(level: str, lang: str = "fr", m: Mode = Depends(require_mode(GRAMMAR)),
-                     user_id: str = Depends(get_user_id)):
-    mode = m.key
-    grammar_list, cards = _select_cards(level, m, lang, count=1, exclude_ids=set(), user_id=user_id)
-    if grammar_list is None:
-        return {"error": "Unknown level"}
-    if not cards:
-        logger.warning("grammar study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)
-        return {"done": True}
-    return cards[0]
-
-
 @router.get("/api/grammar/cards")
 def get_grammar_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
                       beyond_target: bool = Query(False),
                       m: Mode = Depends(require_mode(GRAMMAR)),
                       user_id: str = Depends(get_user_id)):
     """
-    Batch version of /api/grammar/card — returns up to `count` cards at
+    Returns up to `count` cards at
     once so the frontend can keep a session queue filled instead of
     fetching one card per answer (see useCardSession). `exclude` is a
     comma-separated list of raw (unprefixed) card ids the client

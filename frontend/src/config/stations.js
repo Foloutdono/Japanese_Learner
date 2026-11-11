@@ -75,6 +75,10 @@ const STATIONS = {
   // config/identity.js — see that file for why the distinction earns
   // its own registry.
   '/profile/stats':         { code: 'TO', kana: 'とうけい' },
+  // 番付 (plan 262): the whole board, behind the profile's.
+  '/profile/banzuke':       { code: 'BZ', kana: 'ばんづけ' },
+  // 対戦 (plan 279): the duels, behind the profile's door.
+  '/profile/duels':         { code: 'TS', kana: 'たいせん' },
 
   // 本日 — the daily queue. Not a line on the map (see config/tabs.js's own
   // note on why /today is scope: 'today'), but every other screen it

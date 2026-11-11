@@ -99,12 +99,34 @@ const deckAlone = <Routes><Route path="/learn/decks/:deck_id" element={<DeckDeta
 const shelfCalls = () => api.apiFetch.mock.calls.filter(([p, , o]) => p === '/api/decks' && !o?.method).length
 
 describe('the shelf on the desk', () => {
-  it('opens on its first deck, the list beside the page', async () => {
+  it('opens on the Bibliothèque: the list beside the library (plan 269)', async () => {
     await mount('/learn/decks', shelf)
     await settle(400)
-    expect(here.path).toBe('/learn/decks/1')
+    // The bare shelf no longer opens its first deck for you.
+    expect(here.path).toBe('/learn/decks')
+    const list = $('.desk-split--library > .desk-split__list')
+    const page = $('.desk-split--library > .desk-split__page')
+    expect(list.getBoundingClientRect().right).toBeLessThanOrEqual(page.getBoundingClientRect().left)
+    expect(page.querySelector('.lib-catalogue')).not.toBeNull()
+    // The library's own console heads the page; the shelf keeps its own.
+    expect(page.querySelector('.lib-catalogue > .console')).not.toBeNull()
+    expect(list.querySelector('.shelf-console')).not.toBeNull()
+    // No deck is open, and the list is still one stop, on its first row.
+    const rows = [...list.querySelectorAll('.shelf-row')]
+    expect(rows.map(r => r.getAttribute('aria-current'))).toEqual([null, null])
+    expect(rows.map(r => r.tabIndex)).toEqual([0, -1])
+    // The library is the page now, not a door at the list's foot.
+    expect(list.lastElementChild.classList.contains('decks-doors')).toBe(true)
+    expect(list.querySelectorAll('.decks-doors > *')).toHaveLength(1)
+    expect($$('main')).toHaveLength(1)
+  })
+
+  it('opens a deck beside the shelf, the list beside the page', async () => {
+    await mount('/learn/decks/1', shelf)
+    await settle(400)
     const list = $('.desk-split--decks > .desk-split__list')
     const page = $('.desk-split--decks > .desk-split__page')
+    expect($('.desk-split--library')).toBeNull()
     expect(list.getBoundingClientRect().right).toBeLessThanOrEqual(page.getBoundingClientRect().left)
     // The index field over the types as glyph chips, each with its count.
     const console_ = list.querySelector('.shelf-console')
@@ -119,7 +141,7 @@ describe('the shelf on the desk', () => {
     expect(page.querySelector('.dk-head__name').textContent).toBe('Voyage')
     // The page is the shelf's: one bar, one <main>.
     expect($$('main')).toHaveLength(1)
-    // The doors at the list's foot, New deck first.
+    // The door at the list's foot: New deck.
     expect(list.lastElementChild.classList.contains('decks-doors')).toBe(true)
     expect(list.lastElementChild.firstElementChild.classList.contains('decks-doors__create')).toBe(true)
   })
@@ -248,6 +270,35 @@ describe('a deck on the desk', () => {
     expect($('.desk-deck__slot .deckdetail-form')).not.toBeNull()
     expect($('.dk-gate')).toBeNull()
     expect($('.dk-scroll > .dk-cards')).not.toBeNull()
+  })
+
+  it('holds an edit\'s form over the table as it scrolls, and deletes its card from it', async () => {
+    await mount('/learn/decks/1', deckAlone)
+    await settle()
+    $('.dk-all').click()
+    await settle(60)
+    const scroll = $('.dk-scroll')
+    scroll.style.maxHeight = '320px'
+    $$('.dk-cards > .dk-card').at(-1).click()
+    await settle(60)
+    const slot = $('.desk-deck__slot--edit')
+    expect(slot.querySelector('.deckdetail-form')).not.toBeNull()
+    // The rows pass under it: its top stays the scroller's.
+    scroll.scrollTop = scroll.scrollHeight
+    await settle(60)
+    expect(scroll.scrollTop).toBeGreaterThan(0)
+    expect(Math.round(slot.getBoundingClientRect().top)).toBe(Math.round(scroll.getBoundingClientRect().top))
+    // Delete, asked in the sheet, takes the open card and closes the form.
+    const del = slot.querySelector('.btn-secondary--danger')
+    expect(del.textContent.trim()).toBe('Supprimer')
+    del.click()
+    await settle(60)
+    expect($('.sheet__q')?.textContent).toMatch(/^Supprimer cette carte\s\?$/)
+    $$('.btn-primary--danger').find(b => b.closest('.sheet')).click()
+    await settle(60)
+    expect(api.apiFetch).toHaveBeenCalledWith('/api/decks/1/cards/17', {}, { method: 'DELETE' })
+    expect($('.desk-deck__slot')).toBeNull()
+    expect($$('.dk-cards > .dk-card').map(r => r.querySelector('.dk-card__jp').textContent)).not.toContain('降りる')
   })
 
   it('rides its lanes of the day\'s queue from the gate, and comes back to it', async () => {

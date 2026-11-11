@@ -9,13 +9,38 @@ default_platform(:ios)
 platform :ios do
   desc "Archive the app and push it to TestFlight"
   lane :beta do
+    # The key secret is the .p8 file, pasted as it is or in base64; either
+    # is read back into the PEM OpenSSL wants, its body rewrapped, so a
+    # paste that lost its line breaks still reads. Anything else (empty,
+    # another file) stops here and names the secret, where it used to
+    # reach OpenSSL as "invalid curve name" (every tag up to v1.1.4).
+    key_secret = ENV.fetch("APP_STORE_CONNECT_KEY_P8", "").strip
+    key_text = key_secret.include?("BEGIN PRIVATE KEY") ? key_secret : key_secret.unpack1("m")
+    key_body = key_text[/-----BEGIN PRIVATE KEY-----(.+?)-----END PRIVATE KEY-----/m, 1]
+    unless key_body
+      UI.user_error!("APP_STORE_CONNECT_KEY_P8 is not the .p8 key: paste the whole " \
+                     "AuthKey_XXXX.p8 file, from -----BEGIN PRIVATE KEY----- to " \
+                     "-----END PRIVATE KEY-----, see docs/release.md")
+    end
+    key_pem = "-----BEGIN PRIVATE KEY-----\n" \
+              "#{key_body.gsub(/\s+/, '').scan(/.{1,64}/).join("\n")}\n" \
+              "-----END PRIVATE KEY-----\n"
+
+    # The version comes from the tag (v1.2.3 is 1.2.3), the build number
+    # from the workflow run. Refused here when malformed rather than
+    # archived and turned away by App Store Connect.
+    version = ENV.fetch("MARKETING_VERSION", "").delete_prefix("v")
+    build = ENV.fetch("BUILD_NUMBER", "")
+    UI.user_error!("MARKETING_VERSION must be a tag like v1.2.3, got #{ENV['MARKETING_VERSION'].inspect}") unless version.match?(/\A\d+\.\d+\.\d+\z/)
+    UI.user_error!("BUILD_NUMBER must be a whole number, got #{build.inspect}") unless build.match?(/\A\d+\z/)
+
     # The App Store Connect API key, from the three secrets: no Apple ID,
     # no two-factor prompt, no session to expire mid-run.
     api_key = app_store_connect_api_key(
       key_id: ENV.fetch("APP_STORE_CONNECT_KEY_ID"),
       issuer_id: ENV.fetch("APP_STORE_CONNECT_ISSUER_ID"),
-      key_content: ENV.fetch("APP_STORE_CONNECT_KEY_P8"),
-      is_key_content_base64: true,
+      key_content: key_pem,
+      is_key_content_base64: false,
       in_house: false
     )
 
@@ -27,15 +52,6 @@ platform :ios do
       type: "appstore",
       api_key: api_key,
       readonly: false
-    )
-
-    increment_version_number(
-      version_number: ENV.fetch("MARKETING_VERSION", "1.0.0"),
-      xcodeproj: "App.xcodeproj"
-    )
-    increment_build_number(
-      build_number: ENV.fetch("BUILD_NUMBER", "1"),
-      xcodeproj: "App.xcodeproj"
     )
 
     # match wrote each profile's name into the environment as
@@ -69,13 +85,20 @@ platform :ios do
         provisioningProfiles: profiles.values.to_h
       },
       output_directory: "output",
-      clean: true
+      clean: true,
+      # The version and build set on the command line, not by agvtool:
+      # both targets' Info.plists read $(MARKETING_VERSION) and
+      # $(CURRENT_PROJECT_VERSION), so the app and the widget it embeds
+      # carry the same pair (App Store Connect refuses an extension whose
+      # version differs from its app's), and the project needs none of
+      # the Apple Generic Versioning that agvtool asks for and it lacks.
+      xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build}"
     )
 
     pilot(
       api_key: api_key,
       skip_waiting_for_build_processing: true,
-      changelog: "Build #{ENV.fetch('BUILD_NUMBER', '1')} from the mobile workflow."
+      changelog: "Build #{build} (#{version}) from the mobile workflow."
     )
   end
 end

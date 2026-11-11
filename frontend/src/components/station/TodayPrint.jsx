@@ -5,6 +5,7 @@ import { useDeparture } from '../../stores/departure'
 import { useReducedMotion } from '../dayclear/useReducedMotion'
 import { handOver, liftLayer } from './print/liftPrint'
 import { PRINT, usePrintScene } from './print/usePrint'
+import { intlLocale } from '../../lib/locale'
 
 // ── 浮世絵 — the print of the hour, behind Today's gate (plan 205) ──
 // The owner's pick of the canvas "Tsuji — Today, the visit card"
@@ -13,7 +14,12 @@ import { PRINT, usePrintScene } from './print/usePrint'
 // coming home on the bay; 落雁 dusk, the geese coming down under the
 // moon; 秋月 the night, the autumn moon, the fishing fires. Fuji over
 // the bay, the bullet train crossing on its stone viaduct, a pine and
-// the autumn's grasses in front.
+// the autumn's grasses in front. And the year choosing the season
+// (plan 261, the canvas "Tsuji — Today, the seasons"): the cherry and
+// its petals in spring; in summer Red Fuji, the cloud peak, the crape
+// myrtle, the fireflies, August's fireworks; the maples in autumn; the
+// snow and the red plum in winter. `look` names the print
+// (domain/printHour's printName).
 //
 // The print is layered the way it is drawn: the sky; the sky's wood
 // grain (a tile, drawn once); what lies behind the train; the train on
@@ -37,24 +43,70 @@ import { PRINT, usePrintScene } from './print/usePrint'
 const lifted = new WeakMap()
 const drawn = (scene, name) => `<svg viewBox="0 0 ${scene.w} ${scene.h}" focusable="false">${scene.layers[name]}</svg>`
 
+// 予熱 (plan 292): each layer as it stood when Today was last left, put
+// back as it is when Today is opened again. Rebuilt at every visit, the
+// hand-over alone (getAnimations, then every loop's keyframes) held the
+// tab bar's tap for most of a second on a phone. Its loops are paused
+// while it is out of the page -- the browser would go on turning them,
+// unseen, on every frame of every other screen -- and play again, all
+// together and so still in step, when it is back. One print's layers at
+// a time: another print (the hour turned, the frame went wide) lets the
+// last one's go.
+let kept = { scene: null, layers: new Map() }
+
+function keptLayers(scene) {
+  if (kept.scene !== scene) {
+    for (const layer of kept.layers.values()) for (const a of layer.moving) a.cancel()
+    kept = { scene, layers: new Map() }
+  }
+  return kept.layers
+}
+
+function buildLayer(el, scene, name) {
+  const done = lifted.get(scene) ?? {}
+  if (!(name in done)) {
+    el.innerHTML = drawn(scene, name)
+    try {
+      done[name] = `<div class="tpr-lift__root">${liftLayer(el.firstChild)}</div>`
+    } catch {
+      done[name] = null
+    }
+    lifted.set(scene, done)
+  }
+  el.innerHTML = done[name] ?? drawn(scene, name)
+  return { node: el.firstChild, moving: done[name] ? handOver(el.firstChild) : [] }
+}
+
 function PrintLayer({ scene, name }) {
   const ref = useRef(null)
   const reduced = useReducedMotion()
   useLayoutEffect(() => {
     const el = ref.current
-    const done = lifted.get(scene) ?? {}
-    if (!(name in done)) {
-      el.innerHTML = drawn(scene, name)
-      try {
-        done[name] = `<div class="tpr-lift__root">${liftLayer(el.firstChild)}</div>`
-      } catch {
-        done[name] = null
+    const layers = keptLayers(scene)
+    const key = `${name}:${reduced ? 'still' : 'moving'}`
+    let layer = layers.get(key)
+    // Another print mounted at once keeps its own: a node has one place.
+    if (layer && !layer.node.isConnected) {
+      el.replaceChildren(layer.node)
+      for (const a of layer.moving) a.play()
+    } else {
+      // A change to reduced motion lets the other way go.
+      for (const [k, other] of layers) {
+        if (k !== key && k.startsWith(`${name}:`) && !other.node.isConnected) {
+          for (const a of other.moving) a.cancel()
+          layers.delete(k)
+        }
       }
-      lifted.set(scene, done)
+      layer = buildLayer(el, scene, name)
+      if (!layers.has(key)) layers.set(key, layer)
     }
-    el.innerHTML = done[name] ?? drawn(scene, name)
-    const moving = done[name] ? handOver(el.firstChild) : []
-    return () => { for (const a of moving) a.cancel() }
+    // Taken out and paused, for the next visit to play again. A layer
+    // not kept (another print held the place) stops for good.
+    return () => {
+      layer.node.remove()
+      const keep = kept.layers.get(key) === layer
+      for (const a of layer.moving) keep ? a.pause() : a.cancel()
+    }
   }, [scene, name, reduced])
   return <div className="tpr__layer" ref={ref} />
 }
@@ -78,8 +130,8 @@ function useUnderGate() {
   return departing != null && covered === departing
 }
 
-export function TodayPrint({ hour, device, frameRef, train = true }) {
-  const scene = usePrintScene(hour, device)
+export function TodayPrint({ look, device, frameRef, train = true }) {
+  const scene = usePrintScene(look, device)
   const under = useUnderGate()
   const box = scene ? `0 0 ${scene.w} ${scene.h}` : null
   return (
@@ -116,16 +168,16 @@ export function TodayPrint({ hour, device, frameRef, train = true }) {
 // print's vermilion, set down its right edge the way a print carries
 // it. Said whole to a screen reader, in the learner's language (a
 // paragraph cannot be named, so the words are there, unseen).
-export function PrintTitle({ now, hour }) {
+export function PrintTitle({ now, look }) {
   const { t, lang } = useLang()
-  const day = new Intl.DateTimeFormat(lang === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }).format(now)
+  const day = new Intl.DateTimeFormat(intlLocale(lang), { weekday: 'long', day: 'numeric', month: 'long' }).format(now)
   return (
     <p className="tpr-title">
       <span lang="ja" aria-hidden="true">
         {kanjiNumber(now.getMonth() + 1)}月{kanjiNumber(now.getDate())}日
-        <span className="tpr-title__view">{PRINT.hours[hour].view}</span>
+        <span className="tpr-title__view">{PRINT.prints[look].view}</span>
       </span>
-      <span className="sr-only">{t.printTitle(day, t.printViews[hour])}</span>
+      <span className="sr-only">{t.printTitle(day, t.printViews[PRINT.prints[look].viewKey])}</span>
     </p>
   )
 }

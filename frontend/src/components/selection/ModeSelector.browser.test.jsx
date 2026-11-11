@@ -73,7 +73,7 @@ describe('ModeSelector — the cards in a row are one height', () => {
         got.some(r => r.length > 1 && r[0].slot > 120),
         `no row at ${width}px was made tall by a wrapped description`,
       ).toBe(true)
-      screen.unmount()
+      await screen.unmount()
     }
   }, 30000)
 
@@ -129,6 +129,6 @@ describe('ModeSelector — the cards in a row are one height', () => {
     const ghost = screen.container.querySelector('.platform-slot__action--ghost')
     expect(ghost, 'the actionless slot should still reserve the row').not.toBeNull()
     expect(getComputedStyle(ghost).visibility).toBe('hidden')
-    screen.unmount()
+    await screen.unmount()
   }, 30000)
 })

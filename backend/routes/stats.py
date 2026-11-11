@@ -30,8 +30,8 @@ def _empty_bucket(total: int) -> dict:
         "mastered": 0,
         "learned": 0,   # what the cards add up to, whole (plan 184); set once the sums are in
         "due_now": 0,
-        "reviews": 0,   # sum of total_reviews across cards in this bucket
-        "correct": 0,   # sum of correct_reviews across cards in this bucket
+        "reviews": 0,   # answers across cards in this bucket (_state_row's `answers`)
+        "correct": 0,   # right answers across them (`correct_answers`)
     }
 
 
@@ -161,8 +161,11 @@ def get_stats(user_id: str = Depends(get_user_id)):
         if item["due"]:
             bucket["due_now"] += 1
 
-        bucket["reviews"] += item["total_reviews"]
-        bucket["correct"] += item["correct_reviews"]
+        # Answers, not the row's counts: a stop the level rule marked
+        # known is mastered on the grid and was answered nowhere -- a
+        # deck of them read a hundred reviews at 100% (plan 300).
+        bucket["reviews"] += item["answers"]
+        bucket["correct"] += item["correct_answers"]
         progress.setdefault((source, deck_key, mode), []).append(item["progress"])
 
         # A row with no reviews behind it is not progress on the card,
@@ -284,8 +287,6 @@ def reset_stats(user_id: str = Depends(get_user_id),
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT DISTINCT card_id FROM card_modes WHERE card_id LIKE %s", (prefix,))
-            keys_to_delete = [row[0] for row in cur.fetchall()]
             # Deleted first, and in one transaction with nothing else, so a
             # failure cannot leave the schedule cleared while the history
             # that explains it survives.
@@ -312,5 +313,18 @@ def reset_stats(user_id: str = Depends(get_user_id),
     finally:
         conn.close()
     srs.forget_history(user_id)
-    srs.delete_cards(keys_to_delete)
+    # The schedule, by the same prefix: an id read off card_modes alone
+    # missed a `cards` row with no mode left (a retired mode, an
+    # assumption given back), and cost a round trip to read.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM card_modes WHERE card_id LIKE %s", (prefix,))
+            cur.execute("DELETE FROM cards WHERE id LIKE %s", (prefix,))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
     return {"ok": True}

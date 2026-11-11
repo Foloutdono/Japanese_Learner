@@ -27,8 +27,17 @@
 # /api/today spends it too, since plan 098: the daily queue carries
 # the day's RATION of new cards -- what is left of the target -- beside
 # the reviews, which are never budgeted (routes/today.py's header).
+#
+# And since plan 273 a mode the learner rides beyond the default -- one
+# added to Today, or a main mode they chose -- spends it on a card met
+# before too: the ration deals such a mode cards the learner already
+# has, whose first answer there starts nothing get_new_items_today
+# counts, and a ration that never saw itself spent would deal again on
+# every batch (srs.get_mode_firsts_today).
 import logging
 from dataclasses import dataclass
+
+from study import main_modes
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +73,7 @@ def resolve_pace(user_id: str) -> Pace | None:
         try:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT daily_new_target FROM user_profiles WHERE user_id = %s",
+                    "SELECT daily_new_target, main_modes, extra_modes FROM user_profiles WHERE user_id = %s",
                     (user_id,),
                 )
                 row = cur.fetchone()
@@ -73,7 +82,11 @@ def resolve_pace(user_id: str) -> Pace | None:
         target = row[0] if row else None
         if not target or target <= 0:
             return None
-        return Pace(target=int(target), new_today=srs.get_new_items_today(user_id))
+        spending = main_modes.resolve(row[1], row[2]).spending()
+        new_today = srs.get_new_items_today(user_id)
+        if spending:
+            new_today += len(srs.get_mode_firsts_today(user_id, spending))
+        return Pace(target=int(target), new_today=new_today)
     except Exception:
         logger.exception("pace lookup failed")
         return None

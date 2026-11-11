@@ -106,8 +106,13 @@ class LevelVocabularyTests(unittest.TestCase):
     # N3's 397 went to 395 and N1's 491 to 489 with plan 227's glosses
     # and cards: a kana うち and ごみ are the N4 cards now that 内 and 塵
     # share their gloss, 仮令 folded into the N3 たとえ and 率直 into the
-    # N2 card.
-    LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 395, "N2": 405, "N1": 489}
+    # N2 card. Plan 260 moved cards down to their level, and the words
+    # the bank had counted for the level above went with them: N3 395 to
+    # 388 (時 とき, 語, 度, 会, 頃, 様 よう, 失礼), N2 406 to 399 (中身,
+    # 揃える, 溜める, 預かる, プラスチック... less 心身, 看病, 蓄える,
+    # which ten rewritten rows took in) and N1 489 to 482 (ヶ月, 側, 曲,
+    # 挑戦, お客様...); N4 rose to 318.
+    LEVEL_WORDS_FLOOR = {"N4": 318, "N3": 388, "N2": 399, "N1": 482}
     LEVEL_KANJI_FLOOR = {"N4": 106, "N3": 236, "N2": 145, "N1": 235}
 
     def test_every_graded_point_has_two_sentences(self) -> None:

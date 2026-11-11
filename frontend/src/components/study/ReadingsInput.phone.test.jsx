@@ -119,6 +119,28 @@ describe('the readings box on a phone', () => {
     expect(chips('on')).toEqual([])
   })
 
+  it('keeps in the box what the cap had no room for, and grades it on Enter', async () => {
+    await render(<Drill />)
+    await settle()
+    await userEvent.click($('#readings-on'))
+    const fourteen = Array.from({ length: 14 }, (_, i) => `x${i}`)
+    await userEvent.keyboard(fourteen.join(',') + ',')
+    expect(chips('on')).toHaveLength(14)
+    // Typed key by key, the box shuts at the cap; an input method
+    // committing two readings at once (or a paste) does not wait for it.
+    const field = $('#readings-on')
+    compose(field, 'しゅ、す、')
+    field.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: 'しゅ、す、' }))
+    await settle()
+    // The fifteenth is a chip; the sixteenth is not lost.
+    expect(chips('on')).toEqual([...fourteen, 'しゅ'])
+    expect(field.value.trim()).toBe('す')
+    expect($('.readings-input__cap')).not.toBeNull()
+    await userEvent.keyboard('{Enter}')
+    await settle()
+    expect(checked(0).slice(0, 2)).toEqual([{ text: 'シュ', as: 'ok' }, { text: 'ス', as: 'ok' }])
+  })
+
   it('checks on Enter, taking the reading still being typed', async () => {
     const onSubmit = vi.fn()
     await render(<Drill onSubmit={onSubmit} />)

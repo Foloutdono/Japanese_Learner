@@ -4,6 +4,7 @@ import { render } from 'vitest-browser-react'
 // markup — the same trick as layout.phone.test.jsx. The objects the
 // canvas draws for the stage and the gate, pinned by their real classes.
 import './index.css'
+import { StageHead } from './components/chrome/StageHead'
 
 describe('the stage at phone width', () => {
   it('carries the inset itself, docks the rating bar, and keeps the pass at pocket size', async () => {
@@ -32,6 +33,40 @@ describe('the stage at phone width', () => {
     expect(getComputedStyle(screen.container.querySelector('.today-remaining')).borderRadius).toBe('999px')
   })
 
+  // 両端 (2026-10-20): the name stood wherever "‹ Niveaux" ended. The two
+  // ends grow alike, so it stands on the head's middle whatever each holds.
+  it('centres the name between the way out and the controls, the counts under it', async () => {
+    const screen = await render(
+      <main className="container stage">
+        <StageHead
+          onLeave={() => {}} leaveLabel="Niveaux" where="Compréhension écrite" sub="N5" remaining="2 / 5"
+          pass={false} aside={<button type="button" style={{ width: 'var(--sp-7)', height: 'var(--sp-7)' }}>A</button>}
+        />
+      </main>
+    )
+    const $ = sel => screen.container.querySelector(sel)
+    const mid = el => { const r = el.getBoundingClientRect(); return r.left + r.width / 2 }
+    expect(Math.abs(mid($('.stage__where-jp')) - mid($('.stage__head')))).toBeLessThan(1)
+    expect(Math.abs(mid($('.stage__where-line')) - mid($('.stage__head')))).toBeLessThan(1)
+    expect($('.stage__where-line .today-remaining').textContent).toBe('2 / 5')
+    // The way out is its chevron, its place its name and its tooltip.
+    const leave = $('.stage__leave')
+    expect(leave.getBoundingClientRect().width).toBeGreaterThanOrEqual(44)
+    expect(leave.getAttribute('title')).toBe('Niveaux')
+    expect(leave.querySelector('.sr-only').textContent).toBe('Niveaux')
+  })
+
+  it('prints the word of a way out that is not a way back', async () => {
+    const screen = await render(
+      <main className="container stage">
+        <StageHead onLeave={() => {}} leaveLabel="Passer" leaveWord where="試乗" pass={false} />
+      </main>
+    )
+    const leave = screen.container.querySelector('.stage__leave')
+    expect(leave.querySelector('.sr-only')).toBeNull()
+    expect(leave.textContent).toBe('Passer')
+  })
+
   it('docks the level bar on the bottom edge and the rating bar on top of it', async () => {
     // The stage frame stamps this on <html> (useChrome); the fixture
     // does it by hand so --dock-bottom resolves the way it does on a run.
@@ -44,12 +79,12 @@ describe('the stage at phone width', () => {
             <div className="rating-bar">
               <div className="rating-bar__buttons rating-bar__buttons--4">
                 <div className="rating-bar__misses">
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Wrong</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Missed</span></button>
                   <button type="button" className="rating-bar__btn rating-bar__btn--q2"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Almost</span></button>
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q3"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Difficult</span></button>
                 </div>
                 <div className="rating-bar__keys">
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q4 rating-bar__btn--key rating-bar__btn--best"><span className="rating-bar__btn-label">Correct</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q4 rating-bar__btn--key"><span className="rating-bar__btn-label">Correct</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q5 rating-bar__btn--key rating-bar__btn--best"><span className="rating-bar__btn-label">Easy</span></button>
                 </div>
               </div>
             </div>
@@ -71,8 +106,8 @@ describe('the stage at phone width', () => {
       expect(getComputedStyle(bar).bottom).toBe('36px')
       // 券売機 (plan 203): every verdict a key of one make, a gap apart
       // -- the misses no longer one instrument (plan 180's) -- each on
-      // its own sumi with a corner and a foot, and Correct the same key
-      // wider than a miss, moulded in its verdict's ink with the sumi
+      // its own sumi with a corner and a foot, and Easy (Correct's twin
+      // on the four, plain) the same key wider than a miss, moulded in its verdict's ink with the sumi
       // type on it. Not gold: gold is the action's metal (plan 174).
       expect(getComputedStyle(screen.container.querySelector('.rating-bar__buttons')).columnGap).toBe('8px')
       const misses = getComputedStyle(screen.container.querySelector('.rating-bar__misses'))
@@ -88,7 +123,7 @@ describe('the stage at phone width', () => {
       expect(getComputedStyle(key).backgroundImage).not.toContain('201, 154, 62')
       expect(getComputedStyle(key).color).toBe('rgb(28, 24, 17)')
       expect(getComputedStyle(key).borderTopLeftRadius).toBe('8px')
-      expect(key.getBoundingClientRect().width).toBeGreaterThan(plain.getBoundingClientRect().width * 1.3)
+      expect(key.getBoundingClientRect().width).toBeGreaterThan(plain.getBoundingClientRect().width * 1.15)
       expect(Math.round(key.getBoundingClientRect().height)).toBe(Math.round(plain.getBoundingClientRect().height))
       const lamp = getComputedStyle(plain.querySelector('.rating-bar__btn-lamp'))
       expect(lamp.width).toBe('8px')

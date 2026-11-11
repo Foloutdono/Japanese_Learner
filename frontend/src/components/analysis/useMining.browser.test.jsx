@@ -167,6 +167,24 @@ describe('useMining', () => {
     expect((await getMining().ensureDeck('mixed', 'Lyrics')).id).toBe(8)
   })
 
+  // 歌 (plan 264): a lyrics deck, the song sheet's, holds what a mixed
+  // one holds and is offered the same way: a word met in a song goes in
+  // the song's deck.
+  it('offers a lyrics deck for every kind, and makes the song sheet one', async () => {
+    const SONG = { id: 6, name: '夜に駆ける', type: 'lyrics', role: 'owner' }
+    const getMining = await mountMining([...ALL_TYPE_DECKS, SONG])
+    for (const kind of ['vocab', 'kanji', 'grammar', 'kana', 'cloze']) {
+      expect(getMining().decksFor(kind).map(d => d.id), kind).toContain(6)
+    }
+    globalThis.fetch = vi.fn()
+    expect((await getMining().ensureDeck('lyrics', '夜に駆ける', { remember: false })).id).toBe(6)
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+
+    mockFetchOnce(200, { id: 8, name: 'Gurenge', type: 'lyrics' })
+    expect((await getMining().ensureDeck('lyrics', 'Gurenge')).id).toBe(8)
+    expect(JSON.parse(globalThis.fetch.mock.calls[0][1].body)).toEqual({ name: 'Gurenge', type: 'lyrics' })
+  })
+
   it('mineCloze rejects (and never calls fetch) when back would be empty', async () => {
     const getMining = await mountMining(ALL_TYPE_DECKS)
     globalThis.fetch = vi.fn()

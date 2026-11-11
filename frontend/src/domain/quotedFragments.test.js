@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { quotedFragments, sentenceFor } from './quotedFragments'
+import { answerSentences, quotedFragments, sentenceFor } from './quotedFragments'
 
 const TEXT = [
   { jp: 'きのう、友達と公園に行きました。' },
@@ -26,5 +26,27 @@ describe('the sentence a question quotes', () => {
     expect(sentenceFor(TEXT, ['電車'])).toBe(-1)
     // The next fragment is tried when one is ambiguous.
     expect(sentenceFor(TEXT, ['友達', 'カメラ'])).toBe(2)
+  })
+})
+
+describe('the sentence a question rests on (plan 301b)', () => {
+  it('reads the sentences the question names, sorted, once each', () => {
+    expect(answerSentences({ question: 'Why did they go?', at: [2] }, TEXT)).toEqual([2])
+    expect(answerSentences({ question: 'Why?', at: [2, 0, 2] }, TEXT)).toEqual([0, 2])
+  })
+
+  it('names over the quote: `at` is what the author meant', () => {
+    expect(answerSentences({ question: 'What does 「新しい」 mean?', at: [0] }, TEXT)).toEqual([0])
+  })
+
+  it('falls back to the one sentence its quote is in, for a question written before `at`', () => {
+    expect(answerSentences({ question: 'What does 「新しい」 mean?' }, TEXT)).toEqual([2])
+    expect(answerSentences({ question: 'Why did they go?' }, TEXT)).toEqual([])
+  })
+
+  it('leaves out an index the text does not have', () => {
+    expect(answerSentences({ question: 'Why?', at: [9, -1, 1.5, '1'] }, TEXT)).toEqual([])
+    expect(answerSentences({ question: 'What does 「広かった」 mean?', at: [9] }, TEXT)).toEqual([1])
+    expect(answerSentences(null, TEXT)).toEqual([])
   })
 })

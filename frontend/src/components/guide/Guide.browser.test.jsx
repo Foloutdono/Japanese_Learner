@@ -108,7 +108,7 @@ describe('Guide', () => {
     await settle(50)
     expect(onEnd).toHaveBeenCalledWith(true, 3)
     expect(track.mock.calls.find(([n]) => n === 'guide_done')[1]).toMatchObject({ skipped: true, stops: 1 })
-    screen.unmount()
+    await screen.unmount()
 
     onEnd = vi.fn()
     track.mockReset()
@@ -117,6 +117,6 @@ describe('Guide', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle(50)
     expect(onEnd).toHaveBeenCalledWith(true, 3)
-    screen.unmount()
+    await screen.unmount()
   })
 })

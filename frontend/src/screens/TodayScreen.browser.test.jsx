@@ -281,11 +281,13 @@ describe('TodayScreen — the guide', () => {
     apiJson.mockReset()
     apiJson.mockResolvedValue({})
     const screen = await mount()
-    await settleLong()
+    // Waited for, not slept on (the transfer sheet's tests below say why).
+    await vi.waitFor(() => expect(document.querySelector('.guide')).toBeTruthy(), { timeout: 5000, interval: 20 })
     const root = screen.container
     expect(root.querySelector('[data-guide="today.gate"]')).toBeTruthy()
+    // The duels' key beside the gate is a stop of its own (plan 287).
+    expect(root.querySelector('[data-guide="today.duels"]')).toBeTruthy()
     const guide = document.querySelector('.guide')
-    expect(guide).toBeTruthy()
     // The tab bar is the shell's, not this screen's: the guide starts
     // on the gate.
     expect(guide.dataset.stop).toBe('today.gate')
@@ -321,6 +323,10 @@ describe('TodayScreen — the transfer sheet', () => {
   const offered = extra => ({ username: 'Aiko', week: [], streak: 0, level: 1, guided: GUIDED, transferOffer: true, ...extra })
   const sheet = () => document.querySelector('.tr-sheet')
   const settleLong = (ms = 200) => new Promise(r => setTimeout(r, ms))
+  // What should appear is waited for, never slept on: the guide and the
+  // sheet open after the lanes paint, which a fixed 200ms lost on a
+  // loaded CI runner. A fixed settle stays only before an absence.
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
 
   function mountWithSettings() {
     return render(
@@ -343,9 +349,8 @@ describe('TodayScreen — the transfer sheet', () => {
   it('asks, with the apps it reads, and "I’m starting here" answers it', async () => {
     summaryRef.current = offered()
     const screen = await mountWithSettings()
-    await settleLong()
+    await arrives(sheet)
     expect(document.querySelector('.guide')).toBeNull()
-    expect(sheet()).toBeTruthy()
     expect(sheet().querySelector('h2').textContent.replace(/\u00a0/g, ' ')).toBe('Tu as déjà appris ailleurs ?')
     expect([...sheet().querySelectorAll('.tr-chip')].map(c => c.textContent)).toEqual(['Anki', 'WaniKani', 'Renshuu'])
     sheet().querySelector('[data-action="transfer-offer-later"]').click()
@@ -360,7 +365,7 @@ describe('TodayScreen — the transfer sheet', () => {
   it('goes to Settings › Correspondance', async () => {
     summaryRef.current = offered()
     const screen = await mountWithSettings()
-    await settleLong()
+    await arrives(sheet)
     sheet().querySelector('[data-action="transfer-offer-go"]').click()
     // Waited for, not slept on: the page arrives through the router's
     // transition, which a fixed 80ms lost on a loaded CI runner.
@@ -373,7 +378,7 @@ describe('TodayScreen — the transfer sheet', () => {
   it('shut with Escape counts as an answer', async () => {
     summaryRef.current = offered()
     const screen = await mountWithSettings()
-    await settleLong()
+    await arrives(sheet)
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle()
     expect(sheet()).toBeNull()
@@ -384,14 +389,271 @@ describe('TodayScreen — the transfer sheet', () => {
   it('waits for the gate’s guide, and is not drawn when the profile does not offer', async () => {
     summaryRef.current = offered({ guided: {} })
     let screen = await mountWithSettings()
-    await settleLong()
-    expect(document.querySelector('.guide')).toBeTruthy()
+    await arrives(() => document.querySelector('.guide'))
     expect(sheet()).toBeNull()
     await screen.unmount()
     localStorage.removeItem('jp-guided')
     summaryRef.current = offered({ transferOffer: false })
     screen = await mountWithSettings()
     await settleLong()
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+  })
+})
+
+// Early access (plan 269): the sheet that asks a learner, once, from 400
+// XP, how they find the app -- on the transfer sheet's terms, and never
+// beside it.
+describe('TodayScreen — the early-access sheet', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const offered = extra => ({ username: 'Aiko', week: [], streak: 3, level: 5, guided: GUIDED, feedbackOffer: true, ...extra })
+  const sheet = () => document.querySelector('.fb-sheet')
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
+
+  beforeEach(() => {
+    apiJson.mockClear()
+    forgetShown()
+  })
+
+  it('asks, and "Plus tard" answers it once', async () => {
+    summaryRef.current = offered()
+    const screen = await mount()
+    await arrives(sheet)
+    expect(document.querySelector('.guide')).toBeNull()
+    expect(sheet().querySelectorAll('.fb-rate__star')).toHaveLength(5)
+    sheet().querySelector('[data-action="rating-later"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    expect(apiJson.mock.calls.filter(([u]) => u === '/api/feedback/offer')).toHaveLength(1)
+    await screen.unmount()
+  })
+
+  it('waits for the gate’s guide, and is not drawn when the profile does not offer', async () => {
+    summaryRef.current = offered({ guided: {} })
+    let screen = await mount()
+    await arrives(() => document.querySelector('.guide'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.removeItem('jp-guided')
+    summaryRef.current = offered({ feedbackOffer: false })
+    screen = await mount()
+    await settle(200)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+  })
+
+  it('gives way to the transfer offer, never drawn beside it', async () => {
+    summaryRef.current = offered({ transferOffer: true })
+    const screen = await mount()
+    await arrives(() => document.querySelector('.tr-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+  })
+
+  // Google Play (plan 307): in the Android shell the sheet asks for the
+  // store first, while the profile's own `storeOffer` says so -- a learner
+  // who answered the web's question is asked it all the same. The shell is
+  // named by its platform alone, so no plugin is loaded under the test.
+  describe('in the Android shell', () => {
+    beforeEach(() => { window.Capacitor = { getPlatform: () => 'android' } })
+    const away = () => { delete window.Capacitor }
+
+    it('asks for Google Play on `storeOffer`, the web’s question answered or not', async () => {
+      try {
+        summaryRef.current = offered({ feedbackOffer: false, storeOffer: true })
+        const screen = await mount()
+        await arrives(sheet)
+        expect(sheet().querySelector('[data-action="rating-store"]')).toBeTruthy()
+        expect(sheet().querySelectorAll('.fb-rate__star')).toHaveLength(0)
+        sheet().querySelector('[data-action="rating-later"]').click()
+        await settle()
+        expect(sheet()).toBeNull()
+        expect(apiJson.mock.calls.filter(([u]) => u === '/api/feedback/store-offer')).toHaveLength(1)
+        expect(apiJson.mock.calls.filter(([u]) => u === '/api/feedback/offer')).toHaveLength(0)
+        await screen.unmount()
+      } finally {
+        away()
+        summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+      }
+    })
+
+    it('does not ask on the web’s `feedbackOffer` alone', async () => {
+      try {
+        summaryRef.current = offered({ feedbackOffer: true, storeOffer: false })
+        const screen = await mount()
+        await settle(200)
+        expect(sheet()).toBeNull()
+        await screen.unmount()
+      } finally {
+        away()
+        summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+      }
+    })
+  })
+})
+
+// 新しい (plan 287): the duels' key announced, once, to a learner who met
+// Today before it stood beside the gate -- after the offers, never
+// beside them, and never to a learner whose guide shows the key.
+describe('TodayScreen — the duels announced', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const told = extra => ({ username: 'Aiko', week: [], streak: 3, level: 5, guided: GUIDED, duelsNews: true, ...extra })
+  const sheet = () => document.querySelector('.pvp-news')
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
+  const stamps = () => apiJson.mock.calls.filter(([u]) => u === '/api/onboarding/news/duels')
+
+  function mountWithHall() {
+    return render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <Routes>
+            <Route path="/today" element={<TodayScreen />} />
+            <Route path="/profile/duels" element={<p data-page="duels">duels</p>} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  beforeEach(() => {
+    apiJson.mockClear()
+    forgetShown()
+  })
+
+  it('shows the key, and « Voir les duels » opens the hall, told once', async () => {
+    summaryRef.current = told()
+    const screen = await mountWithHall()
+    await arrives(sheet)
+    expect(document.querySelector('.guide')).toBeNull()
+    expect(sheet().querySelector('h2').textContent).toBe('Les duels arrivent sur Aujourd’hui')
+    expect(sheet().querySelector('.pvp-news__art .pvp-key svg')).toBeTruthy()
+    expect(sheet().querySelector('.pvp-news__lead').textContent.replace(/\u00a0/g, ' ')).toContain('à côté d’« Embarquer »')
+    sheet().querySelector('[data-action="duels-news-go"]').click()
+    await vi.waitFor(() => expect(document.querySelector('[data-page="duels"]')).toBeTruthy(), { timeout: 5000, interval: 20 })
+    expect(stamps()).toHaveLength(1)
+    expect(stamps()[0][2]).toMatchObject({ method: 'POST' })
+    await screen.unmount()
+  })
+
+  it('« Plus tard » and Escape put it away, told either way', async () => {
+    summaryRef.current = told()
+    let screen = await mount()
+    await arrives(sheet)
+    sheet().querySelector('[data-action="duels-news-later"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    expect(stamps()).toHaveLength(1)
+    await screen.unmount()
+    apiJson.mockClear()
+    screen = await mount()
+    await arrives(sheet)
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(sheet()).toBeNull()
+    expect(stamps()).toHaveLength(1)
+    await screen.unmount()
+  })
+
+  it('is never drawn for a learner Today’s guide shows the key to, nor when the profile does not tell', async () => {
+    summaryRef.current = told({ guided: {} })
+    let screen = await mount()
+    await arrives(() => document.querySelector('.guide'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.removeItem('jp-guided')
+    summaryRef.current = told({ duelsNews: false })
+    screen = await mount()
+    await settle(200)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+  })
+
+  it('gives way to the transfer offer and the early-access question', async () => {
+    summaryRef.current = told({ transferOffer: true })
+    let screen = await mount()
+    await arrives(() => document.querySelector('.tr-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = told({ feedbackOffer: true })
+    screen = await mount()
+    await arrives(() => document.querySelector('.fb-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+  })
+})
+
+// 本乗車券 (plan 270): a guest is asked to make the card an account
+// further and further apart, after the guide, the transfer offer and the
+// early-access question, and may always go on as a guest.
+describe('TodayScreen — asking a guest to keep the card', () => {
+  const GUIDED = { today: '2026-10-17T00:00:00Z' }
+  const guest = { access_token: 'tok', user: { id: 'g1', is_anonymous: true } }
+  const sheet = () => document.querySelector('.brd-sheet--account')
+  const arrives = el => vi.waitFor(() => expect(el()).toBeTruthy(), { timeout: 5000, interval: 20 })
+
+  function mountAs(session) {
+    return render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <Routes>
+            <Route path="/today" element={<TodayScreen session={session} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  beforeEach(() => {
+    localStorage.removeItem('tsuji.keepAsked')
+    summaryRef.current = { username: 'Aiko', week: [], streak: 0, level: 1, guided: GUIDED }
+  })
+
+  it('waits out the gap since the last ask', async () => {
+    const day = d => { const at = new Date(); at.setDate(at.getDate() - d); return `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}` }
+    // Asked twice, the second time yesterday: the next gap is two days.
+    localStorage.setItem('tsuji.keepAsked', JSON.stringify({ g1: { n: 2, at: day(1) } }))
+    let screen = await mountAs(guest)
+    await settle(300)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    localStorage.setItem('tsuji.keepAsked', JSON.stringify({ g1: { n: 2, at: day(2) } }))
+    screen = await mountAs(guest)
+    await arrives(sheet)
+    await screen.unmount()
+  })
+
+  it('asks a guest, and « Continuer en invité » goes on', async () => {
+    let screen = await mountAs(guest)
+    await arrives(sheet)
+    expect(sheet().querySelector('[data-action="account-guest"]').textContent).toBe('Continuer en invité')
+    sheet().querySelector('[data-action="account-guest"]').click()
+    await settle()
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    // The same day, the next visit is not asked again.
+    screen = await mountAs(guest)
+    await settle(200)
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+  })
+
+  it('waits for the transfer offer and the early-access question, and never asks an account', async () => {
+    summaryRef.current = { ...summaryRef.current, transferOffer: true }
+    let screen = await mountAs(guest)
+    await arrives(() => document.querySelector('.tr-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { ...summaryRef.current, transferOffer: false, feedbackOffer: true }
+    screen = await mountAs(guest)
+    await arrives(() => document.querySelector('.fb-sheet'))
+    expect(sheet()).toBeNull()
+    await screen.unmount()
+    summaryRef.current = { ...summaryRef.current, feedbackOffer: false }
+    screen = await mountAs({ access_token: 'tok', user: { id: 'a1', is_anonymous: false, email: 'a@b.c' } })
+    await settle(200)
     expect(sheet()).toBeNull()
     await screen.unmount()
     summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }

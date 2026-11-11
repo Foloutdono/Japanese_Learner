@@ -565,6 +565,24 @@ def test_the_ledger_is_in_the_deletion_plan():
     assert _tables(PLAN).index("credit_ledger") < _tables(PLAN).index("user_profiles")
 
 
+def test_a_refund_to_a_learner_erased_since_makes_no_account_again(uid):
+    # A duel's fare given back once its closing is committed, to a
+    # learner erased in the meantime: no profile, no welcome, no row.
+    credits.refund(uid, 2, "duel", "duel:1")
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM user_profiles WHERE user_id = %s", (uid,))
+            assert cur.fetchone()[0] == 0
+    finally:
+        conn.close()
+    assert _rows(uid) == []
+    # A learner still here is given it back.
+    credits.summary(uid)
+    credits.refund(uid, 2, "duel", "duel:1")
+    assert _rows(uid)[-1] == (2, "duel", "duel:1")
+
+
 def test_the_free_line_reviews_only_its_own_cards(client):
     # The kana endpoint prices by its own line, so it must refuse what
     # is not a kana card: a vocab card posted there -- under its own

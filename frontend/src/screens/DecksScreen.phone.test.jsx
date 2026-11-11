@@ -172,3 +172,39 @@ describe('a deck made on a filtered shelf', () => {
     expect(titles).toHaveLength(5)
   })
 })
+
+// ── 歌 — a lyrics deck is made from its song (plan 264) ─────────
+// Picked in the create form, the lyrics type turns the form's action
+// into the import, which opens over the shelf with the name typed and
+// posts no deck of its own: the deck is made once its song is read.
+describe('a lyrics deck', () => {
+  it('opens the import from the create form, with the name typed', async () => {
+    const posted = []
+    globalThis.fetch.mockImplementation((url, init) => {
+      if (init?.method === 'POST') posted.push(String(url))
+      return Promise.resolve(new Response(JSON.stringify({ decks: DECKS }), {
+        status: 200, headers: { 'Content-Type': 'application/json' },
+      }))
+    })
+    await shelf()
+    create().click()
+    await settle()
+    const field = document.querySelector('.form .field')
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(field, '夜に駆ける')
+    field.dispatchEvent(new Event('input', { bubbles: true }))
+    const lyrics = [...document.querySelectorAll('.type-row')].find(r => r.textContent.includes('Paroles'))
+    lyrics.click()
+    await settle()
+    const action = document.querySelector('.form .btn-primary')
+    expect(action.textContent).toBe('Importer les paroles')
+    action.click()
+    await settle()
+    expect(document.querySelector('.form')).toBeFalsy()
+    const sheet = document.querySelector('[role="dialog"].lyr-sheet')
+    expect(sheet).toBeTruthy()
+    expect(sheet.querySelector('.seg')).toBeTruthy()
+    expect(posted).toEqual([])
+    // Inside the viewport, as every sheet on a phone.
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+  })
+})

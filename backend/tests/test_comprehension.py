@@ -369,6 +369,27 @@ def test_kanji_feedback_rides_along_when_something_else_is_asked_again(answered)
     assert "kanji above" not in _prompt(calls, 2)
 
 
+def _checked(sentence: str, level: str = "N5"):
+    data = reading._parse_comprehension(_reply(text=SENTENCE_1 + sentence, breakdown=[
+        {"jp": SENTENCE_1, "translation": "", "note": "", "words": WORDS_1},
+        {"jp": sentence, "translation": "", "note": "", "words": []},
+    ]))
+    return reading._check_comprehension(data, level, [])
+
+
+def test_grammar_above_the_level_is_read_as_the_mock_papers_read_it():
+    """Feedback only, and the detector's (study/exam_levels, plan 261):
+    天気が is the weather, no 〜気がする, and ありがとうございます no
+    〜でございます; a 〜んです an N5 reader has not met is named."""
+    assert _checked("きょうは天気がいいです。").grammar_over == []
+    assert _checked("ありがとうございます。").grammar_over == []
+    verdict = _checked("時間がないんです。")
+    assert verdict.grammar_over == [
+        "grammar above N5: 〜んです／〜のです (N4) -- rewrite that sentence with grammar a JLPT N5 learner knows."
+    ]
+    assert not verdict.retry
+
+
 # ── The breakdown ────────────────────────────────────────────────────
 
 def test_breakdown_survives_the_round_trip_in_order(answered):
@@ -526,3 +547,77 @@ def test_a_dead_provider_is_not_asked_twice(monkeypatch):
         reading._call_llm_comprehension("N5", "en")
     assert caught.value.status_code == 503
     assert len(calls) == 1
+
+
+# ── at and why (plan 301b) ───────────────────────────────────────────
+# What a question carries to answer a miss with: the breakdown sentence
+# its right option rests on and one line on why. Soft on purpose: a
+# malformed one is dropped and the exercise still serves, as every pool
+# row written before them does.
+
+def _with_lines(*lines, breakdown=None):
+    over = {}
+    if breakdown is not None:
+        over["breakdown"] = breakdown
+    body = json.loads(_reply(**over))
+    for q, line in zip(body["questions"], lines):
+        q.update(line)
+    return json.dumps(body, ensure_ascii=False)
+
+
+def test_a_question_keeps_its_sentence_and_its_why():
+    data = reading._parse_comprehension(_with_lines(
+        {"at": [1], "why": "「電車は新しいです」: the train is new."},
+        {"at": [1, 0], "why": "  Both   sentences\nsay so. "},
+    ))
+    assert data["questions"][0]["at"] == [1]
+    assert data["questions"][0]["why"] == "「電車は新しいです」: the train is new."
+    # Sorted, and the why folded onto one line.
+    assert data["questions"][1]["at"] == [0, 1]
+    assert data["questions"][1]["why"] == "Both sentences say so."
+    # A question without them is served as before.
+    assert "at" not in data["questions"][2] and "why" not in data["questions"][2]
+
+
+def test_a_bare_index_is_a_list_and_a_bad_one_is_dropped():
+    data = reading._parse_comprehension(_with_lines(
+        {"at": 1},
+        {"at": [7]},
+        {"at": ["0"]},
+        {"at": [0, 1, 0, 1]},
+        {"at": [True]},
+        {"at": []},
+    ))
+    qs = data["questions"]
+    assert qs[0]["at"] == [1]
+    for q in qs[1:3] + qs[4:6]:
+        assert "at" not in q
+    assert qs[3]["at"] == [0, 1]
+
+
+def test_a_why_that_is_not_a_short_line_is_dropped():
+    data = reading._parse_comprehension(_with_lines(
+        {"why": ["a", "list"]},
+        {"why": "x" * (reading._WHY_MAX + 1)},
+        {"why": "   "},
+    ))
+    for q in data["questions"][:3]:
+        assert "why" not in q
+
+
+def test_at_follows_its_sentence_past_a_dropped_one():
+    """A sentence the cleaning drops (no jp) must not shift a question
+    onto its neighbour: `at` names the sentence the model meant."""
+    body = json.loads(_reply())
+    good = body["breakdown"]
+    breakdown = [good[0], {"jp": "", "translation": "x", "note": "", "words": []}, good[1]]
+    data = reading._parse_comprehension(_with_lines({"at": [2]}, {"at": [1]}, breakdown=breakdown))
+    assert [p["jp"] for p in data["breakdown"]] == [SENTENCE_1, SENTENCE_2]
+    assert data["questions"][0]["at"] == [1]
+    assert "at" not in data["questions"][1]
+
+
+def test_the_prompt_asks_for_the_sentence_and_the_why():
+    system = reading._comprehension_system("N5", "en")
+    assert '"at": [0]' in system and '"why": "..."' in system
+    assert "never by its letter, number or position" in system

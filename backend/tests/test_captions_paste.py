@@ -104,6 +104,11 @@ class LayoutTests(unittest.TestCase):
         self.assertLess(len(cues), 3)
 
 
+    def test_a_line_sung_twice_stays_twice(self) -> None:
+        cues = parse_pasted_transcript("0:10 ルララ\n0:12 ルララ\n0:14 宇宙の風に乗る")
+        self.assertEqual([c["text"] for c in cues], ["ルララ", "ルララ", "宇宙の風に乗る"])
+
+
 class FailureTests(unittest.TestCase):
     def test_text_without_timestamps_raises(self) -> None:
         with self.assertRaises(CaptionParseError) as ctx:

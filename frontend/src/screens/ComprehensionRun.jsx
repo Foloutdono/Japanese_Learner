@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -27,13 +27,16 @@ import { askTarget } from '../domain/ask'
 import { useDesk } from '../hooks/useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
 import { CHOICE_KEY_INDEX, LETTER_KEY_INDEX } from '../domain/choiceKeys'
-import { quotedFragments, sentenceFor } from '../domain/quotedFragments'
+import { answerSentences } from '../domain/quotedFragments'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
-import { Clock, ReadingTimer, PaceChip } from '../components/reading/ReadingPieces'
-import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
+import { Clock, ReadingTimer, PaceChip, RollChip } from '../components/reading/ReadingPieces'
+import { CheckIcon, CrossIcon, ChevronIcon, PauseIcon, PlayIcon, PlusIcon, MinusIcon } from '../components/ui/Icons'
+import { RollingPassage } from '../components/reading/RollingPassage'
+import { useReadingRoll, setRollMode, setRollFurigana, nudgeRollSpeed } from '../stores/readingRoll'
+import { ROLL_LEAD, ROLL_TAIL, rollEntries, hasReadings, rollSeconds } from '../domain/readingRoll'
 
 const RIKAI_COLOR = 'var(--line-rikai)'
 
@@ -96,12 +99,18 @@ export default function ComprehensionRun({ session }) {
   // no clock: the text stays until Done reading.
   const [timeLeft, setTimeLeft] = useState(0)
   const factor = paceFactor(useReadingPace())
+  // The text whole, or rolling up the card at the learner's speed
+  // (plan 258). A roll is the first read's: Re-read shows the text whole.
+  const { mode: viewMode, speed: rollSpeed, furigana: rollFurigana } = useReadingRoll()
   // When this reading began, for the Enter key's guard below.
   const readFrom = useRef(0)
   // Re-reading the text from the questions pauses the clock: the
   // reading window was for the first read, and coming back to check
   // a detail is what the paper allows.
   const [rereading, setRereading] = useState(false)
+  // The roll's place on its timeline (0 to 1) and whether it is held.
+  const [rollAt, setRollAt] = useState(0)
+  const [rollHeld, setRollHeld] = useState(false)
   const [currentQ, setCurrentQ] = useState(0)
   const [answers, setAnswers]   = useState([])     // chosen option index per question
   const [picked, setPicked]     = useState(null)   // the current question's choice, until Next commits it
@@ -139,6 +148,8 @@ export default function ComprehensionRun({ session }) {
     startTally(`comprehension:${lvl}`)
     asking.reset()
     setRereading(false)
+    setRollAt(0)
+    setRollHeld(false)
     setShowBreakdown(false)
     setOpenIndex(0)
     setLookup(null)
@@ -179,11 +190,18 @@ export default function ComprehensionRun({ session }) {
       })
   }
 
-  // Reading countdown — the first read only.
+  const rolling = viewMode === 'rolling' && stage === 'reading' && !rereading && Boolean(exercise)
+  const entries = useMemo(() => rollEntries(exercise), [exercise])
+  const readings = useMemo(() => hasReadings(entries), [entries])
+  const rollLength = rollSeconds(entries.map(e => e.text), rollSpeed)
+  const rollTotal = ROLL_LEAD + rollLength + ROLL_TAIL
+
+  // Reading countdown — the first read only. A roll is its own clock:
+  // it ends the reading when its last line has stood (RollingPassage).
   useEffect(() => {
     if (stage !== 'reading' || rereading) return
     readFrom.current = Date.now()
-    if (factor == null) return
+    if (factor == null || rolling) return
 
     const tick = 1 / factor
     timerRef.current = setInterval(() => {
@@ -198,7 +216,7 @@ export default function ComprehensionRun({ session }) {
     }, 1000)
 
     return clearTimer
-  }, [stage, rereading, factor])
+  }, [stage, rereading, factor, rolling])
 
   function clearTimer() {
     if (timerRef.current) {
@@ -211,6 +229,13 @@ export default function ComprehensionRun({ session }) {
     clearTimer()
     setRereading(false)
     setStage('questions')
+  }
+
+  function toggleRoll() {
+    playUi('click-mode-selection')
+    setRollAt(0)
+    setRollHeld(false)
+    setRollMode(rolling ? 'whole' : 'rolling')
   }
 
   function reread() {
@@ -275,15 +300,16 @@ export default function ComprehensionRun({ session }) {
         // its fare was paid at (reading.py: 4 right, 1 wrong).
         data.results?.forEach(r => countReview({ quality: r.is_correct ? 4 : 1 }))
         fare.pay(data)
-        // On the desk the review opens on the first miss, its question
-        // in the middle and the sentence it quotes in the breakdown.
-        if (desk) {
-          const first = data.results?.findIndex(r => !r.is_correct) ?? -1
-          const at = first >= 0 ? first : 0
+        // The review opens on the first miss, its question in the middle
+        // and the sentence it rests on in the breakdown: on the desk, and
+        // on a phone since plan 301b, where a paper with no miss opens on
+        // nothing (the desk's middle always stands one question).
+        const first = data.results?.findIndex(r => !r.is_correct) ?? -1
+        const at = first >= 0 ? first : desk ? 0 : null
+        if (at != null && data.results?.[at]) {
           setOpenRow(at)
-          const r = data.results?.[at]
-          const k = r ? sentenceFor(breakdownOf(exercise), quotedFragments(r.question)) : -1
-          if (k >= 0) setOpenIndex(k)
+          const [k] = answerSentences(exercise.questions?.[at] ?? data.results[at], breakdownOf(exercise))
+          if (k != null) setOpenIndex(k)
         }
       })
       .catch(() => {
@@ -366,9 +392,13 @@ export default function ComprehensionRun({ session }) {
 
   // One frame for the whole exercise, one way out, and a sub that says
   // where in it you are.
+  // A text handed back past the day's ceiling on new ones (the
+  // server's `repeat`) says so while it is read (plan 301): the same
+  // text again with no word on it read as the app stuck on one text.
   const sub =
     stage === 'questions' || stage === 'submitting' ? `${level} · ${t.question} ${currentQ + 1} / ${total}` :
     stage === 'results' ? `${level} · ${t.practiceResult}` :
+    stage === 'reading' && exercise?.repeat ? `${level} · ${t.compReadBefore}` :
     level
 
   // The desk's side column (plan 115). While the questions are asked
@@ -444,11 +474,15 @@ export default function ComprehensionRun({ session }) {
   // learner's, and the words of the sentence it quotes. Sealed until
   // the results (plan 131).
   const reviewed = stage === 'results' && results ? results.results[openRow ?? 0] : null
-  // On the desk opening a row opens the sentence the question quotes, and
-  // its words are the thread's (openResultRow). A phone opens the row only,
-  // so the words are those of the sentence the question quotes, found the
-  // same way, rather than of whichever the breakdown last stood on (plan 197).
-  const quoted = !desk && reviewed ? sentenceFor(breakdown, quotedFragments(reviewed.question)) : -1
+  // The question as it was served: its `at` and `why` (plan 301b) ride
+  // on the exercise, not on the graded rows the server sends back.
+  const servedQ = i => exercise?.questions?.[i] ?? results?.results?.[i]
+  // On the desk opening a row opens the sentence the question rests on,
+  // and its words are the thread's (openResultRow). A phone opens the row
+  // only, so the words are those of the sentence the question rests on,
+  // found the same way, rather than of whichever the breakdown last stood
+  // on (plan 197).
+  const quoted = !desk && reviewed ? (answerSentences(servedQ(openRow ?? 0), breakdown)[0] ?? -1) : -1
   const target = askTarget(null, reviewed ? {
     key: `q${openRow ?? 0}`,
     base: {
@@ -465,25 +499,34 @@ export default function ComprehensionRun({ session }) {
     open: true,
   } : { key: 'sealed', open: false })
 
-  // A result row opens its question; on the desk it also opens the
-  // sentence the question quotes, in the breakdown beside it. From the
-  // run's lines (plan 129) a row is only ever opened, never folded: the
-  // middle always stands one question.
+  // A result row opens its question, and the sentence it rests on opens
+  // in the breakdown: beside it on the desk, under the rows on a phone
+  // once Show breakdown is pressed (plans 301, 301b). From the run's
+  // lines (plan 129) a row is only ever opened, never folded: the middle
+  // always stands one question.
   function openLine(i) {
     const r = results?.results?.[i]
     if (!r || i === openRow) return
-    openResultRow(i, false, r)
+    openResultRow(i, false)
   }
-  function openResultRow(i, isOpen, r) {
+  function openResultRow(i, isOpen) {
     playUi('click-mode-selection')
     setOpenRow(isOpen ? null : i)
-    if (!desk || isOpen) return
-    const k = sentenceFor(breakdown, quotedFragments(r.question))
-    if (k >= 0) {
-      setLookup(null)
+    if (isOpen) return
+    const [k] = answerSentences(servedQ(i), breakdown)
+    if (k != null) {
+      if (desk) setLookup(null)
       setOpenIndex(k)
     }
   }
+
+  // The way the text shows at the clock's start, the pace at its end.
+  const chips = (
+    <>
+      <RollChip rolling={rolling} onToggle={toggleRoll} />
+      <PaceChip session={session} />
+    </>
+  )
 
   return (
     <StudyStage
@@ -495,7 +538,7 @@ export default function ComprehensionRun({ session }) {
       // On the desk the count is the run's lines' (plan 129).
       remaining={stage === 'questions' && !desk ? `${currentQ + 1} / ${total}` : undefined}
       pass={false}
-      aside={<RunStreak />}
+      tally={<RunStreak />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
@@ -555,13 +598,14 @@ export default function ComprehensionRun({ session }) {
         <>
           {/* The window, and the pace's chip at its end (PaceChip). No
               clock: the reading run's own word for it, in its place. */}
-          {!rereading && factor == null && <ReadingTimer untimed t={t} aside={<PaceChip session={session} />} />}
+          {!rereading && factor == null && <ReadingTimer untimed t={t} aside={chips} />}
           {!rereading && factor != null && (
             <Clock
-              fill={timeLeft / exercise.read_seconds}
-              low={timeLeft * factor < 60}
-              label={`${t.timeRemaining} · ${formatTime(timeLeft * factor)}`}
-              aside={<PaceChip session={session} />}
+              smooth={rolling}
+              fill={rolling ? 1 - rollAt : timeLeft / exercise.read_seconds}
+              low={rolling ? rollTotal * (1 - rollAt) < 10 : timeLeft * factor < 60}
+              label={`${t.timeRemaining} · ${formatTime(rolling ? Math.ceil(rollTotal * (1 - rollAt)) : timeLeft * factor)}`}
+              aside={chips}
             />
           )}
 
@@ -572,7 +616,48 @@ export default function ComprehensionRun({ session }) {
               now the breakdown on the result (below) — the same
               sentences, in the same order, but bought AFTER the
               answers are in rather than instead of them. */}
-          <Passage className="prompt-card--passage" text={exercise.text} level={level} t={t} />
+          {rolling ? (
+            <PromptCard className="prompt-card--passage prompt-card--roll" foot={{ left: level, right: t.comprehensionTitle }}>
+              <RollingPassage
+                entries={entries}
+                seconds={rollLength}
+                paused={rollHeld}
+                furigana={rollFurigana && readings}
+                label={t.rollLabel}
+                onProgress={setRollAt}
+                onEnd={factor != null ? finishReading : undefined}
+              />
+              <div className="roll-ctl">
+                <button
+                  type="button"
+                  className="chip roll-ctl__btn"
+                  aria-pressed={rollHeld}
+                  aria-label={rollHeld ? t.rollResume : t.rollPause}
+                  onClick={() => setRollHeld(h => !h)}
+                >
+                  {rollHeld ? <PlayIcon size={14} className="roll-ctl__play" /> : <PauseIcon size={14} />}
+                </button>
+                <div className="roll-ctl__speed" role="group" aria-label={t.rollSpeedLabel}>
+                  <button type="button" className="chip roll-ctl__btn" aria-label={t.rollSlower} onClick={() => nudgeRollSpeed(-1)}><MinusIcon size={14} /></button>
+                  <span className="roll-ctl__value" aria-live="polite">{t.rollSpeed(rollSpeed)}</span>
+                  <button type="button" className="chip roll-ctl__btn" aria-label={t.rollFaster} onClick={() => nudgeRollSpeed(1)}><PlusIcon size={14} /></button>
+                </div>
+                {readings && (
+                  <button
+                    type="button"
+                    className={`chip roll-ctl__btn roll-ctl__furi${rollFurigana ? ' chip--on' : ''}`}
+                    aria-pressed={rollFurigana}
+                    aria-label={rollFurigana ? t.rollFuriganaOn : t.rollFuriganaOff}
+                    onClick={() => setRollFurigana(!rollFurigana)}
+                  >
+                    <span lang="ja" aria-hidden="true">ふ</span>
+                  </button>
+                )}
+              </div>
+            </PromptCard>
+          ) : (
+            <Passage className="prompt-card--passage" text={exercise.text} level={level} t={t} />
+          )}
 
           <div className="stage__foot btn-row">
             <button type="button" className="btn-primary" onClick={finishReading} aria-keyshortcuts={desk ? 'Enter' : undefined}>
@@ -668,6 +753,11 @@ export default function ComprehensionRun({ session }) {
                 )
               })}
             </div>
+            {/* A miss says why, in one line (plan 301b); the sentence it
+                rests on is open in the breakdown beside it. */}
+            {!r.is_correct && servedQ(openRow ?? 0)?.why && (
+              <span className="prose__ai comp-why">{servedQ(openRow ?? 0).why}</span>
+            )}
             <div className="stage__foot btn-row">
               <button type="button" className="btn-secondary" onClick={leave}>
                 {t.changeLevel}
@@ -699,13 +789,19 @@ export default function ComprehensionRun({ session }) {
           <div className="surface qrows">
             {results.results.map((r, i) => {
               const isOpen = openRow === i
+              // The line(s) of the text the right option rests on, under
+              // its options (plans 301, 301b): what the desk's breakdown
+              // opens beside the question, here where the phone opens it,
+              // and on a miss the one line on why.
+              const source = isOpen ? answerSentences(servedQ(i), breakdown).map(k => breakdown[k]) : []
+              const why = isOpen && !r.is_correct ? servedQ(i)?.why : null
               return (
                 <div key={i} className="qrow-item">
                   <button
                     type="button"
                     className="qrow"
                     aria-expanded={isOpen}
-                    onClick={() => openResultRow(i, isOpen, r)}
+                    onClick={() => openResultRow(i, isOpen)}
                   >
                     <span className={`exam-review-row__mark exam-review-row__mark--${r.is_correct ? 'ok' : 'x'}`} aria-hidden="true">
                       {r.is_correct ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
@@ -738,6 +834,13 @@ export default function ComprehensionRun({ session }) {
                           )
                         })}
                       </div>
+                      {why && <span className="prose__ai comp-why">{why}</span>}
+                      {source.map((part, k) => (
+                        <div key={k} className="qrow__source">
+                          <SentenceLine analysis={part.analysis} text={part.jp} t={t} onTokenClick={w => setLookup(vocabLookup(w))} />
+                          {part.translation && <span className="bkd__en">{part.translation}</span>}
+                        </div>
+                      ))}
                       {/* The open question is the asking's thread (plan 197):
                           the page opens on it, not on the whole text. */}
                       <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.comprehensionTitle} text />

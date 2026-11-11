@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TAB_IDS, DESK_TAB_IDS, getDeskTabs, getDeskSections, inSection, dueBadge, gateBeside, tabFor } from './tabs'
+import { TAB_IDS, DESK_TAB_IDS, DESK_PLACE_IDS, PRACTICE_GROUPS, getDeskTabs, getDeskGates, getDeskSections, getDeskPlaces, getSections, deskPlaceFor, deskGateFor, onDeskRail, inSection, dueBadge, gateBeside, tabFor } from './tabs'
 
 // ── Which gate is next along the bar ──────────────────────────
 // The arithmetic behind the sideways flick (hooks/useGateSwipe), on
@@ -58,28 +58,78 @@ describe('the rail', () => {
 
   it('lists a gate\'s sections without the gate itself', () => {
     expect(getDeskSections('learn', t).map(s => s.path)).toEqual([
-      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks', '/learn/decks/library',
+      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar',
     ])
+    // In the practice gate's three groups (plan 290): what a learner
+    // takes in, what they make, and the paper.
     expect(getDeskSections('practice', t).map(s => s.path)).toEqual([
-      '/practice/reading', '/practice/comprehension', '/practice/translation',
-      '/practice/dictation', '/practice/composition', '/practice/exam', '/practice/conversation',
+      '/practice/reading', '/practice/comprehension', '/practice/dictation',
+      '/practice/translation', '/practice/composition', '/practice/conversation',
+      '/practice/exam',
     ])
-    // The queue IS the gate, and the catalogue is the dictionary.
+    // The queue IS the gate, and the catalogue is the dictionary; the
+    // analyser, the shelf, the record and the settings are places
+    // (plan 269), listed on their own.
     expect(getDeskSections('today', t)).toEqual([])
-    expect(getDeskSections('dictionary', t).map(s => s.path)).toEqual(['/dictionary/analyzer'])
-    // The pass's halls: the record, and its settings.
-    expect(getDeskSections('profile', t).map(s => s.path)).toEqual(['/profile/stats', '/profile/settings'])
+    expect(getDeskSections('dictionary', t)).toEqual([])
+    expect(getDeskSections('profile', t)).toEqual([])
+  })
+
+  it('lists the four places, each behind the gate its phone route is (plan 269)', () => {
+    expect(getDeskPlaces(t).map(p => p.id)).toEqual(DESK_PLACE_IDS)
+    expect(getDeskPlaces(t).map(p => [p.path, tabFor(p.path)])).toEqual([
+      ['/dictionary/analyzer', 'dictionary'],
+      ['/learn/decks', 'learn'],
+      ['/profile/stats', 'profile'],
+      ['/profile/settings', 'profile'],
+    ])
+    // The profile's guide finds its two stops on the rail.
+    expect(getDeskPlaces(t).map(p => p.guide)).toEqual([undefined, undefined, 'profile.stats', 'profile.settings'])
+  })
+
+  it('says which place a path stands in, the library and the shelf being one', () => {
+    expect(deskPlaceFor('/learn/decks')?.id).toBe('library')
+    expect(deskPlaceFor('/learn/decks/12')?.id).toBe('library')
+    expect(deskPlaceFor('/learn/decks/library/12')?.id).toBe('library')
+    expect(deskPlaceFor('/profile/settings/sound')?.id).toBe('settings')
+    expect(deskPlaceFor('/dictionary/analyzer')?.id).toBe('analyzer')
+    expect(deskPlaceFor('/dictionary')).toBeNull()
+    expect(deskPlaceFor('/profile')).toBeNull()
+    expect(deskPlaceFor('/learn/vocab')).toBeNull()
+  })
+
+  it('counts a place as a door the rail already has', () => {
+    for (const p of getDeskPlaces(t)) expect(onDeskRail(p.path), p.path).toBe(true)
+    expect(onDeskRail('/learn/vocab')).toBe(true)
+    expect(onDeskRail('/learn/vocab/themes')).toBe(false)
+    // The duels' hall is a gate on the desk (plan 279); its pages are not.
+    expect(onDeskRail('/profile/duels')).toBe(true)
+    expect(onDeskRail('/profile/duels/friends')).toBe(false)
+  })
+
+  it('stands the duels\' gate after Practice, on the phone\'s path, lit behind it too (plan 279)', () => {
+    expect(getDeskGates(t).map(g => g.id)).toEqual(['today', 'learn', 'practice', 'duels', 'dictionary', 'profile'])
+    expect(getDeskGates(t).find(g => g.id === 'duels').path).toBe('/profile/duels')
+    // The tab bar's five are untouched: the phone opens the duels from the holder.
+    expect(getDeskTabs(t).map(g => g.id)).toEqual(DESK_TAB_IDS)
+    expect(TAB_IDS).not.toContain('duels')
+    expect(deskGateFor('/profile/duels')).toBe('duels')
+    expect(deskGateFor('/profile/duels/board')).toBe('duels')
+    expect(deskGateFor('/profile')).toBe('profile')
+    expect(deskGateFor('/profile/duelsx')).toBe('profile')
+    expect(tabFor('/profile/duels')).toBe('profile')
   })
 
   it('carries no pigment: the rail is chrome', () => {
     for (const id of DESK_TAB_IDS) {
-      // A guide anchor is not a colour: the profile's Settings station
-      // carries the stop the page's door carried (plan 143).
       for (const row of getDeskSections(id, t)) {
-        expect(Object.keys(row).filter(k => k !== 'guide').sort()).toEqual(['path', 'title'])
+        expect(Object.keys(row).sort()).toEqual(['path', 'title'])
       }
     }
-    expect(getDeskSections('profile', t).map(s => s.guide)).toEqual(['profile.stats', 'profile.settings'])
+    // A place names a pictogram and a guide's stop, never a colour.
+    for (const p of getDeskPlaces(t)) {
+      expect(Object.keys(p).filter(k => k !== 'guide').sort()).toEqual(['id', 'path', 'title'])
+    }
   })
 
   it('lights a section from anywhere behind it, and only there', () => {
@@ -95,5 +145,19 @@ describe('the rail', () => {
     expect(dueBadge(24)).toBe('24')
     expect(dueBadge(99)).toBe('99')
     expect(dueBadge(100)).toBe('99+')
+  })
+})
+
+// ── The practice gate's groups (plan 290) ──
+// The phone hangs the platforms under three captions, in the
+// registry's order: every platform names one, and a group's platforms
+// stand together, so the desk's rail and plates read them in the same
+// order the phone's groups do.
+describe('the practice platforms\' groups', () => {
+  it('puts every platform in one of the groups, the groups in their order', () => {
+    const platforms = getSections('practice', t)
+    for (const s of platforms) expect(PRACTICE_GROUPS, s.path).toContain(s.group)
+    const runs = platforms.map(s => s.group).filter((g, i, all) => g !== all[i - 1])
+    expect(runs).toEqual(PRACTICE_GROUPS)
   })
 })

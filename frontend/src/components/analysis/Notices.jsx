@@ -48,8 +48,10 @@ export function Notices({ notices = [], announcement, t, lines = true, region = 
           key={n.id}
           className={`anl-panel anl-notice-line anl-notice-line--${n.tone}`}
         >
-          {n.wait && <Loading inline />}
-          {n.text}
+          {/* One row, the dots before the sentence: as two children of
+              the panel's column the dots stood over the line, centred
+              above a sentence set to the left (plan 264). */}
+          {n.wait ? <Loading inline copy={n.text} /> : n.text}
         </div>
       ))}
       {region && <p className="anl-sr-only" role="status" aria-live="polite">{announcement ?? ''}</p>}

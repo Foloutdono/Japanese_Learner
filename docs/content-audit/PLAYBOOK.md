@@ -49,6 +49,11 @@ ledger to update and a run can be reproduced later with `--on`. Read
 `scripts/audit_slice.py`'s docstring for the rotation; `--schedule 12`
 shows what is coming.
 
+Check that the run before yours filed its issue (`--on` its date names
+its slice). If it filed none, say so in your issue's notes: the
+maintainer adds that run to `UNFILED`, and its slice is dealt again at
+its area's next turn. A missed firing is otherwise a slice nobody audits.
+
 The dump carries the entries, the `source` file they live in, and a
 `checks` list: the questions this area is audited against. For vocab it
 also carries `risk` and `flags` — see step 3.
@@ -69,6 +74,15 @@ Most claims will not survive: the subtitle ranking credits verb stems
 and homophones, the JLPT lists are the deck's own ancestors, and a
 "missing" word is often present under another spelling. That is the
 point of auditing them rather than importing them.
+
+A level move survives only on two signals (plan 260,
+`docs/vocab-deck-review.md`): the lists put the word lower *and* the app
+does, by a lesson of that level or a sentence of that level that really
+has the word (not a breakdown's badge of a kana homophone). Name the
+lesson or quote the sentence, and propose the level both support. Since
+plan 260 the lists' affix rows (～枚, ～さん, 御～) are matched too, and a
+card that plan stopped short of the lists (階, 度, 台, 日 at N4) is on the
+list with its reason in that section: read it before proposing more.
 
 **A tours slice is a grammar point's written tour** (plan 187): the
 `twists`, one per notion the point has beyond its main meaning (plan

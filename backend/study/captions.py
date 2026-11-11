@@ -188,6 +188,23 @@ def _cue(start: float, end: float, text: str, words: list[list] | None = None) -
     return cue
 
 
+# A copy of a line on screen for less than this, or this much before the
+# line it copies is off, is the window carrying it, not the line said
+# again: yt-dlp holds a finished auto-caption line 10 ms before the next
+# grows from it, and no line is sung in a quarter of a second.
+_CARRY_SECONDS = 0.25
+
+
+def _carried(prev: dict, cue: dict) -> bool:
+    """Whether `cue`, a repeat of `prev`'s text or of a piece of it, is
+    the rolling window carrying that line rather than the line said
+    again: no word of its own timed, and on screen too briefly to be
+    said or while the first still is."""
+    if cue.get("words"):
+        return False
+    return cue["end"] - cue["start"] < _CARRY_SECONDS or cue["start"] < prev["end"] - _CARRY_SECONDS
+
+
 def _merge_duplicate_consecutive(cues: list[dict]) -> list[dict]:
     """YouTube auto-captions render as a ROLLING WINDOW: consecutive
     Cues repeat most of each other's text, one or two words advancing
@@ -198,19 +215,25 @@ def _merge_duplicate_consecutive(cues: list[dict]) -> list[dict]:
     A Cue whose text is a prefix/suffix of its neighbour, or identical
     to it, is the signature of this. Kept deliberately simple (exact
     containment, not fuzzy matching) -- see the module docstring on
-    tuning this against real videos."""
+    tuning this against real videos.
+
+    But a line shown again is most often a line said again: a chorus
+    sung twice in a row, a ルララ after the line it ends. Folded, it came
+    back once, its cue stretched over both, and its words were read out
+    at half the pace they were sung (the owner, 2026-10-21). So a repeat
+    is folded only where it is the window carrying its line (_carried)."""
     if not cues:
         return cues
     merged = [dict(cues[0])]
     for cue in cues[1:]:
         prev = merged[-1]
-        if cue["text"] == prev["text"] or cue["text"] in prev["text"]:
+        if (cue["text"] == prev["text"] or cue["text"] in prev["text"]) and _carried(prev, cue):
             # Pure repeat (or a shrinking rolling window) -- the
             # earlier Cue already carries this text; only extend its
             # end time.
             prev["end"] = max(prev["end"], cue["end"])
             continue
-        if prev["text"] and prev["text"] in cue["text"]:
+        if prev["text"] and prev["text"] in cue["text"] and prev["text"] != cue["text"]:
             # The rolling window grew: this Cue's text is the previous
             # one PLUS new words. Replace rather than duplicate -- and
             # the word times with it: the previous Cue's, moved to where
@@ -413,7 +436,93 @@ def _parse_srv3(content: str) -> list[dict]:
     return cues
 
 
-_PARSERS = {"srt": _parse_srt, "vtt": _parse_vtt, "ass": _parse_ass, "ssa": _parse_ass, "srv3": _parse_srv3}
+# ── LRC and plain text: a song's lyrics (plan 264) ────────────────
+# The two shapes lyrics are passed around in, beside a video's track:
+# an .lrc, each line behind the time it is sung at ([01:02.50], two of
+# them before a chorus sung twice), and a .txt of the lines alone. The
+# deck shelf's lyrics import reads both (components/decks/
+# LyricsImportSheet.jsx), and the analyser's upload with them.
+#
+# An .lrc's tags ([ti:], [ar:], [offset:]) say nothing to study, and a
+# time with no words after it is the end of the line before it -- an
+# instrumental break. Enhanced LRC's <01:02.75> before a word is that
+# word's time, kept as a VTT stamp's is.
+_LRC_TIME_RE = re.compile(r"\[(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?\]")
+_LRC_TAG_RE = re.compile(r"^\s*\[[a-zA-Z]+:[^\]]*\]\s*$")
+_LRC_OFFSET_RE = re.compile(r"^\s*\[offset:\s*([+-]?\d+)\s*\]", re.IGNORECASE)
+_LRC_WORD_RE = re.compile(r"<(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?>")
+
+
+def _lrc_seconds(m: str, s: str, frac: str | None) -> float:
+    return int(m) * 60 + int(s) + (int(frac) / 10 ** len(frac) if frac else 0.0)
+
+
+def _lrc_timed_text(raw: str, start: float, offset: float) -> tuple[str, list[list]]:
+    pieces = _LRC_WORD_RE.split(raw)
+    # split keeps the three groups of each stamp: text, m, s, frac, text...
+    text, anchors = "", [(0, start)] if len(pieces) > 1 else []
+    for i in range(0, len(pieces), 4):
+        if i:
+            anchors.append((len(text), max(0.0, _lrc_seconds(*pieces[i - 3:i]) + offset)))
+        text += _strip_tags(pieces[i])
+    stripped = text.strip()
+    lead = len(text) - len(text.lstrip())
+    return stripped, _tidy_anchors(stripped, anchors, lead)
+
+
+def _parse_lrc(content: str) -> list[dict]:
+    offset = 0.0
+    stamped: list[tuple[float, str, list[list]]] = []
+    for line in content.splitlines():
+        found = _LRC_OFFSET_RE.match(line)
+        if found:
+            # LRC's offset is in milliseconds, and a positive one makes
+            # the lines come up sooner.
+            offset = -int(found.group(1)) / 1000
+            continue
+        if _LRC_TAG_RE.match(line) and not _LRC_TIME_RE.match(line.strip()):
+            continue
+        times, at = [], 0
+        rest = line.strip()
+        while (m := _LRC_TIME_RE.match(rest, at)):
+            times.append(_lrc_seconds(*m.groups()))
+            at = m.end()
+        if not times:
+            continue
+        body = rest[at:]
+        for t in times:
+            text, words = _lrc_timed_text(body, max(0.0, t + offset), offset)
+            stamped.append((max(0.0, t + offset), text, words))
+    stamped.sort(key=lambda row: row[0])
+    cues = []
+    for i, (start, text, words) in enumerate(stamped):
+        if not text:
+            continue
+        following = next((s for s, _, _ in stamped[i + 1:] if s > start), None)
+        end = following if following is not None else start + _TRAILING_CUE_SECONDS
+        cues.append(_cue(start, end, text, [w for w in words if w[1] < end] or None))
+    if not cues:
+        raise CaptionParseError("No timed lines found in the LRC file", "no_cues")
+    return cues
+
+
+def _parse_text(content: str) -> list[dict]:
+    """A .txt of a song's words, a line each, with no clock (parse_track
+    reads one that is a timed track or an LRC as what it is). The lines
+    are spaced _TRAILING_CUE_SECONDS apart, as a paste's last line is
+    closed: the times only order them, and nothing with no video plays
+    them."""
+    lines = [_strip_markup(l) for l in content.splitlines()]
+    lines = [l for l in lines if l]
+    if not lines:
+        raise CaptionParseError("The text file has no lines", "no_cues")
+    return [_cue(i * _TRAILING_CUE_SECONDS, (i + 1) * _TRAILING_CUE_SECONDS, text)
+            for i, text in enumerate(lines)]
+
+
+_PARSERS = {"srt": _parse_srt, "vtt": _parse_vtt, "ass": _parse_ass, "ssa": _parse_ass, "srv3": _parse_srv3,
+            "lrc": _parse_lrc, "txt": _parse_text}
+_LYRIC_FORMATS = ("lrc", "txt")
 
 
 def _sniff_format(content: str) -> str:
@@ -426,6 +535,8 @@ def _sniff_format(content: str) -> str:
         return "ass"
     if _SRT_ARROW_RE.search(head):
         return "srt"
+    if sum(1 for line in head.splitlines() if _LRC_TIME_RE.match(line.strip())) >= 2:
+        return "lrc"
     raise CaptionParseError("Could not determine subtitle format from content", "unknown_format")
 
 
@@ -438,9 +549,16 @@ def parse_track(content: str, filename: str) -> list[dict]:
     Track silently.
     """
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if ext == "txt":
+        # A timed track or an LRC saved as .txt is read as what it is.
+        try:
+            ext = _sniff_format(content)
+        except CaptionParseError:
+            pass
     parser = _PARSERS.get(ext)
     if parser is None:
-        parser = _PARSERS[_sniff_format(content)]
+        ext = _sniff_format(content)
+        parser = _PARSERS[ext]
 
     try:
         cues = parser(content)
@@ -452,6 +570,10 @@ def parse_track(content: str, filename: str) -> list[dict]:
     if not cues:
         raise CaptionParseError("No usable cues found in subtitle content", "no_cues")
 
+    # Lyrics are written by hand, never a rolling window: a line sung
+    # twice in a row is sung twice (plan 264).
+    if ext in _LYRIC_FORMATS:
+        return cues
     return _merge_duplicate_consecutive(cues)
 
 

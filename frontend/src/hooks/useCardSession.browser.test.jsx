@@ -147,6 +147,35 @@ describe('useCardSession resuming a saved queue', () => {
   }, 10000)
 })
 
+// ── A card just answered is not handed straight back ─────────────
+// A review POST is fire-and-forget, so a refill can reach the backend
+// before it lands, while the card is still due there. Four of the six
+// run screens had no guard, and a learner answering kana every two
+// seconds met the same three or four again ten seconds later.
+describe('useCardSession and the cards just answered', () => {
+  it('keeps them out of the refill whose backend has not seen their reviews', async () => {
+    const key = freshKey()
+    // A backend that never hears a review: it serves whatever the
+    // request does not exclude.
+    const pool = ['a', 'b', 'c', 'd', 'e', 'f']
+    const fetchBatch = vi.fn(async (count, exclude) => pool.filter(id => !exclude.includes(id)).slice(0, count).map(id => card(id)))
+    await render(<Probe storageKey={key} fetchBatch={fetchBatch} batchSize={4} mode="m" />)
+    await vi.waitFor(() => expect(api.queueLength).toBe(6))
+
+    api.advance()
+    await vi.waitFor(() => expect(api.current?.card_id).toBe('b'))
+    api.advance()
+    await vi.waitFor(() => expect(fetchBatch.mock.calls.length).toBeGreaterThanOrEqual(3))
+    await settle(50)
+
+    const [, exclude, , answered] = fetchBatch.mock.calls.at(-1)
+    expect(exclude).toEqual(expect.arrayContaining(['a', 'b']))
+    expect([...answered].sort()).toEqual(['a', 'b'])
+    expect(api.queueLength, 'nothing handed back').toBe(4)
+    expect(saved(key)).toEqual(['c', 'd', 'e', 'f'])
+  })
+})
+
 describe('useCardSession and a queue saved by an older payload', () => {
   it('fetches afresh rather than resuming a queue saved before the forecast', async () => {
     // Plan 126 added `due_in` to every rating's preview; a queue saved

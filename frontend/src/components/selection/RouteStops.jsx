@@ -60,17 +60,32 @@ import { SplitRow } from './SplitRow'
 //           only; the started note goes, each car under the line
 //           carrying its own record. Walked with ←/→ as well. Only the
 //           desk passes it.
+//           Since plan 267 (the owner's pick 2c of the canvas "Tsuji —
+//           the sources and the line, redrawn") the stops across are
+//           doors: one row of joined cells under the line's stripe, each
+//           its marker, code, name and figure on one line and its bar
+//           along its foot -- no rail through them, the stripe is the
+//           line.
+//   captioned — across, the learner's stop says "You are here" in words
+//           on its door rather than to a screen reader only: the sources'
+//           doors (plan 267, LineDoors), where no stop is open and the
+//           landmark is the page's one.
+//   push  — a stop's link pushes rather than replaces (SplitRow's
+//           `push`): the sources' doors, where a stop is a place left
+//           for and Back comes back.
 //
 // In the split the route is also walked by key (hooks/useListWalk,
 // plan 115): one tab stop, the open one, and ↑/↓/Home/End along it.
-export function RouteStops({ stops, here = null, selected = null, onSelect, linkTo = null, figured = false, across = false }) {
+export function RouteStops({ stops, here = null, selected = null, onSelect, linkTo = null, figured = false, across = false, captioned = false, push = false }) {
   const hereIndex = stops.findIndex(s => s.key === here)
-  const walked = selected != null
+  // Doors are one tab stop too, walked with ←/→, with no stop open:
+  // the learner's own is the one Tab lands on.
+  const walked = selected != null || (across && linkTo != null)
   const onWalk = useListWalk(walked, { across })
-  const tabStop = walked && stops.some(s => s.key === selected) ? selected : stops[0]?.key
+  const tabStop = [selected, here].find(k => k != null && stops.some(s => s.key === k)) ?? stops[0]?.key
   const keys = across ? WALK_KEYS_ACROSS : WALK_KEYS
   return (
-    <div className="route" onKeyDown={onWalk} aria-keyshortcuts={walked ? keys : undefined}>
+    <div className={across ? 'route route--across' : 'route'} onKeyDown={onWalk} aria-keyshortcuts={walked ? keys : undefined}>
       {stops.map((stop, i) => {
         const past = hereIndex >= 0 && i < hereIndex
         const current = stop.key === here
@@ -95,7 +110,11 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
           <SplitRow
             key={stop.key}
             to={linkTo?.(stop.key)}
+            push={push}
             className={classes}
+            // A door's name is cut short where the line is narrow: whole
+            // in its tooltip.
+            title={across ? stop.name : undefined}
             aria-current={open ? 'page' : current ? 'location' : undefined}
             tabIndex={walked ? (stop.key === tabStop ? 0 : -1) : undefined}
             onClick={() => { playUi('click-mode-selection'); if (!linkTo) onSelect(stop.key) }}
@@ -108,7 +127,7 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
             {stop.code && <span className="route-stop__code" lang={stop.codeLang}>{stop.code}</span>}
             <span className="route-stop__names">
               <span className="route-stop__jp">{stop.name}</span>
-              {across && current && <span className="sr-only">{stop.hereLabel}</span>}
+              {across && current && <span className={captioned ? 'route-stop__here' : 'sr-only'}>{stop.hereLabel}</span>}
               {(caption || started || stop.note) && (
                 <span className="route-stop__caption">
                   {caption}
@@ -127,7 +146,8 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
             {figured && stop.sample && (
               <span className="desk-stop__sample" lang="ja" aria-hidden="true">{stop.sample}</span>
             )}
-            {figured && stop.total > 0 && (
+            {/* Across, the bar is the door's foot (plan 267). */}
+            {(figured || across) && stop.total > 0 && (
               <span className="desk-line__bar desk-stop__bar" aria-hidden="true">
                 <i className="desk-line__met" style={{ width: share(stop.started ?? 0, stop.total) }} />
                 <i className="desk-line__learned" style={{ width: share(stop.learned ?? 0, stop.total) }} />

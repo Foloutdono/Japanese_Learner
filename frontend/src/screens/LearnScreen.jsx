@@ -1,17 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { getSections, getAllSections } from '../config/tabs'
 import { apiJson } from '../lib/api'
+import { keepCachedJson, lastCachedJson } from '../lib/cachedJson'
+import { GATE_PATHS } from '../lib/warm'
 import { useTodaySummary } from '../stores/today'
 import { useBasics } from '../stores/basics'
 import { useStats } from '../stores/stats'
 import { useProfileSummary } from '../stores/profileSummary'
 import { linesOrAll } from '../domain/boarding'
 import { beginDeparture } from '../stores/departure'
+import { board } from '../stores/boarding'
+import { noteRide, rideOf } from '../stores/learnRide'
 import { playAnnouncement } from '../lib/audio'
-import { TRACKED_LINES as TRACKED, lineStops, stopsAround } from '../domain/lineProgress'
+import { TRACKED_LINES as TRACKED, deckItems, lineStops, stopLabel, stopsAround } from '../domain/lineProgress'
 import { currentKanaSet } from '../domain/kanaSets'
-import { Plate, DueChip, StopsFoot, LineFoot } from '../components/station/LinePlate'
+import { dueByDeck } from '../domain/lanes'
+import { modeLabel } from '../domain/studyModes'
+import { Plate, DueChip, LineFoot } from '../components/station/LinePlate'
+import { GateResume } from '../components/station/GateResume'
+import { LineSheet, StopRecord } from '../components/learn/LineSheet'
 import { useDesk } from '../hooks/useDesk'
 import { Guide } from '../components/guide/Guide'
 import { DeckShelfPanel, LibraryPanel } from '../components/decks/GateShelf'
@@ -58,6 +67,21 @@ import { useGuide } from '../hooks/useGuide'
 // a fetch that failed — and the plate opens the station, exactly as
 // it always did. A guess at the stop would be worse than the question.
 //
+// ── On the phone, the plates fold and rise as a sheet (plan 291) ──
+// Five plates shared the phone's height, about 116px each for two lines
+// of type, and their foot named the last stop FINISHED, so a learner
+// 87% through N5's kanji read « Débutant » on a plate that opened N4.
+// Any other level, the themes or a deck was four taps away. The owner
+// took B of the canvas "Tsuji — Learn on the phone", the shape the
+// Practice gate took (plan 290), with the raised plate improved as
+// drawn there: each line folds to one row, its stop and that stop's
+// figure under the name (StopRecord, the stop the plate opens); a row
+// raises the line's sheet (components/learn/LineSheet), where a stop
+// and a mode are chosen and Embarquer boards them; the last ride a
+// station boarded waits over the lines, boarded in one tap
+// (stores/learnRide); the decks fold under the lines, one row each.
+// The desk keeps its lines across and its shelf beside them.
+//
 // The gate prints no head. It opened on the concourse's bar — 辻 over
 // "Route map", "Four lines" at the far end — and the owner had it
 // removed from the four gates (2026-09-20): the tab bar already
@@ -66,23 +90,30 @@ import { useGuide } from '../hooks/useGuide'
 // <h1>, clipped, so a screen reader still lands somewhere named.
 export default function LearnScreen({ session }) {
   const { t } = useLang()
+  const navigate = useNavigate()
   const today = useTodaySummary().data
   const stats = useStats().data
   const desk = useDesk()
   const profile = useProfileSummary()
   const riding = linesOrAll(profile?.lines)
   const here = profile?.jlptLevel ?? null
-  // The shelf: on the phone its figures under the fifth plate's name,
-  // on the desk every deck in the column beside the lines (plan 132).
-  // `shelfNonce` asks again after a Follow from the library's panel.
-  const [decks, setDecks] = useState(null)
+  // The shelf: on the phone its decks folded under the lines, on the
+  // desk every deck in the column beside them (plan 132). `shelfNonce`
+  // asks again after a Follow from the library's panel. The last answer
+  // kept (lib/warm.js asks it behind Today, plan 292) is drawn at once,
+  // and asked again behind it.
+  const [decks, setDecks] = useState(() => lastCachedJson(GATE_PATHS.decks, session)?.decks ?? null)
   const [shelfNonce, setShelfNonce] = useState(0)
-  const shelf = decks && { count: decks.length, cards: decks.reduce((n, d) => n + (d.card_count ?? 0), 0) }
+  // The line whose sheet is raised, by its path (plan 291).
+  const [open, setOpen] = useState(null)
 
   useEffect(() => {
     let live = true
-    apiJson('/api/decks', session)
-      .then(data => { if (live) setDecks(data?.decks ?? []) })
+    apiJson(GATE_PATHS.decks, session)
+      .then(data => {
+        keepCachedJson(GATE_PATHS.decks, session, data)
+        if (live) setDecks(data?.decks ?? [])
+      })
       .catch(() => { if (live) setDecks(d => d ?? []) })
     return () => { live = false }
   }, [session, shelfNonce])
@@ -96,11 +127,31 @@ export default function LearnScreen({ session }) {
     beginDeparture(to === section.path ? section : { ...section, path: to })
   }
 
+  /** The stop the learner stands at on one line, or null while nobody
+   *  is placed on it yet. */
+  function stopOf(source) {
+    return source === 'kana' ? currentKanaSet(stats?.items?.kana) : here
+  }
+
   /** The stop the learner stands at on one line, as a path, or the
    *  station itself when the line has nobody placed on it yet. */
   function stopPath(section) {
-    const stop = TRACKED[section.path] === 'kana' ? currentKanaSet(stats?.items?.kana) : here
+    const stop = stopOf(TRACKED[section.path])
     return stop ? `${section.path}/${stop}` : section.path
+  }
+
+  // A run boarded from the gate, as from a station: the sheet goes down
+  // first, so the doors are drawn over the gate. It is the last ride
+  // now (plan 291); the fast review, a browse, boards with no doors.
+  function boardRun(path, browse = false) {
+    setOpen(null)
+    noteRide(path)
+    if (browse) navigate(path)
+    else board(() => navigate(path))
+  }
+  function toStation(section, to) {
+    setOpen(null)
+    depart(section, to)
   }
 
   const sections = getSections('learn', t)
@@ -112,49 +163,45 @@ export default function LearnScreen({ session }) {
   // once (plan 100).
   const guide = useGuide('learn', true)
 
-  const linePlates = lines.map((section, i) => {
-    const source = TRACKED[section.path]
-    const stops = lineStops(stats, source)
-    const off = !onRoute(section)
-    return (
-      <Plate
-        key={section.path}
-        section={section}
-        className={`plate--line${off ? ' plate--off' : ''}`}
-        meta={off ? t.plateOffRoute : null}
-        aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
-        // The guide (plan 100) points at the first plate and its
-        // foot; the others say the same thing by looking the same.
-        guide={i === 0 ? 'learn.plate' : undefined}
-        // The phone's plate has room for the stop behind, the one
-        // reached and the one ahead; the desk's draws the whole
-        // line (plan 114), upright since plan 130, and across the
-        // plate since plan 132, where the four stand in one column.
-        foot={desk
-          ? <LineFoot across stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />
-          : <StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
-        fill={stopsAround(stops).leg}
-        onClick={() => depart(section, stopPath(section))}
-      />
-    )
-  })
-
   // 基礎 (plan 186g): while an N5 learner rides the basics, their plate
   // hangs above the lines -- the course is where Today's new cards come
   // from, and the unit at hand is one tap away.
   const basicsSection = getAllSections(t).find(s => s.path === '/learn/basics')
   const basicsPlate = today?.basics && !today.basics.done && basicsSection
-    ? <BasicsPlate section={basicsSection} at={today.basics} onDepart={to => depart(basicsSection, to)} />
+    ? <BasicsPlate section={basicsSection} at={today.basics} fold={!desk} onDepart={to => depart(basicsSection, to)} />
     : null
 
-  return (
-    <main id="main-content" className="learn">
-      <h1 className="sr-only">{t.tabLearn}</h1>
-      {guide.open && <Guide gate="learn" onEnd={guide.onEnd} />}
-      {desk ? (
-        // 棚 (plan 132, the owner's pick "A"): the lines stacked on the
-        // left, each drawn across the plate; the shelf over the library
-        // in a column at the entry's width on the right.
+  if (desk) {
+    const linePlates = lines.map((section, i) => {
+      const source = TRACKED[section.path]
+      const stops = lineStops(stats, source)
+      const off = !onRoute(section)
+      return (
+        <Plate
+          key={section.path}
+          section={section}
+          className={`plate--line${off ? ' plate--off' : ''}`}
+          meta={off ? t.plateOffRoute : null}
+          aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
+          // The guide (plan 100) points at the first plate and its
+          // foot; the others say the same thing by looking the same.
+          guide={i === 0 ? 'learn.plate' : undefined}
+          // The desk's plate draws the whole line (plan 114), upright
+          // since plan 130, and across the plate since plan 132, where
+          // the four stand in one column.
+          foot={<LineFoot across stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />}
+          fill={stopsAround(stops).leg}
+          onClick={() => depart(section, stopPath(section))}
+        />
+      )
+    })
+    return (
+      <main id="main-content" className="learn">
+        <h1 className="sr-only">{t.tabLearn}</h1>
+        {guide.open && <Guide gate="learn" onEnd={guide.onEnd} />}
+        {/* 棚 (plan 132, the owner's pick "A"): the lines stacked on the
+            left, each drawn across the plate; the shelf over the library
+            in a column at the entry's width on the right. */}
         <div className="learn-desk">
           <div className="plates plates--across">{basicsPlate}{linePlates}</div>
           <aside className="learn-desk__side" aria-label={t.decksTitle} style={{ '--line-color': 'var(--line-decks)' }}>
@@ -162,23 +209,113 @@ export default function LearnScreen({ session }) {
             <LibraryPanel session={session} onFollowed={() => setShelfNonce(n => n + 1)} />
           </aside>
         </div>
-      ) : (
-        <div className="plates">
-          {basicsPlate}
-          {linePlates}
-          {decksSection && (
+      </main>
+    )
+  }
+
+  // ── The phone: the lines folded, the sheet a fold raises (plan 291) ──
+  const stops = Object.fromEntries(lines.map(s => [TRACKED[s.path], stopOf(TRACKED[s.path])]))
+  const ride = rideOf(profile?.learnRide?.path)
+  const rideSection = ride && lines.find(s => TRACKED[s.path] === ride.line)
+  return (
+    <main id="main-content" className="learn">
+      <h1 className="sr-only">{t.tabLearn}</h1>
+      {guide.open && <Guide gate="learn" onEnd={guide.onEnd} />}
+      {rideSection && (
+        <GateResume
+          section={rideSection}
+          title={<>{rideSection.title} · <span lang={ride.line === 'kana' ? 'ja' : undefined}>{stopLabel(ride.line, ride.stop)}</span></>}
+          at={profile.learnRide.at}
+          facts={[modeLabel(t, ride.mode)]}
+          onClick={() => boardRun(ride.path)}
+        />
+      )}
+      <div className="plates lrn-folds">
+        {basicsPlate}
+        {lines.map((section, i) => {
+          const source = TRACKED[section.path]
+          const stop = stopOf(source)
+          const off = !onRoute(section)
+          return (
             <Plate
-              section={decksSection}
-              className="plate--shelf"
-              guide="learn.shelf"
-              meta={shelf?.count > 0 ? t.decksRowMeta(shelf.count, shelf.cards) : null}
-              aside={<DueChip due={today?.by_source?.personal ?? 0} />}
-              onClick={() => depart(decksSection)}
+              key={section.path}
+              section={section}
+              className={`plate--line plate--fold${off ? ' plate--off' : ''}`}
+              popup="dialog"
+              // A line the learner chose not to ride says so where the
+              // others print their stop; its sheet still holds it.
+              meta={off
+                ? t.plateOffRoute
+                : <StopRecord source={source} stop={stop} stats={stats} guide={i === 0 ? 'learn.stops' : undefined} />}
+              aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
+              guide={i === 0 ? 'learn.plate' : undefined}
+              // The stripe is painted to the share of the stop the plate
+              // names, the figure beside it.
+              fill={stop ? deckItems(stats, source, stop).score : 0}
+              onClick={() => setOpen(section.path)}
             />
-          )}
-        </div>
+          )
+        })}
+      </div>
+      {decksSection && <Shelf section={decksSection} decks={decks} today={today} onDepart={depart} />}
+      {open && (
+        <LineSheet
+          sections={lines}
+          start={open}
+          stops={stops}
+          stats={stats}
+          today={today}
+          session={session}
+          onClose={() => setOpen(null)}
+          onBoard={boardRun}
+          onStation={toStation}
+        />
       )}
     </main>
+  )
+}
+
+// ── 棚 — the decks on the phone (plan 291) ──────────────────────────
+// Under the lines, captioned as Practice's groups are: the learner's
+// decks, owned and followed, folded one row each -- the deck's name over
+// its cards, what it is due -- the first few of them, and a row of two
+// doors: a new deck, and the library (or every deck, when the shelf
+// holds more than the gate shows). A deck's row departs for its page.
+const SHELF = 4
+
+function Shelf({ section, decks, today, onDepart }) {
+  const { t } = useLang()
+  const uid = useId()
+  const navigate = useNavigate()
+  const due = dueByDeck(today)
+  const shown = (decks ?? []).slice(0, SHELF)
+  const more = (decks?.length ?? 0) > shown.length
+  return (
+    <section className="lrn-shelf" aria-labelledby={`${uid}-shelf`} data-guide="learn.shelf">
+      <h2 className="prc-group__cap" id={`${uid}-shelf`}>{section.title}</h2>
+      {shown.length > 0 && (
+        <div className="plates lrn-folds">
+          {shown.map(deck => (
+            <Plate
+              key={deck.id}
+              section={{ ...section, path: `/learn/decks/${deck.id}`, title: deck.name }}
+              className="plate--fold plate--deck"
+              meta={t.cardsCount(deck.card_count ?? 0)}
+              aside={<DueChip due={due.get(String(deck.id)) ?? 0} />}
+              onClick={() => onDepart(section, `/learn/decks/${deck.id}`)}
+            />
+          ))}
+        </div>
+      )}
+      <div className="lrn-shelf__doors">
+        <button type="button" className="lrn-shelf__door" onClick={() => navigate('/learn/decks', { state: { create: true } })}>
+          ＋ {t.newDeck}
+        </button>
+        <button type="button" className="lrn-shelf__door" onClick={() => onDepart(section, more ? '/learn/decks' : '/learn/decks/library')}>
+          {more ? t.learnAllDecks(decks.length) : t.library} ›
+        </button>
+      </div>
+    </section>
   )
 }
 
@@ -189,8 +326,9 @@ export default function LearnScreen({ session }) {
 // section's neutral one -- the course is no line (config/tabs.js). The
 // head opens the unit at hand. `at` is /api/today's `basics`, so the
 // plate hangs with the gate; the neighbours' names arrive with
-// /api/basics.
-function BasicsPlate({ section, at, onDepart }) {
+// /api/basics. On the phone it folds with the lines (plan 291): the
+// unit at hand under the name, and no foot.
+function BasicsPlate({ section, at, fold = false, onDepart }) {
   const { t } = useLang()
   const units = useBasics().data?.units ?? []
   const i = at.unit - 1
@@ -199,9 +337,9 @@ function BasicsPlate({ section, at, onDepart }) {
   return (
     <Plate
       section={section}
-      className="plate--basics"
-      meta={t.basicsUnit(at.unit, at.of)}
-      foot={(
+      className={fold ? 'plate--basics plate--fold' : 'plate--basics'}
+      meta={fold ? <>{t.basicsUnit(at.unit, at.of)} · <span lang="ja">{at.jp}</span></> : t.basicsUnit(at.unit, at.of)}
+      foot={fold ? null : (
         <span className="plate__foot plate__foot--stops">
           <span className="plate__prev">{units[i - 1] && <>‹ {name(units[i - 1])}</>}</span>
           <span className="plate__here"><span lang="ja">{at.jp}</span></span>

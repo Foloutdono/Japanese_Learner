@@ -81,6 +81,9 @@ _local = threading.local()
 
 
 _FR_PATH = os.path.join(_DATA_DIR, "jmdict_fr.sqlite3")
+# The layers over the pool a gloss query also reads, by the alias each is
+# attached under: French (plan 215) and Spanish (plan 302).
+_LAYER_PATHS = {"fr": _FR_PATH, "es": os.path.join(_DATA_DIR, "jmdict_es.sqlite3")}
 
 
 def _conn() -> sqlite3.Connection:
@@ -89,37 +92,40 @@ def _conn() -> sqlite3.Connection:
         # uri=True + mode=ro: never accidentally write to the shipped DB.
         conn = sqlite3.connect(f"file:{_DB_PATH}?mode=ro", uri=True)
         search_match.register_sql(conn)
-        # The French layer (content/jmdict_fr.py, plan 215), attached so
-        # a French gloss query can be one predicate over the pool. Its
-        # absence only means a French query matches English glosses
-        # alone, as it did before it existed.
-        if os.path.exists(_FR_PATH):
-            conn.execute("ATTACH DATABASE ? AS fr", (f"file:{_FR_PATH}?mode=ro",))
-            _local.fr = True
-        else:
-            _local.fr = False
+        # The French and Spanish layers (content/jmdict_fr.py, plans 215
+        # and 302), attached so a gloss query in either can be one
+        # predicate over the pool. A layer's absence only means a query
+        # in its language matches the other glosses alone, as it did
+        # before it existed.
+        _local.layers = []
+        for lang, path in _LAYER_PATHS.items():
+            if os.path.exists(path):
+                conn.execute(f"ATTACH DATABASE ? AS {lang}", (f"file:{path}?mode=ro",))
+                _local.layers.append(lang)
         _local.conn = conn
     return conn
 
 
-def _has_fr() -> bool:
+def _layers() -> list[str]:
+    """The languages whose pool lines are attached ("fr", "es")."""
     _conn()
-    return bool(getattr(_local, "fr", False))
+    return list(getattr(_local, "layers", ()))
 
 
-def _french_clause(q: str, match: str) -> tuple[str, list]:
-    """The pool words whose French line (plan 215) holds `q` -- one
-    subquery over the ~20k lines, run once per query rather than per
-    pool row, on the line folded at build time (lowercase, no accents),
-    so « epee » finds « épée » without a Python call per row. "word"
-    and "start" keep the LIKE as the prefilter and ask search_match the
-    real question of what it finds, as the English clause does."""
+def _layer_clause(q: str, match: str, lang: str) -> tuple[str, list]:
+    """The pool words whose line in `lang` (plans 215, 302) holds `q` --
+    one subquery over the layer's lines, run once per query rather than
+    per pool row, on the line folded at build time (lowercase, no
+    accents), so « epee » finds « épée » without a Python call per row.
+    "word" and "start" keep the LIKE as the prefilter and ask
+    search_match the real question of what it finds, as the English
+    clause does. `lang` is one of _LAYER_PATHS', never the request's."""
     needle = search_match.fold(q)
     if match == "any":
-        return ("(kanji, kana) IN (SELECT kanji, kana FROM fr.pool_line WHERE fold LIKE ?)",
+        return (f"(kanji, kana) IN (SELECT kanji, kana FROM {lang}.pool_line WHERE fold LIKE ?)",
                 [f"%{needle}%"])
-    return ("(kanji, kana) IN (SELECT kanji, kana FROM fr.pool_line "
-            "WHERE fold LIKE ? AND sm_text(fr, ?, ?))", [f"%{needle}%", q, match])
+    return (f"(kanji, kana) IN (SELECT kanji, kana FROM {lang}.pool_line "
+            f"WHERE fold LIKE ? AND sm_text({lang}, ?, ?))", [f"%{needle}%", q, match])
 
 
 def vocab_jmdict_key(entry: dict) -> str:
@@ -362,7 +368,7 @@ def count() -> int:
 
 
 def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
-           field: str = "all") -> tuple[str, tuple]:
+           field: str = "all", alts: tuple[str, ...] = ()) -> tuple[str, tuple]:
     """(SQL predicate, parameters) for one query in all its forms.
 
     `match` and `field` are study/search_match's: how strictly, and
@@ -376,12 +382,12 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
     look — letters that are not romaji, with the glosses turned off.
     """
     clauses, params = [], []
-    # A gloss query also reads the pool's French lines (plan 215), in
-    # either session language, as the deck half matches both glosses
-    # whichever is displayed (routes/dictionary._deck_matches). French
-    # is Latin script whether or not it is ASCII: « épée » is a gloss,
-    # never a kanji or a reading.
-    french = bool(q) and field != "japanese" and _is_latin(q) and _has_fr()
+    # A gloss query also reads the pool's French and Spanish lines
+    # (plans 215, 302), in any session language, as the deck half matches
+    # every gloss whichever is displayed (routes/dictionary._deck_matches).
+    # They are Latin script whether or not they are ASCII: « épée » and
+    # «canción» are glosses, never a kanji or a reading.
+    layers = _layers() if bool(q) and field != "japanese" and _is_latin(q) else []
     if q:
         if q.isascii():
             if field != "japanese":
@@ -391,14 +397,21 @@ def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
                 else:
                     clauses.append("(meaning LIKE ? AND sm_text(meaning, ?, ?))")
                     params += [f"%{q}%", q, match]
-        elif field != "meaning" and not french:
+        elif field != "meaning" and not layers:
             like = f"{q}%" if match == "start" else f"%{q}%"
             clauses.append("(kanji LIKE ? OR kana LIKE ?)")
             params += [like, like]
-        if french:
-            clause, extra = _french_clause(q, match)
+        for lang in layers:
+            clause, extra = _layer_clause(q, match, lang)
             clauses.append(clause)
             params += extra
+        # Spain's word asked the Latin-American way too (plan 303,
+        # study/search_match.spain_alternatives): the Spanish lines hold it.
+        if "es" in layers:
+            for alt in alts:
+                clause, extra = _layer_clause(alt, match, "es")
+                clauses.append(clause)
+                params += extra
     if field != "meaning":
         for form in kana_forms:
             # The READING column alone. A kana form is a reading, and the
@@ -443,7 +456,7 @@ def _order(q: str, kana_forms: tuple[str, ...]) -> tuple[str, tuple]:
 
 
 def count_matching(q: str, kana_forms: tuple[str, ...] = (),
-                   match: str = "any", field: str = "all") -> int:
+                   match: str = "any", field: str = "all", alts: tuple[str, ...] = ()) -> int:
     """How many pool entries match — the same predicate search() pages
     through, without paying for a page of rows.
 
@@ -451,7 +464,7 @@ def count_matching(q: str, kana_forms: tuple[str, ...] = (),
     on every request (it is half the collection's count) but only needs
     pool ROWS once a page runs past the curated deck.
     """
-    where, params = _match(q, kana_forms, match, field)
+    where, params = _match(q, kana_forms, match, field, alts)
     if not where:
         return count()
     return _conn().execute(
@@ -461,7 +474,7 @@ def count_matching(q: str, kana_forms: tuple[str, ...] = (),
 
 def search(q: str, limit: int, offset: int,
            kana_forms: tuple[str, ...] = (), match: str = "any",
-           field: str = "all") -> tuple[list[dict], int]:
+           field: str = "all", alts: tuple[str, ...] = ()) -> tuple[list[dict], int]:
     """Substring search over kanji/kana/meaning, same semantics as the
     old `for w in VOCAB_JMDICT: if q in ... ` loop in dictionary.py, but
     as an indexed-where-possible SQL query instead of a 292k-row Python
@@ -475,13 +488,13 @@ def search(q: str, limit: int, offset: int,
     query matches is the one the reader almost certainly means.
     idx_entries_freq_rank covers the ORDER BY, so paging never sorts.
     """
-    return (page(q, limit, offset, kana_forms, match, field),
-            count_matching(q, kana_forms, match, field))
+    return (page(q, limit, offset, kana_forms, match, field, alts),
+            count_matching(q, kana_forms, match, field, alts))
 
 
 def page(q: str, limit: int, offset: int,
          kana_forms: tuple[str, ...] = (), match: str = "any",
-         field: str = "all") -> list[dict]:
+         field: str = "all", alts: tuple[str, ...] = ()) -> list[dict]:
     """search()'s rows without its count.
 
     A `%…%` LIKE over 212k rows is a full scan, and the count is one of
@@ -490,7 +503,7 @@ def page(q: str, limit: int, offset: int,
     so the two halves are separable and the caller that needs one should
     not pay for both.
     """
-    where, params = _match(q, kana_forms, match, field)
+    where, params = _match(q, kana_forms, match, field, alts)
     order, order_params = _order(q if where else "", kana_forms)
     sql = "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
     if where:

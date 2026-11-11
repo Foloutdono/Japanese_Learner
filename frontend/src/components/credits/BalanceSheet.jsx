@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
+import { CardIcon } from '../ui/Icons'
 import { useCredits, useBalanceOpen, closeBalance } from '../../stores/credits'
 import { CAP, refillMinutes, nextCreditClock } from '../../domain/credits'
 import { SOURCES } from '../../domain/paywall'
@@ -26,7 +27,7 @@ export function BalanceSheet() {
   const next = nextCreditClock(credits, lang)
 
   return (
-    <Sheet open={open} onClose={closeBalance} jp={t.balanceTitle} cap={t.passLabel} label={t.balanceTitle} initialFocus=".btn-secondary">
+    <Sheet open={open} onClose={closeBalance} title={t.balanceTitle} sub={t.passLabel} icon={CardIcon} line="var(--accent2)" label={t.balanceTitle} initialFocus=".btn-secondary">
       <div className="balance">
         <span className={`balance__fig${balance === 0 ? ' balance__fig--out' : ''}`}>
           {balance == null ? '∞' : balance}

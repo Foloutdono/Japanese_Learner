@@ -273,12 +273,12 @@ describe('the dictionary screen', () => {
     expect(screen.container.querySelector('.bar')).toBeNull()
     expect(screen.container.querySelector('h1.sr-only').textContent).toBe(T.dictionaryTitle)
 
-    // The door names the analyzer and its three intakes, and opens it.
-    // The row is a container of buttons, not a button: its three
+    // The door names the analyzer and its four intakes, and opens it.
+    // The row is a container of buttons, not a button: its four
     // intakes each open a platform of their own (below).
     const door = screen.container.querySelector('.anl-door')
     expect(door.querySelector('.anl-door__title').textContent).toBe(T.analyzerTitle)
-    expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
+    expect(door.querySelectorAll('.anl-door__intake').length).toBe(4)
 
     // Five collections as chips, kanji on, and the learner's own shelf
     // as a sixth at the end of the row (plan 093). Scoped to the
@@ -830,11 +830,11 @@ describe('the dictionary screen', () => {
   // each closed path black and dropped every line — an empty ring, a
   // black blob, half a camcorder. They are the platforms behind the
   // door, so they are buttons that open it standing on one.
-  it('draws its three platforms as glyphs, and opens the analyzer plainly', async () => {
+  it('draws its four platforms as glyphs, and opens the analyzer plainly', async () => {
     const screen = await renderScreen()
     const door = screen.container.querySelector('.anl-door')
     const intakes = [...door.querySelectorAll('.anl-door__intake')]
-    expect(intakes.map(b => b.dataset.intake)).toEqual(['text', 'photo', 'video'])
+    expect(intakes.map(b => b.dataset.intake)).toEqual(['text', 'photo', 'video', 'song'])
     for (const intake of intakes) {
       expect(intake.tagName).toBe('BUTTON')
       expect(intake.getAttribute('aria-label').length).toBeGreaterThan(0)
@@ -850,7 +850,7 @@ describe('the dictionary screen', () => {
     expect(WHERE.pathname + WHERE.search).toBe('/dictionary/analyzer')
   })
 
-  it.each(['photo', 'video', 'text'])('opens the analyzer standing on %s', async key => {
+  it.each(['photo', 'video', 'text', 'song'])('opens the analyzer standing on %s', async key => {
     const screen = await renderScreen()
     screen.container.querySelector(`[data-intake="${key}"]`).click()
     await settle(60)

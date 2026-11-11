@@ -65,42 +65,83 @@ export function getDeskTabs(t) {
   return DESK_TAB_IDS.map(id => byId[id])
 }
 
+// ── 対戦 — the duels, the desk's sixth gate (plan 279) ──
+// The owner's call: on the desk the duels stand beside the other main
+// modes, a gate of the rail's own -- a pictogram and its word -- after
+// Practice. The phone has no room for a sixth gate and opens them from a
+// door in the holder (E1, the Elo under it, L1), and the desk's holder is
+// whole in the window with room for neither (plan 248). The path stays
+// the phone's, behind the pass, so a bookmark and the trail's route
+// patterns read it unchanged; on the desk the pass's gate is not lit
+// while the duels' is, as with a place (plan 269).
+export const DESK_DUELS_PATH = '/profile/duels'
+
+/** The rail's gates, top to bottom: the five, and the duels after Practice. */
+export function getDeskGates(t) {
+  const gates = getDeskTabs(t)
+  const at = gates.findIndex(g => g.id === 'practice') + 1
+  return [...gates.slice(0, at), { id: 'duels', path: DESK_DUELS_PATH, label: t.pvpTitle }, ...gates.slice(at)]
+}
+
+/** The gate `pathname` lights on the rail: the duels' for their hall and
+ *  what stands behind it, else the tab bar's. */
+export function deskGateFor(pathname) {
+  return inSection(pathname ?? '', DESK_DUELS_PATH) ? 'duels' : tabFor(pathname ?? '')
+}
+
+// ── 所 — the four places beside the gates (plan 269) ──
+// On the desk the analyser, the library (the learner's decks and
+// everyone's, one screen), the statistics and the settings are places
+// of their own, listed under the gates past a hairline rather than
+// hung as stations under 辞書, 学習 and 定期券 (the owner's pick A of the
+// canvas "Tsuji — the desk's chrome and its four new places"). Their
+// paths stay the phone's, behind their gates, so a bookmark, the trail's
+// route patterns and the guides read them unchanged; on the desk a gate
+// is not lit while a place behind it is. `icon` names the pictogram
+// (components/chrome/GateIcon.jsx), `guide` the stop that points at the
+// row (the profile's guide, plan 143). The phone's chrome is untouched.
+export const DESK_PLACE_IDS = ['analyzer', 'library', 'stats', 'settings']
+
+/** The four places in the rail's order: a path, a title, a pictogram. */
+export function getDeskPlaces(t) {
+  return [
+    { id: 'analyzer', path: '/dictionary/analyzer', title: t.analyzerTitle },
+    { id: 'library',  path: '/learn/decks',         title: t.library },
+    { id: 'stats',    path: '/profile/stats',       title: t.statistics, guide: 'profile.stats' },
+    { id: 'settings', path: '/profile/settings',    title: identityFor('/profile/settings', t).title, guide: 'profile.settings' },
+  ]
+}
+
+/** The place `pathname` stands in on the desk, or null. */
+export function deskPlaceFor(pathname, t = {}) {
+  return getDeskPlaces(t).find(p => inSection(pathname ?? '', p.path)) ?? null
+}
+
 /**
  * What the rail lists under a lit gate: its sections, minus the one the
- * gate row already is (Today's queue, the dictionary itself), and for the
- * pass its settings — a hall of the pass rather than a place
- * (config/identity.js), but a door the rail has the room to print. Titles
- * only: the rail is chrome, and a section's pigment never goes on chrome
+ * gate row already is (Today's queue, the dictionary itself) and minus
+ * the places (above), which the rail lists on their own. Titles only:
+ * the rail is chrome, and a section's pigment never goes on chrome
  * (DESIGN.md, "Colour is an edge, a ring, or a numeral").
  */
 export function getDeskSections(tabId, t) {
   const root = `/${tabId}`
-  const rows = getSections(tabId, t)
-    .filter(s => s.path !== root)
-    // The profile's Statistics is the rail's station on the desk, as
-    // Settings is: the guide's stop points at it there.
-    .map(s => ({ path: s.path, title: s.title, ...(s.path === '/profile/stats' ? { guide: 'profile.stats' } : {}) }))
-  if (tabId === 'profile') {
-    const settings = identityFor('/profile/settings', t)
-    // The guide's Settings stop (plan 143): the profile draws no door to
-    // Settings on the desk, the rail being one, so the stop points here.
-    rows.push({ path: settings.path, title: settings.title, guide: 'profile.settings' })
-  }
-  // The library, a place under 教材 rather than a section of its own,
-  // gets a station of its own on the rail (plan 132): the gate's panel
-  // names it, and two screens down was too far for it.
-  if (tabId === 'learn') rows.push({ path: '/learn/decks/library', title: t.library })
-  return rows
+  const places = getDeskPlaces(t)
+  return getSections(tabId, t)
+    .filter(s => s.path !== root && !places.some(p => p.path === s.path))
+    .map(s => ({ path: s.path, title: s.title }))
 }
 
 /**
  * Whether the desk's rail already has a door to `path` (plan 114): a
- * gate, or one of any gate's stations. A screen's ‹ way out to one of
- * those is a second door to the same place on the desk, and the Bar
- * drops it (components/chrome/Bar.jsx).
+ * gate (the duels' among them), one of any gate's stations, or a place.
+ * A screen's ‹ way out to one of those is a second door to the same
+ * place on the desk, and the Bar drops it (components/chrome/Bar.jsx).
  */
 export function onDeskRail(path) {
   return DESK_TAB_IDS.some(id => path === `/${id}` || getDeskSections(id, {}).some(s => s.path === path))
+    || path === DESK_DUELS_PATH
+    || getDeskPlaces({}).some(p => p.path === path)
 }
 
 /** Whether `pathname` is standing in the section at `path` (or behind it). */
@@ -168,13 +209,17 @@ function sections(t) {
     // Learn gate hangs its plate itself (screens/LearnScreen.jsx).
     { icon: '基礎', title: t.basicsTitle,     desc: t.basicsDesc,     path: '/learn/basics',  color: 'var(--text-secondary)', tab: 'basics' },
 
-    // ── 実践 — the seven platforms ──
-    { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/practice/reading',       clip: 'reading', color: 'var(--line-reading)', tab: 'practice' },
-    { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/practice/comprehension', clip: 'reading-comprehension', color: 'var(--line-rikai)', tab: 'practice' },
-    // Translation mode: given a phrase in the UI's foreign language,
-    // type the Japanese translation; the deck's reference translation
-    // plus an LLM analysis help you judge your own attempt.
-    { icon: '翻訳', title: t.translationTitle, desc: t.translationDesc, path: '/practice/translation', clip: 'translation', color: 'var(--line-honyaku)', tab: 'practice' },
+    // ── 実践 — the seven platforms, in three groups (plan 290) ──
+    // The phone's gate hangs them under three captions (the owner's
+    // pick D4 of the canvas "Tsuji — the practice gate"), and this is
+    // their order everywhere, the desk's rail and plates included:
+    // `group` is the caption a platform stands under. What it takes in
+    // (understand), what it makes (express), and the paper that tests
+    // both (test). PRACTICE_GROUPS below is the captions' order.
+    //
+    // ── understand: reading, comprehension, dictation ──
+    { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/practice/reading',       clip: 'reading', color: 'var(--line-reading)', tab: 'practice', group: 'understand' },
+    { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/practice/comprehension', clip: 'reading-comprehension', color: 'var(--line-rikai)', tab: 'practice', group: 'understand' },
     // 書取 — dictation: a clip is played (twice, and no more) and the
     // learner writes down what was said. The one section on this tab
     // whose prompt is not text, and so the one the machine grades
@@ -184,28 +229,32 @@ function sections(t) {
     // recordings, and there is no 書取 one to play. playAnnouncement
     // does nothing for a section without it, which is the same silence
     // 統計 and 本日 depart in.
-    { icon: '書取', title: t.dictationTitle, desc: t.dictationDesc, path: '/practice/dictation', color: 'var(--line-kakitori)', tab: 'practice' },
+    { icon: '書取', title: t.dictationTitle, desc: t.dictationDesc, path: '/practice/dictation', color: 'var(--line-kakitori)', tab: 'practice', group: 'understand' },
+    // ── express: translation, composition, conversation ──
+    // Translation mode: given a phrase in the UI's foreign language,
+    // type the Japanese translation; the deck's reference translation
+    // plus an LLM analysis help you judge your own attempt.
+    { icon: '翻訳', title: t.translationTitle, desc: t.translationDesc, path: '/practice/translation', clip: 'translation', color: 'var(--line-honyaku)', tab: 'practice', group: 'express' },
     // 作文 — composition (plan 125): the learner is handed a grammar
     // point and writes a sentence that uses it; the detector says
     // whether the point is there, the tutor reads the sentence back,
     // and the learner grades it — see screens/CompositionRun.jsx. No
     // `clip`, for dictation's reason: there is no recording to play.
-    // Before 模試 so the exam stays last on the gate.
-    { icon: '作文', title: t.compositionTitle, desc: t.compositionDesc, path: '/practice/composition', color: 'var(--line-sakubun)', tab: 'practice' },
-    // Generated mock exams (vocab/grammar/reading/listening, built to
-    // the official JLPT blueprint but never copied from a real past
-    // paper) — see src/exam/.
-    { icon: '模試', title: t.examTitle, desc: t.examDesc, path: '/practice/exam', clip: 'exam', color: 'var(--line-exam)', tab: 'practice' },
+    { icon: '作文', title: t.compositionTitle, desc: t.compositionDesc, path: '/practice/composition', color: 'var(--line-sakubun)', tab: 'practice', group: 'express' },
     // 会話 — conversation (plan 217): someone speaks to the learner in
     // a place and they answer -- choosing among three replies, writing
     // what they are told to say, or freely, the other person played by
     // the model (screens/ConversationRun.jsx). Chosen by scene and by
     // grade, so its station is its own (screens/ConversationStation.jsx)
     // rather than the sentence platforms'. No `clip`, for dictation's
-    // reason. After 模試, the seventh train on both gates: the phone's
-    // painted platform (plan 225) and the desk's (plan 244), which drew
-    // six plates and kept this one to the rail until then.
-    { icon: '会話', title: t.conversationTitle, desc: t.conversationDesc, path: '/practice/conversation', color: 'var(--line-kaiwa)', tab: 'practice' },
+    // reason.
+    { icon: '会話', title: t.conversationTitle, desc: t.conversationDesc, path: '/practice/conversation', color: 'var(--line-kaiwa)', tab: 'practice', group: 'express' },
+    // ── test: the mock exam, last on both gates ──
+    // Generated mock exams (vocab/grammar/reading/listening, built to
+    // the official JLPT blueprint but never copied from a real past
+    // paper) — see src/exam/. Last, so the desk's paper, two plates
+    // wide, takes what the last row leaves (PracticeScreen's Specimens).
+    { icon: '模試', title: t.examTitle, desc: t.examDesc, path: '/practice/exam', clip: 'exam', color: 'var(--line-exam)', tab: 'practice', group: 'test' },
 
     // ── 辞書 — the dictionary, and the analyzer behind its door ──
     { icon: '辞書', title: t.dictionaryTitle, desc: t.dictionaryDesc, path: '/dictionary',          clip: 'dictionary', color: 'var(--line-jisho)',   tab: 'dictionary' },
@@ -232,6 +281,10 @@ function sections(t) {
 }
 
 /** The sections behind one gate, in order. */
+/** The practice gate's captions, in their order (plan 290): each
+ *  practice section names its own in `group`. */
+export const PRACTICE_GROUPS = ['understand', 'express', 'test']
+
 export function getSections(tabId, t) {
   return sections(t).filter(s => s.tab === tabId)
 }

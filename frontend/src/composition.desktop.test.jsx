@@ -153,12 +153,12 @@ describe('a composition run on the desk', () => {
     expect($('.desk-run__side').getAttribute('aria-label')).toBe('Leçon')
     expect($('.desk-run__side .bkd')).toBeNull()
 
-    // The best tile, from its digit (1 is the best, plan 113): "correct",
-    // q4 on the default four-tile scale.
+    // The best tile, from its digit (1 is the best, plan 113): "easy",
+    // q5 on the default four-tile scale.
     press('1')
     await settle(240)
     const result = apiJson.mock.calls.find(c => String(c[0]) === '/api/composition/result')
-    expect(JSON.parse(result[2].body)).toMatchObject({ quality: 4, found: true, verdict: 'acceptable' })
+    expect(JSON.parse(result[2].body)).toMatchObject({ quality: 5, found: true, verdict: 'acceptable' })
     expect($('.desk-run__side').getAttribute('aria-label')).toBe('Décomposition')
     expect($('.desk-run__side .bkd')).not.toBeNull()
     expect($('.desk-run__side .bkd-row, .desk-run__side .bkd-line')).not.toBeNull()

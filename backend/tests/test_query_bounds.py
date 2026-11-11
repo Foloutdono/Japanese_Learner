@@ -5,6 +5,8 @@ os.environ.setdefault("DEV_USER_ID", "test-user")
 
 from fastapi.testclient import TestClient
 from main import app
+from core.auth import CARD_ID_MAX
+from study import duel_paper
 
 client = TestClient(app)
 
@@ -41,6 +43,10 @@ class TestQueryBounds:
         ("/api/grammar/cards?level=N5&mode=grammar.flashcard.f2b", "count", 10, 100000),
         ("/api/dictionary", "limit", 10, 100000),
         ("/api/leaderboard", "limit", 10, 100000),
+        # plan 262: the whole board is paged, never asked for at once.
+        ("/api/leaderboard", "offset", 0, 100001),
+        ("/api/leaderboard", "around", 2, 6),
+        ("/api/leaderboard", "division", 0, 6),
         # plan 211: a learner flicking a selector, or crafting a URL,
         # cannot ask for unbounded work.
         ("/api/dictionary", "page", 1, 100000),
@@ -49,6 +55,14 @@ class TestQueryBounds:
         ("/api/frequency/vocab/tiers/started", "tier_size", 100, 7),
         ("/api/frequency/vocab/stats?tier=1&mode=vocab.flashcard.f2b", "tier_size", 1000, 3),
         ("/api/reading/batch?source=frequency&domain=vocab&tier=1", "tier_size", 200, 1),
+        # plan 279: the duels' pages and the live poll.
+        ("/api/pvp/history", "limit", 20, 51),
+        ("/api/pvp/history", "offset", 0, 10001),
+        ("/api/pvp/board", "limit", 20, 201),
+        ("/api/pvp/board", "offset", 0, 100001),
+        ("/api/pvp/board", "around", 2, 6),
+        # The live poll's version runs to a paper's last question.
+        ("/api/pvp/duels/1/live", "v", 0, duel_paper.ITEMS + 1),
     ]
 
     def test_an_overlong_query_string_returns_422(self):
@@ -72,3 +86,22 @@ class TestQueryBounds:
             sep = "&" if "?" in path else "?"
             resp = client.get(f"{path}{sep}{param}={valid}")
             assert resp.status_code != 422, f"{path} rejected a valid {param}={valid}: {resp.text}"
+
+    # A review's body names its card and mode: bounded like a query
+    # param, so an id cannot be a megabyte stored in `cards`.
+    REVIEW_BODIES = [
+        "/api/kana/review", "/api/vocab/review", "/api/kanji/review",
+        "/api/grammar/review", "/api/today/review",
+    ]
+
+    def test_an_overlong_review_card_id_or_mode_returns_422(self):
+        for path in self.REVIEW_BODIES:
+            for field in ("card_id", "mode"):
+                body = {"card_id": "vocab_N5_水_みず", "mode": "vocab.flashcard.f2b", "quality": 4}
+                body[field] = "a" * (CARD_ID_MAX + 1)
+                resp = client.post(path, json=body)
+                assert resp.status_code == 422, f"{path} accepted a long {field}: {resp.status_code}"
+        resp = client.post("/api/today/stale", json={"cards": [{"card_id": "a" * (CARD_ID_MAX + 1), "mode": "m"}]})
+        assert resp.status_code == 422
+        resp = client.post("/api/decks/1/review", json={"card_id": "a" * (CARD_ID_MAX + 1), "mode": "m", "quality": 4})
+        assert resp.status_code == 422

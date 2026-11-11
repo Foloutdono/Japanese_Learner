@@ -4,13 +4,20 @@ POST /api/feedback — a learner writes to the people who make the app
 feedback door, new directions").
 
 Three doors open the one sheet (frontend/src/components/feedback/):
-Settings' "Nous écrire" row, the flag on an answered card and the link
-under a failure. What each sends:
+Settings' "Nous écrire" row, the flag on an answered card (or on a
+mock-exam question in the result's review) and the link under a
+failure. What each sends:
 
-  kind     problem | idea | fault, or card for the card's own sheet
+  kind     problem | idea | fault, or card / question / rating for their
+           own sheets
+  rating   a rating's: one to five, the early-access sheet's (below)
   text     the learner's words, at most TEXT_MAX characters
   reasons  a card's: what is wrong with it, from CARD_REASONS
   card_id  a card's: the unprefixed id, the content key the audit reads
+  exam_id, revision, question_id
+           a mock-exam question's: the paper (exam id and revision) and the
+           question in it, closed shapes naming what to retire, never any
+           of the question's text
   route    the screen, as the pattern App.jsx declared (never a path)
   area     a failure's: the API area that failed (`/api/today`), and
   status   its HTTP status
@@ -33,10 +40,42 @@ moment the learner asks for one, never taken from the request: a body
 naming an address would let anyone have the app's owner write to a
 stranger. A guest has none, and the sheet offers no reply.
 
+── The early-access sheet (plan 269) ────────────────────────
+The app is young, so once a learner has earned OFFER_XP lifetime XP,
+Today asks them how they find it and what they would change
+(frontend/src/components/feedback/RatingSheet.jsx): a rating of one to
+five and, if they like, a few words. It is a message like any other --
+kind `rating`, the words in `body`, the number in `rating`, counted by
+the same dashboard and read by the same script -- so the rating is the
+one figure the table holds beside the words. `offer_open` decides who
+is asked: the XP earned and never asked before
+(user_profiles.feedback_asked_at), stamped by an answer, a rating sent
+or the sheet shut, so it is asked once and on one device only.
+
+── Google Play (plan 307) ───────────────────────────────────
+In the Android shell the same sheet asks for a rating on the store
+first: its gold door opens the app's page on Google Play, and a link
+under it leads to the form above. It is a question of its own,
+stamped in user_profiles.store_asked_at, so every Android learner past
+OFFER_XP is asked it once, those who answered or shut the sheet above
+included. The server cannot tell the shell from a browser, so
+`offers_open` answers both questions and the client reads the one its
+platform asks. The Android sheet shut, whichever way, stamps both: a
+learner asked on the store is not asked again on the web. Nobody is
+sent to the store, or kept from it, by their stars.
+
 Nothing is answered automatically and nothing is hidden: the rows are
 a queue for a person (scripts/read_feedback.py), counted in Metabase
 (docs/analytics/metabase/10-messages.sql) and in the weekly digest.
 Erased with the account (routes/account.py).
+
+── The bell and the queue (plan 278) ────────────────────────
+Each message rings the owner's private Discord forum once it is
+committed (core/bell.py), tagged by its kind, with its closed classes
+and how many characters it holds -- never its words, its address or
+its author. Its place in the queue is `triage` (TRIAGE): new until a
+person marks it seen, done or dropped with scripts/read_feedback.py,
+which stamps `triaged_at`.
 """
 import logging
 import re
@@ -46,7 +85,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, StringConstraints
 from typing import Annotated
 
-from core import auth, events
+from core import auth, bell, events
 from core.auth import get_user_id
 from core.db import db_conn
 from core.rls import enable_rls
@@ -54,10 +93,23 @@ from core.rls import enable_rls
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-KINDS = ("problem", "idea", "fault", "card")
+KINDS = ("problem", "idea", "fault", "card", "question", "rating")
+# A message's place in the owner's queue (plan 278): new until a person
+# has read it, seen while it waits on a fix, then done or dropped.
+TRIAGE = ("new", "seen", "done", "dropped")
+# The early-access sheet (plan 269): the lifetime XP from which Today
+# asks once how the learner finds the app, and the rating's bounds.
+OFFER_XP = 400
+RATING_MIN, RATING_MAX = 1, 5
 # What can be wrong with a card. Closed, as a deck's report is
 # (routes/decks.REPORT_REASONS): the words beside them are optional.
 CARD_REASONS = ("reading", "meaning", "audio", "example", "other")
+# What can be wrong with a mock-exam question: `answer` is a wrong key.
+QUESTION_REASONS = ("answer", "ambiguous", "audio", "other")
+# An exam id (n5-listening-01) and a question id (listening_m1_q9): shapes
+# only, so nothing a learner typed can ride in them.
+EXAM_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,39}$")
+QUESTION_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
 # A message, not an essay. The sheet counts down to it (maxLength).
 TEXT_MAX = 1000
 # A day's messages per learner, a rolling 24 hours. Five is far past
@@ -82,6 +134,9 @@ def _ensure_schema() -> None:
                     body       TEXT NOT NULL DEFAULT '',
                     reasons    TEXT[] NOT NULL DEFAULT '{}',
                     card_id    TEXT,
+                    exam_id    TEXT,
+                    revision   INT,
+                    question_id TEXT,
                     route      TEXT,
                     area       TEXT,
                     status     SMALLINT,
@@ -95,6 +150,16 @@ def _ensure_schema() -> None:
                 )
             """)
             enable_rls(cur, "feedback")
+            # A table that predates the question's flag (plan 258).
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS exam_id TEXT")
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS revision INT")
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS question_id TEXT")
+            # The early-access sheet's rating (plan 269).
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS rating SMALLINT")
+            # The owner's queue (plan 278). `status` is a failure's HTTP
+            # status, so the message's own is `triage`.
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS triage TEXT NOT NULL DEFAULT 'new'")
+            cur.execute("ALTER TABLE feedback ADD COLUMN IF NOT EXISTS triaged_at TIMESTAMPTZ")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS feedback_user_at ON feedback (user_id, created_at)"
             )
@@ -114,6 +179,10 @@ class FeedbackPayload(BaseModel):
     text: str = Field(default="", max_length=TEXT_MAX)
     reasons: list[_Short] = Field(default_factory=list, max_length=len(CARD_REASONS))
     card_id: str | None = Field(default=None, max_length=160)
+    exam_id: str | None = Field(default=None, max_length=40)
+    revision: int | None = Field(default=None, ge=1, le=1_000_000)
+    question_id: str | None = Field(default=None, max_length=64)
+    rating: int | None = Field(default=None, ge=RATING_MIN, le=RATING_MAX)
     route: str | None = Field(default=None, max_length=64)
     area: str | None = Field(default=None, max_length=40)
     status: int | None = Field(default=None, ge=0, le=599)
@@ -171,7 +240,20 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
     text = payload.text.strip()
     reasons: list[str] = []
     card_id = None
-    if payload.kind == "card":
+    exam_id = question_id = None
+    revision = None
+    if payload.kind == "question":
+        exam_id = (payload.exam_id or "").strip()
+        question_id = (payload.question_id or "").strip()
+        revision = payload.revision
+        if not (EXAM_ID_RE.match(exam_id) and QUESTION_ID_RE.match(question_id) and revision):
+            _refuse(400, "feedback_question", "A question's report names its paper and its question")
+        if any(r not in QUESTION_REASONS for r in payload.reasons):
+            _refuse(400, "feedback_reason", "Unknown reason")
+        reasons = [r for r in QUESTION_REASONS if r in payload.reasons]
+        if not reasons and not text:
+            _refuse(400, "feedback_empty", "Say what is wrong with the question")
+    elif payload.kind == "card":
         card_id = (payload.card_id or "").strip()
         if not CARD_ID_RE.match(card_id):
             _refuse(400, "feedback_card", "A card's report names its card")
@@ -180,8 +262,13 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
         reasons = [r for r in CARD_REASONS if r in payload.reasons]
         if not reasons and not text:
             _refuse(400, "feedback_empty", "Say what is wrong with the card")
+    elif payload.kind == "rating":
+        # The number is the message: the words beside it are optional.
+        if payload.rating is None:
+            _refuse(400, "feedback_rating", "A rating is one to five")
     elif not text:
         _refuse(400, "feedback_empty", "The message is empty")
+    rating = payload.rating if payload.kind == "rating" else None
 
     conn = db_conn()
     try:
@@ -201,22 +288,22 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
     reply_to = _reply_address(user_id) if payload.reply else None
 
     area = _shape("path", payload.area)
+    status = payload.status if area else None
+    route = _shape("route", payload.route)
 
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO feedback (user_id, kind, body, reasons, card_id, route, area, status,
-                                      platform, vp, os, lang, reply, reply_to)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING created_at
+                INSERT INTO feedback (user_id, kind, body, reasons, card_id, exam_id, revision, question_id,
+                                      rating, route, area, status, platform, vp, os, lang, reply, reply_to)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id, created_at
                 """,
                 (
-                    user_id, payload.kind, text, reasons, card_id,
-                    _shape("route", payload.route),
-                    area,
-                    payload.status if area else None,
+                    user_id, payload.kind, text, reasons, card_id, exam_id, revision, question_id,
+                    rating, route, area, status,
                     _visit("platform", payload.platform),
                     _visit("vp", payload.vp),
                     _visit("os", payload.os),
@@ -224,9 +311,91 @@ def post_feedback(payload: FeedbackPayload, user_id: str = Depends(get_user_id))
                     payload.reply, reply_to,
                 ),
             )
-            (at,) = cur.fetchone()
+            number, at = cur.fetchone()
+            if payload.kind == "rating":
+                # Answered: the sheet is not asked again (same commit).
+                _stamp_offer(cur, user_id)
         conn.commit()
     finally:
         conn.close()
     logger.info("feedback kind=%s user=%s", payload.kind, user_id)
+    # The words stay here: the bell is told how many there are.
+    bell.ring(bell.message_post(
+        number=number, kind=payload.kind, chars=len(text), reasons=reasons, card_id=card_id,
+        exam_id=exam_id, revision=revision, question_id=question_id, rating=rating,
+        route=route, area=area, status=status, reply=payload.reply,
+    ))
     return {"ok": True, "at": at.isoformat()}
+
+
+def _stamp_offer(cur, user_id: str) -> None:
+    """The early-access sheet is behind the learner. The first stamp stands."""
+    cur.execute(
+        "UPDATE user_profiles SET feedback_asked_at = COALESCE(feedback_asked_at, NOW()) WHERE user_id = %s",
+        (user_id,),
+    )
+
+
+def offers_open(user_id: str, xp: int) -> tuple[bool, bool]:
+    """Whether Today asks this learner, once, how they find the app, and
+    whether the Android shell asks them, once, for a rating on Google Play
+    (see the module's notes): GET /api/profile's `feedbackOffer` and
+    `storeOffer`, in one query. `xp` is the lifetime figure the profile
+    already holds, so a learner short of it costs no query."""
+    if xp < OFFER_XP:
+        return False, False
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT feedback_asked_at, store_asked_at FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        return False, False
+    return row[0] is None, row[1] is None
+
+
+def offer_open(user_id: str, xp: int) -> bool:
+    """The web's and iOS's question: `feedbackOffer`."""
+    return offers_open(user_id, xp)[0]
+
+
+def store_offer_open(user_id: str, xp: int) -> bool:
+    """The Android shell's question: `storeOffer` (plan 307)."""
+    return offers_open(user_id, xp)[1]
+
+
+@router.post("/api/feedback/offer")
+def post_feedback_offer(user_id: str = Depends(get_user_id)):
+    """The sheet was shut without a rating: asked, and not again."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            _stamp_offer(cur, user_id)
+        conn.commit()
+    finally:
+        conn.close()
+    return {"feedbackOffer": False}
+
+
+@router.post("/api/feedback/store-offer")
+def post_store_offer(user_id: str = Depends(get_user_id)):
+    """The Android sheet is behind the learner (plan 307): the store
+    opened, the form sent or the sheet shut. Asked on the store, and not
+    again on any device; the first stamps stand."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            _stamp_offer(cur, user_id)
+            cur.execute(
+                "UPDATE user_profiles SET store_asked_at = COALESCE(store_asked_at, NOW()) WHERE user_id = %s",
+                (user_id,),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"feedbackOffer": False, "storeOffer": False}

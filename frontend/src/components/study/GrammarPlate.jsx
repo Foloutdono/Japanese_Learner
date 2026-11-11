@@ -9,7 +9,7 @@ import { dueText } from '../../domain/forecast'
 import { runKey } from '../../lib/keyGuards'
 import { choiceAnswer } from '../../domain/cardShape'
 import { bare, lineOf, mapOf } from '../../domain/ladderLine'
-import { ArrowIcon, CheckIcon, RetryIcon } from '../ui/Icons'
+import { ArrowIcon, CheckIcon, CrossIcon, RetryIcon } from '../ui/Icons'
 import { GrammarAnswer } from './GrammarPieces'
 
 // ── 194 — Choisir and Construire, the point's roundel ──────────────
@@ -22,13 +22,14 @@ import { GrammarAnswer } from './GrammarPieces'
 //
 // The front asks: the sentence with the point's hole (two for a point in
 // two pieces), its translation under it. The answer turns the card (the
-// flashcard's turn and sound) to the answer, once: what happened, the
-// sentence echoed small with the answer in its hole -- the right form,
-// or what was typed with each wrong kana struck and the right one
-// written over it -- then the point at the flashcard's answer size and,
-// for a rival taken, the lesson's own line on it. Nothing is left on the
-// other side, so it does not turn back. The learner then rates
-// themselves on the run's bar (ADR 0013).
+// flashcard's turn and sound) to the answer, once, as the owner picked it
+// (plan 310, option C of "Construire's answer, readable"): what happened,
+// and beside it, where Construire missed, what was typed after a cross,
+// each wrong kana struck; the sentence as the front set it, its hole
+// holding the right form; under a hairline the point, a step under the
+// flashcard's answer size, and, for a rival taken, the lesson's own line
+// on it. Nothing is left on the other side, so it does not turn back.
+// The learner then rates themselves on the run's bar (ADR 0013).
 
 // The language's strings from the provider, or from `t` where a caller
 // renders outside one (as CardPrompt's own callers may).
@@ -213,15 +214,22 @@ function TurnCard({ turned, front, back }) {
   )
 }
 
-/** The answer: what happened, the sentence echoed small with the
- *  answer in its hole, the point at the flashcard's answer size, and a
- *  note under it (the lesson's line on a rival). */
-function Back({ card, head, kind, note, sentence }) {
+/** The answer (plan 310): what happened, with what was typed beside it
+ *  where it missed; the sentence as the front set it, the right form in
+ *  its hole; under a hairline the point, a step under the flashcard's
+ *  answer size, since the sentence leads; and a note under it (the
+ *  lesson's line on a rival). */
+function Back({ card, head, kind, typed = null, note, sentence }) {
   return (
     <div className="gl-back">
-      {head && <p className={`gl-back__head gl-back__head--${kind}`}>{head}</p>}
+      {(head || typed) && (
+        <div className="gl-back__verdict">
+          {head && <p className={`gl-back__head gl-back__head--${kind}`}>{head}</p>}
+          {typed}
+        </div>
+      )}
       <div className="gl-echo">{sentence}</div>
-      <GrammarAnswer card={card} size={40} />
+      <GrammarAnswer card={card} size={32} />
       {note && <p className="gl-back__why">{note}</p>}
     </div>
   )
@@ -379,25 +387,55 @@ export function BuildEntry({ entry, t: tProp }) {
   )
 }
 
-/** What a hole holds once the verdict is in: the answer, or what was
- *  typed with each wrong kana struck and the right one written over it. */
-function Marked({ gap }) {
-  if (!gap?.marks?.length) return gap?.answer ?? null
-  return gap.marks.map((m, i) => (m.ok != null
-    ? <span key={i}>{m.ok}</span>
-    : (
-      <span key={i} className="gl-fix">
-        {m.wrong && <s>{m.wrong}</s>}
-        {m.fix && <ins>{m.fix}</ins>}
-      </span>
-    )))
+/** What a hole holds once the verdict is in (plan 310): the right form,
+ *  whatever was typed, so the sentence reads as it is to be learnt.
+ *  Missed, it is spelt as the answer is checked, in kana (`marks`, the
+ *  server's runs: `ok` where the answer agreed, `fix` where it did not),
+ *  and where the answer was partly right the kana it lacked or got wrong
+ *  are underlined where they stand: あり typed for ではありません reads
+ *  ではありません with では and ません underlined. A hole missed whole
+ *  reads plain: underlined end to end, it would say nothing more. The
+ *  correction was once written over the struck kana at a caption's
+ *  size, and seven kana over two ran into the line's readings. */
+function Answered({ gap }) {
+  const marks = gap?.marks ?? []
+  if (!marks.length) return gap?.answer ?? null
+  const partly = marks.some(m => m.ok)
+  return marks.map((m, i) => {
+    if (m.ok != null) return <span key={i}>{m.ok}</span>
+    if (!m.fix) return null
+    return <span key={i} className={partly ? 'gl-fixed' : undefined}>{m.fix}</span>
+  })
+}
+
+/** What was typed, beside the verdict where Construire missed (plan
+ *  310): a cross and the answer as it was checked, each wrong kana struck
+ *  in the miss's ink; a hole typed right, or left empty, says nothing. A
+ *  screen reader hears it as the field's own name, then the answer. */
+function Typed({ gaps, t }) {
+  const missed = (gaps ?? []).filter(g => g.verdict !== 'right' && g.marks?.some(m => m.ok || m.wrong))
+  if (!missed.length) return null
+  return (
+    <p className="gl-typed" lang="ja">
+      <CrossIcon className="gl-typed__x" />
+      <span className="sr-only">{t.bldField}</span>
+      {missed.map((g, n) => (
+        <span key={n} className="gl-typed__gap">
+          {g.marks.map((m, i) => (m.ok != null
+            ? <span key={i}>{m.ok}</span>
+            : m.wrong ? <s key={i}>{m.wrong}</s> : null))}
+        </span>
+      ))}
+    </p>
+  )
 }
 
 /** Construire: the translation given, the point's hole (two for a point
  *  in two pieces) filled as it is typed into the entry under the card
  *  (BuildEntry, kana or rōmaji); the server says right, close or wrong,
- *  gap by gap, and the card turns to the answer, the hole taking the
- *  correction. `entry` is the run's (useBuild); a caller that holds none gets
+ *  gap by gap, and the card turns to the answer, the hole holding the
+ *  right form and what was typed beside the verdict (plan 310). `entry`
+ *  is the run's (useBuild); a caller that holds none gets
  *  its own, the entry then drawn under the card's face. */
 export function GrammarConstruire({ card, answered, entry: held, onDone, session, t: tProp }) {
   const ctx = useLang()
@@ -415,7 +453,7 @@ export function GrammarConstruire({ card, answered, entry: held, onDone, session
           if (piece.gap == null) return partRuns(piece.furigana, i)
           const said = verdict?.gaps?.[piece.gap]
           const node = said
-            ? <span key={`g${i}`} className="gl-gap gl-gap--filled"><Marked gap={said} /></span>
+            ? <span key={`g${i}`} className="gl-gap gl-gap--filled"><Answered gap={said} /></span>
             : (
               <span key={`g${i}`} className={`gl-gap gl-gap--typed${!answered && entry.focus === piece.gap ? ' gl-gap--focus' : ''}`}
                     style={{ '--gap-size': piece.size }} aria-hidden="true">
@@ -436,6 +474,7 @@ export function GrammarConstruire({ card, answered, entry: held, onDone, session
       card={card}
       kind={whole === 'right' ? 'ok' : 'no'}
       head={whole === 'right' ? t.bldRight : whole === 'close' ? t.bldClose : whole === 'wrong' ? t.bldWrong : null}
+      typed={whole === 'right' ? null : <Typed gaps={verdict.gaps} t={t} />}
       note={other ? t.bldOther(other.said, other.register) : null}
       sentence={front}
     />

@@ -251,13 +251,13 @@ describe('the card panel', () => {
     const tiles = $$('.desk-verdict')
     expect(tiles).toHaveLength(4)
     expect(tiles.map(t => t.querySelector('.desk-kbd').textContent)).toEqual(['4', '3', '2', '1'])
-    // The four-button bar's best is quality 4 (domain/ratingScales).
+    // The four-button bar is qualities 1, 2, 4 and 5 (domain/ratingScales).
     // Each tile is a figure: the wait as a numeral and its unit over the
     // verdict's word, and in words to a screen reader.
-    expect(tiles.map(t => t.querySelector('.desk-verdict__value').textContent)).toEqual(['3', '10', '3', '3'])
-    expect(tiles.map(t => t.querySelector('.desk-verdict__unit').textContent)).toEqual(['min', 'min', 'jours', 'sem.'])
-    expect(tiles.map(t => t.querySelector('.desk-verdict__word').textContent)).toEqual(['Raté', 'Presque', 'Difficile', 'Correct'])
-    expect(tiles.map(t => t.querySelector('.sr-only').textContent)).toEqual(['dans 3 min', 'dans 10 min', 'dans 3 j', 'dans 3 sem.'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__value').textContent)).toEqual(['3', '10', '3', '6'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__unit').textContent)).toEqual(['min', 'min', 'sem.', 'sem.'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__word').textContent)).toEqual(['Raté', 'Presque', 'Correct', 'Facile'])
+    expect(tiles.map(t => t.querySelector('.sr-only').textContent)).toEqual(['dans 3 min', 'dans 10 min', 'dans 3 sem.', 'dans 6 sem.'])
     const value = tiles[0].querySelector('.desk-verdict__value')
     expect(getComputedStyle(value).fontSize).toBe(probe('fontSize', 'var(--fs-display)'))
     // The numeral is the tile's largest thing, its word beneath it.
@@ -334,14 +334,14 @@ describe('the card panel of a ladder card', () => {
     const stop = $('.gl-map__stop--now')
     // A miss asks Choisir 2 again, a pass climbs to Choisir 3: two outcomes.
     expect(digits()).toEqual([['4', '3'], ['2', '1']])
-    expect($$('.gl-out__key b').map(b => b.textContent)).toEqual(['Raté', 'Presque', 'Difficile', 'Correct'])
+    expect($$('.gl-out__key b').map(b => b.textContent)).toEqual(['Raté', 'Presque', 'Correct', 'Facile'])
     expect(rows().map(wait)).toEqual(['10min', '1h'])
     // The pass wears the pass key's ink; the miss, the miss's.
     expect(rows().map(r => r.className.includes('gl-out--pass'))).toEqual([false, true])
     expect(getComputedStyle(rows()[0].querySelector('.gl-out__go')).color).toBe(probe('color', 'var(--rating-wrong)'))
     // A screen reader hears each row whole.
     const said = rows().map(r => r.querySelector(':scope > .sr-only').textContent.replace(/\u00a0/g, ' '))
-    expect(said).toEqual(['Raté, Presque : à refaire, dans 10 min', 'Difficile, Correct : étape suivante, dans 1 h'])
+    expect(said).toEqual(['Raté, Presque : à refaire, dans 10 min', 'Correct, Facile : étape suivante, dans 1 h'])
     // Under the stop's own name, inside its band, the walk's rail kept.
     const name = rect('.gl-map__stop--now .gl-map__name')
     rows().forEach(r => {
@@ -359,11 +359,11 @@ describe('the card panel of a ladder card', () => {
   it('groups the verdicts that do the same, in the learner\'s own scale, and names the relapse', async () => {
     await render(<Stage panel={panel(cards.mastered)}><Card />{bar}</Stage>)
     await settle()
-    // Mastered: a miss is the relapse, Difficile and Correct wait different weeks.
-    expect(digits()).toEqual([['4', '3'], ['2'], ['1']])
-    expect(rows().map(r => r.className)).toEqual(['gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass', 'gl-out gl-out--stay gl-out--pass'])
+    // Mastered: a miss is the relapse, Correct and Facile wait the same weeks.
+    expect(digits()).toEqual([['4', '3'], ['2', '1']])
+    expect(rows().map(r => r.className)).toEqual(['gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass'])
     expect($$('.gl-out__note').map(el => el.textContent)).toEqual(['Rechute'])
-    expect(rows().map(wait)).toEqual(['10min', '4sem.', '5sem.'])
+    expect(rows().map(wait)).toEqual(['10min', '5sem.'])
     const mastered = $('.gl-map__stop--now')
     expect(mastered.classList.contains('gl-map__stop--end')).toBe(true)
     expect(mastered.querySelector('.gl-map__dot').textContent).toBe('★')
@@ -767,6 +767,9 @@ describe('the writing board in the middle column', () => {
   it('keeps the board still when the answer is shown, Show the answer keeping its room', async () => {
     await render(<Draw />)
     await settle(400)
+    // Past the stage's own arrival (@keyframes arrive, a 10px rise): read
+    // on its way, the board stands lower before than after.
+    await Promise.all($('.stage').getAnimations().map(a => a.finished.catch(() => {})))
     const before = rect('.canvas-board')
     $('.drawing-quiz__validate').click()
     await settle(200)

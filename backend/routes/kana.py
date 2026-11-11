@@ -2,7 +2,7 @@ import logging
 import random
 from fastapi import APIRouter, Depends, HTTPException, Query
 from content.kana_data import KANA_SETS, kana_to_id, sound_of
-from core.auth import get_user_id, prefixed, unprefixed
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
@@ -11,7 +11,7 @@ from study.glyph_tour import mark_glyph_tours
 from study.modes import (
     B2F, GRADED_FOR_SOURCE, INDICE_CHOICES, KANA, Mode, require_mode, resolve_for_source,
 )
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -25,8 +25,8 @@ KANA_CARD_IDS = frozenset(kana_to_id(k) for kana_list in KANA_SETS.values() for 
 
 
 class ReviewPayload(BaseModel):
-    card_id:    str
-    mode:       str
+    card_id:    str = Field(max_length=CARD_ID_MAX)
+    mode:       str = Field(max_length=MODE_MAX)
     quality:    int
     # The card's stage *before* this review, exactly as it was handed
     # back on the card payload (see _build_kana_card's "stage" field
@@ -158,7 +158,7 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], m: Mode, stage: st
 def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], user_id: str,
                   new_limit: int | None = None):
     """
-    Shared by /api/kana/card and /api/kana/cards: resolves the set,
+    Used by /api/kana/cards: resolves the set,
     picks up to `count`
     due/new card ids (excluding anything already sitting unreviewed
     in the caller's queue), and builds the full payload for each.
@@ -214,27 +214,13 @@ def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], use
     return kana_list, cards
 
 
-@router.get("/api/kana/card")
-def get_kana_card(set_name: str, m: Mode = Depends(require_mode(KANA)),
-                   user_id: str = Depends(get_user_id)):
-    mode = m.key
-    kana_list, cards = _select_cards(set_name, m, count=1, exclude_ids=set(), user_id=user_id)
-    if kana_list is None:
-        logger.warning("kana study unknown set_name=%s user_id=%s", set_name, user_id)
-        return {"error": "Unknown set"}
-    if not cards:
-        logger.warning("kana study exhausted set_name=%s mode=%s user_id=%s", set_name, mode, user_id)
-        return {"done": True}
-    return cards[0]
-
-
 @router.get("/api/kana/cards")
 def get_kana_cards(set_name: str, count: int = Query(10, ge=1, le=100), exclude: str = "",
                     beyond_target: bool = Query(False), lang: str = Query("fr", max_length=8),
                     m: Mode = Depends(require_mode(KANA)),
                     user_id: str = Depends(get_user_id)):
     """
-    Batch version of /api/kana/card — returns up to `count` cards at
+    Returns up to `count` cards at
     once so the frontend can keep a session queue filled instead of
     fetching one card per answer. `exclude` is a comma-separated list
     of raw (unprefixed) card ids the client already has queued but

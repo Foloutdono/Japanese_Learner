@@ -615,7 +615,8 @@ function Run({ session, id, mode }) {
         )
         : null}
       pass={false}
-      aside={<><RunStreak /><SpeakToggle variant="head" /></>}
+      tally={<RunStreak />}
+      aside={<SpeakToggle variant="head" />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records

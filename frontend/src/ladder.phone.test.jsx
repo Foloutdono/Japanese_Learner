@@ -36,7 +36,7 @@ vi.mock('./lib/audio', async (o) => ({
   speakLine: vi.fn(async () => true), stopSpeaking: vi.fn(),
 }))
 const postReview = vi.fn(async () => ({}))
-vi.mock('./lib/reviews', () => ({ postReview: (...a) => postReview(...a), staleCards: vi.fn(async () => []) }))
+vi.mock('./lib/reviews', () => ({ postReview: (...a) => postReview(...a), staleCards: vi.fn(async () => []), reviewsSettled: vi.fn(async () => {}) }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: TodayRun } = await import('./screens/TodayRun')
@@ -45,7 +45,7 @@ const LANE = { id: 's~grammar~N5~grammar.ladder', kind: 'section', source: 'gram
 const card = over => ({ ...over, source: 'grammar', lane: LANE, stage: 'learning', lesson: null })
 const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
 
-async function mount(cards) {
+async function mount(cards, check = ladder.checks.right) {
   let batch = 0
   apiJson.mockImplementation(async (url) => {
     if (String(url).startsWith('/api/today/cards')) {
@@ -53,7 +53,7 @@ async function mount(cards) {
       return { cards: batch === 1 ? cards : [] }
     }
     if (url === '/api/composition/check') return { found: true, japanese: null }
-    if (String(url).startsWith('/api/grammar/build/check')) return ladder.checks.right
+    if (String(url).startsWith('/api/grammar/build/check')) return check
     return {}
   })
   return render(
@@ -125,6 +125,77 @@ describe('the ladder in the day’s queue, on a phone', () => {
     expect(sent[2].mode).toBe('grammar.ladder')
     expect(sent[2].card_id).toBe(ladder.build.card_id)
   }, 20000)
+
+  // Plan 310: a miss turns to the sentence as the front set it, the right
+  // form in its hole, what was typed struck beside the verdict and the
+  // point under its hairline, every piece inside the 390px card.
+  it('answers a near miss inside the screen, the typed answer on the verdict’s line', async () => {
+    const screen = await mount([card(ladder.build)], ladder.checks.close)
+    await settle()
+    const root = screen.container
+    await screen.getByLabelText('Your answer').fill(ladder.checks.typed.close)
+    await settle(120)
+    root.querySelector('form.gl-entry .btn-primary').click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--no')).toBeTruthy()
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    const box = root.querySelector('.prompt-card').getBoundingClientRect()
+    const pieces = root.querySelectorAll('.gl-back__verdict, .gl-typed, .gl-echo .gl-sent, .gl-gap--filled, .gl-back > .grammar-answer')
+    expect(pieces).toHaveLength(5)
+    for (const el of pieces) {
+      const r = el.getBoundingClientRect()
+      expect(r.left).toBeGreaterThanOrEqual(box.left)
+      expect(r.right).toBeLessThanOrEqual(box.right)
+    }
+    const head = root.querySelector('.gl-back__head').getBoundingClientRect()
+    const typed = root.querySelector('.gl-typed').getBoundingClientRect()
+    expect(Math.abs((head.top + head.bottom) / 2 - (typed.top + typed.bottom) / 2)).toBeLessThan(4)
+    expect(root.querySelector('.gl-typed s').textContent).toBe('で')
+    expect(root.querySelector('.gl-gap--filled .gl-fixed').textContent).toBe('て')
+  }, 20000)
+
+  // すみません、わたしはさかな＿＿＿。 at 390px: the kana before the hole
+  // came as one part, which the hole is held to, so the whole clause and
+  // the hole stood on one line wider than the card, cut off at both
+  // edges. The server now sends the word before the hole apart
+  // (furigana.hold_word); a payload that holds more is wrapped inside the
+  // card, never drawn past it.
+  const KANA = { key: 'sc:1', tr: 'Sorry, I don’t like fish.' }
+  const tail = [{ gap: 0, size: 6 }, { furigana: [{ text: '。' }] }]
+  const kanaShapes = {
+    'the word apart': [{ furigana: [{ text: 'すみません、わたしは' }, { text: 'さかな' }] }, ...tail],
+    'one run, as it came before': [{ furigana: [{ text: 'すみません、わたしはさかな' }] }, ...tail],
+  }
+  for (const [shape, pieces] of Object.entries(kanaShapes)) {
+    it(`keeps a sentence in kana inside the card, its hole held to its word (${shape})`, async () => {
+      const screen = await mount([card({ ...ladder.build, build: { ...KANA, pieces } })])
+      await settle()
+      const root = screen.container
+      const box = root.querySelector('.prompt-card').getBoundingClientRect()
+      const sent = root.querySelector('.gl-sent')
+      expect(sent.textContent).toBe('すみません、わたしはさかな。')
+      expect(sent.scrollWidth).toBeLessThanOrEqual(sent.clientWidth)
+      const range = document.createRange()
+      range.selectNodeContents(sent)
+      const glyphs = [...range.getClientRects(), root.querySelector('.gl-gap').getBoundingClientRect()]
+      for (const r of glyphs) {
+        expect(r.left).toBeGreaterThanOrEqual(box.left)
+        expect(r.right).toBeLessThanOrEqual(box.right)
+      }
+      // The hole is held to what came before it in its part; cut apart,
+      // that is the word alone, and the hole never opens a line.
+      const hold = root.querySelector('.gl-hold')
+      expect(hold.textContent).toBe(shape === 'the word apart' ? 'さかな' : 'すみません、わたしはさかな')
+      if (shape === 'the word apart') {
+        const word = document.createRange()
+        word.selectNodeContents(hold.querySelector('span'))
+        const [line] = word.getClientRects()
+        const gap = root.querySelector('.gl-gap').getBoundingClientRect()
+        // On one line: their feet closer than a glyph is tall.
+        expect(Math.abs(gap.bottom - line.bottom)).toBeLessThan(parseFloat(getComputedStyle(sent).fontSize))
+      }
+    }, 20000)
+  }
 
   it('chooses inside the screen, the exam’s tiles a thumb’s targets', async () => {
     const screen = await mount([card(ladder.choose)])

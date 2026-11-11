@@ -21,6 +21,29 @@ _TERMINATORS = frozenset("。！？!?")
 # thought), but the newline itself carries no meaning worth keeping.
 _OPENERS = {"「": "」", "『": "』", "（": "）"}
 
+
+def _unclosed_openers(text: str) -> set[int]:
+    """The positions of the brackets that are never closed.
+
+    OCR, lyrics and half-copied quotes drop a 」 often enough, and a
+    bracket that never closes would otherwise hold every newline and 。
+    after it, turning the rest of the Passage into one Sentence. Such a
+    bracket is plain text instead. Repeated until stable, since setting
+    one aside can change what the closers after it match."""
+    ignored: set[int] = set()
+    while True:
+        stack: list[tuple[int, str]] = []
+        for i, ch in enumerate(text):
+            if i in ignored:
+                continue
+            if ch in _OPENERS:
+                stack.append((i, _OPENERS[ch]))
+            elif stack and ch == stack[-1][1]:
+                stack.pop()
+        if not stack:
+            return ignored
+        ignored.update(i for i, _ in stack)
+
 # The most Sentences one Passage is analysed into. 50 until 2026-09-27,
 # which cut a song with a long chorus, an episode or an article short
 # (owner-directed: remove it). Raised rather than removed because it is
@@ -38,7 +61,8 @@ def split_sentences(text: str) -> list[dict]:
     - Splits on 。！？!? (kept with the Sentence they end) and newlines
       (a separator, dropped).
     - Never splits inside 「」/『』/（） -- quoted speech ending in 。
-      inside a larger sentence is one Sentence, not two.
+      inside a larger sentence is one Sentence, not two. A bracket that
+      is never closed is plain text, not a quote.
     - `text[s["start"]:s["end"]] == s["text"]` holds for every result:
       offsets are into the ORIGINAL text.
     - No terminator anywhere returns exactly one Sentence spanning the
@@ -59,12 +83,13 @@ def split_sentences(text: str) -> list[dict]:
             i += 1
         return i
 
+    unclosed = _unclosed_openers(text)
     start = skip_ws(0)
     i = start
     while i < n:
         ch = text[i]
 
-        if ch in _OPENERS:
+        if ch in _OPENERS and i not in unclosed:
             stack.append(_OPENERS[ch])
             i += 1
             continue
@@ -75,9 +100,13 @@ def split_sentences(text: str) -> list[dict]:
             continue
 
         if not stack and ch == "\n":
-            piece = text[start:i]
-            if piece:
-                sentences.append({"text": piece, "start": start, "end": i})
+            # A \r before the newline (Windows text) or spaces at the end
+            # of the line are whitespace too, and stay out of the piece.
+            end = i
+            while end > start and text[end - 1].isspace():
+                end -= 1
+            if end > start:
+                sentences.append({"text": text[start:end], "start": start, "end": end})
             start = skip_ws(i + 1)
             i = start
             continue

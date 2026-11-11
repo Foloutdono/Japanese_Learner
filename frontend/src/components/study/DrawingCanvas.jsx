@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useLang } from '../../LangContext'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
+import { StrokeZoom } from './StrokeStudy'
 import { playClick } from '../../lib/audio'
 import { UndoIcon, CheckIcon } from '../ui/Icons'
 import { api } from '../../lib/origin'
@@ -248,13 +249,11 @@ function StrokeGlyph({ char }) {
   if (failed) {
     return <div className="stroke-ref__fallback" style={{ display: 'flex' }}>{t.notAvailable}</div>
   }
+  // A tap opens it big, with the calque to trace it on (plan 268).
   return (
-    <StrokeOrderAnimation
-      src={charToSvgUrl(char)}
-      loop
-      className="stroke-ref__img"
-      onError={onError}
-    />
+    <StrokeZoom src={charToSvgUrl(char)} glyph={char} className="stroke-ref__img">
+      <StrokeOrderAnimation src={charToSvgUrl(char)} loop onError={onError} />
+    </StrokeZoom>
   )
 }
 

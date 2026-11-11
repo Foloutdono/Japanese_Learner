@@ -7,6 +7,7 @@ Author the exam pool's seed papers (plan 228) by replaying the generators.
     python -m scripts.exam_seed run n4-grammar-01 --rebuild  # the built ones too
     python -m scripts.exam_seed check n4-grammar-01     # what the test holds the file to
     python -m scripts.exam_seed reclip n4-listening-01  # clip names after a hand-corrected script
+    python -m scripts.exam_seed reslot n3-vocab-01      # re-place the keys of a mondai whose keys step through the slots
     python -m scripts.exam_seed kanji N4 "文を書く"       # characters outside N4's set
 
 A seed paper (content/exam_seed/<exam_id>.json, loaded into exam_papers
@@ -53,7 +54,7 @@ from pathlib import Path
 from study import exam_gen_utils, exam_grammar_gen, exam_listening_gen, exam_pipeline
 from study import exam_reading_gen, exam_vocab_gen, voice_engine
 from study.exam_catalogue import EXAM_GENERATORS
-from study.exam_seed import PER_EXAM, exam_problems, load, problems, seed_for, seed_path
+from study.exam_seed import PER_EXAM, exam_problems, load, problems, reslot, seed_for, seed_path
 from study.exam_audio_repair import questions_with_audio, turns_from_script
 from study.exam_tts import content_key
 from study.llm_shared import offending_kanji
@@ -145,6 +146,9 @@ def replaying():
         swap(module, "llm_configured", lambda: True)
     swap(voice_engine, "ready", lambda timeout=2.0: True)
     swap(exam_listening_gen, "synthesize_dialogue", _clip)
+    # A seed's keys are Claude's own, read with the script: the blind reader
+    # of a generated paper (plan 258) is not a call a seed pays for.
+    swap(exam_listening_gen, "_keys_agree", lambda prepared: [True] * len(prepared))
 
     validate = exam_pipeline.validate_content
 
@@ -293,6 +297,20 @@ def reclip(exam_id: str) -> int:
     return 0
 
 
+def reslot_file(exam_id: str) -> int:
+    """Re-place the right choice of every mondai whose keys step through the
+    slots (study/exam_seed.rotation_tells): position only, nothing else."""
+    data = load(exam_id)
+    if data is None:
+        print(f"{exam_id}: no seed file")
+        return 1
+    moved = reslot(data)
+    if moved:
+        seed_path(exam_id).write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"{exam_id}: {moved} question(s) re-placed")
+    return 0
+
+
 def check(exam_id: str | None) -> int:
     """study/exam_seed.exam_problems over one exam id, or every one --
     what tests/test_exam_seed.py holds the files to."""
@@ -319,6 +337,8 @@ def main(argv=None) -> int:
     c.add_argument("exam_id", nargs="?")
     rc = sub.add_parser("reclip")
     rc.add_argument("exam_id")
+    rs = sub.add_parser("reslot")
+    rs.add_argument("exam_id")
     k = sub.add_parser("kanji")
     k.add_argument("level")
     k.add_argument("text")
@@ -330,6 +350,8 @@ def main(argv=None) -> int:
         return check(args.exam_id)
     if args.command == "reclip":
         return reclip(args.exam_id)
+    if args.command == "reslot":
+        return reslot_file(args.exam_id)
     if args.command == "kanji":
         bad = offending_kanji(args.text, args.level)
         print(f"outside {args.level}: {bad}" if bad else f"all within {args.level}")

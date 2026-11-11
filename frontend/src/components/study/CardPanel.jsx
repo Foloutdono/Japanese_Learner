@@ -9,6 +9,7 @@ import { DeskFigure } from './RunRecords'
 import { useRegisterRunKeys } from '../../stores/runKeys'
 import { STAGES, cardProgress, stripFills } from '../../domain/cardProgress'
 import { LadderMap } from './GrammarPlate'
+import { intlLocale } from '../../lib/locale'
 
 // ── 机 — the card panel, the second of a run's two left panels (plan 126) ──
 // The run's instrument panel, under the session panel: what the card
@@ -87,7 +88,7 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
   const minutes = Math.floor(elapsed / 60000)
   const perMinute = tally.reviewed > 0 && elapsed >= 60000 ? tally.reviewed / (elapsed / 60000) : null
   const toFinish = perMinute && remaining != null ? Math.ceil(remaining / perMinute) : null
-  const decimal = new Intl.NumberFormat(lang === 'fr' ? 'fr-FR' : 'en-GB', { maximumFractionDigits: 1 })
+  const decimal = new Intl.NumberFormat(intlLocale(lang, 'en-GB'), { maximumFractionDigits: 1 })
 
   // A ladder card says what each verdict does to the point (plan 198);
   // one served without its landings (a queue from before the plan, a

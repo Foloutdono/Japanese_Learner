@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The widget's ground: bg-panel, sumi in both themes. -->
+<!-- The widget's ground (plan 318, the owner's colour 5 of the canvas
+     "Tsuji — the home-screen widget, again"): glass — bg-panel's sumi at
+     62% over the wallpaper, in both themes, ringed by the panel's paper
+     ink at 10% so its edge holds on a dark wallpaper. A home-screen
+     widget cannot blur what is behind it, so it is seen through, not
+     frosted. At the launcher's own corner where it has one
+     (values-v31/dimens.xml). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#100e13" />
-    <corners android:radius="24dp" />
+    <solid android:color="#9e100e13" />
+    <stroke android:width="1dp" android:color="#1af3ecdf" />
+    <corners android:radius="@dimen/widget_radius" />
 </shape>

@@ -10,18 +10,16 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss
 from content.grammar_sentences_data import get_sentences
 from content.kana_data import KANA_SETS
 from content.kanji_data import KANJI_BY_LEVEL
-from content.kanji_meanings import KANJI_FR
 from content.kanji_readings import display_reading, split_readings
 from content.radical_data import radical_for
 from content.vocab_data import VOCAB_BY_LEVEL
 from study import conversation
-from study.exam_gen_utils import make_choices
-from study.exam_kanji_gen import build_kanji_reading_distractors
+from study import exam_kanji_choices
 from study.grammar_forms import choice_forms
 from study.grammar_ladder import build_specimen, write_payload
 from study.grammar_lesson import contrast_payload
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 
 # ── 見本 — what each stop of a line holds (plan 137) ──────────────
 # The desk's line station shows each platform with the card it will
@@ -59,7 +57,7 @@ SOURCES = (
     "reading", "translation", "comprehension", "dictation", "composition", "exam", "conversation",
 )
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-LANGS = ("fr", "en")
+LANGS = ("fr", "en", "es")
 
 SAMPLE_SIZE = {"kana": 11, "kanji": 10, "vocab": 8, "grammar": 6, "composition": 6}
 
@@ -111,7 +109,7 @@ def _kanji_line(lang: str) -> dict:
             "sample": [e["kanji"] for e in entries[: SAMPLE_SIZE["kanji"]]],
             "card": {
                 "jp": first["kanji"],
-                "meaning": get_meaning(first, lang, KANJI_FR),
+                "meaning": get_meaning(first, lang, KANJI_GLOSSES),
                 "reading": _kanji_reading(first),
                 "radical": rad["char"] if rad else None,
             },
@@ -135,7 +133,7 @@ def _vocab_line(lang: str) -> dict:
             "card": {
                 "jp": first.get("kanji") or first.get("kana", ""),
                 "reading": (first.get("kana") or "").split("/")[0].strip(),
-                "meaning": get_meaning(first, lang, VOCAB_FR),
+                "meaning": get_meaning(first, lang, VOCAB_GLOSSES),
             },
         }
     return stops
@@ -151,9 +149,10 @@ def _grammar_card(level: str, entry: dict, points: list[dict], lang: str) -> dic
     parts = contrast["furigana"]
     cut = next(i for i, p in enumerate(parts) if p.get("blank"))
     # The rivals the lesson names, then the point: the card pads a short
-    # list with random same-level fillers, which would change the
-    # specimen from one process to the next. Those fillers only when the
-    # lesson names no rival at all.
+    # list with same-level fillers (drawn by the seed above, so the same
+    # in every process), which the specimen leaves out, since it shows what
+    # the lesson sets beside the point. Those fillers only when the lesson
+    # names no rival at all.
     pattern = entry["pattern"]
     rivals = list(dict.fromkeys(r["pattern"] for r in entry.get("compare", []) if r["pattern"] != pattern))
     rules = contrast["rules"]
@@ -276,11 +275,11 @@ def _comprehension_line(lang: str) -> dict:
     seed's opening and its first question, as comprehension_seed.render
     puts it in `lang`; `size` is the questions a text asks."""
     stops = {}
-    for level, seeds in comprehension_seed.by_level().items():
+    for level, seeds in comprehension_seed.index().items():
         if level not in LEVELS or not seeds:
             continue
         first = seeds[0]
-        question = comprehension_seed.render(first, lang)["questions"][0]
+        question = comprehension_seed.render_question(first["questions"][0], lang)
         stops[level] = {
             "sample": [seed["title"] for seed in seeds],
             "card": {
@@ -357,30 +356,30 @@ def _exam_vocab(level: str) -> dict | None:
 
     And its four `options` (plan 165: the Practice gate prints the
     question whole, as the canvas's "Every platform's specimen" draws
-    it): the paper's own 漢字読み choices -- the reading and three of
-    exam_kanji_gen's near-misses (a voicing, a long vowel, a small っ,
-    the character's other readings), dealt by make_choices under a
-    fixed seed so the order is the same on every process. A word with
-    fewer than three near-misses never reaches a paper
-    (build_reading_mondai skips it), so it is passed over here too."""
+    it): the paper's own 漢字読み choices -- the reading and the three
+    wrong readings study/exam_kanji_choices builds for a paper (plan 257:
+    the slips a compound makes, set as a grid), dealt under a fixed seed
+    so the order is the same on every process. A word the paper would not
+    ask, or that has no such set, is passed over here too."""
     bank = reading_sentences.BY_LEVEL.get(level, [])
     for readings in _deck_readings(level):
         for row in bank:
             focus = row.get("focus", "")
             if not (_KANJI.search(focus) and focus in row["jp"] and focus in readings):
                 continue
-            kana = readings[focus]
-            reading = kana.split("/")[0].strip()
-            rng = random.Random(f"{level}:{focus}")
-            made = make_choices(rng, reading, build_kanji_reading_distractors({"kanji": focus, "kana": kana}, rng))
-            if made is None:
+            reading = readings[focus].split("/")[0].strip()
+            if not exam_kanji_choices.askable({"kanji": focus, "kana": reading}, level):
                 continue
-            choices, _ = made
+            sets = exam_kanji_choices.reading_sets(focus, reading, level)
+            if not sets:
+                continue
+            options = [reading] + sets[0][1]
+            random.Random(f"{level}:{focus}").shuffle(options)
             return {
                 "sentence": row["jp"],
                 "word": focus,
                 "reading": reading,
-                "options": [c["textJp"] for c in choices],
+                "options": options,
             }
     return None
 
@@ -392,7 +391,7 @@ def _exam_line(lang: str) -> dict:
     漢字読み, the grammar paper's sentence and its point, the reading
     paper's passage. A kind the grade has nothing to draw from is left
     out rather than filled. No sample: a paper is not a list."""
-    seeds = comprehension_seed.by_level()
+    seeds = comprehension_seed.index()
     stops = {}
     for level in LEVELS:
         card = {}
