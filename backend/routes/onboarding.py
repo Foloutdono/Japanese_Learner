@@ -59,13 +59,16 @@ from study.dictation import measure_forms
 from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
 from study.modes import resolve as resolve_mode
-from study.placement import PER_LEVEL, build_placement_paper, recommend_level, strip_answers, walk
+from study.placement import PER_LEVEL, PLACEMENT_LADDER, build_placement_paper, recommend_level, strip_answers, walk
 from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 _SEED_BITS = 32
+# The fixed paper's questions, one per kind of each rung: the most
+# answers a score can carry.
+PAPER_QUESTIONS = sum(len(kinds) for _level, kinds in PLACEMENT_LADDER)
 
 # ── Content volumes, for the projection ───────────────────────────
 # ITEMS (words, characters, points, glyphs) — deliberately not
@@ -86,7 +89,8 @@ class ScorePayload(BaseModel):
     seed: int = Field(ge=0, lt=2 ** _SEED_BITS)
     # Partial submissions are legal — "stop here, this is too hard" is
     # the early exit, and unanswered questions simply score as wrong.
-    answers: dict[str, str] = {}
+    # At most one answer per question of the fixed paper (plan 211).
+    answers: dict[str, str] = Field(default_factory=dict, max_length=PAPER_QUESTIONS)
 
 
 class ClimbPayload(BaseModel):
