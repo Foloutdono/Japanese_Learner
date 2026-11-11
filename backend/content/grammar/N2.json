@@ -13060,23 +13060,23 @@
     ],
     "choose": [
       {
-        "jp": "天気予報＿＿＿、一日中よく晴れた。",
+        "jp": "約束＿＿＿、彼は今日も遅れて来た。",
         "tr": {
-          "en": "Contrary to the weather forecast, it was sunny all day.",
-          "fr": "Contrairement aux prévisions météo, il a fait beau toute la journée.",
-          "es": "Al contrario de lo que decía el pronóstico, hizo sol todo el día.",
-          "id": "Bertentangan dengan prakiraan cuaca, hari itu cerah seharian."
+          "en": "Going back on his promise, he came late again today.",
+          "fr": "Contrairement à sa promesse, il est encore arrivé en retard aujourd'hui.",
+          "es": "En contra de lo que prometió, hoy volvió a llegar tarde.",
+          "id": "Bertentangan dengan janjinya, hari ini dia datang terlambat lagi."
         },
         "choices": [
           "に反して",
-          "に比べて",
+          "にそって",
           "に加えて"
         ],
         "why": {
-          "en": "The forecast said one thing and the day did the other: に反して, « contrary to ». に比べて (« compared with ») would weigh the day against the forecast, and に加えて (« in addition to ») would add to it.",
-          "fr": "La météo annonçait une chose et la journée a fait l'inverse : に反して, « contrairement à ». に比べて (« comparé à ») mettrait la journée en balance avec les prévisions, et に加えて (« en plus de ») s'y ajouterait.",
-          "es": "El pronóstico decía una cosa y el día hizo lo contrario: に反して, «en contra de». に比べて («comparado con») pondría el día frente al pronóstico, y に加えて («además de») se sumaría a él.",
-          "id": "Prakiraan mengatakan satu hal, tetapi cuaca hari itu sebaliknya: に反して, “bertentangan dengan”. に比べて (“dibandingkan dengan”) akan menimbang hari itu terhadap prakiraan, dan に加えて (“selain”) akan menambahkan sesuatu padanya."
+          "en": "He promised one thing and did the other: に反して, « contrary to ». にそって (« in line with ») would have him keep the promise, and に加えて (« in addition to ») cannot add lateness to a promise.",
+          "fr": "Il avait promis une chose et a fait l'inverse : に反して, « contrairement à ». にそって (« conformément à ») dirait qu'il a tenu sa promesse, et に加えて (« en plus de ») n'ajoute pas un retard à une promesse.",
+          "es": "Prometió una cosa e hizo lo contrario: に反して, «en contra de». にそって («conforme a») diría que cumplió la promesa, y に加えて («además de») no suma un retraso a una promesa.",
+          "id": "Dia menjanjikan satu hal dan melakukan sebaliknya: に反して, “bertentangan dengan”. にそって (“sesuai dengan”) akan berarti dia menepati janjinya, dan に加えて (“selain”) tidak bisa menambahkan keterlambatan pada janji."
         }
       },
       {
