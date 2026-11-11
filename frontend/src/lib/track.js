@@ -124,6 +124,8 @@ export const EVENTS = {
   // call, its count against the day's ceiling. Declared here only so
   // the two sets stay one.
   ai_use: ['feature', 'count', 'limit', 'over'],
+  // ... and the slot given back when no model was paid (an outage).
+  ai_refund: ['feature'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
   // An uncaught error, by screen -- never its message or stack -- and
@@ -178,7 +180,8 @@ export const VALUES = {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target', 'main_mode', 'today_mode'],
     value: ['light', 'dark', 'auto', 'fr', 'en', 'es', 'es-ES', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
-  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation', 'song_transcribe'] },
+  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation', 'song_transcribe', 'conversation_talk', 'conversation_review', 'lyrics_sort'] },
+  ai_refund: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation', 'song_transcribe', 'conversation_talk', 'conversation_review', 'lyrics_sort'] },
   fare_blocked: { kind: ['review', 'duel', 'duel_review'] },
   pvp_friend: { action: ['request', 'accept', 'refuse', 'withdraw', 'remove', 'block', 'unblock'] },
   pvp_report: { reason: ['name', 'cheat', 'spam', 'other'] },

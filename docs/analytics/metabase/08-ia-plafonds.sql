@@ -26,6 +26,18 @@ WHERE name = 'ai_use' AND at >= now() - ({{days}} || ' days')::interval
 GROUP BY 1 ORDER BY 2 DESC;
 
 -- ==== question
+-- title: Appels remboursés (panne)
+-- display: table
+-- size: 12x6
+-- description: Les créneaux rendus par core/daily_limit.release parce qu'aucun modèle n'a été payé (panne des fournisseurs). Les appels réels du jour sont ai_use moins ai_refund.
+SELECT props->>'feature' AS "Fonction", count(*) AS "Remboursés", count(DISTINCT user_id) AS "Apprenants",
+       count(DISTINCT (at AT TIME ZONE 'Europe/Paris')::date) AS "Jours"
+FROM event_log
+WHERE name = 'ai_refund' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
 -- title: Compteurs quotidiens des 30 derniers jours
 -- display: table
 -- size: 12x7

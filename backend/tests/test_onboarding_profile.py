@@ -578,6 +578,20 @@ def test_a_name_too_short_for_a_handle_takes_a_number(client):
         assert profile_module.USERNAME_RE.match(done["username"])
 
 
+def test_a_one_letter_name_takes_a_number_long_enough_for_a_handle(client):
+    # J2 is two characters, which no username may be: the first is J10.
+    with _clean_onboarding_state(DEV_USER_ID):
+        done = _board(client, "J")
+        assert done["username"] == "J10"
+        assert profile_module.USERNAME_RE.match(done["username"])
+
+
+@pytest.mark.parametrize("base", ["J", "Xi", "Camille", "x" * 20])
+def test_every_handle_offered_is_a_username(base):
+    for candidate in profile_module._handle_candidates(base):
+        assert profile_module.USERNAME_RE.match(candidate), candidate
+
+
 def test_a_long_name_keeps_the_handle_within_the_username_length(client, other_user):
     name = "Abcdefghijklmnopqrstuvwx"
     _hold(other_user, name[:20])

@@ -147,7 +147,10 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], m: Mode, stage: st
         # that moment would stall the card.
         field    = "kana" if m.direction == B2F else "romaji"
         answer   = kana_entry[field]
-        pool     = [k[field] for k in kana_list if k[field] != answer]
+        # Distinct values: a set can spell two kana alike (じ/ぢ and
+        # ず/づ are both ji/zu), and a pool with both dealt the same
+        # choice twice.
+        pool     = sorted({k[field] for k in kana_list} - {answer})
         choices  = random.sample(pool, min(3, len(pool))) + [answer]
         random.shuffle(choices)
         payload["hints"][INDICE_CHOICES] = choices
