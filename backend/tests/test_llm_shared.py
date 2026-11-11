@@ -484,3 +484,67 @@ class UsageLoggingTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ChatMeterTest(unittest.TestCase):
+    """What core/daily_limit.refund_unbilled reads: whether a chat()
+    call may have cost money. A 200 did, whatever its body; a read that
+    timed out may have; a connection never made, and a 429/5xx, did not."""
+
+    def setUp(self):
+        self._saved_models = set(llm_shared._DEAD_MODELS)
+        self._saved_providers = set(llm_shared._DEAD_PROVIDERS)
+        llm_shared._DEAD_MODELS.clear()
+        llm_shared._DEAD_PROVIDERS.clear()
+        self.addCleanup(self._restore)
+        p = mock.patch.object(llm_shared, "PROVIDERS", [_provider("alpha", ["a1"])])
+        p.start()
+        self.addCleanup(p.stop)
+
+    def _restore(self):
+        llm_shared._DEAD_MODELS.clear()
+        llm_shared._DEAD_MODELS.update(self._saved_models)
+        llm_shared._DEAD_PROVIDERS.clear()
+        llm_shared._DEAD_PROVIDERS.update(self._saved_providers)
+
+    def _metered(self, post, accept=None):
+        session = mock.Mock()
+        session.post.side_effect = post
+        with mock.patch.object(llm_shared.requests, "Session", return_value=session), \
+                llm_shared.metered() as meter:
+            try:
+                llm_shared.chat([{"role": "user", "content": "x"}], accept=accept)
+            except LLMUnavailable:
+                pass
+        return meter.billed
+
+    def test_every_provider_failing_is_not_billed(self):
+        self.assertFalse(self._metered(lambda *a, **k: FakeResponse(503)))
+
+    def test_a_connection_never_made_is_not_billed(self):
+        def refused(*a, **k):
+            raise llm_shared.requests.ConnectionError("refused")
+        self.assertFalse(self._metered(refused))
+
+    def test_a_connect_timeout_is_not_billed(self):
+        def slow(*a, **k):
+            raise llm_shared.requests.ConnectTimeout("no route")
+        self.assertFalse(self._metered(slow))
+
+    def test_a_read_that_timed_out_is_billed(self):
+        def slow(*a, **k):
+            raise llm_shared.requests.ReadTimeout("mid-answer")
+        self.assertTrue(self._metered(slow))
+
+    def test_a_reply_refused_by_accept_is_billed(self):
+        self.assertTrue(self._metered(lambda *a, **k: FakeResponse(200, "We need to produce JSON"),
+                                      accept=lambda reply: False))
+
+    def test_an_answer_is_billed(self):
+        self.assertTrue(self._metered(lambda *a, **k: FakeResponse(200, "answer")))
+
+    def test_no_meter_open_is_no_error(self):
+        session = mock.Mock()
+        session.post.return_value = FakeResponse(200, "answer")
+        with mock.patch.object(llm_shared.requests, "Session", return_value=session):
+            self.assertEqual(llm_shared.chat([{"role": "user", "content": "x"}]), "answer")

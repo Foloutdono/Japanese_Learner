@@ -317,9 +317,11 @@ def post_composition_review(payload: ReviewPayload, user_id: str = Depends(get_u
 
     The order is the contract: the point is resolved, then a slot of
     the day is claimed, then the model is called. Claimed BEFORE the
-    call, so a failed call costs one -- a client retrying a failure is
-    exactly what the ceiling exists to stop. Over it, a 429 that says
-    when the allowance comes back; the screen keeps the run going."""
+    call, so two at once cannot both pass the ceiling; a reply a model
+    was paid for costs one even unreadable, and a call no model could
+    be reached for is given back (daily_limit.refund_unbilled). Over
+    it, a 429 that says when the allowance comes back; the screen keeps
+    the run going."""
     if not llm_configured():
         raise HTTPException(status_code=500, detail="No LLM provider is configured")
     sentence = payload.sentence.strip()
@@ -341,19 +343,20 @@ def post_composition_review(payload: ReviewPayload, user_id: str = Depends(get_u
     # sits in the system prompt, outside the data fences.
     lang = reading.known_lang(payload.lang)
     lang_name = reading.LANG_NAMES[lang]
-    content = reading._chat(
-        [
-            {"role": "system", "content": SYSTEM_TEMPLATE.format(lang_name=lang_name, max_items=tutor_review.MAX_ITEMS)},
-            {"role": "user", "content": _user_block(level, entry, sentence, lang)},
-        ],
-        # The shape is small; a 3,000-token ceiling on a reasoning
-        # model is paid in latency, not in quality.
-        max_tokens=1000,
-        task="composition-review",
-        # A model that thinks out loud and runs out of tokens before its
-        # JSON answers 200 with a monologue; the next model is asked.
-        accept=tutor_review.acceptable_reply,
-    )
+    with daily_limit.refund_unbilled(user_id, FEATURE):
+        content = reading._chat(
+            [
+                {"role": "system", "content": SYSTEM_TEMPLATE.format(lang_name=lang_name, max_items=tutor_review.MAX_ITEMS)},
+                {"role": "user", "content": _user_block(level, entry, sentence, lang)},
+            ],
+            # The shape is small; a 3,000-token ceiling on a reasoning
+            # model is paid in latency, not in quality.
+            max_tokens=1000,
+            task="composition-review",
+            # A model that thinks out loud and runs out of tokens before its
+            # JSON answers 200 with a monologue; the next model is asked.
+            accept=tutor_review.acceptable_reply,
+        )
     review = tutor_review.parse_review(content)
     if review is None:
         # Not the shape. Prose that reads as a review is still one, so
