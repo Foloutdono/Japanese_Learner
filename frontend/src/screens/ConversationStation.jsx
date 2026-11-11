@@ -65,7 +65,13 @@ export default function ConversationStation({ session }) {
   useEffect(() => {
     let live = true
     apiJson(`/api/conversation/scenarios?lang=${lang}`, session)
-      .then(body => { if (live) setData(lang === 'fr' ? welded(body) : body) })
+      .then(body => {
+        if (!live) return
+        // An answer ends an earlier failure: a language switched after
+        // one asks again, and only Retry used to clear it.
+        setFailed(false)
+        setData(lang === 'fr' ? welded(body) : body)
+      })
       .catch(() => { if (live) setFailed(true) })
     return () => { live = false }
   }, [lang, session, attempt])
