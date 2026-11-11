@@ -41,8 +41,10 @@ const MOTION = { caption: 0.35, fade: 0.22, slide: 0.5, dissolve: 0.45, out: 0.5
 const KEYS_PER_SECOND = 13
 // A line heard as its screen comes: a breath after the screen.
 const HEAR = 0.35
-// How long a line lasts: its voice's length once voiced, else a reading pace's guess.
-const lengthOf = (cue, voiceDur) => voiceDur ? voiceDur(cue) : 0.5 + 0.13 * [...cue.text].length
+// How long a line lasts: its voice's length once voiced, else a reading
+// pace's guess (no voice asked for, or a line the engine did not voice:
+// a draft made without it is timed, not NaN).
+const lengthOf = (cue, voiceDur) => voiceDur?.(cue) || 0.5 + 0.13 * [...cue.text].length
 // The gate's share of the video: its ask, its note, then the gate, waiting.
 const END_SECONDS = 5.5
 
@@ -276,9 +278,11 @@ export const FEATURES = {
       ]),
       ...d.answers.slice(2).flatMap(a => [{ click: option(a), settle: 120 }, { click: SUBMIT, settle: 250 }]),
       { wait: 1200 },
-      { shot: 'results', focus: '.result-lattice, .qrows', tap: `.qrow >> nth=${d.wrong}` },
-      { click: `.qrow >> nth=${d.wrong}`, settle: 700 },
+      // The results come with the miss open on its sentence and its why
+      // (plan 298b): a tap on its row would close it.
+      { shot: 'results', focus: '.result-lattice, .qrows' },
       // The miss asked about: where the text says it.
+      { scroll: '.qrow__detail .ask-launch', block: 'center' },
       { shot: 'missed', focus: '.qrow__detail', tap: '.qrow__detail .ask-launch' },
       { click: '.qrow__detail .ask-launch', ready: '.ask-page', settle: 500 },
       { shot: 'ask', focus: '.ask__offers', tap: WHERE },
@@ -291,9 +295,9 @@ export const FEATURES = {
       { click: BREAKDOWN, settle: 900 },
       { scroll: '.qrows ~ .prompt-card', block: 'start' },
       { shot: 'breakdown', focus: '.qrows ~ .prompt-card .analysis-grammar-chips, .bkd-passage__item--open' },
-      { scroll: `.bkd-passage__head >> nth=${d.sentence}`, block: 'center' },
-      { shot: 'bd-pick', focus: `.bkd-passage__head >> nth=${d.sentence}`, tap: `.bkd-passage__head >> nth=${d.sentence}` },
-      { click: `.bkd-passage__head >> nth=${d.sentence}`, settle: 900, keep: true },
+      // The breakdown stands open on the sentence the miss rests on (plan
+      // 298): no tap opens it, and one on its head would land on a word.
+      { scroll: '.bkd-passage__item--open', block: 'center' },
       { shot: 'bd-open', focus: '.bkd-passage__item--open' },
       // Its word, then its point, each opened in the dictionary (plan 274).
       { scroll: WORD_ROW(d.word), block: 'center' },
@@ -318,11 +322,11 @@ export const FEATURES = {
         { shot: 'q0', hold: 1.4, tap: 1.0, enter: 'push' }, { shot: 'q0-picked', hold: 0.5 },
         { shot: 'q1', hold: 1.4, tap: 1.0 }, { shot: 'q1-picked', hold: 0.7 },
       ] },
-      { say: { en: 'Your score, and every miss shown.', fr: 'Ton score, et chaque erreur montrée.' }, parts: [{ shot: 'results', hold: 1.8, tap: 1.4, enter: 'push' }, { shot: 'missed', hold: 1.4, tap: 1.0 }] },
+      { say: { en: 'Your score, and every miss shown.', fr: 'Ton score, et chaque erreur montrée.' }, parts: [{ shot: 'results', hold: 1.8, enter: 'push' }, { shot: 'missed', hold: 1.4, tap: 1.0 }] },
       { say: { en: 'Ask where the text says it.', fr: 'Demande où le texte le dit.' }, parts: [{ shot: 'ask', hold: 1.4, tap: 1.0, enter: 'push' }, { shot: 'asked', hold: 3.6 }] },
       { say: { en: 'Every sentence, broken down.', fr: 'Chaque phrase, décomposée.' }, parts: [
         { shot: 'bd-ask', hold: 1.0, tap: 0.6, enter: 'back' }, { shot: 'breakdown', hold: 2.2, cam: 'read' },
-        { shot: 'bd-pick', hold: 0.9, tap: 0.5 }, { shot: 'bd-open', hold: 2.4, cam: 'read' },
+        { shot: 'bd-open', hold: 2.4, cam: 'read' },
       ] },
       { say: { en: 'Every word and rule, in the dictionary.', fr: 'Chaque mot, chaque règle, au dictionnaire.' }, parts: [
         { shot: 'bd-word', hold: 0.9, tap: 0.5 }, { shot: 'dict-word', hold: 2.2, cam: 'read', enter: 'rise' },
@@ -397,7 +401,8 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rvw__verdict' },
       { wait: 1200 },
       { shot: 'reviewed', focus: BODY },
-      ...lookSteps(3, { offer: 'てください' }),
+      // A near miss: Almost (q2), as dictation's.
+      ...lookSteps(2, { offer: 'てください' }),
     ],
     beats: [
       ...gateBeats({ en: 'Say it in Japanese.', fr: 'Dis-le en japonais.' }),
@@ -448,7 +453,9 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rating-bar' },
       { wait: 900 },
       { shot: 'checked', focus: '.prompt-card' },
-      ...lookSteps(3, { typed: d.asked }),
+      // One slip short: Almost, the four-button bar's second key (q2; the
+      // bar has had no q3 since it became Missed / Almost / Correct / Easy).
+      ...lookSteps(2, { typed: d.asked }),
     ],
     beats: [
       ...gateBeats({ en: 'Train your ear.', fr: 'Entraîne ton oreille.' }),

@@ -16,6 +16,7 @@ import { BEFORE_309, TUNABLES, tuned } from '../carousel/tune.js'
 import { DESIGNS, FEATURES, WORDS as FUNNEL, funnelOf, readInks, readable, unstopped } from '../carousel/funnel.js'
 import { KINDS, LONG_SITE, PART, REPLY_SHORT, SHORT, TALL, fitShort, answered, chapterText, cueKey, describe as describeVideo, dictionaryForms, drawLong, loadScenePictures, longCommand, longFiles, longItems, longListFiles, longPick, longPlan, shortGloss, stillAt, timeline } from '../carousel/long.js'
 import { SITE_ORIGIN } from '../landing/config.mjs'
+import { DARK, LIGHT } from '../landing/tokens.mjs'
 import { CH as CHALLENGE, CPM, CTA as CHALLENGE_CTA, SCROLL, STYLES as CHALLENGE_STYLES, challengeCommand, challengeCues, challengeItems, challengePage, challengePlan, challengePrintOpts, challengeQuestions, challengeTimeline, cueKey as challengeKey, drawChallenge, hookWords, moraeOf, wordTimes } from '../carousel/challenge.js'
 import { PRINTS_REV, SCENERIES, SCENERY_IDS, printPaths, sceneryOf } from '../carousel/sceneries.js'
 import { drawn, withPath2D } from './testing/challengeCanvas.js'
@@ -26,6 +27,7 @@ import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { SPRINT_MS, points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
+import { COVER, HIGHLIGHTS, NAME_MAX, SHELF, SHELF_INKS, STORY_FIT, VOICE_CREDIT, coverInks, cutBeats, drawCover, drawVoiceCredit, highlightCommand, highlightFiles, highlightNote, shelfProblems } from '../carousel/highlights.js'
 import { APP as FEATURE_APP, FEATURE_FPS, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, camFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
@@ -3280,27 +3282,28 @@ function placedTexts() {
   return { ctx, texts }
 }
 
+// record.mjs's shots for a script, without a browser: where a step shoots, a
+// box for what it shows and one for what it taps, a typed run a shot a chunk,
+// a clip a shot every 0.15 s of it.
+const FOCUS = { x: 40, y: 600, w: 1000, h: 520 }
+const TAP = { x: 120, y: 980, w: 300, h: 110 }
+function shotsOf(steps) {
+  const shots = []
+  for (const st of steps) {
+    if (st.type) {
+      const n = [...st.text].length
+      for (let c = st.chunk || 3, i = 0; c - (st.chunk || 3) < n; c += st.chunk || 3, i++) shots.push({ name: st.shot, i, chars: Math.min(n, c), focus: FOCUS, tap: null })
+    } else if (st.play) {
+      for (let at = 0, i = 0; at < st.seconds + 0.3; at += 0.15, i++) shots.push({ name: st.shot, i, at, focus: FOCUS, tap: null })
+    } else if (st.shot) shots.push({ name: st.shot, i: 0, focus: FOCUS, tap: st.tap ? TAP : null })
+  }
+  return shots
+}
+
 describe('the practice features, recorded in the app (plan 270)', () => {
   const B = { 'promo.json': bank('promo.json') }
   const LANGS = ['en', 'fr']
   const LOCALES = { en: EN, fr: FR }
-  // record.mjs's shots for a script, without a browser: where a step shoots, a
-  // box for what it shows and one for what it taps, a typed run a shot a chunk,
-  // a clip a shot every 0.15 s of it.
-  const FOCUS = { x: 40, y: 600, w: 1000, h: 520 }
-  const TAP = { x: 120, y: 980, w: 300, h: 110 }
-  function shotsOf(steps) {
-    const shots = []
-    for (const st of steps) {
-      if (st.type) {
-        const n = [...st.text].length
-        for (let c = st.chunk || 3, i = 0; c - (st.chunk || 3) < n; c += st.chunk || 3, i++) shots.push({ name: st.shot, i, chars: Math.min(n, c), focus: FOCUS, tap: null })
-      } else if (st.play) {
-        for (let at = 0, i = 0; at < st.seconds + 0.3; at += 0.15, i++) shots.push({ name: st.shot, i, at, focus: FOCUS, tap: null })
-      } else if (st.shot) shots.push({ name: st.shot, i: 0, focus: FOCUS, tap: st.tap ? TAP : null })
-    }
-    return shots
-  }
   const each = fn => { for (const id of FEATURE_IDS) for (const lang of LANGS) fn(id, lang, featurePlan(B, id, { lang })) }
 
   it('films every feature of the Practice tab, in its order, named as the app names it', () => {
@@ -3438,12 +3441,14 @@ describe('the practice features, recorded in the app (plan 270)', () => {
 
   it('pans only over what a shot shows, and dissolves across what none does (plan 273)', () => {
     const plan = featurePlan(B, 'comprehension', { lang: 'en' })
-    // The breakdown read near its foot, then a sentence far below it.
-    const shots = shotsOf(featureSteps(plan)).map(s => ({ ...s, scrollY: { breakdown: 3248, 'bd-pick': 7768, 'bd-open': 7768 }[s.name] ?? 0 }))
+    // The breakdown read near its foot, then the sentence it stands open
+    // on, far below it (no tap opens it since plan 298), then a word of it.
+    const shots = shotsOf(featureSteps(plan)).map(s => ({ ...s, scrollY: { breakdown: 3248, 'bd-open': 7768, 'bd-word': 7768 }[s.name] ?? 0 }))
     const parts = Object.fromEntries(featureTimeline(plan, shots).segs.filter(x => x.kind === 'beat').flatMap(sg => sg.parts.map((p, i) => [`${sg.beat}:${i}`, p])))
-    const bi = plan.beats.findIndex(b => b.parts.some(p => p.shot === 'bd-pick'))
+    const bi = plan.beats.findIndex(b => b.parts.some(p => p.shot === 'bd-open'))
+    expect(plan.beats[bi].parts.map(p => p.shot)).toEqual(['bd-ask', 'breakdown', 'bd-open'])
     expect(parts[`${bi}:2`].enter).toBe('dissolve')
-    expect(parts[`${bi}:3`].enter).not.toBe('dissolve')
+    expect(parts[`${bi + 1}:0`].enter).not.toBe('dissolve')
     // Without the gap, the same move is a pan.
     const flat = featureTimeline(plan, shotsOf(featureSteps(plan))).segs.filter(x => x.kind === 'beat')[bi].parts
     expect(flat[2].enter).toBe('fade')
@@ -3502,5 +3507,160 @@ describe('the practice features, recorded in the app (plan 270)', () => {
       expectFeeds(page, SITE_ORIGIN, at)
       expect(featureCommand(id, lang), at).toContain(`--feature ${id} --lang ${lang}`)
     })
+  })
+})
+
+// ── 棚, the Instagram highlights (plan 322) ─────────────────────────
+describe('the Instagram highlights (plan 322)', () => {
+  const css = read('src/index.css')
+  const B = { 'promo.json': bank('promo.json') }
+  const planOf = (story, lang = 'en') => {
+    const data = bank(STORY_FILES[story])
+    const [{ id }] = promoItems(story, data, lang)
+    return promoPlan(story, data, id, { ...OPTS, lang, story })
+  }
+  const keysOf = story => promoDeck(planOf(story), FORMATS.story, { ground: 'paper' }).map(f => f.key)
+  const withPath = fn => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try { return fn() } finally { globalThis.Path2D = had }
+  }
+
+  it('shelves seven highlights, each named short enough for the profile, each ending on a gate', () => {
+    expect(SHELF).toEqual(['start', 'daily', 'analyzer', 'practice', 'jlpt', 'duels', 'free'])
+    expect(Object.keys(HIGHLIGHTS).sort()).toEqual([...SHELF].sort())
+    expect(shelfProblems()).toEqual([])
+    for (const id of SHELF) for (const lang of ['en', 'fr']) expect([...HIGHLIGHTS[id].name[lang]].length, `${id} ${lang}`).toBeLessThanOrEqual(NAME_MAX)
+    // One glyph a cover, no two alike.
+    expect(new Set(SHELF.map(id => HIGHLIGHTS[id].glyph)).size).toBe(SHELF.length)
+    for (const id of SHELF) expect([...HIGHLIGHTS[id].glyph].length, id).toBe(1)
+  })
+
+  it('rings each cover in the pigment of what it is, as index.css prints it', () => {
+    for (const [name, value] of Object.entries(SHELF_INKS)) expect(css, name).toMatch(new RegExp(`${name}:\\s*${value};`))
+    const paper = { ...DARK, ...LIGHT }
+    // A section wears its line, the start the metal, the free card its band, the duels their gold on sumi.
+    expect(coverInks('start').ring).toBe(paper['--accent2'])
+    expect(coverInks('daily').ring).toBe(paper['--line-kana'])
+    expect(coverInks('analyzer').ring).toBe(paper['--line-kaiseki'])
+    expect(coverInks('practice').ring).toBe(paper['--line-reading'])
+    expect(coverInks('jlpt').ring).toBe(paper['--line-exam'])
+    expect(coverInks('free').ring).toBe(paper['--pass-band'])
+    expect(coverInks('duels')).toEqual({ ring: SHELF_INKS['--duel-gold'], disc: DARK['--bg-main'], ink: DARK['--text-primary'] })
+    // No two rings alike, and every paper cover on the app's paper, in its ink.
+    expect(new Set(SHELF.map(id => coverInks(id).ring)).size).toBe(SHELF.length)
+    for (const id of SHELF.filter(x => x !== 'duels')) expect(coverInks(id), id).toMatchObject({ disc: paper['--bg-main'], ink: paper['--text-primary'] })
+  })
+
+  it('draws a cover whose ring is whole wherever the circle is cut', () => withPath(() => {
+    expect(COVER.size).toBe(1080)
+    for (const id of SHELF) {
+      const fills = []
+      const { ctx, texts } = stubContext()
+      const spy = new Proxy(ctx, { get: (o, k) => (k === 'fillRect' ? (...a) => fills.push([o.fillStyle, ...a]) : o[k]), set: (o, k, v) => { o[k] = v; return true } })
+      expect(() => drawCover(spy, id), id).not.toThrow()
+      // The ring's pigment to the corners; the glyph set as type, the mark drawn.
+      expect(fills[0], id).toEqual([coverInks(id).ring, 0, 0, COVER.size, COVER.size])
+      expect(texts, id).toEqual(id === 'start' ? [] : [HIGHLIGHTS[id].glyph])
+    }
+  }))
+
+  it('numbers a highlight’s files in posting order: stills, the app filmed, the gate last', () => {
+    for (const id of SHELF) {
+      const files = highlightFiles(id, keysOf)
+      expect(files.map(f => f.n), id).toEqual(files.map((_, i) => i + 1))
+      expect(new Set(files.map(f => f.file)).size, id).toBe(files.length)
+      for (const f of files) expect(f.file, id).toMatch(new RegExp(`^${String(f.n).padStart(2, '0')}-[a-z0-9-]+\\.(png|mp4)$`))
+      // The link sticker's frame is the last, and only the last.
+      expect(files.filter(f => f.gate).map(f => f.n), id).toEqual([files.length])
+      for (const f of files.filter(x => x.kind === 'still')) expect(keysOf(f.story), `${id} ${f.file}`).toContain(f.key)
+    }
+    // A story taken whole brings every frame it has; the filmed ones open on a still and close on one.
+    expect(highlightFiles('start', keysOf).map(f => f.key)).toEqual(keysOf('pitch'))
+    for (const id of ['practice', 'jlpt']) {
+      const files = highlightFiles(id, keysOf)
+      expect(files[0].kind, id).toBe('still')
+      expect(files.at(-1), id).toMatchObject({ kind: 'still', key: 'board' })
+      expect(files.filter(f => f.kind === 'clip').length, id).toBeGreaterThan(1)
+    }
+    expect(highlightFiles('duels', keysOf)).toEqual([{ n: 1, kind: 'clip', story: 'duel', clip: 'story', file: '01-duel.mp4', gate: true }])
+    expect(() => highlightFiles('nope', keysOf)).toThrow(/no highlight named nope/)
+  })
+
+  it('cuts each filmed clip from its feature’s beats, on its own clock', () => {
+    for (const id of SHELF) for (const f of HIGHLIGHTS[id].frames.filter(x => x.feature)) {
+      const at = `${id} ${f.feature} ${f.beats}`
+      const plan = featurePlan(B, f.feature, { lang: 'en', fit: STORY_FIT })
+      const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+      const beats = tl.segs.filter(s => s.kind === 'beat')
+      const cut = cutBeats(tl, f.beats)
+      // Past the gate and the level, which every feature opens on, and never the video's own gate.
+      expect(f.beats[0], at).toBeGreaterThanOrEqual(2)
+      expect(f.beats[1], at).toBeLessThan(beats.length)
+      expect(cut.from, at).toBe(beats[f.beats[0]].start)
+      expect(cut.seconds, at).toBeCloseTo(beats.slice(f.beats[0], f.beats[1] + 1).reduce((n, b) => n + b.dur, 0), 2)
+      // A story's clip: long enough to read its captions, short enough to be tapped past.
+      expect(cut.seconds, at).toBeGreaterThan(4)
+      expect(cut.seconds, at).toBeLessThan(20)
+      for (const x of [...cut.sfx, ...cut.cues]) {
+        expect(x.at, at).toBeGreaterThanOrEqual(0)
+        expect(x.at, at).toBeLessThan(cut.seconds)
+      }
+    }
+    const plan = featurePlan(B, 'reading', { lang: 'en' })
+    expect(() => cutBeats(featureTimeline(plan, shotsOf(featureSteps(plan))), [5, 99])).toThrow(/no beats 5 to 99/)
+  })
+
+  it('leaves a story’s gate bare for the link sticker, and its page count to the feed', () => withPath(() => {
+    for (const story of STORIES) for (const print of [null, stillPrint()]) {
+      const pl = planOf(story)
+      const drawn = opts => promoDeck(pl, FORMATS.story, { ground: 'paper', print, ...opts }).map(f => { const s = stubContext(); f.draw(s.ctx); return s.texts })
+      const plain = drawn({})
+      const bare = drawn({ sticker: true, pages: false })
+      // The gate's button is the last frame's, and only its label goes.
+      expect(plain.at(-1), story).toContain(PROMO.en.board)
+      expect(bare.at(-1), story).not.toContain(PROMO.en.board)
+      expect(bare.at(-1), story).toEqual(plain.at(-1).filter(x => x !== PROMO.en.board && !/^\d+ \/ \d+$/.test(x)))
+      for (const texts of bare) expect(texts.filter(x => /^\d+ \/ \d+$/.test(x)), story).toEqual([])
+    }
+  }))
+
+  it('names the Practice tab’s exercises on its story as the app names them', () => withPath(() => {
+    for (const lang of ['en', 'fr']) {
+      const frames = promoDeck(planOf('practice', lang), FORMATS.story, { ground: 'paper', print: stillPrint() })
+      expect(frames.map(f => f.key)).toEqual(['gates', 'board'])
+      const { ctx, texts } = stubContext()
+      frames[0].draw(ctx)
+      for (const id of FEATURE_IDS) {
+        expect(texts, `${lang} ${id}`).toContain(weldIf(lang, FEATURE_APP[lang].title[id]))
+        // The first line the app says of it (the stub's wide letters may cut its end).
+        expect(texts.some(x => x.startsWith(weldIf(lang, FEATURE_APP[lang].desc[id].split('\n')[0]).slice(0, 14))), `${lang} ${id}`).toBe(true)
+        expect(texts, `${lang} ${id}`).toContain([...FEATURE_SCRIPTS[id].jp][0])
+      }
+      expect(texts.join(' '), lang).toContain(PROMO[lang].practice.hook(FEATURE_IDS.length).split(' ')[0])
+    }
+  }))
+
+  it('credits the voice on a clip that speaks, and says where the link goes', () => {
+    const { ctx, texts } = stubContext()
+    drawVoiceCredit(ctx, 'en')
+    expect(texts).toEqual([VOICE_CREDIT.en])
+    expect(VOICE_CREDIT.en).toContain('VOICEVOX Nemo')
+    expect(VOICE_CREDIT.fr).toContain('VOICEVOX Nemo')
+    const files = highlightFiles('practice', keysOf)
+    const clip = files.find(f => f.kind === 'clip')
+    const note = highlightNote('practice', files, { lang: 'en', site: `${SITE_ORIGIN}/en`, seconds: { [clip.file]: 8.93 }, voiced: true })
+    expect(note).toContain('Name: Practice')
+    expect(note).toContain('cover.png')
+    expect(note).toContain(`${clip.file}`)
+    expect(note).toContain('clip, 8.9 s')
+    expect(note).toContain('VOICEVOX Nemo')
+    // The files in order, the link on the last alone.
+    const rows = note.split('\n').filter(l => /^\d\d-/.test(l))
+    expect(rows.map(l => l.split(/\s+/)[0])).toEqual(files.map(f => f.file))
+    expect(rows.filter(l => l.includes(`${SITE_ORIGIN}/en`))).toEqual([rows.at(-1)])
+    expect(highlightNote('start', highlightFiles('start', keysOf), { lang: 'fr', site: SITE_ORIGIN })).toContain('Nom : Découvrir'.replace(' :', ':'))
+    expect(highlightCommand('practice')).toBe('node carousel/long/render.mjs --highlight practice')
+    expect(highlightCommand('jlpt', 'fr', 'dusk')).toBe('node carousel/long/render.mjs --highlight jlpt --lang fr --hour dusk')
   })
 })

@@ -550,7 +550,7 @@ the Japanese as written, with furigana, or in kana.
 ## The promo stories (plan 231)
 
 宣伝, the last source, draws the app itself rather than what it teaches:
-seven 9:16 stories, picked by the segments over the list (`promo.js`).
+eight 9:16 stories, picked by the segments over the list (`promo.js`).
 Each frame is drawn with the app's own parts (`app.js`): the review card
 with its stage and band, the rating bar's four keys, a question's choice
 rows, the white pass, the Depart button, the analyser's boxed sentence
@@ -564,6 +564,7 @@ comprehension's clock, passage card, question card and lettered options.
 | The analyser | a sentence of the N5 reading bank | the sentence pasted, then cut word by word with its numbered points, the gate |
 | Could you pass N5? | an N5 sentence with a kanji-reading question | the question with its four readings, the answer folded as a run folds it, the N5 exam in figures, the gate |
 | Read a whole text (plans 301, 301b) | a comprehension seed's vocabulary or grammar question, N5 to N1 | the passage on its card under the run's clock, the same text rolling (its speed stepped up, ふ pressed, the readings over the kanji), the question with its type and its four options, the answer folded and the line of the text it quotes (its readings, the quoted words lit, its translation), the gate |
+| Seven ways to practice (plan 322) | (one) | the Practice tab's exercises in its order, each a row on its line (its glyph in the line's ring, the app's own name for it and the first line the app says of it: `feature.js`'s `APP`, which a test holds to the locales), the gate |
 | Your pass | (one) | the pass with a name to write, what is free, the gate |
 | Duels (plan 281) | (one) | the duel's ticket, a sprint raced (the count, four questions, the sprint run out), the result and the Elo it moved, the Elo over its curve, the Elo board climbed a place, the gate |
 
@@ -799,7 +800,7 @@ feature a learner would not find on a first run:
 | Feature | After the answer |
 | --- | --- |
 | 読書, 翻訳, 書取 | the rating, the sentence's breakdown read down, then Ask: an offered question tapped (reading's point, translation's 〜てください), or dictation's own typed, "Why に and not が?", the slip it just made |
-| 理解 | before the questions, the clock and the roll, sped up and stopped; after, the score, the miss opened, Ask's "Where does the text say it?", then the whole text's breakdown on the missed sentence, and since plan 274 a word of it and a point of it opened in the dictionary (`content/promo.json`'s `dictionary`, answered by `routes/dictionary.get_dictionary`; a mock key may name query parameters, `GET /api/dictionary?category=vocab`) |
+| 理解 | before the questions, the clock and the roll, sped up and stopped; after, the score with the miss open on its sentence and its why (the app opens it since plan 298b, so no tap does), Ask's "Where does the text say it?", then the whole text's breakdown on the missed sentence, and since plan 274 a word of it and a point of it opened in the dictionary (`content/promo.json`'s `dictionary`, answered by `routes/dictionary.get_dictionary`; a mock key may name query parameters, `GET /api/dictionary?category=vocab`) |
 | 作文 | before writing, the point's lesson, its sheet rising over the card and going |
 | 模試 | the station's four papers, a question flagged, the answer sheet, the score by part, a miss opened again |
 | 会話 | the line's translation shown, a wrong reply struck with why, the scene's score |
@@ -882,6 +883,79 @@ selectors are what to check (`plate`, `stop`, `.stage__foot`, the run's
 own classes, Ask's offers by their words). A step that finds nothing to tap says so in the render's
 log, and an API the app asks for and the bank does not answer gets `{}`,
 which is logged too.
+
+## The Instagram highlights (plan 322)
+
+棚, the profile's shelf: seven highlights under the bio, one per thing the
+app does, in the order a visitor asks (`highlights.js`, `SHELF`): Start,
+Daily, Analyzer, Practice, JLPT, Duels, Free?. A story is gone in a day;
+a highlight is what a visitor who came from a reel taps before the link.
+It is the owner's pick of the canvas drawn for it, twice: **A** for the
+covers and **3** for what a highlight holds.
+
+**The cover is the station's roundel (A, over prints and the icon's
+blue).** A paper disc, a ring in the pigment of what the highlight is and
+one glyph in the serif (辻 日 解 練 試 戦 券; 辻 is the mark, drawn, its
+road in the ring's gold). The ring names the object, never a hex that
+happens to match (DESIGN.md, "Three families"): a section wears its line
+(Daily the kana line's 朱, the app's accent; Analyzer 解析's; Practice
+読書's, the tab's first platform; JLPT 模試's), Start the metal every
+primary action wears, Free? the free card's own band (`--pass-band`), and
+Duels stand on their stage, sumi, in the duels' gold (`--duel-gold`,
+`SHELF_INKS`, held to `index.css`). Instagram cuts a circle from the
+middle of the picture chosen, so the cover is a 1080 square in the ring's
+pigment to its corners with the disc inside: wherever the circle falls,
+the ring is whole. A name under a cover is ten characters at most
+(`NAME_MAX`), or the profile cuts it.
+
+**A highlight opens on the print, shows the app filmed, and closes on
+the sun (3, over all drawn and all filmed).** Its frames are not drawn
+here: they are the promo stories' stills (`{ story }`, or some of its
+frames by `keys`), a story played whole (`{ story, clip }`, the duels'),
+and the feature videos' recordings cut to a few beats
+(`{ feature, beats: [a, b] }`, `cutBeats`: the beats' own captions, sounds
+and lines on the clip's clock, no gate after them). Practice is its
+story's cover, one clip an exercise (what the learner does, then what the
+app says back) and its gate; JLPT is the question and its answer, the
+mock paper sat and handed in, and the gate. The other five are their
+stories as drawn, until their screens are recorded too.
+
+Three things a highlight's frames do that a posted story's do not:
+
+- **The gate is left bare** (`promoDeck`'s `sticker`): only Instagram's
+  link sticker can be tapped, so the drawn "Board at tsuji.app" button
+  gives it its place, and the note beside the files says to lay it there.
+- **No page count** (`pages: false`): a still stands among clips, under
+  Instagram's own bars.
+- **A clip that speaks carries its credit on the frame**
+  (`drawVoiceCredit`): a story has no caption for it, and the engine's
+  licence asks for it wherever its voice is heard. Only where the line
+  was voiced: a draft made without the engine says nothing and credits
+  nothing.
+
+The frames stand at the stories' own margins (`STORY_FIT`: 350 at the
+head, 330 at the foot), which clear Instagram's bars and the reply field.
+
+```bash
+cd frontend
+VOICEVOX_URL=http://localhost:50121 node carousel/long/render.mjs --highlight practice
+node carousel/long/render.mjs --highlight all            # the whole shelf
+node carousel/long/render.mjs --highlight jlpt --lang fr --hour dusk --season winter
+```
+
+Each highlight is a folder under `--out` (`highlight-<id>-<lang>`):
+`cover.png`, its stills and clips numbered in posting order, and
+`post.txt` (its name, the order, each clip's length, where the link
+goes). A clip is the render run again for it (`--feature ID --beats a-b`,
+`--story duel --sticker`, each usable alone), so it is recorded, voiced,
+mixed and encoded exactly as a video is; without the voice engine it is a
+draft, its lines timed by a guess and left unsaid. A story is planned on
+the first item of its bank (the card's word, the analyser's sentence, the
+exam's question).
+
+`shelfProblems()` and `src/carousel.test.js` hold the shelf: every story
+and feature it names exists, every name fits, every ring is its token,
+every clip cuts to a length a story holds, and the last frame is a gate.
 
 ## The word echo (plan 232)
 
@@ -1471,7 +1545,8 @@ range and on its step, every `was` too (plan 309), and
 | `backdrop.js` | the print under a reading challenge's words, washed or darkened, or a photo in its place (plans 247, 276, 309) |
 | `cover.js` | a reading challenge's hook in colour, on the title slip's washi: the hook's own words (`challenge.js`, `hookWords`), handed to it (plan 309) |
 | `halo.js` | the rim of paper round the scroll's words (plan 309) |
-| `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a feature video recorded and made (plan 270) |
+| `highlights.js` | the Instagram highlights: the shelf, each cover's roundel, the frames a highlight holds, a clip cut from a feature's beats, the note beside its files (plan 322) |
+| `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a highlight's folder, a feature's beats or a story played whole as a clip (plan 322); a feature video recorded and made (plan 270) |
 | `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing and camera on the shots (plan 273), each frame, their page (plan 270) |
 | `long/record.mjs` | the app served by Vite and run in a phone-sized browser, its API answered from `promo.json`, a feature's steps done and shot (plan 270) |
 | `tune.js` | what the Tune panel can set: each value's default, range, step and label, read by every module through `tuned()` (plan 248) |

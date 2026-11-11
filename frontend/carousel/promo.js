@@ -13,7 +13,10 @@
 // plan 301 a seventh, reading comprehension: a seed passage under the
 // run's clock, the same text rolling (plan 301b), one of its own
 // questions, answered on the line of the text it quotes, and the board;
-// it plays whole as one clip too.
+// it plays whole as one clip too. Since plan 322 an eighth, the Practice
+// tab: its seven exercises named as the app names them, each on its
+// line, then the gate; and any story's gate can leave the button's place
+// to a feed's own link (`opts.sticker`, an Instagram story's sticker).
 import { EDGE, FS, SP, alpha, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, shadow, text } from './draw.js'
 import * as A from './app.js'
 import { STRINGS, count, weldIf } from './strings.js'
@@ -21,18 +24,20 @@ import { gloss } from './common.js'
 import { sentenceQuizzes } from './quizzes.js'
 import { LIMIT_MS, SPRINT_MS, points } from '../src/domain/duel.js'
 import { quotedFragments, sentenceFor } from '../src/domain/quotedFragments.js'
+// The Practice tab's exercises, named as the app names them (plan 322): read as a frame is drawn, never as this module loads (feature.js imports this one).
+import { APP as PRACTICE_APP, FEATURES as PRACTICE, FEATURE_IDS } from './feature.js'
 
-export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'comprehension', 'pass', 'duel']
-export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', comprehension: 'comprehension.json', pass: 'index.json', duel: 'duel.json' }
+export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'comprehension', 'practice', 'pass', 'duel']
+export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', comprehension: 'comprehension.json', practice: 'index.json', pass: 'index.json', duel: 'duel.json' }
 
 // The words, in the two languages: the app's own where the app says it
 // (locales/*: the ratings, the stages, Today's unit, Depart), the landing
 // page's where the page says it (landing/strings.mjs).
 export const PROMO = {
   en: {
-    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', comprehension: 'Read a whole text', pass: 'Your pass', duel: 'Duels' },
-    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', comprehension: 'Passage', pass: 'The pass', duel: 'Duels' },
-    blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free', duel: 'A two-minute sprint against another learner, and the Elo' },
+    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', comprehension: 'Read a whole text', practice: 'Seven ways to practice', pass: 'Your pass', duel: 'Duels' },
+    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', comprehension: 'Passage', practice: 'Practice', pass: 'The pass', duel: 'Duels' },
+    blurb: { pitch: 'From your first kana to N1, on Today’s print', practice: 'The Practice tab’s exercises, each on its line', pass: 'The pass, and what is free', duel: 'A two-minute sprint against another learner, and the Elo' },
     hours: { dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' },
     hook: 'Learn Japanese, from your first kana to JLPT N1.',
     linesTitle: 'Four lines, five levels',
@@ -86,11 +91,18 @@ export const PROMO = {
       analyser: c => `${c} cut word by word, its grammar numbered`,
       exam: c => `Could you pass the JLPT N5? One question: ${c}`,
       comprehension: (c, lv) => `Can you read a whole text in Japanese? ${c}, a JLPT ${lv} reading`,
+      practice: () => 'Seven ways to practice Japanese: read, listen, write, answer',
       pass: () => 'Your Japanese pass is waiting: start free on tsuji.app',
       duel: () => 'Japanese duels: 2 minutes against another learner, your Elo at stake',
     },
-    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', comprehension: 'A, B, C or D?', pass: 'Board today?', duel: 'Who would you challenge first?' },
+    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', comprehension: 'A, B, C or D?', practice: 'Which one first?', pass: 'Board today?', duel: 'Who would you challenge first?' },
     tags: ['japaneseapp', 'jlpt'],
+    // The Practice tab's story (plan 322): the count is the tab's own.
+    practice: {
+      hook: n => `${['', 'One way', 'Two ways', 'Three ways', 'Four ways', 'Five ways', 'Six ways', 'Seven ways', 'Eight ways', 'Nine ways'][n] ?? `${n} ways`} to practice.`,
+      levels: 'Each one at your level, N5 to N1.',
+      head: 'Practice the Japanese you learn.',
+    },
     // Reading comprehension's story (plan 301): its own lines, then the
     // app's words on its parts (locales/: the clock, the exercise's
     // name, the question and its type's badge).
@@ -141,9 +153,9 @@ export const PROMO = {
     },
   },
   fr: {
-    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', comprehension: 'Lis un texte entier', pass: 'Ton pass', duel: 'Les duels' },
-    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', comprehension: 'Texte', pass: 'Le pass', duel: 'Duels' },
-    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 2 minutes contre un autre apprenant, et l’Elo' },
+    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', comprehension: 'Lis un texte entier', practice: 'Sept façons de pratiquer', pass: 'Ton pass', duel: 'Les duels' },
+    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', comprehension: 'Texte', practice: 'Pratique', pass: 'Le pass', duel: 'Duels' },
+    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', practice: 'Les exercices de l’onglet Pratique, chacun sur sa ligne', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 2 minutes contre un autre apprenant, et l’Elo' },
     hours: { dawn: 'Aube', day: 'Jour', dusk: 'Soir', night: 'Nuit' },
     hook: 'Apprendre le japonais, du premier kana au JLPT N1.',
     linesTitle: 'Quatre lignes, cinq niveaux',
@@ -195,11 +207,17 @@ export const PROMO = {
       analyser: c => `${c} découpée mot à mot, sa grammaire numérotée`,
       exam: c => `Tu réussirais le JLPT N5 ? Une question : ${c}`,
       comprehension: (c, lv) => `Tu lirais un texte entier en japonais ? ${c}, une lecture du JLPT ${lv}`,
+      practice: () => 'Sept façons de pratiquer le japonais : lire, écouter, écrire, répondre',
       pass: () => 'Ton pass pour le japonais t’attend : commence gratuitement sur tsuji.app',
       duel: () => 'Duels de japonais : 2 minutes contre un autre apprenant, ton Elo en jeu',
     },
-    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', comprehension: 'A, B, C ou D ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
+    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', comprehension: 'A, B, C ou D ?', practice: 'Lequel en premier ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
     tags: ['applijaponais', 'jlpt'],
+    practice: {
+      hook: n => `${['', 'Une façon', 'Deux façons', 'Trois façons', 'Quatre façons', 'Cinq façons', 'Six façons', 'Sept façons', 'Huit façons', 'Neuf façons'][n] ?? `${n} façons`} de pratiquer.`,
+      levels: 'Chacun à ton niveau, du N5 au N1.',
+      head: 'Mets en pratique le japonais que tu apprends.',
+    },
     comp: {
       kind: lv => `JLPT ${lv} · Compréhension écrite`,
       hook: 'Tu lirais un texte entier en japonais ?',
@@ -289,6 +307,8 @@ export function promoItems(story, data, lang) {
       return data.passages.flatMap(ps => askable(ps, lang).map(a => ({ id: `${ps.id}:q${a.q + 1}`, jp: ps.title, sub: firstUp(ps.questions[a.q].question[lang] || ps.questions[a.q].question.en), tag: ps.lv })))
     case 'duel':
       return [{ id: story, jp: '対戦', sub: P.blurb.duel, tag: data.level || '' }]
+    case 'practice':
+      return [{ id: story, jp: '練習', sub: P.blurb.practice, tag: '' }]
     default:
       return [{ id: story, jp: '辻', sub: P.blurb[story], tag: '' }]
   }
@@ -601,9 +621,13 @@ export function promoDeck(plan, fmt, opts) {
     c.fill()
     c.restore()
   }
+  // A frame's place in its story, at the head ("2 / 4"), unless the feed
+  // counts for itself (`pages: false`): a highlight's frames stand among
+  // clips, under Instagram's own bars (plan 322).
+  const counted = of => of > 1 && opts.pages !== false
   const chrome = (ctx, i, of) => {
     masthead(ctx, p, fr, p.ink, p.ink)
-    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: PR ? p.ink : p.ink2, align: 'right' })
+    if (counted(of)) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: PR ? p.ink : p.ink2, align: 'right' })
   }
   // A page's ground and chrome wait for its block (centred, below), which
   // knows how far down the words go.
@@ -676,6 +700,11 @@ export function promoDeck(plan, fmt, opts) {
     if (!clock || at == null) return draw(null)
     part(ctx, k(at, GATE_RISE), () => draw(Math.max(0, clock.t - at - GATE_RISE)))
   }
+  // The gate at a story's foot. A feed with a link of its own to lay
+  // there (an Instagram story's link sticker, plan 322) is left the
+  // button's place, bare: only the sticker can be tapped, so a drawn
+  // button beside it would be a second gate that opens nothing.
+  const gateButton = ctx => { if (!opts.sticker) depart(ctx, P.board, END.gate) }
   // The studio's handle, under the words, unless it only names the site.
   const handle = (ctx, y) => {
     const h = (plan.handle || '').trim()
@@ -699,7 +728,7 @@ export function promoDeck(plan, fmt, opts) {
       y = part(c, k(END.note, 0.8), () => lead(c, note, y + SP[5], p.ink2, [FS.lead, FS.body], { align: 'center', weight: 500 }))
       return part(c, k(END.note + 0.3, 0.8), () => handle(c, y))
     }, FOOT)
-    depart(ctx, P.board, END.gate)
+    gateButton(ctx)
   }
   // On the print the last frame is the hour's sun, ringed by the four
   // lines as Today rings it, the mark in it (B2, the owner's pick), the
@@ -728,7 +757,7 @@ export function promoDeck(plan, fmt, opts) {
     ctx.globalAlpha *= k(END.mark, 0.9)
     wash(ctx, top, end)
     ctx.restore()
-    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: p.ink, align: 'right' })
+    if (counted(of)) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: p.ink, align: 'right' })
     const breath = clock ? 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, clock.t / 7)) : null
     const sweep = clock ? A.cssEase(0.45, 0, 0.2, 1)(Math.min(1, Math.max(0, (clock.t - END.ring[0]) / (END.ring[1] - END.ring[0])))) : 1
     part(ctx, k(END.sun, 0.9), () => A.printDial(ctx, p, PR, fr.cx, cy, u, { parts: LINE, count: '', unit: '', time: null, breath, sweep }))
@@ -741,7 +770,7 @@ export function promoDeck(plan, fmt, opts) {
       ctx.restore()
     }
     words(ctx, top)
-    depart(ctx, P.board, END.gate)
+    gateButton(ctx)
   }
   // Today on its print, full-bleed: the hour's sun as the dial, its time
   // under it, the words in the open sky, the print's own ink.
@@ -1275,6 +1304,45 @@ export function promoDeck(plan, fmt, opts) {
       }
       break
     }
+    case 'practice': {
+      // The Practice tab's exercises (plan 322), in its order, each a
+      // row on its line: its glyph in the line's ring, the app's own name
+      // for it and the first line the app says of it. In a clip the rows
+      // come in one after another (PRACTICE_ROWS).
+      const A = PRACTICE_APP[lang] || PRACTICE_APP.en
+      const rows = FEATURE_IDS.filter(id => PRACTICE[id])
+      add('gates', ctx => {
+        page(ctx, 1, 2)
+        centred(ctx, (c, y) => {
+          y = part(c, k(0, 0.8), () => title(c, P.practice.hook(rows.length), y, [FS.heading, FS.title], 2))
+          y += SP[6]
+          const h = 62 * U
+          rows.forEach((id, i) => {
+            part(c, k(PRACTICE_ROWS(i), 0.6), () => {
+              const col = p.line[PRACTICE[id].line]
+              panel(c, fr.x, y, fr.w, h)
+              c.save()
+              rrect(c, fr.x, y, fr.w, h, 6 * U)
+              c.clip()
+              c.fillStyle = col
+              c.fillRect(fr.x, y, 3 * U, h)
+              c.restore()
+              const x = fr.x + 16 * U
+              roundel(c, x + 18 * U, y + h / 2, 18 * U, col, [...PRACTICE[id].jp][0], { ink: F.ink, fam: 'serif', size: 17 * U, weight: 700 })
+              const room = fr.right - 16 * U - (x + 48 * U)
+              const nb = fit(c, say(A.title[id]), { weight: 700, sizes: [16 * U, 14 * U], maxW: room, maxLines: 1, fam: 'latin' })
+              const wb = fit(c, say(A.desc[id].split('\n')[0]), { weight: 400, sizes: [12.5 * U, 11.5 * U], maxW: room, maxLines: 1, fam: 'latin' })
+              text(c, nb.lines[0], x + 48 * U, y + 27 * U, { f: nb.f, color: F.ink })
+              text(c, wb.lines[0], x + 48 * U, y + 46 * U, { f: wb.f, color: F.soft })
+            })
+            y += h + 6 * U
+          })
+          return part(c, k(PRACTICE_ROWS(rows.length), 0.8), () => body(c, P.practice.levels, y + SP[4], [FS.lead, FS.body], 2))
+        })
+      })
+      add('board', ctx => board(ctx, 2, 2, P.practice.head, P.start))
+      break
+    }
     case 'pass': {
       add('pass', ctx => {
         page(ctx, 1, 2)
@@ -1317,7 +1385,7 @@ export function promoDeck(plan, fmt, opts) {
           y = part(c, k(0, 0.8), () => lead(c, P.startFree, y, p.ink, [FS.heading, FS.title], { maxLines: 1 }))
           return promises(c, y + SP[6])
         }, FOOT)
-        depart(ctx, P.board, END.gate)
+        gateButton(ctx)
       })
       break
     }
@@ -1735,6 +1803,8 @@ const COMP_EXIT = 0.12
 // On the print (plan 271) the sun rises in first and its ring is drawn
 // round from the top over RING, then the mark settles into the disc.
 const GATE_RISE = 0.6
+// The Practice story's cover (plan 322): its rows come in one by one.
+const PRACTICE_ROWS = i => 0.6 + 0.3 * i
 export const END = { sun: 0, ring: [0.3, 1.1], mark: 0.8, head: 1.0, note: 1.3, gate: 1.7, promise: i => 1.1 + 0.2 * i }
 
 // The level-up's clock (src/lib/audio/recipes.js, LEVEL_CLOCK, held equal
@@ -1772,6 +1842,9 @@ function scoreOf(plan, points = 0) {
     case 'pass':
       // The gate's punch as the pass comes in, then the level-up's build and its burst.
       return [{ at: 0.4, key: 'pass-clip' }, { at: FILL_START, key: 'level-charge' }, { at: LEVEL_UP, key: 'level-burst' }]
+    case 'practice':
+      // The first plate laid down, then a soft tick as each one follows.
+      return [{ at: PRACTICE_ROWS(0) + 0.05, key: 'card-transition' }, ...FEATURE_IDS.slice(1).map((_, i) => ({ at: PRACTICE_ROWS(i + 1) + 0.05, key: 'toggle', gain: 0.6 }))]
     case 'duel':
       // « Partir » pressed: the stage's one sound (DuelRun's playClick).
       return [{ at: DUEL_PRESS, key: 'click' }]

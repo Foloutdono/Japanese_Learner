@@ -43,6 +43,18 @@
 //                     conversation or exam
 //   --app URL         ... record the app already running there (npm run dev),
 //                     rather than starting Vite here
+//   --beats 3-4       ... only those beats of it (0-based, as feature.js lists
+//                     them), cut as a clip with no gate after it (plan 322)
+//   --story duel      a promo story played whole as one clip (plan 322, promo.js:
+//                     the stories that have one, duel and comprehension)
+//   --sticker         ... its gate left bare for a feed's own link (an Instagram
+//                     story's link sticker)
+//   --highlight ID    a highlight of the Instagram shelf (plan 322, highlights.js):
+//                     start, daily, analyzer, practice, jlpt, duels, free, or all.
+//                     Writes a folder: cover.png, its stills and clips numbered in
+//                     posting order, and post.txt (the order, where the link goes)
+//   --name NAME       the file's name, in place of the one a video gives itself
+//   --bare            the video alone: no page (.txt), no thumbnail (.jpg)
 //   --tune k=v,k=v    the studio's Tune panel (plan 248, tune.js): its "Copy the
 //                     command" writes the values changed, so the render is the preview
 //
@@ -177,6 +189,88 @@ const canvasOf = size => page.evaluate(size => {
   window.__canvas = c
 }, size)
 
+// ── A highlight of the Instagram shelf (plan 322) ──
+// Its cover and its stills are drawn here; each clip is this script run
+// again for it (a feature's beats, a story played whole), so a clip is
+// voiced, mixed and encoded exactly as a video is.
+if (args.highlight) {
+  const H = await import('../highlights.js')
+  const hour = typeof args.hour === 'string' ? args.hour : 'day'
+  const season = typeof args.season === 'string' ? args.season : null
+  const pngOf = async () => Buffer.from((await page.evaluate(() => window.__canvas.toDataURL('image/png'))).split(',')[1], 'base64')
+  for (const id of String(args.highlight) === 'all' ? H.SHELF : [String(args.highlight)]) {
+    if (!H.HIGHLIGHTS[id]) await stop(`no highlight named ${id}: ${H.SHELF.join(', ')}, or all`)
+    const dir = join(OUT, ['highlight', id, lang, ...(season ? [season] : []), ...(hour !== 'day' ? [hour] : [])].join('-'))
+    rmSync(dir, { recursive: true, force: true })
+    mkdirSync(dir, { recursive: true })
+    // The cover: the roundel, on a square.
+    await canvasOf({ w: H.COVER.size, h: H.COVER.size })
+    await page.evaluate(async id => {
+      const Hl = await import('/carousel/highlights.js')
+      const W = await import('/carousel/draw.js')
+      await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), Hl.HIGHLIGHTS[id].glyph)))
+      Hl.drawCover(window.__ctx, id)
+    }, id)
+    writeFileSync(join(dir, 'cover.png'), await pngOf())
+    // Its stories, each planned on its first item of the bank and drawn on
+    // the print of the hour: no page count (the feed has its bars), the
+    // gate left to the link sticker.
+    const stories = [...new Set(H.HIGHLIGHTS[id].frames.filter(f => f.story && !f.clip).map(f => f.story))]
+    await canvasOf(TALL)
+    const keys = await page.evaluate(async ({ stories, lang, hour, season }) => {
+      const Pm = await import('/carousel/promo.js')
+      const A = await import('/carousel/app.js')
+      const W = await import('/carousel/draw.js')
+      const get = name => fetch(`/carousel/bank/${name}`).then(r => { if (!r.ok) throw new Error(name); return r.json() })
+      const { figures } = await get('index.json')
+      const print = await A.loadPrint(hour, { base: '/', season })
+      window.__decks = {}
+      const keys = {}
+      for (const story of stories) {
+        const data = await get(Pm.STORY_FILES[story])
+        const [{ id }] = Pm.promoItems(story, data, lang)
+        const plan = Pm.promoPlan(story, data, id, { lang, story, figures, hour })
+        await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), JSON.stringify(plan))))
+        window.__decks[story] = Pm.promoDeck(plan, W.FORMATS.story, { ground: 'paper', print, sticker: true, pages: false })
+        keys[story] = window.__decks[story].map(f => f.key)
+      }
+      await document.fonts.ready
+      return keys
+    }, { stories, lang, hour, season })
+    const files = H.highlightFiles(id, story => keys[story])
+    const seconds = {}
+    let voiced = false
+    for (const f of files) {
+      if (f.kind === 'still') {
+        await page.evaluate(({ story, key }) => {
+          window.__ctx.clearRect(0, 0, window.__canvas.width, window.__canvas.height)
+          window.__decks[story].find(x => x.key === key).draw(window.__ctx)
+        }, f)
+        writeFileSync(join(dir, f.file), await pngOf())
+        log(`${id}: ${f.file}`)
+        continue
+      }
+      // A clip: this script again, for its beats or its story.
+      const name = f.file.replace(/\.mp4$/, '')
+      const pass = ['lang', 'app', 'season', 'tune', 'unvoiced'].filter(k => args[k] != null && args[k] !== false).flatMap(k => (args[k] === true ? [`--${k}`] : [`--${k}`, String(args[k])]))
+      const what = f.feature ? ['--feature', f.feature, '--beats', f.beats.join('-')] : ['--story', f.story, '--sticker']
+      log(`${id}: ${f.file} ...`)
+      const made = spawnSync(process.execPath, [fileURLToPath(import.meta.url), ...what, '--hour', hour, '--name', name, '--bare', '--out', dir, ...pass], { stdio: 'inherit' })
+      if (made.status !== 0) await stop(`${id}: ${f.file} could not be made`)
+      const probe = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration:stream=codec_type', '-of', 'json', join(dir, f.file)], { encoding: 'utf8' })
+      const info = JSON.parse(probe.stdout || '{}')
+      seconds[f.file] = Number(info.format?.duration) || null
+      // A clip that says a line carries its credit (the child draws it): said so in the note.
+      if (existsSync(join(dir, `${name}.voiced`))) { voiced = true; rmSync(join(dir, `${name}.voiced`)) }
+    }
+    rmSync(join(dir, '.work'), { recursive: true, force: true })
+    writeFileSync(join(dir, 'post.txt'), H.highlightNote(id, files, { lang, site, seconds, voiced }))
+    log(`wrote ${dir}: cover.png, ${files.filter(f => f.kind === 'still').length} stills, ${files.filter(f => f.kind === 'clip').length} clips, post.txt`)
+  }
+  await closeAll()
+  process.exit(0)
+}
+
 let tl, slug, SIZE, pageText, thumbAt
 // An older command's --music is said to be gone, not taken for something else.
 if (args.music !== undefined) log('no video carries music since plan 273: --music is ignored')
@@ -253,22 +347,70 @@ if (args.challenge) {
   try {
     shots = await record(browser, { url: app.url, steps: featureSteps(plan, said || 2.5), mocks: plan.data.mocks, lang, audio: plan.cues.length ? dur.file(plan.cues[0]) : null, dir: shotDir, log })
   } finally { await app.close() }
-  tl = featureTimeline(plan, shots, dur)
+  const whole = featureTimeline(plan, shots, dur)
+  // A highlight's clip (plan 322): those beats alone, on their own clock,
+  // no gate after them; a line it says is credited on the frame.
+  const cut = args.beats ? (await import('../highlights.js')).cutBeats(whole, String(args.beats).split('-').map(Number)) : null
+  tl = cut ? { ...whole, seconds: cut.seconds, sfx: cut.sfx, cues: cut.cues } : whole
+  // (Only where the line was voiced: a draft made without the engine says nothing.)
+  const credit = Boolean(cut && cut.cues.length && dur?.ok)
+  if (credit && args.bare && typeof args.name === 'string') writeFileSync(join(OUT, `${args.name}.voiced`), '')
   SIZE = TALL
-  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.hour !== 'day' ? [plan.hour] : [])].join('-')
-  await fontsFor(glyphs({ plan: { ...plan, data: null }, tl }))
+  slug = ['feature', plan.id, lang, ...(opts.fit !== 'tiktok' ? [opts.fit] : []), ...(plan.hour !== 'day' ? [plan.hour] : []), ...(cut ? [`beats${String(args.beats)}`] : [])].join('-')
+  await fontsFor(glyphs({ plan: { ...plan, data: null }, tl: whole }))
   await canvasOf(SIZE)
-  await page.evaluate(async ({ plan, tl, srcs }) => {
+  await page.evaluate(async ({ plan, tl, srcs, from, credit }) => {
     const F = await import('/carousel/feature.js')
     const A = await import('/carousel/app.js')
+    const Hl = await import('/carousel/highlights.js')
     const imgs = await Promise.all(srcs.map(src => new Promise(done => { const i = new Image(); i.onload = () => done(i); i.onerror = () => done(null); i.src = src })))
     // The gate at the end stands on Today's print of the plan's hour (plan 271).
     const P = await A.loadPrint(plan.hour, { base: '/' })
-    window.__draw = t => F.drawFeature(window.__ctx, plan, tl, t, imgs, P)
-  }, { plan: { ...plan, data: null }, tl, srcs: shots.map(x => '/' + x.file.slice(FRONT.length + 1)) })
+    if (credit) await Promise.all([document.fonts.load('500 40px "Space Grotesk"', Hl.VOICE_CREDIT[plan.lang])])
+    window.__draw = t => {
+      const key = F.drawFeature(window.__ctx, plan, tl, t + from, imgs, P)
+      if (credit) Hl.drawVoiceCredit(window.__ctx, plan.lang)
+      return key
+    }
+  }, { plan: { ...plan, data: null }, tl: whole, srcs: shots.map(x => '/' + x.file.slice(FRONT.length + 1)), from: cut ? cut.from : 0, credit })
   pageText = featurePage(plan, tl, site)
-  thumbAt = featureStillAt()
-  log(`${pageText.title}: ${shots.length} shots, ${tl.seconds.toFixed(1)} s`)
+  thumbAt = cut ? 0.6 : featureStillAt()
+  log(`${pageText.title}: ${shots.length} shots, ${tl.seconds.toFixed(1)} s${cut ? ` (beats ${args.beats})` : ''}`)
+} else if (args.story) {
+  // ── A promo story played whole (plan 322): the clip its deck already has ──
+  const story = String(args.story)
+  const hour = typeof args.hour === 'string' ? args.hour : 'day'
+  const made = await page.evaluate(async ({ story, lang, hour, season, sticker }) => {
+    const Pm = await import('/carousel/promo.js')
+    const A = await import('/carousel/app.js')
+    const W = await import('/carousel/draw.js')
+    if (!Pm.STORIES.includes(story)) return { error: `no story named ${story}: ${Pm.STORIES.join(', ')}` }
+    const get = name => fetch(`/carousel/bank/${name}`).then(r => { if (!r.ok) throw new Error(name); return r.json() })
+    const { figures } = await get('index.json')
+    const data = await get(Pm.STORY_FILES[story])
+    const [{ id }] = Pm.promoItems(story, data, lang)
+    const plan = Pm.promoPlan(story, data, id, { lang, story, figures, hour })
+    await Promise.all(W.FONT_FACES.map(([fam, w]) => document.fonts.load(W.font(w, 40, fam), JSON.stringify(plan))))
+    await document.fonts.ready
+    const print = await A.loadPrint(hour, { base: '/', season })
+    const clip = Pm.promoDeck(plan, W.FORMATS.story, { ground: 'paper', print, sticker, pages: false }).clips.story
+    if (!clip) return { error: `the ${story} story has no clip of the whole: duel and comprehension do` }
+    const c = document.createElement('canvas')
+    c.width = W.FORMATS.story.w
+    c.height = W.FORMATS.story.h
+    window.__ctx = c.getContext('2d')
+    window.__canvas = c
+    // Every frame drawn: the print moves under each.
+    window.__draw = t => { clip.draw(window.__ctx, t); return t }
+    return { seconds: clip.seconds, fps: clip.fps, sfx: clip.sounds, title: plan.title }
+  }, { story, lang, hour, season: typeof args.season === 'string' ? args.season : null, sticker: args.sticker === true })
+  if (made.error) await stop(made.error)
+  tl = { kind: 'story', seconds: made.seconds, fps: made.fps, sfx: made.sfx, cues: [], chapters: [] }
+  SIZE = TALL
+  slug = ['story', story, lang, ...(hour !== 'day' ? [hour] : [])].join('-')
+  pageText = { title: made.title, description: made.title, tags: '' }
+  thumbAt = 1
+  log(`${made.title}: ${tl.seconds.toFixed(1)} s`)
 } else if (recipe) {
   // ── A carousel of the studio, standing, its line voiced ──
   const made = await page.evaluate(async st => {
@@ -328,6 +470,8 @@ if (args.challenge) {
   thumbAt = stillAt(plan, tl)
   log(`${(tl.seconds / 60).toFixed(1)} min, ${tl.cues.length} lines, ${tl.sfx.length} sounds`)
 }
+// A caller's own name for the file (a highlight numbers its clips, plan 322).
+if (typeof args.name === 'string') slug = args.name
 const seconds = Math.min(tl.seconds, Number(args.seconds) || Infinity)
 // A draft is named so: it never overwrites the finished video (plan 248).
 if (seconds < tl.seconds) slug += `-draft${Math.round(seconds)}s`
@@ -440,8 +584,11 @@ ff.stdin.end()
 await new Promise((r, j) => ff.on('close', code => (code === 0 ? r() : j(new Error(`ffmpeg exited ${code}`)))))
 
 // ── The thumbnail, the title and the description ──
-const thumb = await page.evaluate(t => { window.__draw(t); return window.__canvas.toDataURL('image/jpeg', 0.92) }, thumbAt)
-writeFileSync(join(OUT, `${slug}.jpg`), Buffer.from(thumb.split(',')[1], 'base64'))
-writeFileSync(join(OUT, `${slug}.txt`), pageFile(pageText))
+// A clip made for a highlight is the video alone (--bare).
+if (!args.bare) {
+  const thumb = await page.evaluate(t => { window.__draw(t); return window.__canvas.toDataURL('image/jpeg', 0.92) }, thumbAt)
+  writeFileSync(join(OUT, `${slug}.jpg`), Buffer.from(thumb.split(',')[1], 'base64'))
+  writeFileSync(join(OUT, `${slug}.txt`), pageFile(pageText))
+}
 await closeAll()
 log(`wrote ${mp4} (${(seconds / 60).toFixed(1)} min, ${drawn} of ${frames} frames drawn)`)

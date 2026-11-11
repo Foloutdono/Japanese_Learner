@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **322**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **323**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -1505,7 +1505,14 @@ something (`feature.js`, `camFor`: what a part shows framed, a text read
 down, a page pushed in, a sheet risen), and shows past the exercise what
 a first run would not find (the roll, the breakdown, Ask answered from
 `content/promo.json`'s `ask`, a lesson, a flag, a wrong reply's why;
-since plan 274 comprehension's word and point in the dictionary). Since plan 248 every number a maker may set per
+since plan 274 comprehension's word and point in the dictionary); since
+plan 322 the Instagram profile's seven highlights (`highlights.js`, the
+owner's picks A and 3 of the canvas drawn): each cover a station's
+roundel, a paper disc ringed in the pigment of what it is, each
+highlight a still on the print, the app filmed where a recording exists
+(a feature video cut to a few beats) and the print's sun, its gate left
+bare for Instagram's link sticker, made as a folder of files numbered in
+posting order by `node carousel/long/render.mjs --highlight ID`. Since plan 248 every number a maker may set per
 post (a video's timing and pace, the export's quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one
 previewed. Since plan
