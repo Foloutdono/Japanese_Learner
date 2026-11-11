@@ -257,14 +257,14 @@ Tsuji is a Japanese-learning app for self-taught learners, from the first kana t
 No setup or sample file is needed. On the first screen, "Board" starts at once as a guest, or "Have an account?" signs in:
   Email: <DEMO EMAIL>   Password: <DEMO PASSWORD>
 Five tabs: Today (the day's reviews), Learn (courses and decks), Practice (exercises and mock exams), Dictionary, Profile.
-- Registration: Board, then "Create my account" (email and password, confirmed by a link sent by email), or Continue with Google.
+- Registration: Board, then "Create my account" with an email and a password, Continue with Apple or Continue with Google.
 - Account deletion: Profile > Settings > Account > Delete your account. It erases the account and all its data at once.
 - User-generated content: Learn > Decks > Library lists decks published by learners. A deck's "..." menu has "Report the deck" and "Block <author>". Profile > Duels: a player's card has Report and Block. Text is filtered for slurs before it is published, reports are reviewed within 24 hours, and offending content and accounts are removed. Contact: contact.tsujijapanese@gmail.com (also Settings > Write to us).
 - Paid content: none. The app has no in-app purchase, no subscription and no external payment. "Credits" are a free allowance that refills by itself over time; they cannot be bought.
 
 4. EXTERNAL SERVICES
 - Supabase (EU): authentication and database.
-- Google Sign-In, through Supabase: optional sign-in.
+- Sign in with Apple and Google Sign-In, through Supabase: optional sign-in.
 - Render (Frankfurt): our API server. Vercel: serves the web content and relays requests to our server.
 - AI models (Google Gemini, with OpenAI and OpenRouter as fallbacks): sentence analysis, feedback on a learner's translation or composition, generated exercises and mock exams, reading text in a photo, transcribing a learner's own audio file. No account data is sent with a request.
 - Japanese speech is synthesized on our own server (VOICEVOX Nemo engine, self-hosted).
@@ -293,8 +293,8 @@ Before pasting:
   attached to the reply in App Review's messages as well. One take, in
   this order, about three minutes:
   1. Launch from the home screen; **Board**; the boarding's questions.
-  2. **Create my account** with an email and a password; the
-     confirmation link, opened; back in the app.
+  2. **Create my account** with an email and a password (no mail to
+     confirm: the project confirms an address at once).
   3. Today: one short review run. Then a glance at Learn, Practice
      (start one exercise), Dictionary (search a word, open the analyzer).
   4. Learn › Decks › Library: open a deck, its **···** menu,
@@ -302,7 +302,8 @@ Before pasting:
      author and confirm.
   5. Profile › Duels › Friends: find a second account by its exact
      username, open its card, **Report**, **Block**.
-  6. Profile › Settings: sign out, sign in again with the same account.
+  6. Profile › Settings: sign out, sign in again with the same account;
+     sign out, and show **Continue with Apple** opening Apple's sheet.
   7. Profile › Settings › Account › **Delete your account**, confirmed;
      the app returns to the first screen.
   Say nothing about paid content beyond the note: there is none to show.
@@ -312,12 +313,11 @@ Before pasting:
   Purchase products submitted with it (guideline 3.1.1) and this note
   rewritten.
 
-One thing the note cannot answer: the sign-in screen offers **Continue
-with Google** and no equivalent that meets guideline 4.8 (Sign in with
-Apple is the usual one). Email and password do not exempt it, since the
-exemption is for apps that use their own sign-in *exclusively*. Expect
-it to be raised; the fix is Sign in with Apple beside Google, or no
-Google button in the iOS shell.
+The note names **Sign in with Apple**, which guideline 4.8 asks for
+beside Google. 1.1.6 was cut before plan 321 and has Google alone: the
+build resubmitted is one cut after it, tried on TestFlight on a real
+iPhone first (sign in with Apple, then delete that account). A button
+that fails in front of the reviewer is a 2.1 refusal of its own.
 
 ## The widget and its App Group (plan 156)
 
