@@ -307,7 +307,7 @@ def _user_block(level: str, entry: dict, sentence: str, lang: str) -> str:
 class ReviewPayload(BaseModel):
     raw_id: str = Field(min_length=1, max_length=200)
     sentence: str = Field(min_length=1, max_length=MAX_SENTENCE)
-    lang: str = "en"
+    lang: str = Field(default="en", max_length=16)
 
 
 @router.post("/api/composition/review")
@@ -337,11 +337,14 @@ def post_composition_review(payload: ReviewPayload, user_id: str = Depends(get_u
             ),
         )
 
-    lang_name = reading.LANG_NAMES.get(payload.lang, payload.lang)
+    # A language the app answers in, never the text sent: lang_name
+    # sits in the system prompt, outside the data fences.
+    lang = reading.known_lang(payload.lang)
+    lang_name = reading.LANG_NAMES[lang]
     content = reading._chat(
         [
             {"role": "system", "content": SYSTEM_TEMPLATE.format(lang_name=lang_name, max_items=tutor_review.MAX_ITEMS)},
-            {"role": "user", "content": _user_block(level, entry, sentence, payload.lang)},
+            {"role": "user", "content": _user_block(level, entry, sentence, lang)},
         ],
         # The shape is small; a 3,000-token ceiling on a reasoning
         # model is paid in latency, not in quality.
