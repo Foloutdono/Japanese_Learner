@@ -181,6 +181,22 @@ def journey_status(user_id: str = Depends(get_user_id)):
     return _status_payload(user_id)
 
 
+def _future_date(v: date | None) -> date | None:
+    """A destination's date, strictly after today (both payloads below,
+    as onboarding's own form)."""
+    if v is not None and v <= date.today():
+        raise ValueError("must be in the future")
+    return v
+
+
+def _pace(v: int | None) -> int | None:
+    """New cards a day: the same free-integer knob as onboarding's pace
+    bound, 1 to 100."""
+    if v is not None and not (1 <= v <= 100):
+        raise ValueError("must be between 1 and 100")
+    return v
+
+
 class ReprintPayload(BaseModel):
     """At least one of the three (checked in the route: 'none' is a
     caller bug, same convention as PATCH /api/profile/learning).
@@ -200,17 +216,12 @@ class ReprintPayload(BaseModel):
     @field_validator("goalTargetDate")
     @classmethod
     def valid_goal_date(cls, v: date | None) -> date | None:
-        if v is not None and v <= date.today():
-            raise ValueError("must be in the future")
-        return v
+        return _future_date(v)
 
     @field_validator("dailyNewTarget")
     @classmethod
     def valid_target(cls, v: int | None) -> int | None:
-        # Same free-integer knob as onboarding's pace bound.
-        if v is not None and not (1 <= v <= 100):
-            raise ValueError("must be between 1 and 100")
-        return v
+        return _pace(v)
 
     @field_validator("dailyDeparture")
     @classmethod
@@ -298,16 +309,12 @@ class GoalPayload(BaseModel):
     @field_validator("goalTargetDate")
     @classmethod
     def valid_goal_date(cls, v: date | None) -> date | None:
-        if v is not None and v <= date.today():
-            raise ValueError("must be in the future")
-        return v
+        return _future_date(v)
 
     @field_validator("dailyNewTarget")
     @classmethod
     def valid_target(cls, v: int | None) -> int | None:
-        if v is not None and not (1 <= v <= 100):
-            raise ValueError("must be between 1 and 100")
-        return v
+        return _pace(v)
 
 
 @router.post("/api/journey/goal")

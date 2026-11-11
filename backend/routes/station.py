@@ -147,7 +147,12 @@ def _grammar_card(level: str, entry: dict, points: list[dict], lang: str) -> dic
     if contrast is None or not sentences:
         return None
     parts = contrast["furigana"]
-    cut = next(i for i, p in enumerate(parts) if p.get("blank"))
+    # A payload with no blank has no card to draw: the next point's is
+    # tried. A bare next() would raise StopIteration inside
+    # _grammar_line's generator, which Python turns into a RuntimeError.
+    cut = next((i for i, p in enumerate(parts) if p.get("blank")), None)
+    if cut is None:
+        return None
     # The rivals the lesson names, then the point: the card pads a short
     # list with same-level fillers (drawn by the seed above, so the same
     # in every process), which the specimen leaves out, since it shows what
@@ -414,7 +419,7 @@ def _conversation_line(lang: str) -> dict:
     first. The card is that scene as the station's card names it: its
     place, its title and the line it opens on (plan 244: the desk's gate
     shows the train's card at its grade, and this is 会話's). The bank
-    holds every text in English and French; `lang` picks one."""
+    holds every text in English, French and Spanish; `lang` picks one."""
     bank_lang = conversation.bank_lang(lang)
     stops = {}
     for level, scenes in conversation.bank().items():

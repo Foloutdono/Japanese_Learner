@@ -46,11 +46,11 @@ def _sources(user_id: str) -> tuple[str, ...]:
     return tuple(source for source in basics.SOURCES if source in lines)
 
 
-def _progress(user_id: str, sources) -> dict[str, dict[str, float]]:
+def _progress(user_id: str, sources, modes) -> dict[str, dict[str, float]]:
     """source -> {raw id: progress} over the course's cards, 0.0 for a
-    card never met -- one query a line."""
+    card never met -- one query a line. `modes` is the learner's
+    (learner_modes.read), read once by the route for both helpers."""
     out: dict[str, dict[str, float]] = {}
-    modes = learner_modes.read(user_id)
     for source in sources:
         ids = basics.course_ids(source)
         found = srs.get_bulk_progress(prefixed(ids, user_id), primary_mode(source, modes))
@@ -59,11 +59,10 @@ def _progress(user_id: str, sources) -> dict[str, dict[str, float]]:
     return out
 
 
-def _met(user_id: str, sources) -> set[str]:
+def _met(user_id: str, sources, modes) -> set[str]:
     """The course's raw ids the learner has reviewed at least once in
     their line's main mode (plan 273) -- get_new_cards' own negative fact."""
     met: set[str] = set()
-    modes = learner_modes.read(user_id)
     for source in sources:
         ids = basics.course_ids(source)
         card_ids = prefixed(ids, user_id)
@@ -91,8 +90,9 @@ def get_basics(user_id: str = Depends(get_user_id)):
     Today deals it (an N5 learner); one above N5 sees the course whole
     and met, since the level rule seeded N5 known."""
     sources = _sources(user_id)
-    progress = _progress(user_id, sources)
-    met = _met(user_id, sources)
+    modes = learner_modes.read(user_id)
+    progress = _progress(user_id, sources, modes)
+    met = _met(user_id, sources, modes)
     units = []
     at = None
     for n, unit in enumerate(basics.units()):
@@ -145,7 +145,7 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
     course deals them, each with its `progress` (0 new to 1 mastered) and
     whether it is `met`, and the unit's sentences from the reading bank
     -- each with its translation in the reader's language (plan 192:
-    the bank carries English and French)."""
+    the bank carries English, French and Spanish)."""
     found = next(((n, u) for n, u in enumerate(basics.units()) if u["id"] == unit_id), None)
     if found is None:
         raise HTTPException(status_code=404, detail="no such unit")
@@ -153,8 +153,9 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
     lang = lang if lang in ("en", "es") else "fr"
     grammar, vocab, kanji = _entries()
     sources = _sources(user_id)
-    progress = _progress(user_id, sources)
-    met = _met(user_id, sources)
+    modes = learner_modes.read(user_id)
+    progress = _progress(user_id, sources, modes)
+    met = _met(user_id, sources, modes)
 
     def card(source: str, raw_id: str, **fields) -> dict:
         return {"card_id": raw_id, "progress": progress[source].get(raw_id, 0.0), "met": raw_id in met, **fields}
