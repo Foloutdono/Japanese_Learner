@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { addDays, nextStop } from '../../domain/goalMath'
+import { intlLocale } from '../../lib/locale'
 
 // ── 路線図の影 — the ghost train's line ─────────────────────────────
 // One drawing, two grounds: the card's back on a phone (JourneyCard.jsx,
@@ -83,7 +84,7 @@ function Ghost() {
  */
 export function JourneyLine({ stations, youF, planF = null, status = null, model = null, now = null }) {
   const { lang } = useLang()
-  const loc = lang === 'fr' ? 'fr' : 'en'
+  const loc = intlLocale(lang, 'en')
   const full = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short', year: 'numeric' })
   const short = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' })
   const you = clamp(youF)

@@ -49,10 +49,11 @@ describe('the vercel routing table', () => {
   // the fallback. A rewrite never beats a file, so this works only
   // because the web build names the app's document app.html
   // (appShell.js) and leaves no index.html at the root to answer `/`.
-  it('serves the landing at / and /en, ahead of the fallback', () => {
+  it('serves the landing at /, /en and /es, ahead of the fallback', () => {
     const at = source => config.rewrites.findIndex(r => r.source === source)
     const fallback = config.rewrites.findIndex(r => r.destination === `/${APP_SHELL}`)
-    for (const [source, file] of [['/', '/landing/index.html'], ['/en', '/landing/en/index.html'], ['/en/', '/landing/en/index.html']]) {
+    for (const [source, file] of [['/', '/landing/index.html'], ['/en', '/landing/en/index.html'], ['/en/', '/landing/en/index.html'],
+      ['/es', '/landing/es/index.html'], ['/es/', '/landing/es/index.html']]) {
       expect(config.rewrites[at(source)]?.destination, source).toBe(file)
       expect(at(source), source).toBeLessThan(fallback)
       expect(existsSync(new URL(`../public${file}`, import.meta.url)), file).toBe(true)
@@ -64,7 +65,8 @@ describe('the vercel routing table', () => {
   // link or an index entry to /landing/ ends where the page is now.
   it('sends the landing page\u2019s old addresses to the root', () => {
     const to = Object.fromEntries((config.redirects ?? []).map(r => [r.source, r]))
-    for (const [from, where] of [['/landing', '/'], ['/landing/', '/'], ['/landing/en', '/en'], ['/landing/en/', '/en']]) {
+    for (const [from, where] of [['/landing', '/'], ['/landing/', '/'], ['/landing/en', '/en'], ['/landing/en/', '/en'],
+      ['/landing/es', '/es'], ['/landing/es/', '/es']]) {
       expect(to[from]?.destination, from).toBe(where)
       expect(to[from]?.permanent, from).toBe(true)
     }
@@ -112,7 +114,8 @@ describe('the dev server and preview, routed by the same table', () => {
     }
     return dir
   }
-  const LANDING = ['landing/index.html', 'landing/en/index.html', 'landing/landing.js', 'privacy.html', 'delete-account.html', 'sw.js']
+  const LANDING = ['landing/index.html', 'landing/en/index.html', 'landing/es/index.html', 'landing/landing.js', 'privacy.html',
+    'delete-account.html', 'sw.js']
   const publicDir = served(LANDING)
   const buildDir = served([...LANDING, APP_SHELL, 'assets/index-abc.js'])
 
@@ -126,13 +129,15 @@ describe('the dev server and preview, routed by the same table', () => {
     return passed ? { url: req.url } : { status: res.statusCode, location: res.headers.Location }
   }
 
-  it('serves the landing at / and /en, its query kept', () => {
+  it('serves the landing at /, /en and /es, its query kept', () => {
     for (const dir of [publicDir, buildDir]) {
       expect(route(dir, '/')).toEqual({ url: '/landing/index.html' })
       expect(route(dir, '/?landing')).toEqual({ url: '/landing/index.html?landing' })
       expect(route(dir, '/?code=abc')).toEqual({ url: '/landing/index.html?code=abc' })
       expect(route(dir, '/en')).toEqual({ url: '/landing/en/index.html' })
       expect(route(dir, '/en/')).toEqual({ url: '/landing/en/index.html' })
+      expect(route(dir, '/es')).toEqual({ url: '/landing/es/index.html' })
+      expect(route(dir, '/es/')).toEqual({ url: '/landing/es/index.html' })
       expect(route(dir, '/privacy')).toEqual({ url: '/privacy.html' })
       expect(route(dir, '/delete-account')).toEqual({ url: '/delete-account.html' })
     }

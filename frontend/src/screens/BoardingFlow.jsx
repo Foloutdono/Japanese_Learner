@@ -25,12 +25,15 @@ import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
 import { LevelStep } from '../components/boarding/LevelStep'
 import { TestStep } from '../components/boarding/TestStep'
 import CardStep from '../components/boarding/CardStep'
+import { RemindStep } from '../components/boarding/RemindStep'
 import { AccountSheet, GoalSheet, HourSheet, LinesSheet, NameSheet, RhythmSheet } from '../components/boarding/CardSheets'
 import { DeskStrip } from '../components/boarding/DeskStrip'
 import { FeedbackSheet } from '../components/feedback/FeedbackSheet'
 import { failureOf } from '../lib/feedback'
 import { BoardBack } from '../components/boarding/boardBack'
 import { noteAskedToKeep } from '../lib/guest'
+import { arrivalSource } from '../lib/arrival'
+import { isNative } from '../lib/platform'
 
 // ── 乗車 — the boarding (plan 075; the card is the form, plan 247) ──
 // The owner's pick C of the boarding's canvas ("Tsuji — the boarding,
@@ -140,10 +143,44 @@ const PULL_MS = 260
 // 机 (plan 155): the desk's pull is a short one -- a rung sideways and a
 // fade, not the paper's whole width -- and the arriving car's answers
 // follow it in a beat apart (the 机 section of index.css, "the pull on
-// the desk"). The leaving car is kept until all of that has landed.
-const DESK_PULL_MS = 820
+// the desk"). The leaving car is kept until all of that has landed, as
+// the animations themselves say it has (`landed`, below), never a timer
+// of the wall's: an animation starts on the next frame and runs on the
+// frames' clock, so a machine holding its frames back lost the car
+// before it had faded -- 820 ms on the wall, the fade not yet drawn --
+// and the answers still coming in were retimed as their car lost its
+// `--in`. The timer stands only as the longest it is kept, should a
+// frame never come: once faded the car is not seen, so it can be long.
+const DESK_PULL_MAX_MS = 5000
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
+
+// The desk's pull landed: the leaving car's own fade, and the arriving
+// car's entrance -- every animation in it that holds its first frame
+// through its delay, as each entrance in the boarding does (`backwards`).
+// Only what runs on the document's clock and ends: not the body's scrim,
+// which follows its scroll, nor a loop, nor what a car does once it
+// stands (the gate's idle nudge, four seconds on, holds no frame). An
+// animation cancelled on the way, its element gone, has nothing left to
+// land. Read again once what was read has landed: a car draws some parts
+// a render after it arrives (the level's stations, once its climb is
+// measured), and their entrance is its arrival too. `pulling` says the
+// pull is still the one waited on; without the Web Animations API the
+// longest decides.
+async function landed(frame, pulling) {
+  const out = frame?.querySelector('.brd__car--out')
+  if (typeof out?.getAnimations !== 'function') return new Promise(() => {})
+  const timed = a => a.timeline === document.timeline && a.effect.getComputedTiming().iterations !== Infinity
+  const entering = a => timed(a) && ['backwards', 'both'].includes(a.effect.getComputedTiming().fill)
+  while (pulling()) {
+    const into = frame.querySelector('.brd__car:not(.brd__car--out)')
+    const moving = [...out.getAnimations().filter(timed), ...(into?.getAnimations({ subtree: true }).filter(entering) ?? [])]
+      .filter(a => a.playState !== 'finished')
+    if (moving.length === 0) return undefined
+    await Promise.all(moving.map(a => a.finished.catch(() => {})))
+  }
+  return undefined
+}
 
 // The track's stops: the kana, a reader's level, the card -- the reveal
 // is the kana's stop's second half and the test the level's own, never
@@ -180,6 +217,10 @@ export default function BoardingFlow({
     rhythm: RECOMMENDED_RHYTHM,
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
+    // Whether the reminder has been answered -- its switch in the hour's
+    // sheet, or the step after the card (plan 294), which is shown until
+    // it has.
+    reminderAnswered: false,
     cardName: '',
     ...(resumed?.answers ?? {}),
   })
@@ -216,6 +257,9 @@ export default function BoardingFlow({
   // On a native shell, the OS's own answer when it will not ask again:
   // the reminder's switch says why it stays off (plan 247).
   const [nudgeDenied, setNudgeDenied] = useState(false)
+  // How the card's issue was reached ('google', 'guest', ...: complete's
+  // `by`), carried over the reminder's step to the issue it ends in.
+  const [issuedBy, setIssuedBy] = useState(null)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
   // 辻 (plan 163): the strip at the floor's left end, measured so the
@@ -252,11 +296,15 @@ export default function BoardingFlow({
     return () => { live = false }
   }, [session])
 
-  // The pull: the leaving car is dropped once it has left.
+  // The pull: the leaving car is dropped once it has left -- on the
+  // phone after the pull's 260 ms, on the desk once the pull has landed.
   useEffect(() => {
-    if (!leaving) return
-    const id = setTimeout(() => setLeaving(null), desk ? DESK_PULL_MS : PULL_MS)
-    return () => clearTimeout(id)
+    if (!leaving) return undefined
+    let pulling = true
+    const drop = () => { if (pulling) setLeaving(null) }
+    const id = setTimeout(drop, desk ? DESK_PULL_MAX_MS : PULL_MS)
+    if (desk) landed(frameRef.current, () => pulling).then(drop)
+    return () => { pulling = false; clearTimeout(id) }
   }, [leaving, desk])
 
   // Focus lands on the new screen's question.
@@ -276,7 +324,8 @@ export default function BoardingFlow({
       // How long `from` actually held them, then reset for the next
       // question.
       ms: watches.current?.step.lap() ?? 0,
-      index: trackStops(answers).indexOf(stopOf(from)) + 1,
+      // The reminder stands after the card, past the line's last stop.
+      index: from === 'remind' ? trackStops(answers).length + 1 : trackStops(answers).indexOf(stopOf(from)) + 1,
     })
   }
 
@@ -466,6 +515,7 @@ export default function BoardingFlow({
   // (it will not ask a second time) is said under the switch, which
   // would otherwise do nothing at every press (plan 247).
   function remind() {
+    set({ reminderAnswered: true })
     if (answers.notifications) { set({ notifications: false }); return }
     requestNudgePermission()
       .then(granted => {
@@ -566,6 +616,44 @@ export default function BoardingFlow({
       if (!dryRun) noteAskedToKeep(session?.user?.id)
       return
     }
+    if (answers.reminderAnswered || !canNudge()) { issue(answers.notifications, by); return }
+    // The reminder's own step (plan 294), while the OS has not been
+    // asked: one that has decided -- allowed, or refused for good -- is
+    // not asked again, and its answer is the answer.
+    setBusy(true)
+    nudgePermission()
+      .catch(() => 'denied')
+      .then(state => {
+        if (state !== 'prompt') {
+          set({ notifications: state === 'granted', reminderAnswered: true })
+          issue(state === 'granted', by)
+          return
+        }
+        setBusy(false)
+        setIssuedBy(by)
+        go('remind')
+      })
+  }
+
+  // The reminder's gate: the OS's own prompt, then the card.
+  function allowReminder() {
+    if (busy) return
+    setBusy(true)
+    requestNudgePermission()
+      .catch(() => false)
+      .then(granted => {
+        set({ notifications: granted, reminderAnswered: true })
+        issue(granted, issuedBy)
+      })
+  }
+
+  function declineReminder() {
+    if (busy) return
+    set({ notifications: false, reminderAnswered: true })
+    issue(false, issuedBy)
+  }
+
+  function issue(notifications, by) {
     if (dryRun) { onComplete(); return }
     setBusy(true)
     setSaveError(null)
@@ -585,7 +673,7 @@ export default function BoardingFlow({
       lines: answers.lines,
       rhythmMin: answers.rhythm,
       reminderTime: time,
-      notifications: answers.notifications,
+      notifications,
       tzOffsetMin: -new Date().getTimezoneOffset(),
       // The name the card prints, '' for none (routes/profile.py card_name).
       cardName: answers.cardName,
@@ -606,7 +694,7 @@ export default function BoardingFlow({
           pace: perDay,
           // The chosen names joined, never text a learner typed.
           lines: answers.lines.join(','),
-          notifications: answers.notifications,
+          notifications,
           // How the level was found (plan 224), and where the test placed
           // the learner when they took it.
           ...(answers.kana === 'both' ? { level_how: answers.placed ? 'test' : 'pick' } : {}),
@@ -620,6 +708,9 @@ export default function BoardingFlow({
           edited_lines: edited.lines,
           named: answers.cardName.length > 0,
           kept: (by === 'guest' ? null : by) ?? keptBy ?? (guest ? (linkSent ? 'link' : 'none') : 'already'),
+          // The door the learner came in by, a closed class (plan 313,
+          // lib/arrival.js): never the page, never the link.
+          source: arrivalSource({ native: isNative() }),
           // The same measure across the whole line.
           ms: watches.current?.total.read() ?? 0,
         })
@@ -715,6 +806,17 @@ export default function BoardingFlow({
     </>
   )
 
+  // « Signaler ce problème » under a refused issue, on the card or the
+  // reminder's step, whichever the issue failed on.
+  const feedback = (
+    <FeedbackSheet
+      open={reporting}
+      onClose={() => setReporting(false)}
+      session={session}
+      failure={failureOf('/api/onboarding/complete', refusedWith)}
+    />
+  )
+
   // `leaving`: the car pulling out, drawn for the pull and dropped -- a
   // screen that fetches as it mounts (the test) is drawn still there, and
   // the card pulling out takes no sheet with it.
@@ -756,15 +858,23 @@ export default function BoardingFlow({
             error={saveError}
           >
             {!leaving && sheets}
-            {!leaving && (
-              <FeedbackSheet
-                open={reporting}
-                onClose={() => setReporting(false)}
-                session={session}
-                failure={failureOf('/api/onboarding/complete', refusedWith)}
-              />
-            )}
+            {!leaving && feedback}
           </CardStep>
+        )
+      case 'remind':
+        return (
+          <RemindStep
+            time={time}
+            title={t.nudgeTitle(time, perDay)}
+            summary={`${t.nudgeMinutes(answers.rhythm)} · ${t.nudgeNew(perDay)}`}
+            onAllow={allowReminder}
+            onLater={declineReminder}
+            onReport={() => setReporting(true)}
+            busy={busy}
+            error={saveError}
+          >
+            {!leaving && feedback}
+          </RemindStep>
         )
       default:
         return null
@@ -793,12 +903,13 @@ export default function BoardingFlow({
   })
   // The way back the floor draws beside Continue (BoardBack): the
   // question before, or out of the flow from the first.
-  const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : null
+  const atRemind = step === 'remind'
+  const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : desk && atRemind ? back : null
 
   return (
     <main
       // The card stands with no head, as an arrival screen (plan 168).
-      className={desk ? 'brd desk-brd' : onTrack ? 'brd' : 'brd brd--arrival'}
+      className={desk ? 'brd desk-brd' : onTrack || atRemind ? 'brd' : 'brd brd--arrival'}
       id="main-content"
       data-step={step}
       ref={frameRef}
@@ -807,6 +918,8 @@ export default function BoardingFlow({
       style={desk && stripW ? { '--desk-strip-w': stripW } : undefined}
     >
       {onTrack && !desk && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
+      {/* Off the line, after the card: the way back to it, no track. */}
+      {atRemind && !desk && <BoardHead index={0} total={0} onBack={back} />}
       <BoardBack.Provider value={floorBack}>
         <div className="brd__cars">
           {leaving && (

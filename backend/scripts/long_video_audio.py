@@ -1,7 +1,8 @@
 """
 The long videos' sound (plan 233, frontend/carousel/long.js): every
 Japanese line a video says, voiced by the app's own voices, and the mix
-of those lines with the app's sounds and a quiet bed of music.
+of those lines with the app's sounds. No video carries music (plan 273,
+the owner's call): its voices and its sounds are the whole of it.
 
 Two steps, both called by frontend/carousel/long/render.mjs:
 
@@ -24,10 +25,12 @@ level, as the app's playKana does: a lone kana is what the deck was
 recorded for.
 
 `mix` lays the lines and the app's sounds (rendered from the app's own
-recipes by the page, one WAV a sound) on the timeline, under a bed of
-music this script plays itself: soft chords and a slow pluck, nothing
-recorded, so the video owes no one for it. The music steps back while a
-line is said.
+recipes by the page, one WAV a sound) on the timeline.
+
+A line marked `marks` (a challenge read along) is also written down
+syllable by syllable: when each of the engine's morae starts in its
+clip, from the engine's own audio query, so the video lights each word
+as the voice reaches it.
 
 It needs the voice engine (VOICEVOX_URL, CLAUDE.md "Speech") for
 `voice`, numpy for `mix`, and no database. The licence's one condition
@@ -146,12 +149,30 @@ def read_wav(path: Path):
     return data.reshape(-1, ch), rate
 
 
+def mora_marks(query: dict, speed: float) -> list[dict]:
+    """When each mora of an audio query starts in its clip, in seconds:
+    the engine lays the lead-in silence, each mora's consonant and vowel
+    and each pause at its length, all divided by the speed (a pause is
+    marked `p`). Within a frame (about 11ms) of the clip it makes."""
+    t = float(query.get("prePhonemeLength", 0.1))
+    out = []
+    for phrase in query.get("accent_phrases", []):
+        for mora in phrase.get("moras", []):
+            out.append({"t": round(t / speed, 3), "k": mora.get("text", "")})
+            t += float(mora.get("consonant_length") or 0) + float(mora.get("vowel_length") or 0)
+        pause = phrase.get("pause_mora")
+        if pause:
+            out.append({"t": round(t / speed, 3), "k": "、", "p": 1})
+            t += float(pause.get("vowel_length") or 0)
+    return out
+
+
 def voice(cues_path: Path, cache: Path, out: Path) -> int:
     from study import voice_engine as engine
     cues = json.loads(cues_path.read_text(encoding="utf-8"))
     cache.mkdir(parents=True, exist_ok=True)
     rev = engine.VOICE_REV
-    durs, failed = {}, []
+    durs, marks, files, failed = {}, {}, {}, []
     unique = {cue_key(c): c for c in cues}
     todo = [c for c in unique.values() if not (cache / clip_name(c, rev)).exists()]
     print(f"{len(unique)} line(s), {len(todo)} to voice (voice {rev}).")
@@ -172,58 +193,21 @@ def voice(cues_path: Path, cache: Path, out: Path) -> int:
             write_wav(path, pcm.frames, pcm.rate)
         with wave.open(str(path)) as w:
             durs[cue_key(cue)] = round(w.getnframes() / w.getframerate(), 3)
+        # Where it is: a feature's video plays it in the app it records (plan 270).
+        files[cue_key(cue)] = str(path)
+        if cue.get("marks") and not kana:
+            slot = SLOTS.get(cue["who"], 0)
+            speed = engine.tempo_for_slot(slot) * (SLOW if cue.get("slow") else 1.0)
+            try:
+                query = engine._json(engine._request("POST", "/audio_query", params={"text": cue["text"], "speaker": engine.style_for_slot(slot)}), "/audio_query")
+                marks[cue_key(cue)] = mora_marks(query, speed)
+            except Exception as e:  # noqa: BLE001 -- the words are then lit in proportion
+                print(f"  {cue['text']}: no syllables ({type(e).__name__}: {e})", file=sys.stderr)
         if i % 50 == 0:
             print(f"  {i}/{len(unique)}")
-    out.write_text(json.dumps({"rev": rev, "durs": durs}, ensure_ascii=False, indent=0), encoding="utf-8")
+    out.write_text(json.dumps({"rev": rev, "durs": durs, "marks": marks, "files": files}, ensure_ascii=False, indent=0), encoding="utf-8")
     print(f"wrote {out}: {len(durs)} line(s); {len(failed)} failed.")
     return 1 if failed else 0
-
-
-# ── The bed ───────────────────────────────────────────────────────
-# Four chords, eight seconds each, in D major's quiet corner: Gmaj7,
-# F#m7, Em7, Dmaj9 -- a pad of soft sines and a pluck walking the chord.
-CHORDS = [[55, 59, 62, 66], [54, 57, 61, 64], [52, 55, 59, 62], [50, 57, 61, 64]]
-BAR = 8.0
-# The bed's level against the voice: some 15dB under a line said, as a
-# soft bed should sit (5dB under, the first take's, fought the voice).
-MUSIC = 0.3
-
-
-def bed(seconds: float):
-    import numpy as np
-    n = int(seconds * RATE)
-    out = np.zeros(n, dtype=np.float32)
-    hz = lambda m: 440 * 2 ** ((m - 69) / 12)
-    span = int(BAR * RATE)
-    tail = int(2.0 * RATE)
-    t = np.arange(span + tail, dtype=np.float32) / RATE
-    # A chord swells in and lets go into the next one.
-    env = np.minimum(1, t / 2.0) * np.clip((BAR + 2.0 - t) / 2.0, 0, 1)
-    plucks = [0, 1.5, 3, 4, 5.5, 7]
-    for b in range(int(np.ceil(seconds / BAR))):
-        chord = CHORDS[b % len(CHORDS)]
-        pad = np.zeros_like(t)
-        for j, m in enumerate(chord):
-            f = hz(m - 12 if j == 0 else m)
-            for detune in (-0.7, 0.7):
-                pad += np.sin(2 * np.pi * (f + detune) * t + j) * (0.5 if j else 0.8)
-            pad += 0.08 * np.sin(2 * np.pi * 2 * f * t)
-        pad *= env * 0.05
-        for k, at in enumerate(plucks):
-            m = chord[(k * 2 + b) % len(chord)] + 12
-            dt = np.clip(t - at, 0, None)
-            on = (t >= at).astype(np.float32)
-            pad += on * np.sin(2 * np.pi * hz(m) * dt) * np.exp(-dt * 2.2) * 0.035 * np.minimum(1, dt / 0.01)
-        a = b * span
-        z = min(n, a + span + tail) - a
-        if z <= 0:
-            break
-        out[a:a + z] += pad[:z]
-    # The video opens and closes on it.
-    fade = int(2.5 * RATE)
-    out[:fade] *= np.linspace(0, 1, fade, dtype=np.float32)
-    out[-fade:] *= np.linspace(1, 0, fade, dtype=np.float32)
-    return out
 
 
 LOUD = -14.0      # dBFS, the voice's level where it speaks
@@ -251,6 +235,10 @@ def limited(x, block: int = 120, release: float = 0.08):
     smooth = np.interp(np.arange(blocks * block), np.arange(blocks) * block + block / 2, gain)
     out = pad * smooth[:, None].astype(np.float32)
     return np.clip(out[:n], -CEILING, CEILING)
+
+
+# The whole mix's last moment, faded: a chime's tail never stops on a cut.
+END_FADE_S = 0.3
 
 
 def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
@@ -290,25 +278,11 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
         z = min(len(clip), n - a)
         if z > 0:
             fx[a:a + z] += clip[:z] * s.get("gain", 1)
-    # The voice at the front, the app's sounds under it, the bed under both,
-    # stepping back while a line is said (a quarter-second follower).
+    # The voice at the front, the app's sounds under it.
     peak = float(np.abs(voice_track).max()) or 1
     voice_track *= 0.7 / peak
-    # Where little is said (a carousel's short says one line), the bed
-    # carries the video: it rises, up to twice its level, still stepping
-    # back under the voice.
-    spoken = float(np.mean(np.abs(voice_track) > 0.02)) if n else 0.0
-    music = bed(n / RATE) * MUSIC * float(np.clip(0.12 / max(spoken, 0.06), 1.0, 2.0))
-    level = np.abs(voice_track)
-    win = int(0.25 * RATE)
-    run = np.concatenate([[0], np.cumsum(level, dtype=np.float64)])
-    idx = np.arange(n)
-    lo, hi = np.clip(idx - win // 2, 0, n), np.clip(idx + win // 2, 0, n)
-    follow = ((run[hi] - run[lo]) / win).astype(np.float32)
-    duck = 1 - 0.55 * np.clip(follow / 0.05, 0, 1)
-    music *= duck
-    left = voice_track + music + fx[:, 0] * 0.5
-    right = voice_track + music + fx[:, 1] * 0.5
+    left = voice_track + fx[:, 0] * 0.5
+    right = voice_track + fx[:, 1] * 0.5
     stereo = np.stack([left, right], axis=1)
     # As loud as a video on YouTube: the voice where it speaks at LOUD, its
     # few peaks above the ceiling held down by a limiter rather than the
@@ -318,6 +292,9 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
     stereo *= 10 ** (LOUD / 20) / max(rms, 1e-6)
     stereo = limited(stereo)
     stereo = stereo[: int(seconds * RATE)]
+    tail = min(len(stereo), int(END_FADE_S * RATE))
+    if tail:
+        stereo[-tail:] *= np.linspace(1, 0, tail, dtype=np.float32)[:, None]
     pcm = (np.clip(stereo, -1, 1) * 32767).astype("<i2").tobytes()
     write_wav(out, pcm, RATE, channels=2)
     print(f"wrote {out}: {seconds:.1f}s, {len(tl['cues'])} line(s) ({missing} unsaid), {len(tl['sfx'])} sound(s).")
@@ -331,7 +308,7 @@ def main() -> int:
     v.add_argument("cues", type=Path)
     v.add_argument("--cache", type=Path, required=True)
     v.add_argument("--out", type=Path, required=True)
-    m = sub.add_parser("mix", help="lay the lines, the sounds and the bed on the timeline")
+    m = sub.add_parser("mix", help="lay the lines and the sounds on the timeline")
     m.add_argument("timeline", type=Path)
     m.add_argument("--cache", type=Path, required=True)
     m.add_argument("--sfx", type=Path, required=True)

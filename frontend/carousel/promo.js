@@ -8,23 +8,31 @@
 // (index.json), never written here. What a story promises is what the
 // app does today: start free, the kana line free for good, no ads and no
 // trackers; no frame prices a mode. The plan is pure; the frames draw.
-import { EDGE, FS, SP, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, text } from './draw.js'
+// Since plan 281 a sixth, the duels, is a story in motion end to end:
+// one sprint played, its result, the Elo it moved and the board. Since
+// plan 301 a seventh, reading comprehension: a seed passage under the
+// run's clock, the same text rolling (plan 301b), one of its own
+// questions, answered on the line of the text it quotes, and the board;
+// it plays whole as one clip too.
+import { EDGE, FS, SP, alpha, font, fit, frame, ground, hasKanji, mark, masthead, measure, palette, paragraphH, rrect, reading, roundel, shadow, text } from './draw.js'
 import * as A from './app.js'
 import { STRINGS, count, weldIf } from './strings.js'
 import { gloss } from './common.js'
 import { sentenceQuizzes } from './quizzes.js'
+import { LIMIT_MS, SPRINT_MS, points } from '../src/domain/duel.js'
+import { quotedFragments, sentenceFor } from '../src/domain/quotedFragments.js'
 
-export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'pass']
-export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', pass: 'index.json' }
+export const STORIES = ['pitch', 'card', 'analyser', 'exam', 'comprehension', 'pass', 'duel']
+export const STORY_FILES = { pitch: 'index.json', card: 'words-N5.json', analyser: 'N5.json', exam: 'N5.json', comprehension: 'comprehension.json', pass: 'index.json', duel: 'duel.json' }
 
 // The words, in the two languages: the app's own where the app says it
 // (locales/*: the ratings, the stages, Today's unit, Depart), the landing
 // page's where the page says it (landing/strings.mjs).
 export const PROMO = {
   en: {
-    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', pass: 'Your pass' },
-    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', pass: 'The pass' },
-    blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free' },
+    names: { pitch: 'The pitch', card: 'One card', analyser: 'The analyser', exam: 'Could you pass N5?', comprehension: 'Read a whole text', pass: 'Your pass', duel: 'Duels' },
+    lists: { pitch: 'The pitch', card: 'Word', analyser: 'Sentence', exam: 'Question', comprehension: 'Passage', pass: 'The pass', duel: 'Duels' },
+    blurb: { pitch: 'From your first kana to N1, on Today’s print', pass: 'The pass, and what is free', duel: 'A two-minute sprint against another learner, and the Elo' },
     hours: { dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' },
     hook: 'Learn Japanese, from your first kana to JLPT N1.',
     linesTitle: 'Four lines, five levels',
@@ -39,10 +47,10 @@ export const PROMO = {
     board: 'Board at tsuji.app',
     stillKnow: 'Do you still know this word?',
     how: 'How did it go?',
-    ratings: ['Missed', 'Difficult', 'Correct', 'Easy'],
+    ratings: ['Missed', 'Almost', 'Correct', 'Easy'],
     // The scheduler's forecast for a card mastered a month ago
     // (landing/strings.mjs, KNOWN): backend/srs/scheduler.py's own.
-    due: ['in 2 min', 'in 74 days', 'in 80 days', 'in 90 days'],
+    due: ['in 2 min', 'in 10 min', 'in 80 days', 'in 90 days'],
     mastered: 'Mastered',
     mode: 'Word → meaning',
     tap: 'Tap to reveal',
@@ -55,7 +63,7 @@ export const PROMO = {
     paste: 'Paste a sentence, a YouTube link or a photo.',
     chars: n => `${n} characters`,
     analyze: 'Analyze',
-    cuts: 'Tsuji cuts it word by word and numbers its grammar. A photo is read on your phone; the image never leaves it.',
+    cuts: 'Tsuji cuts it word by word and numbers its grammar. The photo is not kept.',
     watch: 'Read the Japanese you actually watch.',
     anyText: 'A text, a photo or a YouTube link, word by word',
     examKind: 'JLPT N5 · Kanji reading',
@@ -77,15 +85,65 @@ export const PROMO = {
       card: c => `Do you still know ${c}? Spaced repetition, nothing to set up`,
       analyser: c => `${c} cut word by word, its grammar numbered`,
       exam: c => `Could you pass the JLPT N5? One question: ${c}`,
+      comprehension: (c, lv) => `Can you read a whole text in Japanese? ${c}, a JLPT ${lv} reading`,
       pass: () => 'Your Japanese pass is waiting: start free on tsuji.app',
+      duel: () => 'Japanese duels: 2 minutes against another learner, your Elo at stake',
     },
-    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', pass: 'Board today?' },
+    ask: { pitch: 'Where are you on the line?', card: 'Did you know it?', analyser: 'Which sentence should Tsuji cut next?', exam: 'Your answer?', comprehension: 'A, B, C or D?', pass: 'Board today?', duel: 'Who would you challenge first?' },
     tags: ['japaneseapp', 'jlpt'],
+    // Reading comprehension's story (plan 301): its own lines, then the
+    // app's words on its parts (locales/: the clock, the exercise's
+    // name, the question and its type's badge).
+    comp: {
+      kind: lv => `JLPT ${lv} · Reading comprehension`,
+      hook: 'Can you read a whole text in Japanese?',
+      timeLeft: 'Time remaining',
+      title: 'Reading comprehension',
+      question: 'Question',
+      types: { comprehension: 'Comprehension', vocabulary: 'Vocabulary', grammar: 'Grammar', inference: 'Inference' },
+      inText: 'In the text',
+      // The roll (plan 301b), and its speed as the stepper prints it (locales' rollSpeed).
+      roll: 'Or let it roll, at your speed.',
+      speed: n => `${n} char/s`,
+      then: 'Then the whole text, sentence by sentence: each word with its reading and its meaning.',
+      head: 'Read whole texts, not just words.',
+      note: 'A text at your level, then its questions: the JLPT’s reading section, rehearsed.',
+    },
+    // The duels' story (plan 281): its own lines, then the app's words on
+    // its parts (locales/: the ticket, the race, the result, the Elo).
+    duel: {
+      hook: s => ['A duel in Japanese.', s >= 120 && s % 60 === 0 ? `${s / 60} minutes.` : `${s} seconds.`],
+      versus: 'You against another learner.',
+      same: 'The same questions for you both.',
+      fast: top => `Answer fast: up to ${top} points.`,
+      ahead: 'Get ahead on the line.',
+      winElo: 'Win, and your Elo goes up.',
+      eloIs: 'Your Elo: your level against the others.',
+      eloFrom: 'It starts from your JLPT level, then moves with every ranked sprint.',
+      climb: 'Beat stronger players, climb faster.',
+      ride: 'Learn by playing, against other learners.',
+      modes: 'Ranked sprints or duels with friends.',
+      you: 'You',
+      go: 'Depart',
+      kinds: { word: 'Word', reading: 'Reading', writing: 'Writing', kana: 'Kana' },
+      duelLevel: 'Duel level',
+      questions: 'Questions',
+      wordsKanji: 'words and kanji',
+      sprint: 'Sprint · 2 minutes',
+      win: 'Won',
+      by: n => `by ${n} point${n === 1 ? '' : 's'}`,
+      rightsOf: (r, n) => `${r} right of ${n}`,
+      elo: 'Elo',
+      xpLeft: n => `${n} more today`,
+      startAt: n => `start ${n}`,
+      peak: n => `peak ${n}`,
+      gapTo: (n, r) => `${n} Elo points from #${r}`,
+    },
   },
   fr: {
-    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', pass: 'Ton pass' },
-    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', pass: 'Le pass' },
-    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit' },
+    names: { pitch: 'L’app en bref', card: 'Une carte', analyser: 'L’analyseur', exam: 'Tu passerais le N5 ?', comprehension: 'Lis un texte entier', pass: 'Ton pass', duel: 'Les duels' },
+    lists: { pitch: 'L’app en bref', card: 'Mot', analyser: 'Phrase', exam: 'Question', comprehension: 'Texte', pass: 'Le pass', duel: 'Duels' },
+    blurb: { pitch: 'Du premier kana au N1, sur l’estampe du jour', pass: 'Le pass, et ce qui est gratuit', duel: 'Un sprint de 2 minutes contre un autre apprenant, et l’Elo' },
     hours: { dawn: 'Aube', day: 'Jour', dusk: 'Soir', night: 'Nuit' },
     hook: 'Apprendre le japonais, du premier kana au JLPT N1.',
     linesTitle: 'Quatre lignes, cinq niveaux',
@@ -100,8 +158,8 @@ export const PROMO = {
     board: 'Embarquer sur tsuji.app',
     stillKnow: 'Tu connais encore ce mot ?',
     how: 'Comment ça s’est passé ?',
-    ratings: ['Raté', 'Difficile', 'Correct', 'Facile'],
-    due: ['dans 2 min', 'dans 74 jours', 'dans 80 jours', 'dans 90 jours'],
+    ratings: ['Raté', 'Presque', 'Correct', 'Facile'],
+    due: ['dans 2 min', 'dans 10 min', 'dans 80 jours', 'dans 90 jours'],
     mastered: 'Maîtrisé',
     mode: 'Mot → sens',
     tap: 'Touche pour révéler',
@@ -114,7 +172,7 @@ export const PROMO = {
     paste: 'Colle une phrase, un lien YouTube ou une photo.',
     chars: n => `${n} caractères`,
     analyze: 'Analyser',
-    cuts: 'Tsuji la découpe mot à mot et numérote sa grammaire. La photo est lue sur ton téléphone ; l’image ne le quitte pas.',
+    cuts: 'Tsuji la découpe mot à mot et numérote sa grammaire. La photo n’est pas conservée.',
     watch: 'Lis le japonais que tu regardes vraiment.',
     anyText: 'Un texte, une photo ou un lien YouTube, mot à mot',
     examKind: 'JLPT N5 · Lecture des kanji',
@@ -136,10 +194,54 @@ export const PROMO = {
       card: c => `Tu connais encore ${c} ? La répétition espacée, sans rien régler`,
       analyser: c => `${c} découpée mot à mot, sa grammaire numérotée`,
       exam: c => `Tu réussirais le JLPT N5 ? Une question : ${c}`,
+      comprehension: (c, lv) => `Tu lirais un texte entier en japonais ? ${c}, une lecture du JLPT ${lv}`,
       pass: () => 'Ton pass pour le japonais t’attend : commence gratuitement sur tsuji.app',
+      duel: () => 'Duels de japonais : 2 minutes contre un autre apprenant, ton Elo en jeu',
     },
-    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', pass: 'Tu embarques aujourd’hui ?' },
+    ask: { pitch: 'Tu en es où sur la ligne ?', card: 'Tu le savais ?', analyser: 'Quelle phrase Tsuji doit-il découper ensuite ?', exam: 'Ta réponse ?', comprehension: 'A, B, C ou D ?', pass: 'Tu embarques aujourd’hui ?', duel: 'Qui défierais-tu en premier ?' },
     tags: ['applijaponais', 'jlpt'],
+    comp: {
+      kind: lv => `JLPT ${lv} · Compréhension écrite`,
+      hook: 'Tu lirais un texte entier en japonais ?',
+      timeLeft: 'Temps restant',
+      title: 'Compréhension écrite',
+      question: 'Question',
+      types: { comprehension: 'Compréhension', vocabulary: 'Vocabulaire', grammar: 'Grammaire', inference: 'Inférence' },
+      inText: 'Dans le texte',
+      roll: 'Ou laisse-le défiler, à ta vitesse.',
+      speed: n => `${n} car./s`,
+      then: 'Puis le texte entier, phrase par phrase : chaque mot avec sa lecture et son sens.',
+      head: 'Lis des textes entiers, pas que des mots.',
+      note: 'Un texte à ton niveau, puis ses questions : l’épreuve de lecture du JLPT, en répétition.',
+    },
+    duel: {
+      hook: s => ['Un duel en japonais.', s >= 120 && s % 60 === 0 ? `${s / 60} minutes.` : `${s} secondes.`],
+      versus: 'Toi contre un autre apprenant.',
+      same: 'Mêmes questions pour vous deux.',
+      fast: top => `Réponds vite : jusqu’à ${top} points.`,
+      ahead: 'Passe devant sur la ligne.',
+      winElo: 'Gagne, et ton Elo monte.',
+      eloIs: 'Ton Elo, ton niveau face aux autres.',
+      eloFrom: 'Il part de ton niveau JLPT, puis bouge à chaque sprint classé.',
+      climb: 'Bats plus fort que toi, grimpe plus vite.',
+      ride: 'Apprends en jouant, contre d’autres apprenants.',
+      modes: 'Sprints classés ou duels entre amis.',
+      you: 'Toi',
+      go: 'Partir',
+      kinds: { word: 'Mot', reading: 'Lecture', writing: 'Écriture', kana: 'Kana' },
+      duelLevel: 'Niveau du duel',
+      questions: 'Questions',
+      wordsKanji: 'mots et kanji',
+      sprint: 'Sprint · 2 minutes',
+      win: 'Gagné',
+      by: n => `de ${n} point${n === 1 ? '' : 's'}`,
+      rightsOf: (r, n) => `${r} justes sur ${n}`,
+      elo: 'Elo',
+      xpLeft: n => `${n} encore aujourd’hui`,
+      startAt: n => `départ ${n}`,
+      peak: n => `pic ${n}`,
+      gapTo: (n, r) => `${n} points d’Elo de la ${r === 1 ? '1re' : `${r}ᵉ`} place`,
+    },
   },
 }
 
@@ -183,9 +285,56 @@ export function promoItems(story, data, lang) {
       return data.sentences.filter(s => s.gram.some(g => data.points[g.p])).map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.p }))
     case 'exam':
       return data.sentences.filter(s => readingOf(s, data, lang)).map(s => ({ id: s.id, jp: s.jp, sub: s[lang] || s.en, tag: s.rows[s.fi]?.t || '' }))
+    case 'comprehension':
+      return data.passages.flatMap(ps => askable(ps, lang).map(a => ({ id: `${ps.id}:q${a.q + 1}`, jp: ps.title, sub: firstUp(ps.questions[a.q].question[lang] || ps.questions[a.q].question.en), tag: ps.lv })))
+    case 'duel':
+      return [{ id: story, jp: '対戦', sub: P.blurb.duel, tag: data.level || '' }]
     default:
       return [{ id: story, jp: '辻', sub: P.blurb[story], tag: '' }]
   }
+}
+
+// ── 理解, reading comprehension's story (plan 301) ──────────────────
+const passageText = ps => ps.sents.map(rows => rows.map(r => r[0]).join(''))
+/** The questions of a seed passage its story can answer on a line of the
+ *  text: those that quote one sentence of it (the run's own rule,
+ *  domain/quotedFragments.js, the one the desk and the phone open the
+ *  breakdown by) whose translation the bank carries; a vocabulary
+ *  question first, its quote a word, then a grammar one. [{ q, at, quote }] */
+export function askable(ps, lang) {
+  const sents = passageText(ps).map(jp => ({ jp }))
+  const out = []
+  for (const type of ['vocabulary', 'grammar']) {
+    ps.questions.forEach((q, i) => {
+      if (q.type !== type) return
+      const quotes = quotedFragments(q.question[lang] || q.question.en)
+      const at = sentenceFor(sents, quotes)
+      if (at < 0 || !ps.tr?.[at]) return
+      out.push({ q: i, at, quote: quotes.find(f => sents[at].jp.includes(f)) })
+    })
+  }
+  return out
+}
+/** The line a question quotes, as the breakdown's open sentence draws it:
+ *  each word with its reading, a particle or the copula bare, the
+ *  words the question quotes lit. */
+function quotedLine(rows, quote) {
+  const jp = rows.map(r => r[0]).join('')
+  // A question that quotes its sentence whole lights nothing in it.
+  const whole = jp.replace(/[。！？、]/g, '') === quote.replace(/[。！？、]/g, '')
+  const from = whole ? -1 : jp.indexOf(quote)
+  let at = 0
+  return rows.map(([t, kind, , fu]) => {
+    const start = at
+    at += t.length
+    return {
+      t, k: kind ? 'word' : 'punct',
+      fu: fu && hasKanji(t) ? reading({ t, fu }) : '',
+      bare: kind === 'p' || kind === 'c',
+      lit: from >= 0 && start < from + quote.length && at > from,
+      point: 0,
+    }
+  })
 }
 
 /** The analyser's view of a bank sentence: its tokens, each grammar
@@ -210,6 +359,100 @@ export function analysed(s, data, lang) {
   })
   return { toks, points }
 }
+
+// ── 対戦, the duels' story (plan 281) ────────────────────────────────
+// One sprint played: the opening of a real N5 paper (bank/duel.json, the
+// duels' own generator), answered as a quick learner answers it -- the
+// first after two seconds, while what it is worth runs down, two at once,
+// then a lookalike kanji taken for the right one -- against a recorded
+// run that leads, is passed and passes again; the minute run out, the
+// result face to face and the Elo it moved, by the classic expectation
+// at the settled K (study/duel_elo.py); the Elo over the last ranked
+// duels and the board it climbs. The two learners and their figures are
+// the story's own, a sample; the questions, what a speed is worth, the
+// holds after an answer, the XP and where the Elo starts are the app's.
+export const DUEL_RUN = {
+  you: { level: 'N5', elo: 1212 },
+  them: { name: 'Hana', level: 'N4', elo: 1282 },
+  no: 412,
+  // The paper's first four, each [ms after it was served, right or not].
+  taps: [[2000, true], [800, true], [750, true], [900, false]],
+  // The other's recorded run over the same stretch, [ms into the sprint,
+  // points]: theirs too served after the holds and paid what its speed is worth.
+  theirs: [[950, 100], [2650, 94], [4600, 90], [5700, 100]],
+  // The minute as it ends.
+  final: { mine: 1240, theirs: 1105, rights: 14, answered: 15, theirRights: 13, theirAnswered: 15 },
+  // The learner's Elo after each of the twenty ranked duels before this
+  // one: the last of the provisional ones (K 40), then settled (K 20).
+  trend: [1056, 1077, 1059, 1082, 1101, 1084, 1106, 1126, 1107, 1128, 1146, 1157, 1148, 1160, 1170, 1183, 1175, 1187, 1198, 1212],
+  // The board above the learner.
+  board: [['Sora22', 1341], ['Kenta', 1296], ['aiko', 1251], ['Rin', 1219]],
+}
+
+/** The wrong choice a hurried eye takes: the first that shares a
+ *  character with the right one (白円 for 百円), else the first wrong one. */
+function wrongPick(q) {
+  const right = q.choices[q.answer]
+  const wrong = q.choices.map((c, i) => i).filter(i => i !== q.answer)
+  return wrong.find(i => [...q.choices[i]].some(ch => right.includes(ch))) ?? wrong[0]
+}
+
+/** The duels' story, played (pure): the questions in the reader's
+ *  language, each answer when it lands and what it pays, the other's
+ *  run, the result, the Elo before and after, the XP, the board. */
+export function duelRun(data, lang) {
+  const R = DUEL_RUN
+  const items = data.items.map(q => ({
+    n: q.n, kind: q.kind, prompt: q.prompt, reading: q.reading || '', two: q.kind !== 'word', answer: q.answer,
+    choices: Array.isArray(q.choices) ? q.choices : (q.choices[lang] || q.choices.en),
+  }))
+  // Served at once, answered after its ms, the next served after the
+  // server's hold: a right answer's, or a wrong one's lock.
+  let served = 0
+  let mine = 0
+  const answers = R.taps.map(([ms, right], i) => {
+    const q = items[i]
+    const pts = right ? points(ms) : 0
+    mine += pts
+    const a = { n: i, served, at: served + ms, pick: right ? q.answer : wrongPick(q), right, pts, total: mine }
+    served = a.at + (right ? data.hold.right : data.hold.wrong)
+    return a
+  })
+  let theirs = 0
+  const their = R.theirs.map(([at, pts]) => ({ at, pts, total: (theirs += pts) }))
+  const expected = 1 / (1 + 10 ** ((R.them.elo - R.you.elo) / 400))
+  const delta = Math.round(data.elo.k * (1 - expected))
+  const after = R.you.elo + delta
+  const trend = [...R.trend.slice(1), after]
+  const xp = R.final.rights * data.xp.right + (R.final.answered - R.final.rights) * data.xp.wrong
+  const ranked = elo => [...R.board.map(([name, e]) => ({ name, elo: e, me: false })), { name: null, elo, me: true }]
+    .sort((a, b) => b.elo - a.elo).map((r, i) => ({ ...r, rank: i + 1 }))
+  const board = { before: ranked(R.you.elo), after: ranked(after) }
+  const mineAfter = board.after.find(r => r.me)
+  const ahead = board.after[mineAfter.rank - 2]
+  return {
+    items, answers, next: served, their, final: R.final, you: R.you, them: R.them, no: R.no, level: data.level,
+    top: points(0), seconds: SPRINT_MS / 1000,
+    elo: { before: R.you.elo, after, delta, start: data.elo.start[R.you.level], trend, peak: Math.max(...trend) },
+    xp: { paid: xp, left: Math.max(0, data.xp.cap - xp) },
+    board: { ...board, gap: ahead ? { elo: ahead.elo - after, rank: ahead.rank } : null },
+  }
+}
+
+/** The race's line (DuelRun's reachOf): past the leader by a quarter, in
+ *  steps of 250, so the trains ride the middle of it and the gap reads. */
+const reachOf = (a, b) => Math.max(500, Math.ceil((Math.max(a, b) * 1.3) / 250) * 250)
+
+/** The story's beats, in order, and how long each holds (seconds): the
+ *  ticket, the race (the count, the sprint as played, the rest of the
+ *  minute run out: as long as the run makes it), the result, the Elo,
+ *  the Elo board, and the call to action, a story's last (`board`). */
+export const DUEL_BEATS = [['ticket', 2.45], ['race', null], ['result', 2.6], ['elo', 2.5], ['ranking', 2.4], ['board', 3.5]]
+const COUNT = 1.3
+const RUN_OUT = 1.0
+const EXIT = 0.12
+// When « Partir » is pressed on the ticket.
+const DUEL_PRESS = 2.05
 
 /** A story's plan: what its frames say, from the bank. */
 export function promoPlan(story, data, id, opts) {
@@ -244,6 +487,31 @@ export function promoPlan(story, data, id, opts) {
         title: P.titles.exam(row.t), caption: { jp: s.jp, romaji: '', tr: s[lang] || s.en, ask, tags, name: row.t },
       }
     }
+    case 'comprehension': {
+      const [pid, n] = String(id ?? '').split(':q')
+      const ps = data.passages.find(x => x.id === pid && askable(x, lang).some(a => a.q === Number(n) - 1)) ?? data.passages.find(x => askable(x, lang).length)
+      const a = askable(ps, lang).find(x => x.q === Number(n) - 1) ?? askable(ps, lang)[0]
+      const q = ps.questions[a.q]
+      const said = pair => weldIf(lang, (pair && (pair[lang] || pair.en)) || '')
+      return {
+        ...base, id: `${ps.id}:q${a.q + 1}`, level: ps.lv,
+        promo: {
+          level: ps.lv, title: ps.title, text: passageText(ps).join(''), read: data.read?.[ps.lv] ?? 0,
+          // The roll's lines (plan 301b): each sentence's words, with the
+          // readings of their kanji for the furigana.
+          roll: ps.sents.map(rows => rows.map(([t, , , fu]) => ({ t, fu: fu && hasKanji(t) ? fu : null }))),
+          // What the roll's timeline counts (domain/readingRoll's rollSeconds).
+          chars: [...passageText(ps).join('')].length,
+          n: a.q + 1, total: ps.questions.length, type: q.type,
+          question: said(q.question), choices: (q.options[lang] || q.options.en).map(o => weldIf(lang, o)), right: q.correct,
+          quote: { toks: quotedLine(ps.sents[a.at], a.quote), tr: said(ps.tr[a.at]) },
+        },
+        title: P.titles.comprehension(ps.title, ps.lv),
+        caption: { jp: ps.title, romaji: '', tr: said(q.question), ask, tags: [...P.tags, `jlpt${ps.lv.toLowerCase()}`], name: ps.title },
+      }
+    }
+    case 'duel':
+      return { ...base, id: story, level: data.level, promo: duelRun(data, lang), title: P.titles.duel(), caption: { jp: '対戦', romaji: '', tr: P.names.duel, ask, tags, name: P.names.duel } }
     default:
       return { ...base, id: story, promo: {}, title: P.titles[story](), caption: { jp: '辻', romaji: '', tr: P.names[story], ask, tags, name: P.names[story] } }
   }
@@ -281,6 +549,8 @@ export function promoDeck(plan, fmt, opts) {
   // move as the print moves. With no clock the cover stands still, whole.
   let clock = null
   let shownPoints = () => 0
+  let duelStory = null
+  let compStory = null
   const ease = x => 1 - (1 - x) ** 3
   const k = (start, dur) => (clock ? ease(Math.min(1, Math.max(0, (clock.t - start) / dur))) : 1)
   const part = (c, prog, fn) => {
@@ -294,15 +564,92 @@ export function promoDeck(plan, fmt, opts) {
   }
   const LINE = [{ color: p.line.kana, n: 4 }, { color: p.line.vocab, n: 20 }, { color: p.line.kanji, n: 10 }, { color: p.line.grammar, n: 8 }]
 
-  // A block set in the middle of what the masthead and the foot leave:
-  // drawn once off the page to measure it, then where it belongs.
-  // One too tall for the room is set smaller, whole, never cut.
+  // ── On the print (plan 271, the owner's pick B of four drawn) ──
+  // Every frame stands on Today's print of the hour, as the gate does,
+  // its sky washed toward the ground's paper down to where the words end,
+  // so the landscape shows under them and a part is lifted off it on its
+  // own shadow. Without the print (node's tests) a frame stands on the
+  // ground alone, its block centred as before.
+  const PR = opts.print || null
+  const PU = PR ? fmt.w / PR.scene.w : 1
+  const WASH = 160
+  const view = ctx => {
+    if (!PR) return ground(ctx, p, fr)
+    A.drawPrint(ctx, PR, 0, 0, PU, { W: fmt.w, H: fmt.h, moving: clock?.moving, t: clock?.t })
+  }
+  // The paper over the sky from `from` to `to`, fading out over WASH either side (none above the top).
+  const wash = (ctx, from, to) => {
+    if (!PR) return
+    const a = Math.max(0, from - WASH)
+    const b = to + WASH
+    const g = ctx.createLinearGradient(0, a, 0, b)
+    const at = y => Math.min(1, Math.max(0, (y - a) / (b - a)))
+    g.addColorStop(0, alpha(p.bg, from <= 0 ? 0.9 : 0))
+    g.addColorStop(at(from), alpha(p.bg, 0.9))
+    g.addColorStop(at(to), alpha(p.bg, 0.86))
+    g.addColorStop(1, alpha(p.bg, 0))
+    ctx.fillStyle = g
+    ctx.fillRect(0, a, fmt.w, b - a)
+  }
+  // A part's shadow on the print: a box the part then covers.
+  const lift = (c, x, y, w, h, r = 6 * U) => {
+    if (!PR) return
+    c.save()
+    shadow(c, '0px 4px 12px rgba(30, 20, 10, 0.3)')
+    c.fillStyle = A.faceOf(p).bg
+    rrect(c, x, y, w, h, r)
+    c.fill()
+    c.restore()
+  }
+  const chrome = (ctx, i, of) => {
+    masthead(ctx, p, fr, p.ink, p.ink)
+    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: PR ? p.ink : p.ink2, align: 'right' })
+  }
+  // A page's ground and chrome wait for its block (centred, below), which
+  // knows how far down the words go.
+  let pending = null
+  const page = (ctx, i, of) => {
+    pending = { i, of }
+  }
+  // A frame leaving a story played whole (the share of it gone, set by
+  // the story's clip): on the print its print and its washed sky stay as
+  // they were and what stands on them fades and rises, as a frame on the
+  // ground leaves over the ground; the next frame washes its own.
+  let leaving = 0
+  const leave = ctx => {
+    if (!leaving) return
+    ctx.globalAlpha *= 1 - leaving
+    ctx.translate(0, -28 * leaving)
+  }
+  // A frame that lays itself out rather than in a block (reading
+  // comprehension's text and roll, plan 301) opens its page at once, the
+  // sky washed down to `to`, where its card ends.
+  const pageTo = (ctx, i, of, to) => {
+    pending = null
+    view(ctx)
+    wash(ctx, 0, to)
+    leave(ctx)
+    chrome(ctx, i, of)
+  }
+  // A block under the masthead: drawn once off the page to measure it,
+  // then where it belongs, at the head of the sky on the print, in the
+  // middle of the room without it. One too tall for the room is set
+  // smaller, whole, never cut.
   const centred = (ctx, body, foot = 0) => {
     const top = fr.y + 64 + SP[7]
     const room = fr.bottom - foot - top
     const h = body(scratch(ctx), top) - top
-    if (h <= room) return body(ctx, top + (room - h) / 2)
-    const s = room / h
+    const s = h <= room ? 1 : room / h
+    const y0 = PR || s < 1 ? top : top + (room - h) / 2
+    if (pending) {
+      const { i, of } = pending
+      pending = null
+      view(ctx)
+      wash(ctx, 0, y0 + h * s)
+      leave(ctx)
+      chrome(ctx, i, of)
+    }
+    if (s === 1) return body(ctx, y0)
     ctx.save()
     ctx.translate(fr.cx, top)
     ctx.scale(s, s)
@@ -311,16 +658,16 @@ export function promoDeck(plan, fmt, opts) {
     ctx.restore()
     return top + room
   }
-  const lead = (ctx, str, y, color, sizes, { align = 'left', maxLines = 3, weight = 700 } = {}) => {
-    const b = fit(ctx, say(str), { weight, sizes, maxW: fr.w, maxLines })
+  // A middle dot stays at the end of its line, never opens the next.
+  const lead = (ctx, str, y, color, sizes, { align = 'left', maxLines = 3, weight = 700, fam = 'latin' } = {}) => {
+    const b = fit(ctx, say(str).replace(/ · /g, '\u00a0· '), { weight, sizes, maxW: fr.w, maxLines, fam })
     b.lines.forEach((l, i) => text(ctx, l, align === 'center' ? fr.cx : fr.x, y + b.size * (0.8 + i * 1.18), { f: b.f, color, align }))
     return y + paragraphH(b)
   }
-  const page = (ctx, i, of) => {
-    ground(ctx, p, fr)
-    masthead(ctx, p, fr)
-    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: p.ink2, align: 'right' })
-  }
+  // A frame's title, in the sky: serif, centred (plan 271).
+  const title = (ctx, str, y, sizes, maxLines = 3) => lead(ctx, str, y, p.ink, sizes, { align: 'center', maxLines, weight: 900, fam: 'serif' })
+  // A frame's body under it, centred.
+  const body = (ctx, str, y, sizes = [FS.lead, FS.body], maxLines = 3) => lead(ctx, str, y, p.ink2, sizes, { align: 'center', maxLines, weight: 500 })
   // Its rings reach past the pill: the whole of them inside the frame.
   // In a clip, given the moment it comes in (`at`), it rises in and then
   // waits as the app's gate waits (app.js's departButton).
@@ -339,14 +686,61 @@ export function promoDeck(plan, fmt, opts) {
   // In a clip the mark, the ask and its note come in one after another,
   // then the gate, which waits (END below).
   const board = (ctx, i, of, head, note) => {
+    if (PR) return sunBoard(ctx, i, of, 1, (c, y) => {
+      y = part(c, k(END.head, 0.8), () => title(c, head, y, [FS.display * 0.62, FS.heading]))
+      y = part(c, k(END.note, 0.8), () => body(c, note, y + SP[5]))
+      return part(c, k(END.note + 0.3, 0.8), () => handle(c, y))
+    })
     page(ctx, i, of)
     centred(ctx, (c, y) => {
-      part(c, k(END.mark, 0.9), () => mark(c, fr.cx - 130, y, 260, p.ink, p.gold))
+      part(c, k(END.sun, 0.9), () => mark(c, fr.cx - 130, y, 260, p.ink, p.gold))
       y += 260 + SP[7]
       y = part(c, k(END.head, 0.8), () => lead(c, head, y, p.ink, [FS.display * 0.62, FS.heading], { align: 'center' }))
       y = part(c, k(END.note, 0.8), () => lead(c, note, y + SP[5], p.ink2, [FS.lead, FS.body], { align: 'center', weight: 500 }))
       return part(c, k(END.note + 0.3, 0.8), () => handle(c, y))
     }, FOOT)
+    depart(ctx, P.board, END.gate)
+  }
+  // On the print the last frame is the hour's sun, ringed by the four
+  // lines as Today rings it, the mark in it (B2, the owner's pick), the
+  // words under it in the washed sky, the gate at the foot. `size`: the
+  // sun's share of Today's dial. In a clip the sun rises in, the ring is
+  // drawn round from the top, the mark settles into the disc, then the
+  // words and the gate (END).
+  const sunBoard = (ctx, i, of, size, words) => {
+    // The words start under the ring, measured off the page to wash the
+    // sky behind them; a long ask takes its room from the sun, never
+    // from the gate.
+    const room = fr.bottom - DEP - 8 * U - SP[6]
+    let u, halo, cy, top, end
+    for (let s = size; ; s -= 0.04) {
+      u = PU * s
+      halo = PR.frame.halo * u
+      cy = fr.y + halo + SP[5]
+      top = cy + halo + SP[7]
+      end = words(scratch(ctx), top)
+      if (end <= room || s <= 0.5) break
+    }
+    const r = PR.frame.disc * u
+    view(ctx)
+    // In a clip the sky pales behind the words as the mark settles.
+    ctx.save()
+    ctx.globalAlpha *= k(END.mark, 0.9)
+    wash(ctx, top, end)
+    ctx.restore()
+    if (of > 1) text(ctx, `${i} / ${of}`, fr.right, fr.y + 64 * 0.66, { f: font(700, FS.caption, 'latin'), color: p.ink, align: 'right' })
+    const breath = clock ? 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, clock.t / 7)) : null
+    const sweep = clock ? A.cssEase(0.45, 0, 0.2, 1)(Math.min(1, Math.max(0, (clock.t - END.ring[0]) / (END.ring[1] - END.ring[0])))) : 1
+    part(ctx, k(END.sun, 0.9), () => A.printDial(ctx, p, PR, fr.cx, cy, u, { parts: LINE, count: '', unit: '', time: null, breath, sweep }))
+    const m = k(END.mark, 0.9)
+    if (m > 0) {
+      const ms = r * 1.15 * (1.15 - 0.15 * m)
+      ctx.save()
+      ctx.globalAlpha *= m
+      mark(ctx, fr.cx - ms / 2, cy - ms / 2, ms, p.ink, p.gold)
+      ctx.restore()
+    }
+    words(ctx, top)
     depart(ctx, P.board, END.gate)
   }
   // Today on its print, full-bleed: the hour's sun as the dial, its time
@@ -384,6 +778,7 @@ export function promoDeck(plan, fmt, opts) {
   }
   const F = A.faceOf(p)
   const panel = (ctx, x, y, w, h, r = 6 * U) => {
+    lift(ctx, x, y, w, h, r)
     ctx.fillStyle = F.bg
     rrect(ctx, x, y, w, h, r)
     ctx.fill()
@@ -394,13 +789,17 @@ export function promoDeck(plan, fmt, opts) {
   }
 
   switch (plan.story) {
+    // A feature's video ends here (plan 270): the stories' last frame, its ask the caller's.
+    case 'gate':
+      add('gate', ctx => board(ctx, 1, 1, plan.head, plan.note ?? P.start))
+      break
     case 'pitch': {
       add('today', ctx => today(ctx, P.hook))
       add('lines', ctx => {
         page(ctx, 2, 4)
         const rows = [['kana', '仮', fig.kanaDeck], ['vocab', '語', fig.words], ['kanji', '漢', fig.kanji], ['grammar', '文', fig.points]]
         centred(ctx, (c, y) => {
-          y = lead(c, P.linesTitle, y, p.ink, [FS.heading, FS.title], { maxLines: 1 })
+          y = title(c, P.linesTitle, y, [FS.heading, FS.title], 2)
           y += SP[7]
           const h = 84 * U
           for (const [key, jp, num] of rows) {
@@ -423,7 +822,7 @@ export function promoDeck(plan, fmt, opts) {
             text(c, figure, fr.right - 18 * U, y + h / 2 + 12 * U, { f: font(700, 34 * U, 'latin'), color: F.ink, align: 'right' })
             y += h + 8 * U
           }
-          return lead(c, P.levels, y + SP[5], p.ink2, [FS.lead, FS.body], { align: 'center', maxLines: 2, weight: 500 })
+          return body(c, P.levels, y + SP[5], [FS.lead, FS.body], 2)
         })
       })
       if (fig.levels && fig.kanaDeck) {
@@ -431,8 +830,8 @@ export function promoDeck(plan, fmt, opts) {
           page(ctx, 3, 4)
           const stops = arrivals(fig, 10).map(a => [a.level, P.span(spanOf(a.days))])
           centred(ctx, (c, y) => {
-            y = lead(c, P.paceTitle, y, p.ink, [FS.heading, FS.title], { maxLines: 2 })
-            y = lead(c, P.paceAt, y + SP[3], p.ink2, [FS.lead, FS.body], { maxLines: 2, weight: 500 })
+            y = title(c, P.paceTitle, y, [FS.heading, FS.title], 2)
+            y = body(c, P.paceAt, y + SP[3], [FS.lead, FS.body], 2)
             y += SP[8]
             const rx = fr.x + 60
             const step = 140
@@ -449,7 +848,7 @@ export function promoDeck(plan, fmt, opts) {
               text(c, say(span), rx + 110, cy + z * 0.36, { f: font(700, z, 'latin'), color: i === 0 ? p.ink : p.ink2 })
             })
             y += step * (stops.length - 1) + 56 + SP[8]
-            return lead(c, P.paceNote, y, p.ink2, [FS.body, FS.sm], { maxLines: 3, weight: 500 })
+            return body(c, P.paceNote, y, [FS.body, FS.sm], 3)
           })
         })
       }
@@ -459,7 +858,10 @@ export function promoDeck(plan, fmt, opts) {
     case 'card': {
       const pr = plan.promo
       const cardH = 290 * U
-      const card = (c, y, body, hint) => A.reviewCard(c, p, fr.x, y, fr.w, cardH, U, { stage: 'mastered', stageLabel: P.mastered, foot: ['N5', P.mode], band: 1, hint, body })
+      const card = (c, y, face, hint) => {
+        lift(c, fr.x, y, fr.w, cardH)
+        return A.reviewCard(c, p, fr.x, y, fr.w, cardH, U, { stage: 'mastered', stageLabel: P.mastered, foot: ['N5', P.mode], band: 1, hint, body: face })
+      }
       const back = c => (x, yy, w, h) => {
         const mb = fit(c, pr.sense, { weight: 800, sizes: [27.2 * U, 22 * U, 18 * U], maxW: w, maxLines: 2, fam: 'latin' })
         const mh = paragraphH(mb)
@@ -474,7 +876,7 @@ export function promoDeck(plan, fmt, opts) {
       add('front', ctx => {
         page(ctx, 1, 4)
         centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.stillKnow, y, p.ink, [FS.display * 0.66, FS.heading]))
+          y = part(c, k(0, 0.8), () => title(c, P.stillKnow, y, [FS.display * 0.66, FS.heading]))
           y += SP[7]
           const turned = clock && clock.t >= TURN
           part(c, k(0.4, 1.0), () => card(c, y, turned
@@ -497,7 +899,7 @@ export function promoDeck(plan, fmt, opts) {
         centred(ctx, (c, y) => {
           card(c, y, back(c))
           y += cardH + SP[7]
-          y = lead(c, P.how, y, p.ink, [FS.title], { maxLines: 1 })
+          y = title(c, P.how, y, [FS.title], 1)
           y += SP[4]
           const bar = A.ratingBar(c, p, fr.x, y + 34 * U, fr.w, U, P.ratings, { pressed: 2 })
           bar.centres.forEach((cx, i) => {
@@ -520,7 +922,7 @@ export function promoDeck(plan, fmt, opts) {
       const pasteFrame = ctx => {
         page(ctx, 1, 3)
         centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.paste, y, p.ink, [FS.display * 0.62, FS.heading]))
+          y = part(c, k(0, 0.8), () => title(c, P.paste, y, [FS.display * 0.62, FS.heading]))
           y += SP[8]
           const h = 146 * U
           panel(c, fr.x, y, fr.w, h, 8 * U)
@@ -557,7 +959,7 @@ export function promoDeck(plan, fmt, opts) {
           }
           text(c, P.analyze, bx + bw / 2, by + bh / 2 + 6 * U, { f: font(700, 15 * U, 'latin'), color: '#1c1811', align: 'center' })
           y += h + SP[8]
-          return part(c, k(0.5, 0.8), () => lead(c, P.cuts, y, p.ink2, [FS.lead, FS.body], { maxLines: 5, weight: 500 }))
+          return part(c, k(0.5, 0.8), () => body(c, P.cuts, y, [FS.lead, FS.body], 5))
         })
       }
       add('paste', ctx => {
@@ -585,7 +987,7 @@ export function promoDeck(plan, fmt, opts) {
           panel(c, fr.x, y, fr.w, lineH, 8 * U)
           A.analyserLine(c, p, fr.x + 13 * U, y + 22 * U, inner, U, pr.toks)
           y += lineH + SP[4]
-          y = lead(c, pr.tr, y, p.ink2, [FS.lead, FS.body], { align: 'center', maxLines: 3, weight: 500 })
+          y = body(c, pr.tr, y, [FS.lead, FS.body], 3)
           y += SP[6]
           // As many of its points as the room holds, in the sentence's order.
           const room = fr.bottom - (fr.y + 64 + SP[7])
@@ -593,7 +995,10 @@ export function promoDeck(plan, fmt, opts) {
           pr.points.forEach((pt, i) => {
             if (y - y0 + 102 * U > room) return
             shown += 1
-            y = part(c, pointIn(i), () => y + A.pointCard(c, p, fr.x, y, fr.w, U, pt) + 8 * U)
+            y = part(c, pointIn(i), () => {
+              lift(c, fr.x, y, fr.w, 102 * U)
+              return y + A.pointCard(c, p, fr.x, y, fr.w, U, pt) + 8 * U
+            })
           })
           pointsShown = shown
           return y
@@ -607,6 +1012,7 @@ export function promoDeck(plan, fmt, opts) {
       const pr = plan.promo
       const question = (c, y) => {
         const h = 124 * U
+        lift(c, fr.x, y, fr.w, h)
         A.reviewCard(c, p, fr.x, y, fr.w, h, U, { stage: 'new', foot: ['N5', P.examMode], band: 0, body: (x, yy, w, hh) => {
           const s = pr.before + pr.word + pr.after
           let z = 24 * U
@@ -623,44 +1029,257 @@ export function promoDeck(plan, fmt, opts) {
       add('question', ctx => {
         page(ctx, 1, 3)
         centred(ctx, (c, y) => {
-          part(c, k(0, 0.8), () => text(c, P.examKind.toLocaleUpperCase(), fr.x, y + FS.caption, { f: font(700, FS.caption, 'latin'), color: p.line.exam, tr: 0.18 }))
+          part(c, k(0, 0.8), () => text(c, P.examKind.toLocaleUpperCase(), fr.cx, y + FS.caption, { f: font(700, FS.caption, 'latin'), color: p.line.exam, align: 'center', tr: 0.18 }))
           y += FS.caption * 1.6 + SP[3]
-          y = part(c, k(0.1, 0.8), () => lead(c, P.examAsk, y, p.ink, [FS.heading, FS.title]))
+          y = part(c, k(0.1, 0.8), () => title(c, P.examAsk, y, [FS.heading, FS.title]))
           y += SP[6]
           y += part(c, k(0.6, 0.9), () => question(c, y)) + SP[4]
           // The four readings in one after another.
+          pr.choices.forEach((_, i) => part(c, k(1.5 + 0.3 * i, 0.7), () => lift(c, fr.x, y + i * 56 * U, fr.w, 48 * U)))
           y += A.choiceRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: p.line.exam, rowH: 48, reveal: pr.choices.map((_, i) => k(1.5 + 0.3 * i, 0.7)) })
-          return part(c, k(3.2, 0.8), () => lead(c, P.comment, y + SP[5], p.ink2, [FS.body], { maxLines: 2, weight: 500 }))
+          return part(c, k(3.2, 0.8), () => body(c, P.comment, y + SP[5], [FS.body], 2))
         })
       })
       add('answer', ctx => {
         page(ctx, 2, 3)
         centred(ctx, (c, y) => {
           y += question(c, y) + SP[5]
+          // Answered, the run folds the other rows away: the right one stays.
+          lift(c, fr.x, y, fr.w, 54 * U)
           y += A.choiceRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: p.line.exam, right: pr.right, answered: true }) + SP[6]
-          y = lead(c, pr.explain, y, p.ink, [FS.title, FS.lead], { maxLines: 3 })
+          y = lead(c, pr.explain, y, p.ink, [FS.title, FS.lead], { align: 'center', maxLines: 3 })
           if (!pr.exam) return y
           y += SP[6]
           const figs = P.examFigs(pr.exam)
           const fz = FS.heading
           const nw = Math.max(...figs.map(([v]) => measure(c, v, font(700, fz, 'latin'))))
-          for (const [v, l] of figs) {
-            text(c, v, fr.x, y + fz * 0.8, { f: font(700, fz, 'latin'), color: p.line.exam })
-            const lb = fit(c, say(l), { weight: 500, sizes: [FS.lead, FS.body], maxW: fr.w - nw - SP[5], maxLines: 1, fam: 'latin' })
-            text(c, lb.lines[0], fr.x + nw + SP[5], y + fz * 0.8, { f: lb.f, color: p.ink })
+          const labels = figs.map(([, l]) => fit(c, say(l), { weight: 500, sizes: [FS.lead, FS.body], maxW: fr.w - nw - SP[5], maxLines: 1, fam: 'latin' }))
+          // The figures and their words as one block, centred under the rest.
+          const x0 = fr.cx - (nw + SP[5] + Math.max(...labels.map(lb => measure(c, lb.lines[0], lb.f)))) / 2
+          figs.forEach(([v], i) => {
+            text(c, v, x0, y + fz * 0.8, { f: font(700, fz, 'latin'), color: p.line.exam })
+            text(c, labels[i].lines[0], x0 + nw + SP[5], y + fz * 0.8, { f: labels[i].f, color: p.ink })
             y += fz * 1.15
-          }
+          })
           return y
         })
       })
       add('board', ctx => board(ctx, 3, 3, P.stand, P.examNote))
       break
     }
+    case 'comprehension': {
+      // Plan 301: the text under the run's clock, one of its questions,
+      // answered on the line of the text it quotes, and the board. In a
+      // clip the cover's parts come in, the card last, and the clock
+      // runs from the moment it is up; the still is the clip's end.
+      const pr = plan.promo
+      const C = P.comp
+      const rikai = p.line.rikai
+      const badge = { vocabulary: p.success, grammar: p.warning }[pr.type] || p.ink2
+      const kicker = (c, str, y, color = rikai) => {
+        text(c, str.toLocaleUpperCase(), fr.x, y + FS.caption, { f: font(700, FS.caption, 'latin'), color, tr: 0.18 })
+        return y + FS.caption * 1.6
+      }
+      const left = () => Math.max(0, pr.read - Math.max(0, (clock ? clock.t : CLIP.seconds) - COMP_CLOCK))
+      const mmss = secs => `${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, '0')}`
+      // The cover's text: whole at the reading rung, else at the small
+      // one, else bounded as the run bounds it, the rest under the foot.
+      const pad = A.PASSAGE.pad * U
+      const footH = 2 * 12 * U + A.PASSAGE.foot * U * 1.35
+      const HOOK = [FS.heading, FS.title]
+      const coverOf = c => {
+        const y = lead(scratch(c), C.hook, fr.y + 64 + SP[7] + FS.caption * 1.6 + SP[2], p.ink, HOOK, { maxLines: 2 }) + SP[6]
+          + A.readClock(scratch(c), p, fr.x, 0, fr.w, U, { fill: 1, label: '0:00' }) + SP[4]
+        const room = fr.bottom - y - footH - 2 * pad
+        for (const size of [A.PASSAGE.size, A.PASSAGE.small]) {
+          const lines = A.passageLines(c, pr.text, fr.w, U, size)
+          const step = size * A.PASSAGE.lh * U
+          if (lines.length * step <= room || size === A.PASSAGE.small) return { size, lines, step, rows: Math.max(1, Math.min(lines.length, Math.floor(room / step))) }
+        }
+      }
+      add('text', ctx => {
+        pageTo(ctx, 1, 5, fr.bottom)
+        const cover = coverOf(ctx)
+        let y = fr.y + 64 + SP[7]
+        y = part(ctx, k(0, 0.8), () => kicker(ctx, C.kind(pr.level), y))
+        y += SP[2]
+        y = part(ctx, k(0.1, 0.8), () => lead(ctx, C.hook, y, p.ink, HOOK, { maxLines: 2 }))
+        y += SP[6]
+        const secs = left()
+        y += part(ctx, k(0.5, 0.6), () => A.readClock(ctx, p, fr.x, y, fr.w, U, { fill: pr.read ? secs / pr.read : 0, label: `${C.timeLeft} · ${mmss(Math.ceil(secs))}`, low: secs < 60 })) + SP[4]
+        const h = footH + 2 * pad + cover.rows * cover.step
+        part(ctx, k(COMP_CARD, 0.9), () => A.passageCard(ctx, p, fr.x, y, fr.w, h, U, { lines: cover.lines, size: cover.size, foot: [pr.level, C.title] }))
+      })
+      const head = (c, y) => kicker(c, `${pr.level} · ${C.question} ${pr.n} / ${pr.total}`, y)
+      const asked = (c, y) => {
+        y = head(c, y)
+        y += SP[2]
+        // The run's progress (.deck-progress): the line's segment to this question.
+        const bh = 6 * U
+        c.fillStyle = p.surfaceLine
+        rrect(c, fr.x, y, fr.w, bh, bh / 2)
+        c.fill()
+        c.save()
+        rrect(c, fr.x, y, fr.w, bh, bh / 2)
+        c.clip()
+        c.fillStyle = rikai
+        c.fillRect(fr.x, y, fr.w * (pr.n / pr.total), bh)
+        c.restore()
+        y += bh + SP[4]
+        return y + A.askCard(c, p, fr.x, y, fr.w, U, { badge: C.types[pr.type] || pr.type, color: badge, question: pr.question }) + SP[3]
+      }
+      // ── The roll (plan 301b): the same text a sentence a line, rising
+      // at the chosen speed, the line being read lit. Still, it is the
+      // demo's last moment (ROLL_DEMO.seconds); in a clip the card lands,
+      // its first line stands, the roll runs, + is pressed twice and ふ
+      // once, the readings fading in over the kanji.
+      const D = ROLL_DEMO
+      const cpsAt = t => [...D.speeds].reverse().find(([at]) => t >= at)[1]
+      const readBy = t => {
+        // The characters gone by: each stretch at its own speed.
+        const from = D.card + A.ROLL.lead
+        let read = 0
+        D.speeds.forEach(([at, cps], i) => {
+          const a = Math.max(at, from)
+          const b = Math.min(i + 1 < D.speeds.length ? D.speeds[i + 1][0] : Infinity, t)
+          if (b > a) read += (b - a) * cps
+        })
+        return Math.min(read, pr.chars)
+      }
+      const pressOf = (t, at) => (clock && t >= at && t < at + 0.25 ? 1 - (t - at) / 0.25 : 0)
+      const tapRing = (c, [x, y], dt) => {
+        if (!clock || dt < 0 || dt > 0.45) return
+        const f = dt / 0.45
+        c.save()
+        c.globalAlpha *= 0.6 * (1 - f)
+        c.strokeStyle = p.paper ? p.ink : '#ffffff'
+        c.lineWidth = 2.5 * U
+        c.beginPath()
+        c.arc(x, y, (14 + 22 * ease(f)) * U, 0, Math.PI * 2)
+        c.stroke()
+        c.restore()
+      }
+      add('roll', ctx => {
+        pageTo(ctx, 2, 5, fr.bottom)
+        const t = clock ? clock.t : D.seconds
+        let y = fr.y + 64 + SP[7]
+        y = part(ctx, k(0, 0.6), () => kicker(ctx, C.kind(pr.level), y))
+        y += SP[2]
+        // At the cover's hook's size, so the two read as one story.
+        const rung = fit(scratch(ctx), say(C.hook), { sizes: HOOK, maxW: fr.w, maxLines: 2 }).size
+        y = part(ctx, k(0.1, 0.6), () => lead(ctx, C.roll, y, p.ink, [rung, FS.title], { maxLines: 2 }))
+        y += SP[6]
+        const cps = cpsAt(t)
+        const read = readBy(t)
+        const leadLeft = Math.max(0, D.card + A.ROLL.lead - t)
+        const remaining = leadLeft + (pr.chars - read) / cps + A.ROLL.tail
+        const whole = A.ROLL.lead + pr.chars / cps + A.ROLL.tail
+        y += part(ctx, k(0.2, 0.6), () => A.readClock(ctx, p, fr.x, y, fr.w, U, { fill: remaining / whole, label: `${C.timeLeft} · ${mmss(Math.ceil(remaining))}`, low: remaining < 10 })) + SP[4]
+        const furi = !clock ? 1 : Math.min(1, Math.max(0, (t - D.furi) / 0.3))
+        const layout = A.rollLayout(ctx, pr.roll, fr.w, U, { furigana: furi > 0 })
+        const { y: at } = A.rollAt(layout, read, pr.chars)
+        const { mids } = layout
+        let lit = 0
+        for (let i = 0; i + 1 < mids.length; i++) if (at >= mids[i]) lit = Math.min(mids.length - 1, i + (at - mids[i]) / (mids[i + 1] - mids[i]))
+        const press = { faster: Math.max(pressOf(t, D.speeds[1][0]), pressOf(t, D.speeds[2][0])), furi: pressOf(t, D.furi) }
+        part(ctx, k(D.card, 0.8), () => {
+          const { chips } = A.rollCard(ctx, p, fr.x, y, fr.w, fr.bottom - y, U, { layout, at, lit, furi, speed: C.speed(cps), foot: [pr.level, C.title], press })
+          for (const [, when] of D.speeds.slice(1)) tapRing(ctx, chips.faster, t - when)
+          tapRing(ctx, chips.furi, t - D.furi)
+        })
+      })
+      // A frame's parts come in as the app brings them in (in a clip);
+      // still, everything stands.
+      add('question', ctx => {
+        page(ctx, 3, 5)
+        centred(ctx, (c, y) => {
+          y = part(c, k(0, 0.6), () => asked(c, y))
+          y += A.letterRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: rikai, reveal: pr.choices.map((_, i) => k(0.6 + 0.25 * i, 0.5)) })
+          return part(c, k(1.8, 0.6), () => lead(c, P.comment, y + SP[5], p.ink2, [FS.body], { maxLines: 2, weight: 500 }))
+        })
+      })
+      add('answer', ctx => {
+        page(ctx, 4, 5)
+        centred(ctx, (c, y) => {
+          // The question again in a line, its card on the slide before.
+          y = part(c, k(0, 0.6), () => {
+            const yy = head(c, y) + SP[2]
+            const qb = A.mixedFit(c, pr.question, { weight: 500, sizes: [FS.lead / U, FS.body / U], maxW: fr.w, maxLines: 3, u: U })
+            qb.lines.forEach((l, i) => text(c, l, fr.x, yy + qb.size * (0.8 + i * 1.18), { f: qb.f, color: p.ink2 }))
+            return yy + paragraphH(qb) + SP[4]
+          })
+          y = part(c, k(0.3, 0.5), () => y + A.letterRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: rikai, right: pr.right, answered: true }) + SP[6])
+          // The line it rests on, on the breakdown's open rail: the
+          // sentence with its readings, the words quoted lit, its translation.
+          y = part(c, k(0.9, 0.6), () => {
+            let yy = kicker(c, C.inText, y, p.ink2) + SP[2]
+            const x = fr.x + 3 * U + 12 * U
+            const w = fr.right - x
+            const y0 = yy
+            yy += A.analyserLine(c, p, x, yy, w, U, pr.quote.toks, { center: false })
+            const tb = fit(c, pr.quote.tr, { weight: 500, sizes: [FS.lead, FS.body], maxW: w, maxLines: 3 })
+            tb.lines.forEach((l, i) => text(c, l, x, yy + tb.size * (0.8 + i * 1.18), { f: tb.f, color: p.ink }))
+            yy += paragraphH(tb)
+            c.fillStyle = rikai
+            c.fillRect(fr.x, y0, 3 * U, yy - y0)
+            return yy
+          })
+          return part(c, k(1.8, 0.6), () => lead(c, C.then, y + SP[6], p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 }))
+        })
+      })
+      add('board', ctx => board(ctx, 5, 5, C.head, C.note))
+      // The story whole (plan 301b), as the duels' plays: each frame on its
+      // own clock, one after another, a frame leaving as the next comes.
+      const beats = COMP_BEATS.map(([key, len]) => [out.findIndex(f => f.key === key), len])
+      const total = beats.reduce((sum, [, len]) => sum + len, 0)
+      const starts = beats.map((_, i) => beats.slice(0, i).reduce((sum, [, len]) => sum + len, 0))
+      // On the print (plan 271) it moves under every frame, as a cover's does.
+      compStory = {
+        seconds: total,
+        fps: CLIP.fps,
+        print: !!PR,
+        sounds: [
+          ...scoreOf(plan),
+          { at: starts[1] + D.card, key: 'card-transition' },
+          ...[D.speeds[1][0], D.speeds[2][0], D.furi].map(at => ({ at: starts[1] + at, key: 'click', gain: 0.6 })),
+          { at: starts[2] + 0.1, key: 'card-transition' },
+          ...pr.choices.map((_, i) => ({ at: starts[2] + 0.6 + 0.25 * i, key: 'toggle', gain: 0.5 })),
+          { at: starts[3] + 0.3, key: 'toggle', gain: 0.8 },
+          ...endScoreOf(plan).map(x => ({ ...x, at: starts[4] + x.at })),
+        ],
+        draw: (ctx, t, moving = null) => {
+          let i = beats.findIndex((_, j) => t < starts[j] + beats[j][1])
+          if (i < 0) i = beats.length - 1
+          const s = t - starts[i]
+          const last = i === beats.length - 1
+          ctx.save()
+          clock = { t: s, moving }
+          try {
+            const exit = last ? 0 : Math.min(1, Math.max(0, (s - (beats[i][1] - COMP_EXIT)) / COMP_EXIT))
+            // On the print the frame keeps its print and its wash as it
+            // leaves (leave, above): faded and moved whole, its washed sky
+            // went with it and the bare print flashed between two frames.
+            if (exit > 0 && PR) leaving = exit
+            else if (exit > 0) {
+              view(ctx)
+              ctx.globalAlpha *= 1 - exit
+              ctx.translate(0, -28 * exit)
+            }
+            out[beats[i][0]].draw(ctx)
+          } finally {
+            leaving = 0
+            clock = null
+            ctx.restore()
+          }
+        },
+      }
+      break
+    }
     case 'pass': {
       add('pass', ctx => {
         page(ctx, 1, 2)
         centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.passWaits, y, p.ink, [FS.display * 0.72, FS.heading], { maxLines: 2 }))
+          y = part(c, k(0, 0.8), () => title(c, P.passWaits, y, [FS.display * 0.72, FS.heading], 2))
           y += SP[7]
           // In a clip 辶 fills on the level-up's own clock (recipes.js's
           // LEVEL_CLOCK, which its sounds are scored against), then the
@@ -668,15 +1287,12 @@ export function promoDeck(plan, fmt, opts) {
           const up = clock && clock.t >= LEVEL_UP
           const xp = !clock ? 0.12 : up ? 0.06 : fillShare(clock.t - FILL_START)
           y += part(c, k(0.4, 1.2), () => A.passCard(c, fr.x, y, fr.w, { name: P.yourName, nameInk: 'rgba(34, 36, 40, 0.45)', level: up ? 2 : 1, cls: P.free, xp })) + SP[7]
-          return part(c, k(1.0, 0.8), () => lead(c, P.passBody, y, p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 }))
+          return part(c, k(1.0, 0.8), () => body(c, P.passBody, y, [FS.lead, FS.body], 4))
         })
       })
       add('free', ctx => {
-        page(ctx, 2, 2)
-        centred(ctx, (c, y) => {
-          y = part(c, k(0, 0.8), () => lead(c, P.startFree, y, p.ink, [FS.heading, FS.title], { maxLines: 1 }))
-          y += SP[6]
-          // In a clip the promises come in one at a time (END.promise).
+        // The promises, one panel each; in a clip they come in one at a time (END.promise).
+        const promises = (c, y) => {
           P.promises.forEach(([h1, b1], i) => {
             const h = 74 * U
             part(c, k(END.promise(i), 0.7), () => {
@@ -690,9 +1306,379 @@ export function promoDeck(plan, fmt, opts) {
             y += h + 8 * U
           })
           return part(c, k(END.promise(P.promises.length), 0.8), () => handle(c, y))
+        }
+        // On the print, the sun's ending, smaller, for the three panels under it.
+        if (PR) return sunBoard(ctx, 2, 2, 0.62, (c, y) => {
+          y = part(c, k(END.head, 0.8), () => title(c, P.startFree, y, [FS.heading, FS.title], 1))
+          return promises(c, y + SP[6])
+        })
+        page(ctx, 2, 2)
+        centred(ctx, (c, y) => {
+          y = part(c, k(0, 0.8), () => lead(c, P.startFree, y, p.ink, [FS.heading, FS.title], { maxLines: 1 }))
+          return promises(c, y + SP[6])
         }, FOOT)
         depart(ctx, P.board, END.gate)
       })
+      break
+    }
+    case 'duel': {
+      // The story plays end to end (plan 281): each beat is drawn at its
+      // own moment `s`, its parts coming in faster than a cover's, its
+      // words landing one by one; a still is its beat at rest (STILL).
+      const pr = plan.promo
+      const D = P.duel
+      const beats = DUEL_BEATS.map(([key, len]) => [key, len ?? COUNT + pr.next / 1000 + RUN_OUT])
+      const clamp = x => Math.min(1, Math.max(0, x))
+      const io = x => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2)
+      const at = (s, start, dur) => (s == null ? 1 : ease(clamp((s - start) / dur)))
+      const glide = A.cssEase(0.25, 0.1, 0.25, 1)
+      const HEAD = [FS.heading, FS.title]
+      // Words that land one after another, 0.05s apart, each rising 14px
+      // over 0.22s; `parts` [[text, ink]] each start a line, all at the
+      // largest size at which the whole sets in `maxLines`.
+      const setOf = (c, parts, sizes, maxLines) => {
+        for (const z of sizes) {
+          const blocks = parts.map(([str, ink]) => ({ ink, b: fit(c, say(str), { sizes: [z], maxW: fr.w, maxLines: 9 }) }))
+          if (blocks.reduce((m, x) => m + x.b.lines.length, 0) <= maxLines || z === sizes[sizes.length - 1]) return { z, blocks }
+        }
+      }
+      const headline = (c, parts, y, s, start = 0, { sizes = HEAD, maxLines = 3 } = {}) => {
+        const { z, blocks } = setOf(c, parts, sizes, maxLines)
+        let i = 0
+        let line = 0
+        for (const { ink, b } of blocks) {
+          for (const l of b.lines) {
+            const by = y + z * (0.8 + line * 1.18)
+            let x = fr.x
+            for (const word of l.split(' ')) {
+              const f = at(s, start + i * 0.05, 0.22)
+              if (f > 0) {
+                c.save()
+                c.globalAlpha *= f
+                text(c, word, x, by + (1 - f) * 14, { f: b.f, color: ink })
+                c.restore()
+              }
+              x += measure(c, `${word} `, b.f)
+              i += 1
+            }
+            line += 1
+          }
+        }
+        return y + z * (0.8 + (line - 1) * 1.18 + 0.3)
+      }
+      // What a block below a headline takes, measured off the page, then
+      // set in the middle of the room the headline leaves.
+      const below = (c, top, body) => {
+        const h = body(scratch(c), 0)
+        const room = fr.bottom - top
+        if (h <= room) return body(c, top + (room - h) / 2)
+        c.save()
+        c.translate(fr.cx, top)
+        c.scale(room / h, room / h)
+        c.translate(-fr.cx, -top)
+        body(c, top)
+        c.restore()
+      }
+      // A tap, as a screen recording shows one: a ring that opens and fades.
+      const tap = (c, x, y, dt) => {
+        if (!clock || dt < 0 || dt > 0.45) return
+        const f = dt / 0.45
+        c.save()
+        c.globalAlpha *= 0.6 * (1 - f)
+        c.strokeStyle = '#ffffff'
+        c.lineWidth = 2.5 * U
+        c.beginPath()
+        c.arc(x, y, (14 + 22 * ease(f)) * U, 0, Math.PI * 2)
+        c.stroke()
+        if (dt < 0.18) {
+          c.globalAlpha = 0.35 * (1 - dt / 0.18)
+          c.fillStyle = '#ffffff'
+          c.beginPath()
+          c.arc(x, y, 14 * U, 0, Math.PI * 2)
+          c.fill()
+        }
+        c.restore()
+      }
+      const lift = (c, f, fn, dy = 16 * U) => {
+        if (f <= 0) return
+        c.save()
+        c.globalAlpha *= f
+        c.translate(0, (1 - f) * dy)
+        fn()
+        c.restore()
+      }
+
+      // ── The ticket: the hook, the duel's ticket, « Partir » pressed ──
+      const PRESS = DUEL_PRESS
+      const ticket = (c, s) => {
+        lift(c, at(s, 0, 0.3), () => masthead(c, p, fr), 0)
+        const top = fr.y + 64 + SP[7]
+        below(c, top, (cc, y) => {
+          y = headline(cc, [[D.hook(pr.seconds)[0], p.ink], [D.hook(pr.seconds)[1], p.gold]], y, s, 0.05, { sizes: [FS.display, FS.display * 0.85, FS.display * 0.72], maxLines: 3 })
+          y += SP[6]
+          const tf = at(s, 0.5, 0.45)
+          const th = A.duelTicket(scratch(cc), p, fr.x, y, fr.w, U, ticketOf(0))
+          if (tf > 0) {
+            cc.save()
+            cc.globalAlpha *= tf
+            cc.translate(fr.cx, y + th / 2 + (1 - tf) * 40 * U)
+            cc.rotate((1 - tf) * -0.05)
+            cc.translate(-fr.cx, -(y + th / 2))
+            A.duelTicket(cc, p, fr.x, y, fr.w, U, ticketOf(s == null ? 0 : Math.max(0, 1 - Math.abs(s - 1.0) / 0.2)))
+            cc.restore()
+          }
+          y += th + SP[5]
+          const vy = y
+          lift(cc, at(s, 1.1, 0.35), () => lead(cc, D.versus, vy, p.ink2, [FS.lead, FS.body], { maxLines: 2, weight: 500 }))
+          y = lead(scratch(cc), D.versus, vy, p.ink2, [FS.lead, FS.body], { maxLines: 2, weight: 500 }) + SP[7]
+          const press = s == null ? 0 : clamp(1 - Math.abs(s - PRESS - 0.07) / 0.09)
+          const by = y
+          lift(cc, at(s, 1.45, 0.35), () => A.stageButton(cc, p, fr.x, by, fr.w, U, D.go, { press }))
+          if (s != null) tap(cc, fr.cx, by + 26 * U, s - PRESS)
+          return by + 52 * U
+        })
+      }
+      const ticketOf = pulse => ({
+        no: pr.no, pulse,
+        you: { name: D.you, level: pr.you.level }, them: { name: pr.them.name, level: pr.them.level },
+        facts: [[D.duelLevel, pr.level], [D.questions, D.wordsKanji]],
+        foot: ['辻駅 発行', D.sprint],
+      })
+
+      // ── The race: the count, the sprint as played, the minute run out ──
+      const sprintEnd = COUNT + pr.next / 1000
+      const totalAt = (list, m) => list.filter(x => x.at <= m).reduce((t, x) => t + x.pts, 0)
+      const changes = [...new Set([...pr.answers.filter(a => a.pts > 0).map(a => a.at), ...pr.their.map(x => x.at)])].sort((a, b) => a - b)
+      const sharesAt = m => {
+        const mine = totalAt(pr.answers, m)
+        const theirs = totalAt(pr.their, m)
+        const reach = reachOf(mine, theirs)
+        return [theirs / reach, mine / reach]
+      }
+      // The trains glide to each new total as the app's do (0.3s, ease).
+      const trainsAt = m => {
+        const e = [...changes].reverse().find(x => x <= m)
+        if (e == null) return sharesAt(m)
+        const from = sharesAt(e - 1)
+        const to = sharesAt(e)
+        const f = glide((m - e) / 300)
+        return to.map((v, i) => from[i] + (v - from[i]) * f)
+      }
+      // The rest of the paper as the minute runs out: its readings and
+      // spellings, two by two, so the dock holds still while they flash by.
+      const RUN_IN = pr.items.slice(pr.answers.length).filter(q => q.two)
+      const QUICK = [100, 94, 100, 88, 97, 100, 91, 100]
+      const raceAt = s => {
+        if (s < COUNT) {
+          const n = s < 0.5 ? 3 : s < 0.9 ? 2 : 1
+          return { count: n, since: s - (n === 3 ? 0.1 : n === 2 ? 0.5 : 0.9), m: 0, mine: 0, theirs: 0, trains: [0, 0] }
+        }
+        if (s < sprintEnd) {
+          const m = (s - COUNT) * 1000
+          const a = [...pr.answers].reverse().find(x => x.served <= m)
+          return {
+            q: pr.items[a.n], a, m, qMs: m - a.served, flash: m >= a.at ? a : null,
+            mine: totalAt(pr.answers, m), theirs: totalAt(pr.their, m), trains: trainsAt(m),
+          }
+        }
+        // The rest of the minute run out: a question a beat, each right,
+        // the two totals climbing to the result, the lead changing hands.
+        const f = clamp((s - sprintEnd) / RUN_OUT)
+        const m0 = totalAt(pr.answers, pr.next)
+        const t0 = totalAt(pr.their, pr.next)
+        const mine = Math.round(m0 + (pr.final.mine - m0) * f ** 1.3)
+        const theirs = Math.round(t0 + (pr.final.theirs - t0) * f ** 0.8)
+        const reach = Math.max(500, Math.max(mine, theirs) * 1.3)
+        const k = Math.min(RUN_IN.length - 1, Math.floor(f * RUN_IN.length))
+        const q = RUN_IN[k]
+        return {
+          q, m: pr.next + (SPRINT_MS - pr.next) * f, qMs: 0, flash: { pick: q.answer, right: true, pts: QUICK[k % QUICK.length] },
+          mine, theirs, trains: [theirs / reach, mine / reach], runOut: f,
+        }
+      }
+      // The screen as the stage lays it out: the race, the page, the dock
+      // under the thumb, at the size that holds the tallest dock.
+      const raceHead = c => Math.max(...[D.same, D.fast(pr.top), D.ahead].map(str => setOf(c, [[str, p.ink]], HEAD, 2).z * (0.8 + 1.18 + 0.3)))
+      const DOCK_MAX = Math.max(...[...pr.items.slice(0, pr.answers.length), ...RUN_IN].map(q => A.tilesHeight(q.choices.length, q.two)))
+      const NEED = 118 + 12 + 150 + 12 + 12 + DOCK_MAX + 12
+      const race = (c, s) => {
+        const hh = raceHead(c)
+        // The beat's words: the same questions, then speed, then the line
+        // from the third question on, where the learner passes.
+        const third = COUNT + pr.answers[2].served / 1000
+        const say1 = s < COUNT ? 0 : s < third ? 1 : 2
+        headline(c, [[[D.same, D.fast(pr.top), D.ahead][say1], p.ink]], fr.y, s, [0, COUNT, third][say1], { maxLines: 2 })
+        const y0 = fr.y + hh + SP[5]
+        const us = Math.min(U, (fr.bottom - y0) / NEED)
+        const sw = A.PHONE_W * us
+        const sx = fr.cx - sw / 2
+        const bottom = y0 + NEED * us
+        const st = raceAt(s)
+        const dockH = (24 + (st.q ? A.tilesHeight(st.q.choices.length, st.q.two) : 0)) * us
+        const dockTop = bottom - dockH
+        const enter = at(s, 0, 0.25)
+        lift(c, enter, () => {
+          // The dock, edge to edge and down to the frame's foot.
+          c.fillStyle = p.panel
+          c.fillRect(0, dockTop, fr.W, fr.H - dockTop)
+          const lead0 = st.mine - st.theirs
+          const trails = lead0 > 0 ? 0 : 1
+          const span = Math.abs(st.trains[1] - st.trains[0])
+          A.raceLine(c, p, sx, y0, sw, us, {
+            clock: 1 - st.m / SPRINT_MS,
+            rows: [
+              { who: pr.them.name, fig: n(st.theirs), me: false, at: st.trains[0] },
+              { who: D.you, fig: n(st.mine), me: true, at: st.trains[1] },
+            ],
+            gap: lead0 !== 0 ? { row: trails, from: st.trains[trails], span, fig: `−${n(Math.abs(lead0))}`, mine: lead0 > 0 } : null,
+          })
+          const py = y0 + 130 * us
+          const ph = dockTop - 12 * us - py
+          if (st.count) {
+            A.duelPage(c, p, sx, py, sw, ph, us, { count: st.count, pop: 0.6 * (1 - at(st.since, 0, 0.18)) })
+            return
+          }
+          const { q, flash, qMs } = st
+          A.duelPage(c, p, sx, py, sw, ph, us, {
+            kind: D.kinds[q.kind], prompt: q.prompt, reading: q.kind === 'word' ? q.reading : '',
+            worth: flash ? flash.pts : points(qMs), share: flash ? 0 : Math.max(0, 1 - qMs / LIMIT_MS),
+            verdict: flash ? (flash.right ? 'right' : 'wrong') : null,
+            // What it paid swells as the answer lands.
+            pop: st.a && flash ? 0.35 * (1 - clamp((st.m - st.a.at) / 250)) : 0,
+          })
+          const tiles = A.duelTiles(c, p, sx, dockTop + 12 * us, sw, us, { choices: q.choices, two: q.two, picked: flash?.pick ?? null, verdict: flash ? (flash.right ? 'right' : 'wrong') : null })
+          if (st.a && flash) tap(c, ...tiles.centres[st.a.pick], (st.m - st.a.at) / 1000)
+        }, 0)
+      }
+
+      // ── The result face to face, the Elo it moved, the XP it paid ──
+      const result = (c, s) => {
+        const top = headline(c, [[D.winElo, p.ink]], fr.y, s) + SP[6]
+        below(c, top, (cc, y) => {
+          const f = at(s, 0.05, 0.3)
+          const count1 = s == null ? 1 : ease(clamp((s - 0.25) / 0.6))
+          const mine = Math.round(pr.final.mine * count1)
+          const theirs = Math.round(pr.final.theirs * count1)
+          const reach = Math.max(pr.final.mine, pr.final.theirs, 1) * 1.08
+          lift(cc, f, () => {
+            A.faceOff(cc, p, fr.x, y, fr.w, U, {
+              word: D.win, by: D.by(pr.final.mine - pr.final.theirs),
+              sides: [
+                { fig: n(mine), who: D.you, rights: D.rightsOf(pr.final.rights, pr.final.answered), me: true },
+                { fig: n(theirs), who: pr.them.name, rights: D.rightsOf(pr.final.theirRights, pr.final.theirAnswered) },
+              ],
+              finish: [{ who: pr.them.name, at: pr.final.theirs / reach }, { who: D.you, at: pr.final.mine / reach, me: true }],
+              show: { word: at(s, 0.15, 0.3), figs: at(s, 0.2, 0.3), finish: at(s, 0.35, 0.6) },
+            })
+          })
+          y += 287.27 * U + 12 * U
+          const elo = s == null ? 1 : io(clamp((s - 1.15) / 0.4))
+          const pop = s == null ? 0 : 1 - clamp((s - 1.55) / 0.25)
+          const cells = [
+            { value: n(Math.round(pr.elo.before + pr.elo.delta * elo)), move: s == null || s >= 1.55 ? { text: `+${pr.elo.delta}`, up: pr.elo.delta >= 0, pop } : null, label: D.elo },
+            { value: `+${Math.round(pr.xp.paid * elo)}`, unit: 'XP', label: D.xpLeft(pr.xp.left) },
+          ]
+          const ry = y
+          lift(cc, at(s, 0.95, 0.3), () => A.recordsRow(cc, p, fr.x, ry, fr.w, U, cells))
+          return ry + A.recordsRow(scratch(cc), p, fr.x, ry, fr.w, U, cells)
+        })
+      }
+
+      // ── The Elo: where it started, the curve it drew ──
+      const elo = (c, s) => {
+        let y = headline(c, [[D.eloIs, p.ink]], fr.y, s)
+        y += SP[4]
+        let subB = lead(scratch(c), D.eloFrom, y, p.ink2, [FS.lead, FS.body], { maxLines: 3, weight: 500 })
+        lift(c, at(s, 0.35, 0.35), () => { subB = lead(c, D.eloFrom, y, p.ink2, [FS.lead, FS.body], { maxLines: 3, weight: 500 }) })
+        below(c, subB + SP[6], (cc, yy) => {
+          const drawn = s == null ? 1 : io(clamp((s - 0.55) / 1.0))
+          const tr = pr.elo.trend
+          const pos = drawn * (tr.length - 1)
+          const i = Math.min(tr.length - 2, Math.floor(pos))
+          const v = Math.round(tr[i] + (tr[i + 1] - tr[i]) * (pos - i))
+          let h = 209.42 * U
+          lift(cc, at(s, 0.2, 0.3), () => {
+            h = A.eloCard(cc, p, fr.x, yy, fr.w, U, {
+              cap: D.elo, fig: n(v), trend: tr, start: pr.elo.start, drawn,
+              foot: [D.startAt(n(pr.elo.start)), D.peak(n(pr.elo.peak))], footShow: at(s, 1.5, 0.3),
+            })
+          })
+          return yy + h
+        })
+      }
+
+      // ── The Elo board, climbed a place ──
+      const ranking = (c, s) => {
+        const top = headline(c, [[D.climb, p.ink]], fr.y, s) + SP[6]
+        const before = pr.board.before
+        const after = pr.board.after
+        const swap = s == null ? 1 : io(clamp((s - 1.0) / 0.4))
+        const value = s == null ? 1 : io(clamp((s - 0.8) / 0.3))
+        const rows = before.map(r => {
+          const was = r.rank
+          const now = after.find(x => x.me === r.me && x.name === r.name).rank
+          const dy = (now - was) * 55 * swap
+          const elo = r.me ? Math.round(pr.elo.before + pr.elo.delta * value) : r.elo
+          return { rank: swap < 0.5 ? was : now, name: r.me ? D.you : r.name, elo: n(elo), me: r.me, dy }
+        })
+        const gap = pr.board.gap
+        const foot = gap ? D.gapTo(n(gap.elo), gap.rank) : ''
+        below(c, top, (cc, y) => {
+          lift(cc, at(s, 0.1, 0.3), () => A.boardRows(cc, p, fr.x, y, fr.w, U, rows, { foot, footShow: at(s, 1.5, 0.3) }))
+          return y + A.boardRows(scratch(cc), p, fr.x, y, fr.w, U, rows, { foot })
+        })
+      }
+
+      // ── The call to action: the mark, its words, the gate ──
+      const gate = ctx => board(ctx, 1, 1, D.ride, D.modes)
+
+      const scenes = { ticket, race, result, elo, ranking }
+      const STILL = { ticket: 1.9, race: COUNT + 4.3, result: 2.6, elo: 2.5, ranking: 2.4 }
+      for (const [key] of beats) {
+        add(key, ctx => {
+          if (key === 'board') return gate(ctx)
+          ground(ctx, p, fr)
+          // The ticket's cover clip holds once « Partir » is let go.
+          scenes[key](ctx, clock ? (key === 'ticket' ? Math.min(clock.t, PRESS + 0.25) : clock.t) : STILL[key])
+        })
+      }
+      const total = beats.reduce((t, [, len]) => t + len, 0)
+      const gateAt = total - beats[beats.length - 1][1]
+      // Its beats stand on the ground, as the stage does; on the print
+      // (plan 271) the gate it ends on is the print's sun, moving.
+      duelStory = {
+        seconds: total,
+        fps: CLIP.fps,
+        print: !!PR,
+        sounds: [{ at: PRESS, key: 'click' }, ...endScoreOf(plan).map(x => ({ ...x, at: gateAt + x.at }))],
+        draw: (ctx, t, moving = null) => {
+          let start = 0
+          for (const [key, len] of beats) {
+            if (t < start + len || key === 'board') {
+              const s = t - start
+              ctx.save()
+              clock = { t: s, moving }
+              try {
+                if (key === 'board') gate(ctx)
+                else {
+                  ground(ctx, p, fr)
+                  const exit = clamp((s - (len - EXIT)) / EXIT)
+                  if (exit > 0) {
+                    ctx.globalAlpha *= 1 - exit
+                    ctx.translate(0, -28 * exit)
+                  }
+                  scenes[key](ctx, s)
+                }
+              } finally {
+                clock = null
+                ctx.restore()
+              }
+              return
+            }
+            start += len
+          }
+        },
+      }
       break
     }
     default:
@@ -709,22 +1695,47 @@ export function promoDeck(plan, fmt, opts) {
     },
   })
   out.clips = {
-    cover: inMotion(out[0], plan.story === 'pitch', () => scoreOf(plan, shownPoints())),
-    end: inMotion(out[out.length - 1], false, () => endScoreOf(plan)),
+    cover: inMotion(out[0], !!PR, () => scoreOf(plan, shownPoints())),
+    end: inMotion(out[out.length - 1], !!PR, () => endScoreOf(plan)),
+    // The duels' story whole (plan 281): every beat, one after another;
+    // reading comprehension's (plan 301b).
+    ...(duelStory ? { story: duelStory } : {}),
+    ...(compStory ? { story: compStory } : {}),
   }
   out.clip = out.clips.cover
   return out
 }
 
+/** The stories' call to action in motion, its ask a caller's own (plan
+ *  270, a feature's video): the mark, the ask, its note, then the gate,
+ *  which waits; scored as the stories' is (the board's flap, the chime). */
+export function gateClip(fmt, { lang = 'en', head, note = null, handle = '', ground = 'paper', print = null } = {}) {
+  const plan = { ...promoPlan('pitch', {}, null, { lang, handle }), story: 'gate', head: weldIf(lang === 'fr' ? 'fr' : 'en', head), note }
+  return promoDeck(plan, fmt, { ground, print }).clips.end
+}
+
 /** A cover clip's length and rate: seven seconds, at thirty frames. */
 export const CLIP = { seconds: 7, fps: 30 }
+// Reading comprehension's cover (plan 301): the card lands at COMP_CARD,
+// the clock runs from COMP_CLOCK, once it is up.
+const COMP_CARD = 0.6
+const COMP_CLOCK = 1.1
+// The roll shown (plan 301b): the card lands at `card`, its first line
+// stands ROLL.lead, then it rolls at 6 characters a second; + is pressed
+// at 2.4s and 3.0s (8, then 10, the stepper's own steps) and ふ at 4.4s.
+export const ROLL_DEMO = { card: 0.3, speeds: [[0, 6], [2.4, 8], [3.0, 10]], furi: 4.4, seconds: 9 }
+// The story whole: each frame's beat, in seconds, and the exit between two.
+export const COMP_BEATS = [['text', 3.6], ['roll', ROLL_DEMO.seconds], ['question', 4.0], ['answer', 4.5], ['board', 3.5]]
+const COMP_EXIT = 0.12
 
 // The call to action's clock: the mark, the ask, its note, then the
 // gate at GATE, risen GATE_RISE later and waiting from then on, so its
 // idle nudge (four seconds untaken) falls inside the clip. On the pass
 // story's last frame the three promises come in where the ask's note would.
+// On the print (plan 271) the sun rises in first and its ring is drawn
+// round from the top over RING, then the mark settles into the disc.
 const GATE_RISE = 0.6
-export const END = { mark: 0, head: 0.5, note: 0.9, gate: 1.6, promise: i => 0.5 + 0.3 * i }
+export const END = { sun: 0, ring: [0.3, 1.1], mark: 0.8, head: 1.0, note: 1.3, gate: 1.7, promise: i => 1.1 + 0.2 * i }
 
 // The level-up's clock (src/lib/audio/recipes.js, LEVEL_CLOCK, held equal
 // by carousel.test.js): the road fills for FILL_SPAN along FILL_CURVE,
@@ -752,12 +1763,18 @@ function scoreOf(plan, points = 0) {
       const ticks = Array.from({ length: points }, (_, i) => ({ at: 3.9 + 0.35 * i, key: 'toggle', gain: 0.7 }))
       return [...keys, { at: 3.1, key: 'click' }, { at: 3.5, key: 'card-transition' }, ...ticks]
     }
+    case 'comprehension':
+      // The text's card laid down on the stage.
+      return [{ at: COMP_CARD, key: 'card-transition' }]
     case 'exam':
       // The question laid down, then each reading in with a press.
       return [{ at: 0.6, key: 'card-transition' }, ...[0, 1, 2, 3].map(i => ({ at: 1.5 + 0.3 * i, key: 'click', gain: 0.6 }))]
     case 'pass':
       // The gate's punch as the pass comes in, then the level-up's build and its burst.
       return [{ at: 0.4, key: 'pass-clip' }, { at: FILL_START, key: 'level-charge' }, { at: LEVEL_UP, key: 'level-burst' }]
+    case 'duel':
+      // « Partir » pressed: the stage's one sound (DuelRun's playClick).
+      return [{ at: DUEL_PRESS, key: 'click' }]
     default:
       return []
   }

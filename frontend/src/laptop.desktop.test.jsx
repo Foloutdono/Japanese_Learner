@@ -40,6 +40,12 @@ const { default: RatingBar } = await import('./components/study/RatingBar')
 const { startTally, countReview } = await import('./stores/runTally')
 
 const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
+// The stage's own arrival (@keyframes arrive, a 10px rise) at its end: a
+// test that holds a place against the level bar outside the stage, or
+// against itself a moment later, waits for it, not for a timer alone.
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+  .map(a => a.finished.catch(() => {})))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const CHOICES = ['gare', 'électricité', 'voiture', 'montagne']
@@ -102,6 +108,7 @@ describe('a run on a laptop', () => {
     const screen = await render(<McqRun />)
     // Past the stage's own arrival, which moves everything a pixel or two.
     await settle(600)
+    await landed()
     const before = $('.rating-bar').getBoundingClientRect().top
     const picked = $$('.mcq-row')[2].getBoundingClientRect().top
     await screen.rerender(<McqRun answered />)
@@ -233,6 +240,7 @@ describe('the action under what it answers (plan 123)', () => {
     try {
       await render(<Foot rows={9} />)
       await settle(600)
+      await landed()
       const foot = $('.stage__foot').getBoundingClientRect()
       expect(foot.bottom).toBeLessThanOrEqual($('.lvlbar').getBoundingClientRect().top + 1)
       expect(foot.top).toBeGreaterThan(0)

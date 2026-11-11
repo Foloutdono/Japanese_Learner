@@ -73,6 +73,7 @@
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		A8B1C8031BB0480185AE9A0E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F2CF38688AD35692A2E27658 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B62DF1466C67B48441D61D97 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DB4FA5EA118E6B3F0669BB21 /* TsujiWidgetPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TsujiWidgetPlugin.swift; sourceTree = "<group>"; };
 		DE07936D8A3094165F8E49D5 /* TsujiWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TsujiWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -234,6 +235,7 @@
 			knownRegions = (
 				en,
 				fr,
+				es,
 				Base,
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
@@ -329,6 +331,7 @@
 			children = (
 				A8B1C8031BB0480185AE9A0E /* en */,
 				16679ABFC9CAA5D94C2FE0E4 /* fr */,
+				F2CF38688AD35692A2E27658 /* es */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

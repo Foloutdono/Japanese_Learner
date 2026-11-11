@@ -58,7 +58,10 @@ TARGET_LINE_WIDTH = 16
 # A stored line cut by today's rule carries it (`cut_rev`), so a line
 # with nowhere clean to cut is not tried again at every opening
 # (routes/video._current). Bumped when what a line is cut into changes.
-CUT_REV = 2
+# 3: plan 314's breakdown -- the tokens and the points a line is never
+# cut through moved (にすぎない, ことがない, とは限らない whole; ほどで; 五、六
+# two numbers, their comma no breath).
+CUT_REV = 3
 # A piece narrower than this is a scrap (a ね！ on its own), dearer
 # than a less even cut.
 MIN_PIECE_WIDTH = 4
@@ -185,15 +188,34 @@ def _breath_cuts(text: str) -> list[tuple[int, int, float]]:
     return cuts
 
 
+# The figures a count is written with (_cuts: the comma of 五、六さつ).
+_NUMERAL_CHARS = frozenset("0123456789０１２３４５６７８９一二三四五六七八九十百千万")
+
+
+def _numeral(m) -> bool:
+    return bool(m.surface) and all(c in _NUMERAL_CHARS for c in m.surface)
+
+
 def _cuts(text: str, tokens) -> list[tuple[int, int, float]]:
     if not tokens:
         return _breath_cuts(text)
     cuts = []
-    for prev, nxt in zip(tokens, tokens[1:]):
+    for k, (prev, nxt) in enumerate(zip(tokens, tokens[1:])):
         cost = _cut_cost(prev, nxt, text[prev.end:nxt.start])
+        if cost is not None and _mark(prev) and k > 0 and _numeral(tokens[k - 1]) and _numeral(nxt):
+            # (一、二回, 五、六さつ: one count, "once or twice" -- its comma is
+            # no breath, plan 314)
+            cost = None
         if cost is not None:
             cuts.append((prev.end, nxt.start, cost))
     return cuts
+
+
+# The frames a sentence's subject or object hangs in (plan 272): their が
+# or を and the predicate are kept whole each, but a line breathes
+# between them -- …みなさんが | いてくれるので.
+_FRAMES = frozenset({"〜があります／います", "〜が好きです", "〜がきらいです", "〜が上手です／下手です",
+                     "〜が分かります", "〜をください"})
 
 
 def _clean_cuts(text: str, tokens, cuts: list[tuple[int, int, float]]) -> list[tuple[int, int, float]]:
@@ -204,7 +226,7 @@ def _clean_cuts(text: str, tokens, cuts: list[tuple[int, int, float]]) -> list[t
     line's head to its foot was never going to stay on one line)."""
     spans = []
     for hit in grammar_detect.hits(text, tokens) if tokens else []:
-        if line_width(text[hit["start"]:hit["end"]]) <= TARGET_LINE_WIDTH:
+        if line_width(text[hit["start"]:hit["end"]]) <= TARGET_LINE_WIDTH and hit["pattern"] not in _FRAMES:
             spans.append((hit["start"], hit["end"]))
         else:
             spans += [tuple(segment) for segment in hit["segments"]]

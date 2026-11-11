@@ -17,7 +17,7 @@ import { MarkSheet } from '../exam/DeskSheet'
 import { useDesk } from '../hooks/useDesk'
 import { EnterKey, LeaveKey } from '../components/chrome/DeskKeys'
 import { GateButton } from '../components/ui/GateButton'
-import { PageIcon, ChevronIcon, CrossIcon, FlagIcon, InfoIcon, SheetIcon } from '../components/ui/Icons'
+import { PageIcon, ChevronIcon, CrossIcon, FlagIcon, InfoIcon, SheetIcon, CheckCircleIcon, WarningIcon } from '../components/ui/Icons'
 
 // Poll cadence while the server generates a paper (it answers 202 until
 // the paper exists). Starts responsive, backs off geometrically so a
@@ -159,12 +159,16 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
 
   // A heartbeat, not a clock: its value is never read, only its change
   // forces a re-render each second so the derived `timeLeft` below gets
-  // recomputed against a fresh Date.now().
+  // recomputed against a fresh Date.now(). It beats only while the
+  // clock runs: before the paper arrives and on its cover there is no
+  // `timeLeft` to recompute, and the whole paper would redraw for nothing.
   const [, setTick] = useState(0)
+  const clockRunning = Boolean(exam && startedAt)
   useEffect(() => {
+    if (!clockRunning) return
     const id = setInterval(() => setTick(n => n + 1), 1000)
     return () => clearInterval(id)
-  }, [])
+  }, [clockRunning])
 
   const submitting = useRef(false)
 
@@ -460,7 +464,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   // silently losing the guard rather than silently keeping it.
   const dialogs = (
     <>
-      <Sheet open={submitState === 'confirming' && !desk} onClose={() => setSubmitState('idle')} jp={t.examConfirmTitle}>
+      <Sheet open={submitState === 'confirming' && !desk} onClose={() => setSubmitState('idle')} title={t.examConfirmTitle} icon={CheckCircleIcon} line="var(--line-exam)">
         <p className="hint">{t.examConfirmBody(unansweredCount)}</p>
         <button type="button" className="btn-primary" onClick={() => setSubmitState('idle')}>
           {t.examKeepGoing}
@@ -473,7 +477,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
         </button>
       </Sheet>
 
-      <Sheet open={submitState === 'error'} onClose={() => setSubmitState('idle')} jp={t.examSubmitFailed} label={t.examSubmitFailed}>
+      <Sheet open={submitState === 'error'} onClose={() => setSubmitState('idle')} title={t.examSubmitFailed} icon={WarningIcon} line="var(--line-exam)" label={t.examSubmitFailed}>
         <button type="button" className="btn-primary" onClick={finish}>
           {t.examSubmitRetry}
         </button>
@@ -482,7 +486,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
         </button>
       </Sheet>
 
-      <Sheet open={leaving} onClose={() => setLeaving(false)} jp={t.examLeaveTitle}>
+      <Sheet open={leaving} onClose={() => setLeaving(false)} title={t.examLeaveTitle} icon={CrossIcon} line="var(--line-exam)">
         <p className="hint">{t.examLeaveBody}</p>
         <button type="button" className="btn-primary" onClick={() => setLeaving(false)}>
           {t.examLeaveStay}
@@ -612,7 +616,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
         </main>
         <LevelBar />
 
-        <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} jp={t.examSheetTitle}>
+        <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title={t.examSheetTitle} icon={SheetIcon} line="var(--line-exam)">
           <PartsSheet
             questions={questions}
             answers={answers}

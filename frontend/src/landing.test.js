@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { DARK, LIGHT, SCALE } from '../landing/tokens.mjs'
 import { PAGES, SITE_ORIGIN, STORES, PRESENTATION, CLIPS } from '../landing/config.mjs'
 import { landingFiles, landingVoices } from '../landing/build.mjs'
@@ -82,12 +82,32 @@ describe('the landing page', () => {
       expect(html.match(/<h1\b/g)).toHaveLength(1)
     })
 
-    it('names its canonical address and both languages', () => {
+    it('names its canonical address and every language', () => {
       expect(text(/<link rel="canonical" href="([^"]+)"/)).toBe(`${SITE_ORIGIN}${page.path}`)
       for (const other of Object.values(PAGES)) {
         expect(html).toContain(`<link rel="alternate" hreflang="${other.lang}" href="${SITE_ORIGIN}${other.path}">`)
       }
       expect(html).toContain('hreflang="x-default"')
+    })
+
+    // Plan 302: three languages, so the phone's header lists them all in
+    // a menu (the desktop's switch never fitted there), each beside its
+    // flag; the one read is lit and links nowhere.
+    it('offers every language in the header, each beside its flag', () => {
+      const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'))
+      const menu = header.slice(header.indexOf('data-lmenu'), header.indexOf('</details>'))
+      const others = Object.values(PAGES).filter(p => p.lang !== page.lang)
+      for (const part of [header.slice(header.indexOf('class="seg langs"')), menu]) {
+        expect(part).toMatch(new RegExp(`<a aria-current="page" lang="${page.lang}"><svg class="lang-flag"`))
+        for (const other of others) {
+          expect(part).toContain(`<a href="${other.path}" hreflang="${other.lang}" lang="${other.lang}"><svg class="lang-flag"`)
+        }
+      }
+      expect(menu).toContain('<summary aria-label=')
+      expect(header).not.toContain('top__other')
+      for (const other of others) {
+        expect(html).toContain(`<meta property="og:locale:alternate" content="${other.ogLocale}">`)
+      }
     })
 
     it('describes itself in JSON-LD whose FAQ is the one on the page', () => {
@@ -178,22 +198,30 @@ describe('the landing page', () => {
     const facts = readFacts()
     const fr = STRINGS.fr(facts)
     const en = STRINGS.en(facts)
+    const es = STRINGS.es(facts)
 
     /** Every key path in `o`, functions and arrays included. */
     const shape = (o, at = '') => Object.entries(o).flatMap(([k, v]) =>
       v && typeof v === 'object' && !Array.isArray(v) ? shape(v, `${at}${k}.`) : [`${at}${k}`])
 
-    it('say the same things in both languages', () => {
-      expect(shape(en)).toEqual(shape(fr))
-      for (const key of ['figures', 'nav']) expect(en[key]).toHaveLength(fr[key].length)
-      expect(en.faq.items).toHaveLength(fr.faq.items.length)
-      expect(en.presentation.chapters).toHaveLength(PRESENTATION.chapters.length)
+    it('say the same things in every language', () => {
+      for (const t of [en, es]) {
+        expect(shape(t)).toEqual(shape(fr))
+        for (const key of ['figures', 'nav']) expect(t[key]).toHaveLength(fr[key].length)
+        expect(t.faq.items).toHaveLength(fr.faq.items.length)
+        expect(t.presentation.chapters).toHaveLength(PRESENTATION.chapters.length)
+      }
     })
 
     it('name every clip the footage slots hold', () => {
-      for (const t of [fr, en]) {
+      for (const t of [fr, en, es]) {
         expect(Object.keys(t.features.items)).toEqual(CLIPS.map(c => c.id))
       }
+    })
+
+    it('film every clip the footage slots hold (plan 283)', () => {
+      const scenes = readdirSync(new URL('../landing/footage/scenes/', import.meta.url)).map(f => f.replace(/\.mjs$/, ''))
+      expect(scenes.sort()).toEqual(CLIPS.map(c => c.id).sort())
     })
 
     it('count the decks the app serves', () => {

@@ -13,7 +13,7 @@ import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
 import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
-import { CheckIcon, ChevronIcon, PlusIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon, PlusIcon, CalendarIcon } from '../ui/Icons'
 import LevelFitLine from './LevelFitLine'
 import ComebackLine from './ComebackLine'
 import { useCredits } from '../../stores/credits'
@@ -21,7 +21,7 @@ import { useProfileSummary } from '../../stores/profileSummary'
 import { useLearnerModes, setExtraModes, MODE_LINES } from '../../stores/learnerModes'
 import { publishLeft } from '../../stores/gateRun'
 import { runFit, isFreeLane, laneFreeShare, nextCreditClock, refillClock } from '../../domain/credits'
-import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
+import { LINE_ORDER, laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
 import { restWeek, sealDate, ticketDate, utcToday, weekdayKanji } from '../../domain/dayClear'
 import { longDate } from '../dayclear/aria'
 import { WeekStamps } from '../dayclear/kit/WeekStamps'
@@ -34,6 +34,8 @@ import { shareTicket } from '../../lib/shareTicket'
 import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys, ThreadKey } from './TodayDial'
 import { TodayDay } from './TodayDay'
+import { DuelKey } from '../pvp/DuelKey'
+import { DuelBoard } from '../pvp/DuelRow'
 import { TodayPrint, PrintTitle } from './TodayPrint'
 import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
 
@@ -68,7 +70,7 @@ import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, prelo
 // Grouped by type, in the lines' order, because the pigment is what
 // tells one lane from another and the backend's order interleaves them.
 // Stable, so the backend's urgency order within a type survives.
-const TYPE_ORDER = ['kana', 'vocab', 'kanji', 'grammar', 'personal']
+const TYPE_ORDER = LINE_ORDER
 function orderLanes(lanes) {
   const rank = l => { const i = TYPE_ORDER.indexOf(laneTypeOf(l)); return i < 0 ? TYPE_ORDER.length : i }
   return [...lanes].sort((a, b) => rank(a) - rank(b))
@@ -586,10 +588,14 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
           </span>
           <span className="tdy-door__go">{t.gateAdjust}<ChevronIcon direction="right" size={16} /></span>
         </button>
-        {gate}
+        {/* The duels' key beside the gate (plan 287). */}
+        <div className="tdy-gaterow">
+          {gate}
+          <DuelKey hold={Boolean(fin?.playing)} arrive={Boolean(fin?.live)} arriveDelay={fin ? fin.ms('KEY') : 0} />
+        </div>
       </div>
 
-      <Sheet open={open} onClose={() => setOpen(false)} jp={t.todayTitle} label={t.gateServicesTitle} className="tdy-sheet">
+      <Sheet open={open} onClose={() => setOpen(false)} title={t.todayTitle} icon={CalendarIcon} label={t.gateServicesTitle} className="tdy-sheet">
         <Services
           lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
           choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
@@ -659,15 +665,18 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
       </section>
       <div className="tdy-desk__hero" ref={hero}>
         <div className="tdy-desk__go">
-          <GateButton
-            label={fin ? t.finContinue : t.depart}
-            onClick={depart}
-            aria-label={t.todayDue(run.taken)}
-            keys
-            disabled={closed}
-            arrive={Boolean(fin?.live)}
-            arriveDelay={fin ? fin.ms('KEY') : 0}
-          />
+          <div className="tdy-gaterow">
+            <GateButton
+              label={fin ? t.finContinue : t.depart}
+              onClick={depart}
+              aria-label={t.todayDue(run.taken)}
+              keys
+              disabled={closed}
+              arrive={Boolean(fin?.live)}
+              arriveDelay={fin ? fin.ms('KEY') : 0}
+            />
+            <DuelKey hold={Boolean(fin?.playing)} arrive={Boolean(fin?.live)} arriveDelay={fin ? fin.ms('KEY') : 0} />
+          </div>
         </div>
       </div>
       <aside className="tdy-desk__col">
@@ -968,8 +977,14 @@ function ClearedGate({ today, desk, finish = null }) {
   const gateCome = came('GATE')
   const foot = (
     <>
-      {rows.length > 0 && (boardCome || hold) && (
-        <div className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}>{rows}</div>
+      {/* The duels as the board's row once the day is done (plan 287):
+          the gate is shut, and the key with it. */}
+      {(boardCome || hold) && (
+        <DuelBoard
+          rows={rows}
+          ask={!fin?.playing}
+          className={`tdy-board${fin ? (boardCome ? ' clrk-arrive' : ' clrk-held') : ''}`}
+        />
       )}
       {(gateCome || hold) && (
         <GateButton

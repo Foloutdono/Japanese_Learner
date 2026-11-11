@@ -5,7 +5,7 @@ import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, ReleaseNote, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
-import { ClaimSheet } from './components/credits/ClaimSheet'
+import { RefillMoment } from './components/credits/RefillMoment'
 import { OfferScreen } from './components/offers/OfferScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
@@ -13,7 +13,7 @@ import { getTabs, tabFor } from './config/tabs'
 import { Shell, StageFrame } from './components/chrome/Shell'
 import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
-import { apiJson, apiJsonWithTimeout } from './lib/api'
+import { ApiError, apiJson, apiJsonWithTimeout } from './lib/api'
 // Development-only. Vite statically replaces import.meta.env.DEV with
 // `false` in a production build, so this import and the route below
 // are both dropped by tree-shaking — the screen is not merely
@@ -24,6 +24,7 @@ import RidePreview from './screens/RidePreview'
 import SoundPalette from './screens/SoundPalette'
 import OffersPreview from './screens/OffersPreview'
 import DayClearPreview from './screens/DayClearPreview'
+import RatingPreview from './screens/RatingPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
@@ -56,6 +57,11 @@ import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
 import TicketsScreen from './screens/TicketsScreen'
 import BanzukeScreen from './screens/BanzukeScreen'
+import DuelsScreen from './screens/DuelsScreen'
+import DuelFriendsScreen from './screens/DuelFriendsScreen'
+import DuelBoardScreen from './screens/DuelBoardScreen'
+import DuelRun from './screens/DuelRun'
+import DuelDeparture from './screens/DuelDeparture'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -506,12 +512,25 @@ export default function App({ front = NO_FRONT }) {
         if (p.onboardedAt) rememberOnboarded(userId)
         setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })
       })
-      .catch(() => {
+      .catch(err => {
         // The 45 s ceiling reached, or the network gave out. Either way
         // the learner watched a loading screen and got nothing, which
         // is the worst first impression the app can make -- and until
         // now, the one it could not count.
-        track('boot_timeout', { waited_ms: Date.now() - startedAt })
+        //
+        // Once per boot, on its first failure (plan 312): the gate asks
+        // again every few seconds, and counting each try made 456 rows
+        // of 29 failed boots in October, a share of failed opens no one
+        // could read. Whether the boot recovered is the app_open that
+        // follows; why it failed is `reason`.
+        if (gateAttempt === 0) {
+          track('boot_timeout', {
+            waited_ms: Date.now() - startedAt,
+            reason: err?.name === 'AbortError' ? 'timeout'
+              : err instanceof ApiError && err.status >= 500 ? 'server'
+                : 'network',
+          })
+        }
         if (cancelled) return
         // FAIL OPEN — but only for a learner this device has already
         // seen through the gate. A flaky network must never lock
@@ -621,6 +640,8 @@ export default function App({ front = NO_FRONT }) {
                 real rail beside it on the desk. */}
             <Route element={<Shell />}>
               <Route path="/dev/dayclear" element={<DayClearPreview />} />
+              {/* The early-access sheet, the web's and Android's (plan 307). */}
+              <Route path="/dev/rating" element={<RatingPreview />} />
             </Route>
           </Routes>
           {/* The workbench replays the real boarding, so it needs the
@@ -779,7 +800,7 @@ export default function App({ front = NO_FRONT }) {
                 decides). */}
             <Route path="/learn/decks/:deck_id" element={<DecksScreen session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
-            <Route path="/practice"             element={<PracticeScreen />} />
+            <Route path="/practice"             element={<PracticeScreen session={session} />} />
             {/* No /:sectionId segment: every generated paper has exactly
                 one section (see each backend/study/exam_*_gen.py), so it
                 was a parameter with one legal value and a picker screen
@@ -809,6 +830,9 @@ export default function App({ front = NO_FRONT }) {
             {/* 記念切符 — the tickets a streak has earned (plan 191). */}
             <Route path="/profile/tickets"      element={<TicketsScreen session={session} />} />
             <Route path="/profile/banzuke"      element={<BanzukeScreen session={session} />} />
+            <Route path="/profile/duels"        element={<DuelsScreen session={session} />} />
+            <Route path="/profile/duels/friends" element={<DuelFriendsScreen session={session} />} />
+            <Route path="/profile/duels/board"  element={<DuelBoardScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
             {/* The settings pages (plan 074): display, sound, learning,
                 destination, data, account — each its own page under
@@ -823,6 +847,8 @@ export default function App({ front = NO_FRONT }) {
               under the shell above. */}
           <Route element={<StageFrame />}>
             <Route path="/today/run"                          element={<TodayRun session={session} />} />
+            <Route path="/duel/new"                           element={<DuelDeparture session={session} />} />
+            <Route path="/duel/:id"                           element={<DuelRun session={session} />} />
             <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
             <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />
             {/* The literal `level/` segment keeps the four-segment band
@@ -916,11 +942,11 @@ export default function App({ front = NO_FRONT }) {
             run's own retry unmounts the failure that raised it. */}
         <FeedbackHost session={session} />
         <OfferScreen />
-        {/* 補充 — what the refill landed while the app was closed, on
-            arrival (plan 141). Held through the 改札 cutscene and the
-            first ride, which have the learner's whole attention, and
-            opened once either lets go. */}
-        <ClaimSheet hold={onboarding === 'finishing'} />
+        {/* 補充 — what the refill landed while the app was closed,
+            charged onto the card on arrival (plans 141, 278). Held
+            through the 改札 cutscene and the first ride, which have the
+            learner's whole attention, and played once either lets go. */}
+        <RefillMoment hold={onboarding === 'finishing'} />
         {/* 運行状況 — the status sheet off the HUD's station panel
             (plan 074): the pass's back, the ghost train and the two
             honest moves. */}

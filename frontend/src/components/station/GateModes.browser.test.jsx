@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
@@ -10,7 +10,7 @@ import '../../index.css'
 // lit while Today deals them; a tap writes the line's list. A lane the
 // server marks as ridden in the learner's own modes rides under 主.
 
-vi.mock('../../stores/credits', () => ({ useCredits: () => null, openBalance: vi.fn() }))
+vi.mock('../../stores/credits', () => ({ useCredits: () => null, openBalance: vi.fn(), useClaimOffer: () => null, useClaimLanded: () => 0 }))
 vi.mock('../../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))
 const setExtraModes = vi.hoisted(() => vi.fn(async () => ({})))
@@ -62,6 +62,8 @@ describe('GateCard — a line\'s modes', () => {
     localStorage.removeItem('tsuji.gateMain')
     setExtraModes.mockClear()
   })
+  // The lane's files share one origin: leave no language behind for the next.
+  afterEach(() => { localStorage.removeItem('lang') })
 
   it('boards the lanes the server marks as the learner\'s own under 主', async () => {
     await services()

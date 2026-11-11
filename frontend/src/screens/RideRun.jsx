@@ -23,6 +23,7 @@ import { useErrorStep } from '../hooks/useErrorStep'
 import { stepFor } from '../domain/flowSteps'
 import { useBackGuard } from '../hooks/useBackGuard'
 import { markCardsRidden } from '../lib/rideProgress'
+import { warmToday } from '../lib/warm'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardPanel } from '../components/study/CardPanel'
@@ -81,10 +82,13 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // way out is `onDone` alone -- the workbench has no /today to land on.
 
 // Where a finished card ride goes: the reading ride (plan 099), whose
-// grade carries the lesson's stamp. Only a SKIP stamps from here,
-// because a skip is the whole lesson declined. The cards done leave a
-// note on the device (lib/rideProgress.js), so a ride left before the
-// reading's stamp is boarded again at the reading, not the first card.
+// grade carries the lesson's stamp. A SKIP stamps from here, because a
+// skip is the whole lesson declined; and so does the cards' end for a
+// learner with no kana (plan 170), who has no sentence to read: the
+// reading held only its plate for them, and the plate went (plan 292),
+// so they go on into the station. The cards done leave a note on the device
+// (lib/rideProgress.js), so a ride left before the reading's stamp is
+// boarded again at the reading, not the first card.
 export const RIDE_NEXT = '/ride/reading'
 
 // The steps, as ride_step names them: domain/flowSteps.js's CARD_STEPS,
@@ -119,6 +123,8 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   // known card, so the reading rides on it in Latin letters and is
   // spoken on the flip.
   const latin = summary?.kanaKnown != null && summary.kanaKnown !== 'both' && summary.kanaKnown !== 'hiragana'
+  // No kana at all: the cards are the whole lesson.
+  const last = summary?.kanaKnown === 'none'
 
   const [cards, setCards] = useState(given)
   const [failed, setFailed] = useState(false)
@@ -180,14 +186,15 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     if (finished.current) return
     finished.current = true
     setBusy(true)
-    if (!skipped) {
-      // On to the reading ride; the lesson's stamp is its plate's.
+    if (!skipped && !last) {
+      // On to the reading ride; the lesson's stamp is its grade's.
       mark(step, 'reading')
       if (onNext) onNext()
       else release().then(() => navigate(RIDE_NEXT, { replace: true }))
       return
     }
-    track('ride_done', { skipped: true, at: 'cards', ms: watches.current?.total.read() ?? 0 })
+    if (!skipped) mark(step, 'today')
+    track('ride_done', { skipped, at: 'cards', ms: watches.current?.total.read() ?? 0 })
     // App's copy of the stamp at once, not when the POST answers: a Back
     // that Chrome took past the guard to the front door lands there in
     // the same pop, and the door must already send to the gate.
@@ -195,7 +202,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     const stamped = dryRun
       ? Promise.resolve()
       : apiJson('/api/onboarding/ride/done', session, {
-          method: 'POST', body: JSON.stringify({ skipped: true }),
+          method: 'POST', body: JSON.stringify({ skipped }),
         }).catch(() => {})
     // A stamp that could not land is not a reason to hold the door:
     // the ride shows again next launch, which costs a learner one more
@@ -257,6 +264,12 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   useEffect(() => {
     if (step === 'done' && !dryRun) markCardsRidden(session?.user?.id)
   }, [step, dryRun, session])
+
+  // The station, asked for while the second card is read when it is
+  // next (lib/warm.js): the reading does it for everyone else.
+  useEffect(() => {
+    if (last && index >= 1 && !dryRun) warmToday(desk)
+  }, [last, index, dryRun, desk])
 
   const panels = desk && Boolean(cards?.length) && step !== 'done'
 
@@ -336,7 +349,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
           {guessed && <p className="ride__done-note">{t.rideGuessed}</p>}
           <div className="ride__done-air" aria-hidden="true" />
           <div className="ride__done-foot">
-            <Continue keys label={t.rideContinue} onClick={() => finish(false)} disabled={busy} />
+            <Continue keys label={last ? t.brdEnter : t.rideContinue} onClick={() => finish(false)} disabled={busy} />
             {/* 机 (plan 122): Enter goes on, as the key printed says. */}
             <EnterKey onEnter={() => finish(false)} disabled={busy} />
           </div>

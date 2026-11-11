@@ -82,6 +82,12 @@ function fetchIfStale() {
   return inflight
 }
 
+/** The last summary, outside React: a screen drawing the whole of
+ *  /api/profile (the Profile gate) starts from it (plan 292). */
+export function peekSummary() {
+  return cache
+}
+
 // Development only: the reward workbench (/dev/rewards) needs a
 // summary to exist so the level HUD has something to report a gain
 // against, and there is no session there to fetch one. Not a real
@@ -179,6 +185,14 @@ export function applyXpGain({ amount }) {
 // moved in place until the next real fetch says it: the finish plays on
 // Today, whose desk panel prints the summary's streak beside the rally
 // that rolls to the answer's.
+// 前回 (plan 291): the ride a Learn station has just boarded, set in
+// place so the gate offers it again on the way back, before the next
+// real fetch says the same (stores/learnRide.js).
+export function applyLearnRide(ride) {
+  if (!cache || !ride) return
+  setCache({ ...cache, learnRide: ride })
+}
+
 export function applyStreak(streak) {
   if (!cache || !(streak > 0) || cache.streak === streak) return
   setCache({ ...cache, streak, streakLongest: Math.max(cache.streakLongest ?? 0, streak) })

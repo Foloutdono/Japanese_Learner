@@ -498,9 +498,9 @@ def frequent_not_here(rank, band: int = FREQUENT_BAND) -> list[dict]:
     return out
 
 
-def measure() -> dict:
-    rank = ranking()
-    lookups = _lookups(rank)
+def measure(rank=None, lookups=None) -> dict:
+    rank = rank or ranking()
+    lookups = lookups or _lookups(rank)
     per_level = {}
     for level in LEVELS:
         ranks = [card_rank(e, rank, lookups) for e in deck().get(level, [])]

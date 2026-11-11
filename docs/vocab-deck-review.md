@@ -958,6 +958,79 @@ and `test_placement` holds thirty seeds to a prompt each.
 Deploy, then `python -m scripts.migrate_vocab_ids --yes`: it renames
 each learner's rows and rewrites `deck_cards.level` from the target id.
 
+### The placement audits' proposals (#360's B, #439's 体重; 2026-10-28)
+
+#360 applied its A findings; its proposals waited. Decision 1 settles
+most of them: a word the course's sentences say has a card, at the
+lowest level a sentence or the lists give it (plan 153's rule).
+
+| level | added | the lowest sentence that says it |
+|---|---|---|
+| N5 | もしもし, ただいま | N5 grammar and conversation (ただいま is a wrong reply's greeting at N5, the adverb from N4: the card carries both) |
+| N4 | 専門 | N2 comprehension (専門の業者), the lists' N4; JMdict gives it no sentence, so two are written |
+| N3 | 体重, 主人, 自宅, 生涯, 地面, イメージ | N3 comprehension (体重, 店の主人), conversation (ご自宅) and exam paper (地面); 生涯 and イメージ are the lists' N3 |
+| N2 | 勝手, 全力, 行方, 職場, 自ら | N2 grammar, or the lists' N2 |
+| N1 | 内緒, バッテリー | an N1 exam reading (内緒) and N1 grammar (スマホのバッテリー); the lists' N1 |
+
+Each took its pool row's senses (`pool_moves.json`), so a learner who
+held it as a pool card keeps it after `migrate_pool_cards`.
+
+#360's B5, the class behind 然して: ten cards whose only spelling
+is one JMdict flags rare for a word it marks usually kana, while the
+course writes the kana, became kana cards at their level (`MOVES`):
+纏める, 漸く, 狡い, 飽くまで, 若しかして, 纏め, 外方, 填まる, 嘗て, 態々.
+Two did not:
+
+- **傲る (N1, "to be haughty") stays.** The course's おごる is 奢る, "to
+  treat", in nine sentences of ten (おごるよ, コーヒーをおごってね),
+  which the pool glosses right today; a kana おごる card would gloss
+  them all "haughty". 奢る has no card, though N3 sentences say it:
+  the next placement slice's to propose.
+- **朝御飯 is the owner's call.** Not usually kana, and one of four N5
+  cards (御飯, 朝御飯, 昼御飯, 晩御飯) that spell 御 where the course
+  writes ご or kana. The four move together or not at all.
+
+#360 counted only the `jp` and `sentence` fields, so it read 地面, 内緒,
+イメージ and バッテリー as unused: the exam seeds and N1 grammar say
+them, and they are above. Not added, the lists and a rank alone (#360's
+B4 rest, #439's 菌): 正体, 台詞, 所有, 親父, お袋, 折, 狩り, パパ, リード,
+ノー, 菌 (the course's 菌 is 黴菌, its own card).
+
+Deploy, then `migrate_vocab_ids --yes` and `migrate_pool_cards --yes`.
+
+### 314 — お願いします at N5, the owner's call (2026-11-09)
+
+Plan 314's breakdown reads a closing お願いします as the deck's "please"
+(`card_lookup.resolve_please`), where it had read 願う "to desire". The
+deck held the word twice, in kanji at N1 and in kana at N2: plan 112's
+open pair, a kana card below its kanji card. So the N5 pages, which say
+it from the first conversation, showed an N1 or an N2 card.
+
+The owner moved it to N5, over plan 260's rule: the lists put it at N2,
+where two signals would have stopped. Both cards became one N5 card,
+`vocab_N5_お願いします_おねがいします` (two `MOVES` lines, "Plan 314"),
+since the same word twice at one level is the duplicate 106b and 112
+merged.
+
+- **The spelling is the lists'.** Decision 3: a card's level is the
+  word's, not its kanji's (願 is N3, as 写 is N4 under 写真). The N5 and
+  N4 pages that keep to their kanji write it in kana, which finds the
+  card: the fold, and `FOLDED_FORMS` for the dictionary and the kana
+  index.
+- **The gloss tells it from its neighbours.** ください and どうぞ are
+  "please" at N5 too, so the card reads "please (asking for something,
+  or a favour)", in French and Spanish as well.
+- **The written sentences went.** `example_added.json` holds only words
+  JMdict gives none; the kana card had two, and the kanji card has its
+  own.
+- **It counts as itself.** The fold no longer keeps お, 願う and する as
+  its parts, so an N5 page that says お願いします counts the card, and
+  no 願う (`LOCAL_REV` 47).
+
+The deck is 7,979. Deploy, then `migrate_vocab_ids --yes`: it moves both
+cards' rows onto the N5 card, merging where a learner held both, and a
+pin or a favourite kept under the kana card's key (`KEY_MOVES`).
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104

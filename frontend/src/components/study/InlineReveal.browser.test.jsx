@@ -26,7 +26,7 @@ vi.mock('../../lib/audio', async (o) => ({
 // the same position from the first frame to the last.
 
 const KANA = 'カ・ゲ・した・しも・もと・さ.げる・さ.がる・くだ.る・くだ.り・くだ.す・~くだ.す・くだ.さる・お.ろす・お.りる'
-const t = { onyomi: "On'yomi", kunyomi: "Kun'yomi", readingsMore: n => `${n} more` }
+const t = { readingsOnName: "On'yomi", readingsKunName: "Kun'yomi", readingsMore: n => `${n} more` }
 const settle = ms => new Promise(r => setTimeout(r, ms))
 
 async function reveal(meaning) {
@@ -119,7 +119,7 @@ const ANZEN = {
   kana: 'アン・やす.い・やす.まる・やす・やす.らか',
   meaning: 'cheap; low; quiet; rested; contented; peaceful',
 }
-const T = { tapToReveal: 'tap', onyomi: "On'yomi", kunyomi: "Kun'yomi", readingsMore: n => `${n} more` }
+const T = { tapToReveal: 'tap', readingsOnName: "On'yomi", readingsKunName: "Kun'yomi", readingsMore: n => `${n} more` }
 
 describe('InlineReveal — inside a real flashcard, at the real card width', () => {
   it('opens straight into its final place and never moves again', async () => {

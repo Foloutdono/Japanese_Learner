@@ -13,10 +13,9 @@ import logging
 import os
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from core.credits import require_pass
 
 from core.auth import get_user_id
-from core.credits import local_today, resets_at
+from core.credits import local_today, require_pass, resets_at
 from core.db import db_conn
 from core.rls import enable_rls
 from study.llm_shared import chat, LLMUnavailable

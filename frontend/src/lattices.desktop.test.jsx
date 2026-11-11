@@ -107,6 +107,7 @@ describe('a route that is the whole page', () => {
   it('stays upright where it is not the page', async () => {
     await station(<div className="wrap"><RouteStops stops={stops} here="N4" onSelect={() => {}} /></div>)
     await settle()
+    await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {})))
     const cards = boxes('.route-stop')
     expect(cards[1].top).toBeGreaterThan(cards[0].bottom)
   })

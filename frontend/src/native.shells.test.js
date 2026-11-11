@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { SUPPORTED_LANGS } from './lib/locale'
 import { readFileSync } from 'node:fs'
 
 // What the store shells may ask for and must declare. Each of these was
@@ -38,6 +39,15 @@ describe('the Android shell', () => {
     expect(read('android/app/src/main/res/xml/file_paths.xml')).not.toMatch(/<external-path\b/)
   })
 
+  // The widget as the picker lists it, in each language the app speaks.
+  it('names its widget in every language the app speaks', () => {
+    for (const lang of SUPPORTED_LANGS) {
+      const strings = read(`android/app/src/main/res/values${lang === 'en' ? '' : `-${lang}`}/strings.xml`)
+      expect(strings, lang).toContain('name="widget_label"')
+      expect(strings, lang).toContain('name="widget_description"')
+    }
+  })
+
   it('shrinks and renames the release code and drops its unused resources', () => {
     const release = read('android/app/build.gradle').match(/buildTypes \{\s*release \{[\s\S]*?\n {8}\}/)[0]
     expect(release).toContain('minifyEnabled true')
@@ -60,7 +70,35 @@ describe('the iOS shell', () => {
     expect(privacy).toMatch(/<key>NSPrivacyTracking<\/key>\s*<false\/>/)
   })
 
+  // Every byte the app encrypts goes through iOS itself: HTTPS in the
+  // system WebView, nothing of its own. Said in the plist, App Store
+  // Connect stops asking about export compliance on every build (build
+  // 1105 was the first it held back for the answer).
+  it('says it uses no encryption beyond the system\'s', () => {
+    const plist = read('ios/App/App/Info.plist')
+    expect(plist).toMatch(/<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/)
+  })
+
   it('copies each manifest into its own target', () => {
     expect(project.match(/PrivacyInfo\.xcprivacy in Resources \*\/,/g)).toHaveLength(2)
+  })
+
+  // The WebView's navigator.language follows the languages the shell
+  // declares, so a language the app speaks but the shell does not reaches
+  // the web app as the fallback: a Spanish iPhone opened in French until
+  // plan 302's review. Each language is declared, bundled and asked in.
+  it('speaks every language the web app does, and falls back as it does', () => {
+    const plist = read('ios/App/App/Info.plist')
+    const declared = [...plist.match(/<key>CFBundleLocalizations<\/key>\s*<array>([\s\S]*?)<\/array>/)[1]
+      .matchAll(/<string>(\w+)<\/string>/g)].map(m => m[1])
+    expect([...declared].sort()).toEqual([...SUPPORTED_LANGS].sort())
+    expect(plist).toMatch(/<key>CFBundleDevelopmentRegion<\/key>\s*<string>en<\/string>/)
+    for (const lang of SUPPORTED_LANGS) {
+      const strings = read(`ios/App/App/${lang}.lproj/InfoPlist.strings`)
+      expect(strings, lang).toContain('"NSCameraUsageDescription"')
+      expect(strings, lang).toContain('"NSPhotoLibraryUsageDescription"')
+      expect(project, lang).toContain(`path = ${lang}.lproj/InfoPlist.strings;`)
+      expect(project.match(/knownRegions = \(([\s\S]*?)\);/)[1], lang).toMatch(new RegExp(`\\b${lang},`))
+    }
   })
 })

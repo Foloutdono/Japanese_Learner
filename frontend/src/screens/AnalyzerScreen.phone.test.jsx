@@ -303,7 +303,7 @@ describe('the analyser result on a phone', () => {
     words.click()
     // W2 (plan 220): a card per word, the sheet naming how many.
     await vi.waitFor(() => expect(document.querySelector('.anl-m__sheet .anl-tile')).not.toBeNull())
-    expect(document.querySelector('.anl-m__sheet .sheet__cap').textContent).toBe('1 mot · 1 nouveau')
+    expect(document.querySelector('.anl-m__sheet .sheet__sub').textContent).toBe('1 mot · 1 nouveau')
     document.querySelector('.anl-m__sheet .anl-tile').click()
     await vi.waitFor(() => expect(document.querySelector('.anl-m__sheet')).toBeNull())
   })

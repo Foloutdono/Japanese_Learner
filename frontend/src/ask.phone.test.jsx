@@ -315,10 +315,9 @@ describe('the asking in comprehension, on a phone', () => {
     await settle(200)
     press('b'); await settle(60); press('Enter'); await settle(120)
     press('a'); await settle(60); press('Enter'); await settle(400)
-    // Results, no question open yet: the text is not what is asked about.
-    expect(launch()).toBeNull()
-    $$('.qrow')[1].click()
-    await settle(250)
+    // Results, open on the first miss (plan 301b): the asking is in its
+    // detail, about it, and never about the screen-long text.
+    expect($$('.qrow')[1].getAttribute('aria-expanded')).toBe('true')
     expect($('.qrow__detail > .ask-launch')).not.toBeNull()
     await openPage()
     // The page names the open question, not the screen-long text.

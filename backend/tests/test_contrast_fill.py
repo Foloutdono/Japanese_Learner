@@ -39,3 +39,32 @@ def test_every_contrast_sentence_reads_whole_once_answered():
                 if _answered(payload) != ex["jp"]:
                     wrong.append((level, entry["pattern"], ex["jp"], _answered(payload)))
     assert not wrong, wrong[:10]
+
+
+def test_a_rival_the_lesson_calls_the_same_is_never_offered():
+    # Plan 319: だろう in でしょう's hole, から in ので's, the potential in
+    # ことができます's said the same as the answer, and no translation told
+    # them apart. A compare entry marked `same` stays in the lesson and is
+    # offered neither as a named rival nor as a filler, whatever the seed.
+    import random
+
+    from study.grammar_lesson import contrast_payload
+
+    offered, asked = [], 0
+    for level, entries in GRAMMAR_POINTS_BY_LEVEL.items():
+        for entry in entries:
+            same = {r["pattern"] for r in entry.get("compare", []) if r.get("same")}
+            if not same:
+                continue
+            for ex in entry.get("examples", []):
+                if not ex.get("contrast"):
+                    continue
+                for seed in range(4):
+                    payload = contrast_payload(level, entry, entries, "en", rng=random.Random(seed), example=ex)
+                    if payload is None:
+                        continue
+                    asked += 1
+                    offered += [(level, entry["pattern"], ex["jp"], rule)
+                                for rule in payload.get("rules", {}).values() if rule in same]
+    assert asked
+    assert not offered, offered[:10]

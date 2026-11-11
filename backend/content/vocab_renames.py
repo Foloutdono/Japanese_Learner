@@ -989,6 +989,39 @@ MOVES: dict[str, str] = {
     "vocab_N2_楽器_がっき": "vocab_N3_楽器_がっき",
     "vocab_N2_暖める_あたためる": "vocab_N3_暖める_あたためる",
     "vocab_N2_暖まる_あたたまる": "vocab_N3_暖まる_あたたまる",
+
+    # ── The rest of #360's class (its B5) ───────────────────────
+    # 然して's case ten times over: a word JMdict marks usually kana, the
+    # deck's only card for it written in a spelling JMdict flags rare,
+    # and the course's own sentences writing the kana. Each becomes a
+    # kana card at its level. 傲る stays: the course's おごる is 奢る, "to
+    # treat", nine times to one, and a kana card would gloss them
+    # "haughty". 朝御飯 is not usually kana, and is one of four 御飯
+    # cards whose spelling is one decision, not this one's.
+    "vocab_N2_纏める_まとめる": "vocab_N2__まとめる",
+    "vocab_N2_漸く_ようやく": "vocab_N2__ようやく",
+    "vocab_N2_狡い_ずるい": "vocab_N2__ずるい",
+    "vocab_N2_飽くまで_あくまで": "vocab_N2__あくまで",
+    "vocab_N1_若しかして_もしかして": "vocab_N1__もしかして",
+    "vocab_N1_纏め_まとめ": "vocab_N1__まとめ",
+    "vocab_N1_外方_そっぽ": "vocab_N1__そっぽ",
+    "vocab_N1_填まる_はまる": "vocab_N1__はまる",
+    "vocab_N1_嘗て_かつて": "vocab_N1__かつて",
+    "vocab_N1_態々_わざわざ": "vocab_N1__わざわざ",
+
+    # ── Plan 314: お願いします at N5, the owner's call ──────────
+    # The breakdown reads a closing お願いします as the deck's "please"
+    # (card_lookup.resolve_please), which the deck held twice: in kanji
+    # at N1 and in kana at N2, a pair plan 112 left open. The N5 lessons
+    # and 391 of the app's lines say it from the first conversation.
+    # The lists put it at N2, so plan 260's two signals stop there; the
+    # owner chose N5. Both cards go onto one N5 card, since two cards of
+    # one word at one level would be met twice (106b, 112), in the
+    # lists' spelling: a card's level is the word's, not its kanji's
+    # (写真 at N5, though 写 is N4), and the pages that keep to N5's
+    # kanji write it in kana, which still finds the card.
+    "vocab_N1_お願いします_おねがいします": "vocab_N5_お願いします_おねがいします",
+    "vocab_N2__おねがいします": "vocab_N5_お願いします_おねがいします",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
@@ -1292,9 +1325,13 @@ def folded_forms() -> dict[str, tuple[tuple[str, str], ...]]:
 # And a folded spelling's other reading, where the card packs both: the
 # N1 良い was read いい and the N1 好い よい (plan 193), but each spelling
 # is read either way, and the page's 良い is mostly よい.
+#
+# And a kana card that took a pool row written in kanji: ただいま was the
+# pool's 只今 until the deck taught it (#360).
 FOLDED_ONLY: dict[str, tuple[tuple[str, str], ...]] = {
     "vocab_N3_下ろす_おろす": (("下す", "おろす"),),
     "vocab_N5__いい/よい": (("良い", "よい"), ("好い", "いい")),
+    "vocab_N5__ただいま": (("只今", "ただいま"),),
 }
 
 

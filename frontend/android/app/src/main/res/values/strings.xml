@@ -8,4 +8,14 @@
          words come from the app, in the learner's language. -->
     <string name="widget_label">Today’s train</string>
     <string name="widget_description">The day’s cards, what they take, and a word you know.</string>
+    <!-- The picker's preview of it (layout/widget_train_preview.xml, plan
+         293): a train, in the words the app would hand it. -->
+    <string name="widget_preview_hour" translatable="false">07:30</string>
+    <string name="widget_preview_count" translatable="false">23</string>
+    <string name="widget_preview_unit">cards</string>
+    <string name="widget_preview_meta">12 min · 5 new</string>
+    <string name="widget_preview_reading" translatable="false">でんしゃ</string>
+    <string name="widget_preview_jp" translatable="false">電車</string>
+    <string name="widget_preview_meaning">train</string>
+    <string name="widget_preview_depart">Depart</string>
 </resources>

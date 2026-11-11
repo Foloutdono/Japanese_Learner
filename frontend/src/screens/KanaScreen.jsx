@@ -1,6 +1,7 @@
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
+import { noteRide } from '../stores/learnRide'
 import { useStats } from '../stores/stats'
 import { Leave } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
@@ -87,7 +88,8 @@ export default function KanaScreen() {
   }
 
   // ── The platforms: the set's modes ──
-  const run = m => navigate(`/learn/kana/${set}/${m}`)
+  // 前回 (plan 291): a set's run is the gate's last ride.
+  const run = m => { noteRide(`/learn/kana/${set}/${m}`); navigate(`/learn/kana/${set}/${m}`) }
 
   // ── 机 — the sets over a set's cars (plans 114, 251) ──
   // The kana line across the top, the open set lit, and its exercises

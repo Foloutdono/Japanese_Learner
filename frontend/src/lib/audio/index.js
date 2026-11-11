@@ -10,6 +10,7 @@
 //   voices.js     every ui/sfx sound, its variants, and the choice.
 //   playback.js   one-shots: kana, sfx, ui, announcements.
 //   ambiance.js   the looping track, crossfades and tab visibility.
+//   duel.js       a duel's music and sounds, on the run's clock (plan 285).
 //   speech.js     TTS, which the browser plays outside our graph.
 //   reveal.js     whether a card speaks its answer once revealed.
 //
@@ -36,6 +37,7 @@ export {
   playArrival, playPlatformChime, playBoardFlap, playDayClear, playMilestone,
 } from './chimes'
 export { startAmbiance, stopAmbiance, holdAmbianceHour } from './ambiance'
+export { loadDuelAudio, releaseDuelAudio, startDuelRace, playDuelResult } from './duel'
 export { speakJapanese, speakSentence, speakLine, stopSpeaking, voicedUrl } from './speech'
 // The palette itself is not part of the app's own surface — nothing
 // but the /dev/sounds screen picks a voice, and it imports voices.js

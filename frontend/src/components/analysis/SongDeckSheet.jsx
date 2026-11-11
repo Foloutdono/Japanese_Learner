@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Sheet } from '../chrome/Sheet'
 import { deckTypeOf } from '../decks/deckTypes'
-import { CheckIcon, ChevronIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon, SongIcon } from '../ui/Icons'
 import { Dots } from '../ui/Loading'
 import { track } from '../../lib/track'
 import { composing } from '../../lib/keyGuards'
@@ -72,7 +72,7 @@ export function SongDeckSheet({ session, mining, sentences, title, t, onClose })
   const count = (takes.words ? words.length : 0) + (takes.lines ? lines.length : 0)
 
   return (
-    <Sheet open onClose={onClose} jp={t.songDeckTitle} label={t.songDeckTitle} className="anl-song-sheet" dismiss>
+    <Sheet open onClose={onClose} title={t.songDeckTitle} icon={SongIcon} line="var(--line-kaiseki)" label={t.songDeckTitle} className="anl-song-sheet" dismiss>
       {made ? (
         <div className="surface picker anl-song__made">
           <Link to={`/learn/decks/${made.id}`} className="picker-row anl-song__deck">

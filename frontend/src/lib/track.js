@@ -37,7 +37,7 @@ import { runHideHooks } from './pageHide'
 // this against name-for-name and key-for-key.
 export const EVENTS = {
   app_open: ['boot_ms', 'cold', 'platform', 'standalone'],
-  boot_timeout: ['waited_ms'],
+  boot_timeout: ['waited_ms', 'reason'],
   screen_view: ['route', 'tab'],
   // How long the screen was in front of someone (plan 218): engaged
   // time, sent on leaving it and on the page being hidden
@@ -49,7 +49,7 @@ export const EVENTS = {
   session_start: ['platform', 'vp', 'os', 'lang', 'theme', 'input', 'standalone', 'reduced'],
   boarding_step: ['step', 'to', 'index', 'dir', 'ms'],
   boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms', 'level_how', 'placed',
-    'edited_goal', 'edited_rhythm', 'edited_hour', 'edited_lines', 'named', 'kept'],
+    'edited_goal', 'edited_rhythm', 'edited_hour', 'edited_lines', 'named', 'kept', 'source'],
   account_claimed: ['from'],
   // The first ride (plan 097): the two lessons after the boarding and
   // the guide over each gate. Step and stop names are the app's own,
@@ -131,6 +131,15 @@ export const EVENTS = {
   // lib/vitals.js; plan 218).
   client_error: ['route', 'step', 'where'],
   vitals: ['route', 'lcp', 'inp', 'cls', 'ttfb'],
+  // 対戦 (plan 279): written by the server (routes/pvp.py), declared
+  // here so the two sets stay one. Never a username.
+  pvp_friend: ['action'],
+  pvp_report: ['reason'],
+  pvp_duel_start: ['kind', 'mode', 'level', 'against'],
+  pvp_duel_done: ['kind', 'mode', 'level', 'outcome', 'rights', 'wait_h'],
+  pvp_review: ['kind'],
+  pvp_placed: ['level'],
+  pvp_smurf: ['games'],
 }
 
 // The values a string property may take where it is an enum (plan 218),
@@ -139,11 +148,14 @@ export const EVENTS = {
 // (one name per key, single-quoted strings) and keep the end marker.
 // A value outside its list is dropped here and again on the server.
 export const VALUES = {
+  boot_timeout: {
+    reason: ['timeout', 'server', 'network'],
+  },
   session_start: {
     platform: ['web', 'native'],
     vp: ['phone', 'tablet', 'desk', 'wide'],
     os: ['ios', 'android', 'windows', 'mac', 'linux', 'chromeos', 'other'],
-    lang: ['fr', 'en'],
+    lang: ['fr', 'en', 'es'],
     theme: ['light', 'dark', 'auto'],
     input: ['touch', 'mouse'],
   },
@@ -151,24 +163,42 @@ export const VALUES = {
     level_how: ['pick', 'test'],
     placed: ['N5', 'N4', 'N3', 'N2', 'N1'],
     kept: ['google', 'password', 'link', 'already', 'none'],
+    source: ['tiktok', 'instagram', 'youtube', 'reddit', 'search', 'store', 'other', 'direct'],
   },
   run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   feature_use: {
-    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback'],
-    action: ['play', 'text', 'photo', 'video', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide'],
+    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback', 'readings', 'duels_key', 'duels_board', 'duels_news'],
+    action: ['play', 'text', 'photo', 'video', 'song', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide'],
   },
   transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
   transfer_offer: { choice: ['go', 'later'] },
   setting_change: {
     setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target', 'main_mode', 'today_mode'],
-    value: ['light', 'dark', 'auto', 'fr', 'en', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
+    value: ['light', 'dark', 'auto', 'fr', 'en', 'es', 'es-ES', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
-  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation'] },
+  ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation', 'song_transcribe'] },
+  fare_blocked: { kind: ['review', 'duel', 'duel_review'] },
+  pvp_friend: { action: ['request', 'accept', 'refuse', 'withdraw', 'remove', 'block', 'unblock'] },
+  pvp_report: { reason: ['name', 'cheat', 'spam', 'other'] },
+  pvp_duel_start: {
+    kind: ['friend', 'ranked'],
+    mode: ['async', 'live'],
+    level: ['novice', 'N5', 'N4', 'N3', 'N2', 'N1'],
+    against: ['friend', 'seek', 'ghost', 'open'],
+  },
+  pvp_duel_done: {
+    kind: ['friend', 'ranked'],
+    mode: ['async', 'live'],
+    level: ['novice', 'N5', 'N4', 'N3', 'N2', 'N1'],
+    outcome: ['win', 'loss', 'draw', 'expired', 'declined'],
+  },
+  pvp_review: { kind: ['friend', 'ranked'] },
+  pvp_placed: { level: ['novice', 'N5', 'N4', 'N3', 'N2', 'N1'] },
   client_error: {
     where: ['error', 'rejection'],
-    step: ['kana', 'reveal', 'level', 'test', 'card', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],
+    step: ['kana', 'reveal', 'level', 'test', 'card', 'remind', 'intro-scripts', 'intro-sounds', 'intro-table', 'intro-katakana', 'intro-sentence', 'intro-route', 'known', 'known-dict', 'known-back', 'unknown', 'unknown-back', 'done', 'read', 'type', 'measure', 'graded', 'pass'],
   },
 }
 // end VALUES

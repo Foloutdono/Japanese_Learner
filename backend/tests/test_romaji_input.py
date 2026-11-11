@@ -37,3 +37,34 @@ def test_is_romaji():
     assert is_romaji("mizu to gohan")
     assert not is_romaji("みず to gohan")
     assert not is_romaji("123 !")
+
+
+# ── A "translation" that is the line in the alphabet (plan 311) ──
+# 関心はまだ僕ら came back from the model as «Kanshin wa mada bokura» and
+# was printed on the explanation sheet as the line's meaning.
+@pytest.mark.parametrize("given", [
+    "Kanshin wa mada bokura",
+    "kanshin ha mada bokura.",
+    "KANSHIN WA MADA BOKURA",
+    "Kanshin wa mada bokura…",
+])
+def test_the_line_spelled_out_is_no_translation(given):
+    from study.romaji import spells_out
+
+    assert spells_out(given, "関心はまだ僕ら")
+
+
+@pytest.mark.parametrize("given, line", [
+    ("The concern is still us.", "関心はまだ僕ら"),
+    ("L'intérêt, c'est encore nous.", "関心はまだ僕ら"),
+    # A line of a word or two may rightly be its sound.
+    ("Tanaka-san", "田中さん"),
+    ("Tokyo Tower", "東京タワー"),
+    # Japanese is no romaji, and an empty answer is nothing to judge.
+    ("かんしんはまだぼくら", "関心はまだ僕ら"),
+    ("", "関心はまだ僕ら"),
+])
+def test_a_translation_is_left_alone(given, line):
+    from study.romaji import spells_out
+
+    assert not spells_out(given, line)

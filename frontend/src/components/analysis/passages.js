@@ -1,13 +1,14 @@
 // ── 帳 — what the analyser's shelf reads off a history entry (plan 136) ──
 // Each entry carries `kind: 'passage' | 'session'` (useAnalyzerSession
-// merges two endpoints): a session is the video platform, a passage a
-// text or, by its `source`, a photo. Pure, so the node lane holds it.
+// merges two endpoints): a session is the video platform, or the song's
+// by its `source` (plan 317), a passage a text or, by its `source`, a
+// photo. Pure, so the node lane holds it.
 
-export const SHELF_KINDS = ['video', 'text', 'photo']
+export const SHELF_KINDS = ['video', 'song', 'text', 'photo']
 
 /** Which platform a history entry came from, as the registry's key. */
 export function kindOf(h) {
-  if (h.kind === 'session') return 'video'
+  if (h.kind === 'session') return h.source === 'song' ? 'song' : 'video'
   return h.source === 'image' ? 'photo' : 'text'
 }
 

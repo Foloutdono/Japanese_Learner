@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
@@ -22,6 +22,10 @@ const $ = sel => document.querySelector(sel)
 beforeEach(() => {
   document.body.innerHTML = ''
   try { localStorage.setItem('lang', 'fr') } catch { /* private mode */ }
+})
+// The lane's files share one origin: leave no language behind for the next.
+afterEach(() => {
+  try { localStorage.removeItem('lang') } catch { /* private mode */ }
 })
 
 function mount(query) {

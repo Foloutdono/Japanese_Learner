@@ -37,9 +37,12 @@ TURNS = [
 ]
 
 
+_FRAMES = array("h", (int(8000 * math.sin(i / 5)) for i in range(engine.DIALOGUE_RATE // 4))).tobytes()
+
+
 def _pcm():
-    rate = engine.DIALOGUE_RATE
-    return engine.Pcm(array("h", (int(8000 * math.sin(i / 5)) for i in range(rate // 4))).tobytes(), rate)
+    # Made once: a run says every line of every stored paper, thousands.
+    return engine.Pcm(_FRAMES, engine.DIALOGUE_RATE)
 
 
 @pytest.fixture
@@ -50,6 +53,7 @@ def store(tmp_path):
             mock.patch.object(revoice, "all_clips", lambda: [{"jp": LINE, "level": "N5"}]), \
             mock.patch.object(revoice, "_engine_ok", lambda: True), \
             mock.patch.object(engine, "style_for_slot", lambda slot: 100 + slot), \
+            mock.patch.object(engine, "encode_mp3", lambda pcm, **k: b"a new voice"), \
             mock.patch.object(engine, "say", mock.Mock(side_effect=lambda *a, **k: _pcm())) as say:
         yield directory, say
 

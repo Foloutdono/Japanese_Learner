@@ -7,6 +7,7 @@ import { GrammarChips } from './GrammarChips'
 import { GrammarPoints } from './GrammarPoints'
 import { LevelBadge } from './LevelBadge'
 import { SpeakButton } from './SpeakButton'
+import { Frame } from './Frame'
 import { wordRowsOf } from './rows'
 import { grammarGloss } from './grammarGloss'
 import { coversToken, numberedPointsOf } from './grammarSpans'
@@ -223,8 +224,9 @@ export function WordRows({ analysis, t, onTokenClick }) {
 //               `translation`, one row per word, a numbered card per
 //               rule (and, once bought, what each does here -- plan
 //               095), and the `note` (else the deep tier's
-//               explanation) last and quiet. `sentenceText` is what
-//               prints when there is no analysis to draw from.
+//               explanation: since plan 311 the line's frame, drawn as
+//               the analyser's sheet draws it) last. `sentenceText` is
+//               what prints when there is no analysis to draw from.
 //
 // `onGrammarOpen(point)` makes each grammar card a door to the point's
 // dictionary entry; the screen decides what opens — a
@@ -262,7 +264,9 @@ export function SentenceBreakdown({
             follows; else the button that buys it -- the one thing left
             to do, so on the desk it stands on the panel's floor rather
             than under the last card (.bkd__foot, plan 160). */}
-        {noteText
+        {note == null && analysis?.frame?.length
+          ? <Frame frame={analysis.frame} analysis={analysis} onPoint={openGrammar} t={t} />
+          : noteText
           ? <span className="prose__ai">{noteText}</span>
           : onExplain && available && (
             <div className="bkd__explain bkd__foot">

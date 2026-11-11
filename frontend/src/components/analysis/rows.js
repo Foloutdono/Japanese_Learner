@@ -11,7 +11,10 @@
 // adjective before it (食べ + ます, 新しかっ + た). A particle or a
 // copula ends any run before it and is a row of its own (standsAlone).
 // An auxiliary the model glossed on its own is a word the model named,
-// and keeps its row. Punctuation is no row at all.
+// and keeps its row; so does one the server glossed (plan 272): the
+// written negative ず of せず, the rude やがる, Kyoto's はる -- a part
+// with no rule of its own, whose line folded into its verb was read
+// nowhere. Punctuation is no row at all.
 //
 // The head token carries the row's state, level and gloss; the
 // surface and the reading are the run's own, joined.
@@ -53,7 +56,7 @@ export function rowsOf(tokens) {
       }
     } else if (FOLDS_AUXILIARY.has(tok.pos)) {
       while (end + 1 < tokens.length && tokens[end + 1].pos === 'auxiliary'
-        && !tokens[end + 1].meaning && !standsAlone(tokens[end + 1])) end += 1
+        && !tokens[end + 1].meaning && !tokens[end + 1].gloss && !standsAlone(tokens[end + 1])) end += 1
     }
     const group = tokens.slice(i, end + 1)
     rows.push({

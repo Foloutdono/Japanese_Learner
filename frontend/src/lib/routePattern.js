@@ -27,6 +27,10 @@ export const ROUTES = [
   '/today',
   '/today/run',
   '/today/clear',
+  // 対戦 (plan 279): the departure, then a duel from its ticket to its
+  // result, on the stage. The literal before the pattern it would match.
+  '/duel/new',
+  '/duel/:id',
   // 試乗 — the first ride (plan 098). Before any gate, so tabFor
   // answers null for it.
   '/ride',
@@ -113,6 +117,10 @@ export const ROUTES = [
   '/profile/tickets',
   // 番付 (plan 262): the whole board.
   '/profile/banzuke',
+  // 対戦 (plan 279): the duels' hall, the friends, the Elo board.
+  '/profile/duels',
+  '/profile/duels/friends',
+  '/profile/duels/board',
   '/profile/settings',
   '/profile/settings/:page',
 ]

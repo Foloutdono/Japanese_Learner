@@ -3,6 +3,18 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { StageFrame } from '../components/chrome/Shell'
+// The real faces, as main.jsx loads them: whether a passage fits its
+// card is a question of the metrics the card is drawn in, not of the
+// fallback the runner happens to have (see below).
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/space-grotesk/latin-500.css'
+import '@fontsource/space-grotesk/latin-600.css'
+import '@fontsource/space-grotesk/latin-700.css'
+import '@fontsource/noto-serif-jp/600.css'
+import '@fontsource/noto-serif-jp/700.css'
+import '@fontsource/noto-sans-jp/400.css'
+import '@fontsource/noto-sans-jp/500.css'
+import '@fontsource/noto-sans-jp/700.css'
 import '../index.css'
 
 // ── 読解 — the passage band, measured on the smallest phone ──────
@@ -20,14 +32,15 @@ import '../index.css'
 //
 // ONE DIRECTION ONLY, and deliberately. This asserts that the ceiling
 // fits; it does not assert that a character more would not. Where the
-// line actually breaks depends on the Japanese font the machine has,
-// and CI has none — a headless Linux runner falls back to a narrower
-// glyph and packs noticeably more per line than any real device does
-// (a text of CEILING + 80 overflows on a developer machine and fits in
-// CI, which is what retired the assertion that used to be here). The
-// fit is therefore measured where the metrics are worst and asserted
-// where they can only be better: a pass in CI is weaker evidence than
-// a pass locally, and a FAILURE anywhere is real.
+// line actually breaks depends on the face the card is drawn in, so the
+// card is drawn in the app's own (Noto Sans JP, Space Grotesk, loaded
+// as main.jsx loads them and waited for before anything is measured):
+// left to the machine's fallback, the same 280 characters fitted in
+// CI, whose runner has no Japanese face and packs more per line, and
+// overflowed by a line in a container whose system-ui is Inter, where
+// the glyphs falling back past it set the lines taller -- neither of
+// them the card a learner reads. What still differs between machines
+// is the rasteriser, so a FAILURE anywhere is still real.
 
 // The ceiling of COMPREHENSION_CHARS. Written here as a number because
 // the two halves of the app do not share a language; the backend test
@@ -104,6 +117,10 @@ async function reading(text, sentences = null) {
       </MemoryRouter>
     </LangProvider>
   )
+  // The faces before the entrance: a slice of Noto Sans JP arriving
+  // after the measure would move every line under it.
+  await document.fonts.load('500 16px "Noto Sans JP"', text)
+  await document.fonts.ready
   await settle()
   return screen.container
 }

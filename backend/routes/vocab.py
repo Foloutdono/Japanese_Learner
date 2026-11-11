@@ -2,13 +2,13 @@ import logging
 import random
 from fastapi import APIRouter, Depends, HTTPException, Query
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from core.auth import get_user_id, prefixed, unprefixed
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from translations import get_meaning
-from translations.fr.vocab_fr import VOCAB_FR
+from translations.course import VOCAB_GLOSSES
 from study.modes import (
     VOCAB, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_FURIGANA, WORD_READING,
     Mode, eligible_for, require_mode, resolve_for_source,
@@ -16,14 +16,14 @@ from study.modes import (
 from study.furigana import align_deck as align_furigana
 from study.mcq import pick_distractors
 from study import teaching_order
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 class ReviewPayload(BaseModel):
-    card_id:    str
-    mode:       str
+    card_id:    str = Field(max_length=CARD_ID_MAX)
+    mode:       str = Field(max_length=MODE_MAX)
     quality:    int
     # The card's stage *before* this review, exactly as it was handed
     # back on the card payload (see _build_vocab_card's "stage" field
@@ -59,7 +59,7 @@ def _stage_demotion(prev_stage: str | None, new_stage: str | None) -> str | None
         return None
     return STAGE_DEMOTIONS.get((prev_stage, new_stage))
 
-FR_MAP = VOCAB_FR
+GLOSSES = VOCAB_GLOSSES
 MAX_BATCH = 25
 
 
@@ -106,7 +106,7 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
     # how a meaning is resolved keeps that right for the prompt AND for
     # the distractors, which a post-hoc correction of the payload could
     # not.
-    resolve_meaning = meaning_of or (lambda e: get_meaning(e, lang, FR_MAP))
+    resolve_meaning = meaning_of or (lambda e: get_meaning(e, lang, GLOSSES))
     meaning = resolve_meaning(word)
 
     payload = {
@@ -174,7 +174,7 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
 def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
                   new_limit: int | None = None):
     """
-    Shared by /api/vocab/card and /api/vocab/cards. Returns
+    Used by /api/vocab/cards. Returns
     (vocab_list, cards) — vocab_list is None for an unknown level or
     invalid mode (callers re-check which, to keep the exact original
     error messages).
@@ -245,27 +245,13 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     return vocab_list, cards
 
 
-@router.get("/api/vocab/card")
-def get_vocab_card(level: str, lang: str = "fr",
-                   m: Mode = Depends(require_mode(VOCAB)),
-                   user_id: str = Depends(get_user_id)):
-    mode = m.key
-    vocab_list, cards = _select_cards(level, m, lang, count=1, exclude_ids=set(), user_id=user_id)
-    if vocab_list is None:
-        return {"error": "Unknown level"}
-    if not cards:
-        logger.warning("vocab study exhausted level=%s mode=%s user_id=%s", level, mode, user_id)
-        return {"done": True}
-    return cards[0]
-
-
 @router.get("/api/vocab/cards")
 def get_vocab_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
                     beyond_target: bool = Query(False),
                     m: Mode = Depends(require_mode(VOCAB)),
                     user_id: str = Depends(get_user_id)):
     """
-    Batch version of /api/vocab/card — returns up to `count` cards at
+    Returns up to `count` cards at
     once so the frontend can keep a session queue filled instead of
     fetching one card per answer. `exclude` is a comma-separated list
     of raw (unprefixed) card ids the client already has queued but
@@ -314,7 +300,7 @@ def get_vocab_review_cards(level: str, lang: str = "fr", user_id: str = Depends(
             "card_id": vocab_to_id(word, level),
             "kanji":   word.get("kanji", ""),
             "kana":    word.get("kana", ""),
-            "meaning": get_meaning(word, lang, FR_MAP),
+            "meaning": get_meaning(word, lang, GLOSSES),
             "stage":   stage,
         })
 

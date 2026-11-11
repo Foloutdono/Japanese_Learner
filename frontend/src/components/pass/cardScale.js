@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 // ── The card's two sizes (plan 173) ──────────────────────────────────
 // The card (PassCard.jsx) is drawn at two fixed sizes and scaled to its slot, the way
@@ -11,25 +11,37 @@ import { useLayoutEffect, useState } from 'react'
 export const FACE_W = 272
 export const BACK_W = 424
 
+// The width each slot last measured (plan 292): a card drawn again in
+// its slot (the profile's, at every visit) starts at it, so the reading
+// before paint confirms it rather than drawing the card a second time,
+// which held the Profile gate's tap for a beat.
+const lastWidth = new Map()
+
 /**
- * The slot's own width: a callback ref and the width in pixels, null
- * until measured. offsetWidth, not the bounding box, so a card hung or
- * tilted by a transform (the gate's, the level-up's) measures its box.
- * The first reading is before paint, so the card never shows unscaled.
+ * The slot's own width: a ref for the card's root and the width in
+ * pixels, null until measured. offsetWidth, not the bounding box, so a
+ * card hung or tilted by a transform (the gate's, the level-up's)
+ * measures its box. The first reading is before paint, so the card
+ * never shows unscaled. `slot` names the place (the card's class).
  */
-export function useSlotWidth() {
-  const [node, setNode] = useState(null)
-  const [width, setWidth] = useState(null)
+export function useSlotWidth(slot = '') {
+  const ref = useRef(null)
+  const [width, setWidth] = useState(() => lastWidth.get(slot) ?? null)
   useLayoutEffect(() => {
-    if (!node) return
-    const read = () => setWidth(node.offsetWidth || null)
+    const node = ref.current
+    if (!node) return undefined
+    const read = () => {
+      const measured = node.offsetWidth || null
+      if (measured) lastWidth.set(slot, measured)
+      setWidth(measured)
+    }
     read()
-    if (typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return undefined
     const observer = new ResizeObserver(read)
     observer.observe(node)
     return () => observer.disconnect()
-  }, [node])
-  return [setNode, width]
+  }, [slot])
+  return [ref, width]
 }
 
 /** The two scale factors, as the card's custom properties. */

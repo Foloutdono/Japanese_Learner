@@ -72,6 +72,7 @@ from routes.station         import router as station_router
 from routes.feedback        import router as feedback_router
 from routes.release         import router as release_router
 from routes.transfer        import router as transfer_router
+from routes.pvp             import router as pvp_router
 from routes.events          import router as events_router
 from core.credits import OutOfCredits, PassRequired, LimitReached
 # The shared daily counter's table is made here, at the app's start,
@@ -229,6 +230,7 @@ app.include_router(tts_router)
 app.include_router(station_router)
 app.include_router(feedback_router)
 app.include_router(transfer_router)
+app.include_router(pvp_router)
 app.include_router(release_router)
 
 

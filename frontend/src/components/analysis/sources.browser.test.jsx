@@ -133,15 +133,26 @@ describe('the source registry', () => {
     expect(screen.container.querySelector('.anl-shelf')).not.toBeNull()
     expect(screen.container.querySelector('.anl-sources')).toBeNull()
 
-    screen.container.querySelector('.anl-entry__tool').click()
+    // Every platform but the line's is a row of the ＋'s ways in (plan
+    // 317b), each opening its sheet: the registry's keys, all of them.
+    for (const s of SOURCES.filter(x => x.key !== 'text')) {
+      screen.container.querySelector('.anl-entry__add').click()
+      await settle(60)
+      const row = [...document.querySelectorAll('.anl-way')].find(b => b.querySelector('b').textContent === fr[s.label])
+      expect(row, s.key).toBeTruthy()
+      row.click()
+      await settle(60)
+      expect(document.querySelector(`[role="dialog"] #anl-panel-${s.key}`), s.key).not.toBeNull()
+      expect(document.querySelector(`[role="dialog"] #anl-panel-${s.key}`).childElementCount, s.key).toBeGreaterThan(0)
+      document.querySelector('.scrim').click()
+      await settle(60)
+      expect(document.querySelector('[role="dialog"]')).toBeNull()
+    }
+    // The video's sheet is the photo's and the song's kind: it holds its
+    // own intake, not only a pasted link.
+    screen.container.querySelector('.anl-entry__add').click()
     await settle(60)
-    expect(document.querySelector('[role="dialog"] #anl-panel-photo .intake-pair')).not.toBeNull()
-    document.querySelector('.scrim').click()
-    await settle(60)
-    expect(document.querySelector('[role="dialog"]')).toBeNull()
-
-    // The video has its own door too, not only a pasted link.
-    screen.container.querySelector('.anl-entry__tool[aria-label="Vidéo"], .anl-entry__tool[aria-label="Video"]').click()
+    ;[...document.querySelectorAll('.anl-way')].find(b => b.querySelector('b').textContent === fr.sourceVideo).click()
     await settle(60)
     expect(document.querySelector('[role="dialog"] #anl-panel-video .anl-field')).not.toBeNull()
     document.querySelector('.scrim').click()

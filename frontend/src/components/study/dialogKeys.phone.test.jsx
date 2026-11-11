@@ -23,7 +23,7 @@ function Run({ open, onRate, onAnswer }) {
       <Flashcard t={{}} resetKey="a" front={<span className="probe-front">山</span>} back={<span className="probe-back">mountain</span>} />
       <MCQGrid choices={['a', 'b', 'c', 'd']} onAnswer={onAnswer} answered={false} renderChoice={c => c} />
       <RatingBar scale="full" active onRate={onRate} />
-      <Sheet open={open} onClose={() => {}} jp="券" cap="pass"><p>balance</p></Sheet>
+      <Sheet open={open} onClose={() => {}} title="券" sub="pass"><p>balance</p></Sheet>
     </LangProvider>
   )
 }
@@ -114,7 +114,7 @@ describe('the offer over another sheet', () => {
       const offer = usePaywall()
       return (
         <LangProvider>
-          <Sheet open onClose={under} jp="券" cap="balance">
+          <Sheet open onClose={under} title="券" sub="balance">
             <button type="button" className="probe-see" onClick={() => openPaywall('balance')}>see the pass</button>
           </Sheet>
           <OfferScreen />

@@ -7,6 +7,7 @@ import { useLearnerModes, setMainMode, setExtraModes, MODE_LINES } from '../../s
 import { Loading } from '../ui/Loading'
 import { Emphasized } from '../ui/Emphasized'
 import { Sheet } from '../chrome/Sheet'
+import { SlidersIcon } from '../ui/Icons'
 import { Chip, Chips } from '../chrome/Console'
 import { SettingsPage, Slip } from './SettingsPage'
 import { useDesk } from '../../hooks/useDesk'
@@ -153,7 +154,7 @@ function ModeSheet({ from, to, preview, t, lang, onConfirm, onClose }) {
   const marked = preview.markedKnown ?? 0
   const title = t.modeSwitchTitle(to)
   return (
-    <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet" initialFocus='[data-action="mode-cancel"]'>
+    <Sheet open onClose={onClose} title={title} icon={SlidersIcon} label={title} className="lvl-sheet" initialFocus='[data-action="mode-cancel"]'>
       <p className="lvl-sheet__body">
         <Emphasized text={marked > 0 ? t.modeSwitchBody(from, to, weeks) : t.modeSwitchBodyNone(to)} strongClassName="lvl-sheet__strong" />
       </p>
