@@ -70,6 +70,15 @@ describe('the iOS shell', () => {
     expect(privacy).toMatch(/<key>NSPrivacyTracking<\/key>\s*<false\/>/)
   })
 
+  // Every byte the app encrypts goes through iOS itself: HTTPS in the
+  // system WebView, nothing of its own. Said in the plist, App Store
+  // Connect stops asking about export compliance on every build (build
+  // 1105 was the first it held back for the answer).
+  it('says it uses no encryption beyond the system\'s', () => {
+    const plist = read('ios/App/App/Info.plist')
+    expect(plist).toMatch(/<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/)
+  })
+
   it('copies each manifest into its own target', () => {
     expect(project.match(/PrivacyInfo\.xcprivacy in Resources \*\/,/g)).toHaveLength(2)
   })
