@@ -60,25 +60,6 @@ export function EloCurve({ trend, start, label }) {
   )
 }
 
-/** A door in the holder's shape: roundel, name, figure, chevron. */
-export function DoorRow({ glyph, name, sub, figure, onClick }) {
-  return (
-    <div className="records records--one">
-      <button type="button" className="record record--door" style={{ '--line-color': 'var(--pass-ink)' }} onClick={onClick}>
-        <span className="pf-line__id">
-          <span className="pf-line__roundel" aria-hidden="true" lang="ja">{glyph}</span>
-          <span className="pf-line__names">
-            <span className="pf-line__jp">{name}</span>
-            {sub && <span className="pvp-door__waiting">{sub}</span>}
-          </span>
-        </span>
-        {figure != null && <span className="record__value record__value--door">{figure}</span>}
-        <ChevronIcon direction="right" size={15} className="record__chev" />
-      </button>
-    </div>
-  )
-}
-
 /**
  * The levels a paper asks and their share (plan 286, the owner's B):
  * the paper stands where the Elo does, between two levels (the levels
