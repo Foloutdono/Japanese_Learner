@@ -4,12 +4,11 @@ One counter for every daily ceiling (plan 125).
 routes/ocr.py and routes/reading.py each grew a table of their own --
 ocr_usage, comprehension_usage, the same three columns -- and each said
 so: two counters is a coincidence, three is a pattern, and the third
-would be the moment to generalise. 作文's tutor review is the third. It
-counts here, in daily_usage keyed by (learner, feature, local day), and
-the two older tables stay where they are: moving them is a data
-migration with nothing to gain yet. The day a fourth feature or an
-operator report wants one table is the day they move -- a one-shot
-INSERT ... SELECT each, and one line in each route.
+would be the moment to generalise. 作文's tutor review was the third,
+and it counted here, in daily_usage keyed by (learner, feature, local
+day). Plan 320 moved the two older ones in ("ocr", "comprehension"):
+scripts/migrate_daily_usage.py folds their rows into this table and
+drops them. Every model call's ceiling counts here now.
 
 The rules are the two routes' own, kept:
 

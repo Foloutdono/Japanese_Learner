@@ -213,11 +213,11 @@ def seeded():
     the table themselves -- start from the state they expect."""
     _sql("DELETE FROM comprehension_pool")
     _sql("DELETE FROM comprehension_served WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
-    _sql("DELETE FROM comprehension_usage WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
+    _sql("DELETE FROM daily_usage WHERE feature = 'comprehension' AND user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
     reading._seed_comprehension_pool()
     yield
     _sql("DELETE FROM comprehension_served WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
-    _sql("DELETE FROM comprehension_usage WHERE user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
+    _sql("DELETE FROM daily_usage WHERE feature = 'comprehension' AND user_id IN (%s, %s)", (DEV_USER_ID, SEED_READER))
 
 
 def _count():

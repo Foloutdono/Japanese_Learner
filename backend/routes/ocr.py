@@ -7,17 +7,16 @@
 # plans/023.
 #
 # The image is forwarded to the model and dropped. Nothing is written to
-# disk or to the database except a per-user counter.
+# disk or to the database except a per-user counter (core/daily_limit.py).
 import base64
 import logging
 import os
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
+from core import daily_limit
 from core.auth import get_user_id
-from core.credits import local_today, require_pass, resets_at
-from core.db import db_conn
-from core.rls import enable_rls
+from core.credits import require_pass, resets_at
 from study.llm_shared import chat, LLMUnavailable
 from study.ocr_prompt import OCR_PROMPT, VERTICAL_HINT
 from study.text_normalize import normalize_recognized_text
@@ -51,7 +50,8 @@ _MAX_IMAGE_BYTES = 8 * 1024 * 1024
 # a manga chapter photographs it page by page, and a chapter is more
 # than ten pages. 20 covers a real session and still cuts the worst
 # case by two thirds. It is env-overridable precisely because the right
-# number is a measurement nobody has yet -- ocr_usage has the data.
+# number is a measurement nobody has yet -- daily_usage has the data
+# (feature 'ocr').
 _DAILY_OCR_LIMIT = int(os.environ.get("OCR_DAILY_LIMIT", "20"))
 
 # Magic bytes, because a client's declared content_type is a claim, not
@@ -71,72 +71,15 @@ def _sniff_image_type(raw: bytes) -> str | None:
     return None
 
 
-def _ensure_ocr_schema() -> None:
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS ocr_usage (
-                    user_id  TEXT NOT NULL,
-                    day      DATE NOT NULL,
-                    count    INTEGER NOT NULL DEFAULT 0,
-                    PRIMARY KEY (user_id, day)
-                )
-            """)
-            enable_rls(cur, "ocr_usage")
-        conn.commit()
-    finally:
-        conn.close()
-
-
-try:
-    _ensure_ocr_schema()
-except Exception:  # pragma: no cover - a missing DB must not stop import
-    logger.exception("ocr schema could not be initialised")
-
-
-def _claim_daily_slot(user_id: str) -> int:
-    """Increment today's counter and return the new value.
-
-    Incremented BEFORE the model call on purpose: a failing call still
-    costs a slot, because a client retrying a failure is exactly what a
-    cap exists to stop.
-
-    "Today" is the LEARNER's, not the server's -- core/credits.py's own
-    rule, and the same helper. It was CURRENT_DATE (the server's clock,
-    UTC in every deployment) while the cap was 60 and nobody reached
-    it. At 20 the boundary decides whether someone can study in the
-    evening: a learner in Tokyo crosses into the next UTC day at 09:00
-    local, so a UTC cap would hand them a fresh allowance mid-morning
-    and none at all after dinner. It also makes the message the screen
-    already shows -- "You've hit today's image limit. Try again
-    tomorrow." -- true, which it was not before.
-
-    A learner with no profile row, or none that has reported an offset
-    yet, falls back to UTC exactly as local_today does."""
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
-                (user_id,),
-            )
-            row = cur.fetchone()
-            cur.execute(
-                """
-                INSERT INTO ocr_usage (user_id, day, count)
-                VALUES (%s, %s, 1)
-                ON CONFLICT (user_id, day)
-                DO UPDATE SET count = ocr_usage.count + 1
-                RETURNING count
-                """,
-                (user_id, local_today(row[0] if row else None)),
-            )
-            (count,) = cur.fetchone()
-        conn.commit()
-        return count
-    finally:
-        conn.close()
+# The cap counts in core/daily_limit.py's daily_usage under OCR_FEATURE
+# (plan 320), on the learner's own day. It had a table of its own,
+# ocr_usage, written before the shared counter existed;
+# scripts/migrate_daily_usage.py folds its rows into daily_usage and
+# drops it. One rule changed with the move: a database error now counts
+# as under the cap (claim fails open) where the old counter raised a
+# 500. A hiccup refusing a scan the learner is entitled to is the worse
+# failure, and a pool that ran dry still refuses (PoolBusy, a 503).
+OCR_FEATURE = "ocr"
 
 
 # A plain def, so FastAPI runs it on the threadpool (plan 211): as an
@@ -165,7 +108,7 @@ def recognize_image(
             status_code=400, detail="Not a supported image (PNG, JPEG or WebP)"
         )
 
-    used = _claim_daily_slot(user_id)
+    used = daily_limit.claim(user_id, OCR_FEATURE, _DAILY_OCR_LIMIT)
     if used > _DAILY_OCR_LIMIT:
         # The screen shows its own localized line for a 429 (the
         # frontend's `ocrLimitReached`), so this detail is for the log
@@ -191,21 +134,24 @@ def recognize_image(
         ],
     }]
 
-    try:
-        content = chat(
-            messages,
-            timeout=90,
-            max_tokens=1500,
-            reasoning=False,
-            vision=True,
-            task="ocr",
-        )
-    except LLMUnavailable as e:
-        logger.error("OCR has no usable vision provider: %s", e)
-        raise HTTPException(
-            status_code=503,
-            detail="Image reading is unavailable right now. Please try again later.",
-        )
+    # An outage nobody billed gives the slot back (the 503's cause is
+    # the LLMUnavailable, which refund_unbilled reads).
+    with daily_limit.refund_unbilled(user_id, OCR_FEATURE):
+        try:
+            content = chat(
+                messages,
+                timeout=90,
+                max_tokens=1500,
+                reasoning=False,
+                vision=True,
+                task="ocr",
+            )
+        except LLMUnavailable as e:
+            logger.error("OCR has no usable vision provider: %s", e)
+            raise HTTPException(
+                status_code=503,
+                detail="Image reading is unavailable right now. Please try again later.",
+            ) from e
 
     text = normalize_recognized_text(content or "")
     # `model` is deliberately NOT returned, though plan 023 asked for it:

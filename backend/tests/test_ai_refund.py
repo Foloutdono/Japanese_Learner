@@ -297,9 +297,7 @@ def test_the_paper_everyone_sits_is_charged_to_nobody(monkeypatch):
 
 def test_every_module_that_claims_a_slot_can_give_it_back():
     """A module that calls daily_limit.claim() calls refund_unbilled()
-    too: a new rationed feature brings its refund in the same change.
-    routes/reading.py counts in a table of its own (comprehension_usage)
-    and is not one of them."""
+    too: a new rationed feature brings its refund in the same change."""
     missing = []
     for path in sorted(BACKEND.glob("*/*.py")):
         if path.parts[-2] in {"tests", "scripts"} or path.name == "daily_limit.py":
