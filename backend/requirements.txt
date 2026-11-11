@@ -33,6 +33,10 @@ aiofiles
 # which this app doesn't set -- pinned as a floor regardless).
 python-multipart>=0.0.32
 pykakasi
+# scripts/build_radical_index.py's XML parser: refuses a DOCTYPE outright,
+# so a KANJIDIC2 dump handed to it on the command line can't entity-bomb
+# the process the way stdlib xml.etree.ElementTree would let it.
+defusedxml>=0.7.1
 # >=2.33.0: fixes CVE-2024-35195 (TLS verification can silently stay
 # disabled on a Session after an initial verify=False request),
 # CVE-2024-47081 (.netrc credentials can leak to a crafted URL's host), and

@@ -29,7 +29,11 @@ Notes:
 """
 import sys
 import json
-import xml.etree.ElementTree as ET
+# Not stdlib xml.etree: that parser expands internal entities with no
+# limit (the "billion laughs" DoS), and this reads whatever XML dump is
+# handed to it on the command line rather than a fixed, already-vetted
+# file. defusedxml.ElementTree is a drop-in that refuses a DOCTYPE outright.
+import defusedxml.ElementTree as ET
 from collections import defaultdict
 
 

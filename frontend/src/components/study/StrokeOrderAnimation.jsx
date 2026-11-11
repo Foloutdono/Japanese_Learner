@@ -77,6 +77,21 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
     const svgEl = container.querySelector('svg')
     if (!svgEl) { onError?.(); return }
 
+    // Every caller today points this at the backend's own /kanjivg
+    // static files, never at anything a learner wrote -- but innerHTML
+    // runs the HTML parser, which (unlike a plain <img>) WILL act on a
+    // <script> or an on*= handler inside inline SVG. Stripped rather
+    // than trusted, so this stays safe the day a caller hands it
+    // anything less fixed.
+    svgEl.querySelectorAll('script, foreignObject').forEach(el => el.remove())
+    for (const el of svgEl.querySelectorAll('*')) {
+      for (const attr of [...el.attributes]) {
+        if (/^on/i.test(attr.name) || /^(?:href|xlink:href)$/i.test(attr.name) && /^\s*javascript:/i.test(attr.value)) {
+          el.removeAttribute(attr.name)
+        }
+      }
+    }
+
     svgEl.removeAttribute('width')
     svgEl.removeAttribute('height')
     svgEl.style.width = '100%'
