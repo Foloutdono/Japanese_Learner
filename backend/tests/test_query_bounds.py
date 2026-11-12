@@ -105,3 +105,12 @@ class TestQueryBounds:
         assert resp.status_code == 422
         resp = client.post("/api/decks/1/review", json={"card_id": "a" * (CARD_ID_MAX + 1), "mode": "m", "quality": 4})
         assert resp.status_code == 422
+
+    def test_a_deck_name_is_bounded_and_not_blank(self):
+        from routes.decks import DECK_NAME_MAX
+        resp = client.post("/api/decks", json={"name": "a" * (DECK_NAME_MAX + 1), "type": "standard"})
+        assert resp.status_code == 422
+        resp = client.patch("/api/decks/1", json={"name": "a" * (DECK_NAME_MAX + 1)})
+        assert resp.status_code == 422
+        resp = client.post("/api/decks", json={"name": "   ", "type": "standard"})
+        assert resp.status_code == 400

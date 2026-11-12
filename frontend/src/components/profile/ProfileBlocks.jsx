@@ -5,6 +5,7 @@ import { SplitRow } from '../selection/SplitRow'
 import { useDesk } from '../../hooks/useDesk'
 import { durationParts, weekShare } from '../../domain/agenda'
 import { AGENDA_PATH } from '../agenda/AgendaNext'
+import { intlLocale } from '../../lib/locale'
 
 // ── The stamp book (canvas Profile, plan 074) ─────────────────
 // DESIGN.md, Motion: the streak is a stamp rally, not a flame. The
@@ -89,9 +90,9 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en', figures =
   const { cells, elapsed, stamped } = bookDays(calendar, today)
 
   // A title, so capitalised: French writes its months in lower case.
-  const month = new Intl.DateTimeFormat(lang, { month: 'long' }).format(today)
+  const month = new Intl.DateTimeFormat(intlLocale(lang), { month: 'long' }).format(today)
   const title = month.charAt(0).toLocaleUpperCase(lang) + month.slice(1)
-  const dowFmt = new Intl.DateTimeFormat(lang, { weekday: 'narrow' })
+  const dowFmt = new Intl.DateTimeFormat(intlLocale(lang), { weekday: 'narrow' })
   const dows = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(A_MONDAY)
     d.setDate(A_MONDAY.getDate() + i)

@@ -845,8 +845,14 @@ def _ensure_deck_schema() -> None:
 _ensure_deck_schema()
 
 
+# A deck's name, as the forms let it be typed (DecksScreen, the song
+# sheets: maxLength 120). Bounded here too (plan 211): a client is not
+# what holds a text param to a size.
+DECK_NAME_MAX = 120
+
+
 class DeckPayload(BaseModel):
-    name: str
+    name: str = Field(max_length=DECK_NAME_MAX)
     # The deck's STRUCTURE, which decides what it can hold and which
     # modes it offers (see STRUCTURES). `standard` -- a plain front/back
     # pair -- is the default, being the only one that needs nothing.
@@ -1083,7 +1089,7 @@ def _like(term: str) -> str:
 
 
 class DeckEditPayload(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, max_length=DECK_NAME_MAX)
     description: str | None = None
 
 
@@ -1793,6 +1799,10 @@ def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
 def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
     if payload.type not in DECK_TYPES:
         raise HTTPException(status_code=400, detail="Invalid deck type")
+    # As a rename does: a name of spaces is no name.
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="A deck needs a name")
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -1802,7 +1812,7 @@ def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
                 INSERT INTO decks (user_id, name, type)
                 VALUES (%s, %s, %s)
                 RETURNING id, name, type, created_at
-            """, (user_id, payload.name, payload.type))
+            """, (user_id, name, payload.type))
             deck = dict(cur.fetchone())
         conn.commit()
         deck["card_count"] = 0

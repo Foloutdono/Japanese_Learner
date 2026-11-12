@@ -1,3 +1,5 @@
+import { intlLocale } from '../lib/locale'
+
 // ── 定期券 — the learner's card, by its plan (plan 173) ──────────
 // One card in three materials, the owner's picks of the canvas "Tsuji —
 // the three offers" (its pages "The free card" and "The cards in the
@@ -48,7 +50,7 @@ export function sinceMonth(iso, lang) {
   if (!iso) return null
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return null
-  return new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(d)
+  return new Intl.DateTimeFormat(intlLocale(lang), { month: 'long', year: 'numeric' }).format(d)
 }
 
 // 署名 (plan 247): the card prints a first name the boarding asked for,

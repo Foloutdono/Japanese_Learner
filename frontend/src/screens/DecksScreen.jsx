@@ -227,6 +227,7 @@ function DecksShelf({ session, open }) {
         autoFocus
         className="field"
         aria-label={t.deckNamePlaceholder}
+        maxLength={120}
       />
       <div className="type-list" role="radiogroup" aria-label={t.createDeck} onKeyDown={onWalkTypes}>
         {DECK_TYPES.map((dt, i) => {
