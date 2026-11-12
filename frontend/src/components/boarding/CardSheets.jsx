@@ -20,6 +20,7 @@ import {
 import { CARD_NAME_MAX, cardNameLength } from '../../domain/passCard'
 import { BoardLink, Continue } from './BoardFrame'
 import { CheckMark, LockMark } from './icons'
+import { intlLocale } from '../../lib/locale'
 
 // ── 乗車 — the card's sheets (plan 247) ──────────────────────────
 // The owner's pick C of the boarding's canvas, "the card is the form":
@@ -141,7 +142,7 @@ export function RhythmSheet({ open, onClose, value, onPick, rides = null, stop =
 
 function DepartureBoard({ value, onChange, rides, stop, first }) {
   const { t, lang } = useLang()
-  const date = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric' })
+  const date = new Intl.DateTimeFormat(intlLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })
   const goal = stop && stop !== 'novice' ? stop : null
   return (
     <>

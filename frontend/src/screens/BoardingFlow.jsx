@@ -34,6 +34,7 @@ import { BoardBack } from '../components/boarding/boardBack'
 import { noteAskedToKeep } from '../lib/guest'
 import { arrivalSource } from '../lib/arrival'
 import { isNative } from '../lib/platform'
+import { intlLocale } from '../lib/locale'
 
 // ── 乗車 — the boarding (plan 075; the card is the form, plan 247) ──
 // The owner's pick C of the boarding's canvas ("Tsuji — the boarding,
@@ -550,7 +551,7 @@ export default function BoardingFlow({
   // The month the goal picked is reached in, for the lines' sheet -- once
   // the volumes that price it have answered.
   const arrivalMonth = volumes
-    ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
+    ? new Intl.DateTimeFormat(intlLocale(lang), { month: 'short', year: 'numeric' }).format(figures.date)
     : null
   // What each line carries on the ride to the goal, taken or not.
   const everyLine = volumes
@@ -565,7 +566,7 @@ export default function BoardingFlow({
   // A reader of both scripts has none.
   const kanaLeft = volumes ? kanaFigures(volumes, answers.kana, perDay, now) : null
   const kanaStop = kanaLeft && kanaLeft.kana > 0
-    ? { date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' }).format(kanaLeft.date), min: answers.rhythm }
+    ? { date: new Intl.DateTimeFormat(intlLocale(lang), { day: 'numeric', month: 'short' }).format(kanaLeft.date), min: answers.rhythm }
     : null
   // The goal's sheet: the stops ahead, each priced at the card's pace on
   // its lines, and where a reader stands.

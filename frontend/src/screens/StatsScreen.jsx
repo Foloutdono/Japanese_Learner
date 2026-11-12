@@ -12,6 +12,7 @@ import { retentionSeries, missesSince, strengthRungs, lineGrids, weakestByLine }
 import { ReportStrip } from '../components/stats/ReportStrip'
 import { LineReport } from '../components/stats/LineReport'
 import { useDesk } from '../hooks/useDesk'
+import { intlLocale } from '../lib/locale'
 
 // 統計 wears the plate the profile's door to it already draws (TO, in
 // LineMark) — the bar is the same mark, so the screen you land on is
@@ -88,8 +89,8 @@ export default function StatsScreen({ session }) {
   // was pressed, or on the desk the one under the mouse (plan 123).
   const askedIndex = preview ?? point ?? series.currentIndex
   const asked = askedIndex === null ? null : series.points[askedIndex]
-  const dayFmt = new Intl.DateTimeFormat(lang, { weekday: 'short', day: 'numeric', month: 'short' })
-  const weekFmt = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
+  const dayFmt = new Intl.DateTimeFormat(intlLocale(lang), { weekday: 'short', day: 'numeric', month: 'short' })
+  const weekFmt = new Intl.DateTimeFormat(intlLocale(lang), { day: 'numeric', month: 'short' })
   const pointLabel = p => {
     const date = new Date(`${p.start}T12:00:00`)
     return series.unit === 'day' ? dayFmt.format(date) : t.reportWeekStart(weekFmt.format(date))

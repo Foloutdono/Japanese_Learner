@@ -9,6 +9,7 @@
 // Pure: the instants, the notifications' words and the widget's
 // figures. The network and the plugins are lib/platform.js's.
 import { lineShares } from '../domain/lanes'
+import { intlLocale } from './locale'
 
 // One notification a day at most, as the boarding promised ("One a
 // day, at your time. Never more."): a dated one for each of the next
@@ -194,6 +195,6 @@ export function whenLabel(at, now, t, lang) {
   const days = Math.round((localMidnight(at).getTime() - localMidnight(now).getTime()) / 86_400_000)
   if (days === 0) return t.nudgeWhen.today
   if (days === 1) return t.nudgeWhen.tomorrow
-  const name = new Intl.DateTimeFormat(lang, { weekday: 'long' }).format(at)
+  const name = new Intl.DateTimeFormat(intlLocale(lang), { weekday: 'long' }).format(at)
   return name.charAt(0).toUpperCase() + name.slice(1)
 }
