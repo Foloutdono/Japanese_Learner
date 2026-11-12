@@ -27,6 +27,7 @@ import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { SPRINT_MS, points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import { APP as FEATURE_APP, FEATURE_FPS, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, camFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
+import { QUALITY_LABEL_KEY, scaleFor } from './domain/ratingScales.js'
 import EN from './locales/en/index.js'
 import FR from './locales/fr/index.js'
 
@@ -3488,6 +3489,29 @@ describe('the practice features, recorded in the app (plan 270)', () => {
         expect(texts.some(t => sg.say.includes(t.trim()) && t.trim().length > 2), `${at}: ${sg.say}`).toBe(true)
       }
     })
+  })
+
+  // The recorder taps the key a script names and waits ten seconds for one the
+  // bar does not draw: quality 3 left the default four on 2026-10-26, and the
+  // dictation's and the translation's scripts tapped it until 2026-11-11.
+  it('rates on a key the recorded learner’s bar draws, a slip as a near miss', () => {
+    const KEY = /\.rating-bar__btn--q(\d)/
+    const rated = {}
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const bar = scaleFor(plan.data.mocks['GET /api/profile'].ratingScale).qualities
+      for (const st of featureSteps(plan)) for (const sel of [st.tap, st.click].flat()) {
+        const q = typeof sel === 'string' && sel.match(KEY)
+        if (!q) continue
+        expect(bar, `${at}: ${sel}`).toContain(Number(q[1]))
+        if (st.click) rated[id] = Number(q[1])
+      }
+    })
+    // As each exercise ends (test_carousel_bank.py): the reading right, the
+    // dictation a slip short, the translation right in part, in the bar's own words.
+    const word = Object.fromEntries(Object.entries(rated).map(([id, q]) => [id, EN[QUALITY_LABEL_KEY[q]]]))
+    expect(word).toEqual({ reading: EN.correctHesit, translation: EN.wrongSeen, dictation: EN.wrongSeen })
+    expect(EN.wrongSeen).toBe('Almost')
   })
 
   it('posts each video to the three feeds, credited where the app’s voices speak', () => {
