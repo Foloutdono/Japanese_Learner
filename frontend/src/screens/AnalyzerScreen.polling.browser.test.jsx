@@ -682,7 +682,7 @@ describe('AnalyzerScreen polling', () => {
     const screen = await renderScreen()
     await goToPlatform(screen, 'video')
     await settle(120)
-    const card = screen.container.querySelector('.anl-lib .anl-card__open')
+    const card = screen.container.querySelector('.anl-lib__item')
     expect(card.textContent).toContain('猫が好き')
     card.click()
     await settle(200)

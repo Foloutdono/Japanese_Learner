@@ -7,10 +7,10 @@ import { forgetCachedJson } from '../../lib/cachedJson'
 import '../../index.css'
 
 // ── 図書館 — the public library of analysed videos (plan 322) ──
-// Under the desk it is a row of chips (all, mine, the kinds the library
-// holds) and an order, over a row per video; opening one hands the video
-// back. The server's answer is mocked: what is held here is what the
-// learner reads of it, and the request each chip makes.
+// The owner's pick B, "just the pictures": a title with one picker beside
+// it, then a grid of stills, each with its first line and nothing else.
+// The server's answer is mocked: what is held here is what the learner
+// reads of it, and the request each pick makes.
 const apiJson = vi.fn()
 vi.mock('../../lib/api', () => ({
   api: p => p,
@@ -22,25 +22,15 @@ vi.mock('../../lib/api', () => ({
 
 const T = {
   vlibTitle: 'Video library',
-  vlibHint: 'Every video learners analysed.',
-  vlibOrder: 'Order',
-  vlibOrderNew: 'Newest',
-  vlibOrderPopular: 'Most studied',
-  vlibMine: 'Mine',
+  vlibAllKinds: 'All kinds',
+  vlibKind: 'Kind of video',
+  vlibMine: 'My videos',
   vlibKinds: { music: 'Music', podcast: 'Podcast', other: 'Other' },
-  vlibLearners: n => `${n} ${n === 1 ? 'learner' : 'learners'}`,
   vlibEmpty: 'No video yet.',
   vlibEmptyMine: 'You have not opened one.',
   vlibError: 'The library did not load.',
   vlibMore: 'Show more',
-  shelfAll: 'All',
-  shelfFilter: 'Show',
-  sourceVideo: 'Video',
   retry: 'Try again',
-  sessionSentenceCount: n => `${n} ${n === 1 ? 'sentence' : 'sentences'}`,
-  dateToday: 'today',
-  dateYesterday: 'yesterday',
-  dateDaysAgo: n => `${n} days ago`,
 }
 
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
@@ -64,6 +54,11 @@ async function library(props = {}) {
 }
 const paths = () => apiJson.mock.calls.map(c => c[0])
 const settle = () => new Promise(r => setTimeout(r, 30))
+function pick(select, value) {
+  const proto = Object.getPrototypeOf(select)
+  Object.getOwnPropertyDescriptor(proto, 'value').set.call(select, value)
+  select.dispatchEvent(new Event('change', { bubbles: true }))
+}
 
 beforeEach(async () => {
   await page.viewport(414, 900)
@@ -72,36 +67,43 @@ beforeEach(async () => {
 })
 
 describe('VideoLibrary', () => {
-  it('lists the videos with their kind, their lines and their learners', async () => {
+  it('shows each video as its still and its first line, and nothing else', async () => {
     apiJson.mockResolvedValue(answer([video('aaaaaaaaaaa'), video('bbbbbbbbbbb', { category: 'podcast', learners: 1 })]))
     const screen = await library()
     await settle()
-    const rows = screen.container.querySelectorAll('.anl-row')
-    expect(rows).toHaveLength(2)
-    expect(rows[0].textContent).toContain('aaaaaaaaaaa の歌')
-    expect(rows[0].textContent).toContain('Music')
-    expect(rows[0].textContent).toContain('12 sentences')
-    expect(rows[1].textContent).toContain('1 learner')
-    expect(paths()[0]).toBe('/api/video/library?limit=24&offset=0&sort=new')
+    const items = screen.container.querySelectorAll('.anl-lib__item')
+    expect(items).toHaveLength(2)
+    expect(items[0].querySelector('.anl-lib__still')).not.toBeNull()
+    // The line is the whole of what a video says: no kind, count, learners or date.
+    expect(items[0].textContent).toBe('aaaaaaaaaaa の歌')
+    expect(paths()[0]).toBe('/api/video/library?limit=24&offset=0')
   })
 
-  it('shows a chip per kind the library holds, and asks for the kind pressed', async () => {
+  it('lays two stills a row on a phone, four on the desk', async () => {
+    apiJson.mockResolvedValue(answer(Array.from({ length: 8 }, (_, i) => video(`v${String(i).padStart(10, '0')}`))))
+    const screen = await library()
+    await settle()
+    const columns = () => getComputedStyle(screen.container.querySelector('.anl-lib__grid')).gridTemplateColumns.split(' ').length
+    expect(columns()).toBe(2)
+    await page.viewport(1280, 900)
+    await settle()
+    expect(columns()).toBe(4)
+  })
+
+  it('offers all kinds, the learner\'s own and each kind the library holds, and asks for the one picked', async () => {
     apiJson.mockResolvedValue(answer([video('aaaaaaaaaaa')]))
     const screen = await library()
     await settle()
-    const names = [...screen.container.querySelectorAll('.chip')].map(c => c.textContent)
-    // "Other" holds none, so it has no chip; "Mine" has one.
-    expect(names.join('|')).toMatch(/All.*Mine.*Music.*Podcast.*Newest.*Most studied/)
-    expect(names.join('|')).not.toContain('Other')
-    ;[...screen.container.querySelectorAll('.chip')].find(c => c.textContent.startsWith('Podcast')).click()
+    const select = screen.container.querySelector('.anl-lib__kind select')
+    expect(select.labels[0].textContent).toContain('Kind of video')
+    // "Other" holds none, so it is not offered.
+    expect([...select.options].map(o => o.textContent)).toEqual(['All kinds', 'My videos', 'Music', 'Podcast'])
+    pick(select, 'podcast')
     await settle()
-    expect(paths().at(-1)).toBe('/api/video/library?limit=24&offset=0&sort=new&category=podcast')
-    ;[...screen.container.querySelectorAll('.chip')].find(c => c.textContent.startsWith('Mine')).click()
+    expect(paths().at(-1)).toBe('/api/video/library?limit=24&offset=0&category=podcast')
+    pick(select, 'mine')
     await settle()
-    expect(paths().at(-1)).toBe('/api/video/library?limit=24&offset=0&sort=new&mine=true')
-    ;[...screen.container.querySelectorAll('.chip')].find(c => c.textContent === 'Most studied').click()
-    await settle()
-    expect(paths().at(-1)).toBe('/api/video/library?limit=24&offset=0&sort=popular&mine=true')
+    expect(paths().at(-1)).toBe('/api/video/library?limit=24&offset=0&mine=true')
   })
 
   it('hands the video to onOpen', async () => {
@@ -109,11 +111,11 @@ describe('VideoLibrary', () => {
     const onOpen = vi.fn()
     const screen = await library({ onOpen })
     await settle()
-    screen.container.querySelector('.anl-row__open').click()
+    screen.container.querySelector('.anl-lib__item').click()
     expect(onOpen).toHaveBeenCalledWith(expect.objectContaining({ videoId: 'aaaaaaaaaaa' }))
   })
 
-  it('shows more a page at a time, from where the list ends, never twice', async () => {
+  it('shows more a page at a time, from where the grid ends, never twice', async () => {
     const first = Array.from({ length: 24 }, (_, i) => video(`v${String(i).padStart(10, '0')}`))
     apiJson.mockImplementation(async path => (
       path.includes('offset=24')
@@ -122,20 +124,20 @@ describe('VideoLibrary', () => {
     ))
     const screen = await library()
     await settle()
-    expect(screen.container.querySelectorAll('.anl-row')).toHaveLength(24)
+    expect(screen.container.querySelectorAll('.anl-lib__item')).toHaveLength(24)
     screen.container.querySelector('.anl-lib__more').click()
     await settle()
     expect(paths().at(-1)).toContain('offset=24')
-    // 24 + 1 new: the repeated one is not listed twice, and nothing is left to show.
-    expect(screen.container.querySelectorAll('.anl-row')).toHaveLength(25)
+    // 24 + 1 new: the repeated one is not listed twice.
+    expect(screen.container.querySelectorAll('.anl-lib__item')).toHaveLength(25)
   })
 
-  it('says so when the library is empty', async () => {
+  it('says so when the library is empty, with no picker', async () => {
     apiJson.mockResolvedValue(answer([], { counts: { all: 0, mine: 0, music: 0, podcast: 0, other: 0 } }))
     const screen = await library()
     await settle()
     expect(screen.container.textContent).toContain('No video yet.')
-    expect(screen.container.querySelector('.chip')).toBeNull()
+    expect(screen.container.querySelector('select')).toBeNull()
   })
 
   it('says so, and offers a retry, when it did not load', async () => {
@@ -146,6 +148,6 @@ describe('VideoLibrary', () => {
     apiJson.mockResolvedValue(answer([video('aaaaaaaaaaa')]))
     screen.container.querySelector('[role="alert"] button').click()
     await settle()
-    expect(screen.container.querySelectorAll('.anl-row')).toHaveLength(1)
+    expect(screen.container.querySelectorAll('.anl-lib__item')).toHaveLength(1)
   })
 })
