@@ -300,8 +300,11 @@ Before pasting:
   4. Learn › Decks › Library: open a deck, its **···** menu,
      **Report the deck** (pick a reason, send), then **Block** its
      author and confirm.
-  5. Profile › Duels › Friends: find a second account by its exact
-     username, open its card, **Report**, **Block**.
+  5. Profile › Duels, the Elo figure at its head, the Elo ranking: tap
+     a second account's name, and its card has **Report** and **Block**.
+     (A name found by the Friends search opens no card; one who asked
+     you as a friend does.) Report it; block in step 4 or here, not
+     both on one account, since a block hides its author's decks.
   6. Profile › Settings: sign out, sign in again with the same account;
      sign out, and show **Continue with Apple** opening Apple's sheet.
   7. Profile › Settings › Account › **Delete your account**, confirmed;
