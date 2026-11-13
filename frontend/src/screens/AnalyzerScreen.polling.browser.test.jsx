@@ -660,7 +660,7 @@ describe('AnalyzerScreen polling', () => {
   // session is: the first poll is a 200 and the stage is drawn.
   it('opens a video from the library, ready at once', async () => {
     forgetCachedJson()
-    apiJson.mockImplementation(async (path, _session, init) => {
+    apiJson.mockImplementation(async path => {
       if (path.startsWith('/api/video/library/')) {
         return { sessionId: 9, status: 'ready', videoId: 'aaaaaaaaaaa' }
       }
