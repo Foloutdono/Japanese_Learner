@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **322**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **323**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -417,6 +417,30 @@ runtime purpose.
   sources (`phrase.KeepRequest`, `video._SOURCE_NAMES`,
   `passages.kindOf`) takes it in the same change, or a line pinned from
   a song is refused.
+- **A video the server fetched belongs to everybody, and to nobody (plan
+  322).** Every whole YouTube video a learner's link fetch made ready is
+  kept once in `video_library` (`routes/video_library.py`), anonymous: no
+  learner is on a row, an entry shows how many have studied it and never
+  who. Only what the server fetched itself joins (`video_library.joins`:
+  source `youtube`, no window): an upload or a grab only *names* a video
+  id, so its text is the learner's and stays private, as does a paste, a
+  song and a window of a video. The next learner who pastes that link or
+  picks it from the library opens a session of their own over the copy
+  (`open_for`, `from_library`): no fetch, none of the link allowance
+  (`_fetch_refusal` leaves it out), at most `OPEN_DAILY_CAP` a day. These
+  sessions are not on the analyser's shelf and do not count toward its
+  thirty (`core/history.LIBRARY_SESSION`, read by the listing and the
+  limit alike); "Mine" is the learner's own sessions of library videos.
+  A video's kind (`study/video_category.CATEGORIES`) is told once by a
+  model from a sample of its lines, on the learner's `video_category`
+  ration, and a video no model sorted is NULL, under "all" alone, and
+  sorted when next opened; a change to the prompt or the set bumps
+  `CATEGORY_REV`. A new thing the library keeps per video is read by
+  every learner, so it holds nothing a learner typed, and what a learner
+  adds to their own session (a model's translations, a lyrics sort)
+  never copies back. `python -m scripts.backfill_video_library` brings in
+  the videos analysed before it, once, after the deploy; `privacy.html`
+  says it in the three languages.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -1053,6 +1077,16 @@ the two tables, which nothing reads or erases any more.
 
 ```bash
 python -m scripts.migrate_daily_usage  # report (the run, rolled back); --yes to apply
+```
+
+And one after the deploy that carries plan 322, which takes whole YouTube
+videos off the analyser's shelf and into the public library: without it a
+video a learner fetched before is on neither. It adds the oldest ready,
+whole, link-fetched session of each video the library lacks, with no kind
+(a model sorts a video as it is next opened, so the script spends nothing).
+
+```bash
+python -m scripts.backfill_video_library  # report; --yes to apply
 ```
 
 And one after any deploy that changes the voice (plan 121 did, from edge-tts

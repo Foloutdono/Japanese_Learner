@@ -20,6 +20,7 @@ const NAMED = {
   link_fetch_disabled: t => t.videoLinkFetchOff,
   link_allowance_mine: t => t.videoLinkAllowanceMine,
   link_allowance_app: t => t.videoLinkAllowanceApp,
+  library_allowance: t => t.videoLibraryAllowance,
   file_too_large: t => t.subtitleTooLarge,
   transcript_too_long: t => t.transcriptTooLong,
   session_preparing: t => t.videoStillPreparing,

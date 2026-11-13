@@ -1501,6 +1501,30 @@
   gap: var(--sp-2);
   overflow-x: auto;
 }
+/* 図書館 (plan 322) — the public library of analysed videos, set under
+   the shelf on the desk and in the video's sheet on a phone. It is the
+   shelf's own object (chips, rows, cards), so it adds only its head, the
+   two chip rows (the kind, the order) and its "show more". */
+.anl-lib { margin-top: var(--sp-5); }
+.anl-lib__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.anl-lib__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: var(--text-primary);
+}
+.anl-lib__filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.anl-lib__more { align-self: center; }
 /* A chip's count: the console's own count register, beside its word. */
 .chip__n {
   font-family: var(--font-display);

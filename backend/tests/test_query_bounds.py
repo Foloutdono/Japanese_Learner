@@ -55,6 +55,9 @@ class TestQueryBounds:
         ("/api/frequency/vocab/tiers/started", "tier_size", 100, 7),
         ("/api/frequency/vocab/stats?tier=1&mode=vocab.flashcard.f2b", "tier_size", 1000, 3),
         ("/api/reading/batch?source=frequency&domain=vocab&tier=1", "tier_size", 200, 1),
+        # plan 322: the video library is paged, never asked for at once.
+        ("/api/video/library", "limit", 10, 49),
+        ("/api/video/library", "offset", 0, 10001),
         # plan 279: the duels' pages and the live poll.
         ("/api/pvp/history", "limit", 20, 51),
         ("/api/pvp/history", "offset", 0, 10001),

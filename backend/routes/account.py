@@ -154,6 +154,7 @@ SHARED = {
     "grammar_sentences":     "generated content cache keyed by (level, pattern)",
     "phrase_analysis_cache": "keyed by a hash of the phrase; shared across every caller",
     "banzuke_marks":         "which board week was settled and which day's places taken; no learner's rows",
+    "video_library":         "every whole YouTube video a link fetch made ready, once, for every learner (plan 322); anonymous, no learner on a row: a learner's own sessions of it are video_sessions, in PLAN",
 }
 
 

@@ -600,12 +600,39 @@ CREATE TABLE video_sessions (
     -- Which lines are the song (plan 264, study/lyrics_sort.py),
     -- {"rev", "kinds": {line text: kind}}; NULL until a lyrics deck is
     -- made of the session.
-    lyrics_sort   JSONB
+    lyrics_sort   JSONB,
+    -- A session opened from the public library (plan 322) rather than
+    -- fetched: it spent none of the link allowance, so the fetch budget
+    -- (routes/video.py's _fetch_refusal) does not count it.
+    from_library  BOOLEAN NOT NULL DEFAULT FALSE
 );
 ALTER TABLE video_sessions ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_video_sessions_user
 ON video_sessions(user_id, created_at DESC);
+
+CREATE INDEX idx_video_sessions_video
+ON video_sessions(video_id) WHERE source = 'youtube';
+
+-- 動画の図書館 (plan 322): every YouTube video a learner's link fetch
+-- has analysed, once, for everybody. One row per video, the whole
+-- track, with no learner on it: it is anonymous on purpose. Owned by
+-- routes/video_library.py. `category` is one of
+-- study/video_category.CATEGORIES, NULL until the model has sorted it.
+CREATE TABLE video_library (
+    video_id     TEXT PRIMARY KEY,
+    category     TEXT,
+    sentences    JSONB NOT NULL,
+    translations JSONB NOT NULL DEFAULT '{}'::jsonb,
+    truncated    INTEGER NOT NULL DEFAULT 0,
+    line_count   INTEGER NOT NULL DEFAULT 0,
+    first_line   TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE video_library ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_video_library_category
+ON video_library(category, created_at DESC);
 
 -- The claim lock -- same pattern as exam_generation_jobs
 -- (study/exam_schema.py), one row per session while work is running or
