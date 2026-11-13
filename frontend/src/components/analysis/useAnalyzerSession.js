@@ -340,6 +340,26 @@ export function useAnalyzerSession(session) {
     }
   }
 
+  // ── The library (plan 322) ───────────────────────────────
+  // A video another learner's link already analysed: the server makes the
+  // learner's own session over its copy, ready at once, and from there it
+  // is read as any session is (the poll's first GET is a 200). No fetch,
+  // so none of the link allowance; refused only past the day's openings.
+  async function openLibraryVideo(videoId) {
+    if (!videoId) return
+    countUse('analyzer', 'video')
+    const run = beginRun()
+    try {
+      const data = await apiJson(`/api/video/library/${encodeURIComponent(videoId)}/open`, session, { method: 'POST' })
+      if (run !== runIdRef.current) return
+      setVideoSessionId(data.sessionId)
+    } catch (e) {
+      if (run !== runIdRef.current) return
+      setError({ video: e })
+      setStatus('failed')
+    }
+  }
+
   async function startVideoFromFile(file, { url, start, end, timing, translations }) {
     if (!file) return
     countUse('analyzer', 'video')
@@ -679,6 +699,7 @@ export function useAnalyzerSession(session) {
     analyzeText,
     startVideoFromFile,
     startVideoFromLink,
+    openLibraryVideo,
     startVideoFromTranscript,
     startSongFromFile,
     explain,

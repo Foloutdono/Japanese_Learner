@@ -30,7 +30,7 @@ from core import daily_limit
 from core.db import db_conn
 from core.rls import enable_rls
 from core.auth import get_user_id
-from core.history import HISTORY_LIMIT, trim_history
+from core.history import HISTORY_LIMIT, LIBRARY_SESSION, trim_history
 from core.srs_instance import srs
 from study import line_translate, lyrics_sort, morphology, song_transcribe
 from study.llm_shared import LLMUnavailable, hears_audio
@@ -47,6 +47,7 @@ from study.sentences import MAX_SENTENCES
 # SRS state, and buying its deep tier shares phrase_analysis_cache --
 # reused wholesale rather than reimplemented, the same pattern
 # routes/translation.py uses for routes/reading.py's _chat.
+from routes import video_library
 from routes.phrase import TranslationsPayload, _analyze_sentence, deep_context, translated_block
 
 # A pass feature (plan 069): every route here refuses a free learner
@@ -191,6 +192,16 @@ def _ensure_video_schema() -> None:
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
             """)
+            # A session opened from the public library (plan 322) spent
+            # none of the link allowance. Additive.
+            cur.execute(
+                "ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS from_library BOOLEAN NOT NULL DEFAULT FALSE"
+            )
+            # The library's count of learners per video reads this.
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_video_sessions_video
+                ON video_sessions(video_id) WHERE source = 'youtube'
+            """)
         conn.commit()
         # One table's self-migration per transaction (CLAUDE.md): a
         # failing ALTER above must not roll back the jobs table, nor
@@ -232,7 +243,7 @@ def _fetch_refusal(user_id: str) -> tuple[str, str] | None:
                 """
                 SELECT COUNT(*) FILTER (WHERE user_id = %s), COUNT(*)
                   FROM video_sessions
-                 WHERE source = 'youtube'
+                 WHERE source = 'youtube' AND NOT from_library
                    AND created_at > NOW() - INTERVAL '1 day'
                 """,
                 (user_id,),
@@ -415,12 +426,21 @@ def _materialize(session_id: int, cues: list[dict], translated: dict, timing: st
                 UPDATE video_sessions
                    SET status = 'ready', sentences = %s, truncated = %s, translations = %s
                  WHERE id = %s
-             RETURNING user_id
+             RETURNING user_id, source, video_id, window_start, window_end
                 """,
                 (json.dumps(analyzed, ensure_ascii=False), truncated,
                  json.dumps(translations, ensure_ascii=False), session_id),
             )
             row = cur.fetchone()
+            # A whole video the server fetched joins the public library
+            # (plan 322), once; the rest of the shelf is the learner's own.
+            joined = False
+            if row and video_library.joins(row[1], row[2], row[3], row[4]):
+                first = next((s["text"] for s in analyzed if not s.get("foreign") and s.get("text")), None)
+                joined = video_library.add(
+                    cur, row[2], json.dumps(analyzed, ensure_ascii=False), truncated,
+                    json.dumps(translations, ensure_ascii=False), len(analyzed), first,
+                )
             cur.execute("DELETE FROM video_session_jobs WHERE session_id = %s", (session_id,))
             # On the shelf now: the oldest past the history's limit leaves it.
             if row:
@@ -430,6 +450,10 @@ def _materialize(session_id: int, cues: list[dict], translated: dict, timing: st
                     session_id, len(analyzed), truncated)
     finally:
         conn.close()
+    # After the commit and never fatal: the session is ready either way,
+    # and a video no model sorted is asked again when it is next opened.
+    if joined:
+        video_library.sort_into_a_kind(row[2], row[0])
 
 
 def _with_translations(cues: list[dict], translated: dict) -> list[dict]:
@@ -665,6 +689,10 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         pasted = (body.get("transcript") or "").strip()
         url = body.get("url") or ""
         video_id = parse_video_id(url)
+        # Read before the ingest is chosen: whether the library can
+        # answer a link depends on whether a window was asked for.
+        window_start = _optional_seconds(body.get("start"), "start")
+        window_end = _optional_seconds(body.get("end"), "end")
         if url and video_id is None:
             raise _refusal(400, "not_youtube_url", "Not a recognized YouTube URL")
 
@@ -675,6 +703,17 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             content = pasted
             source_ref = video_id or "paste"
         elif video_id:
+            # A whole video the library already holds (plan 322) opens at
+            # once: no fetch, no proxy, none of the link allowance. A
+            # window of it is another track and is fetched as before.
+            if window_start is None and window_end is None:
+                opened = await run_in_threadpool(video_library.open_video, user_id, video_id)
+                if opened is not None:
+                    return JSONResponse(
+                        status_code=202,
+                        content={"sessionId": opened, "status": "generating", "windowCapped": False,
+                                 "fromLibrary": True},
+                    )
             if not proxy_configured():
                 raise _refusal(
                     400, "link_fetch_disabled",
@@ -698,8 +737,6 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
         filename = None
         timing = None
         tracks = None
-        window_start = _optional_seconds(body.get("start"), "start")
-        window_end = _optional_seconds(body.get("end"), "end")
 
     # Only a Window with BOTH bounds can be back-to-front. One bound on
     # its own ("from 2:30 on", "up to 4:00") is a perfectly good Window,
@@ -1050,7 +1087,9 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
     Only `ready` sessions are listed. A 'generating' one has nothing to
     reopen yet and a 'failed' one has nothing to reopen at all; both are
     transient states the poll already surfaces where they happen. Nor
-    is a removed one (`deleted_at`, core/history.py).
+    is a removed one (`deleted_at`, core/history.py), nor a whole
+    YouTube video: those live in the public library (plan 322,
+    routes/video_library.py), not on the shelf, and do not count.
     """
     conn = db_conn()
     try:
@@ -1062,6 +1101,7 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
                        sentences->0->>'text' AS first_line
                   FROM video_sessions
                  WHERE user_id = %s AND status = 'ready' AND deleted_at IS NULL
+                   AND NOT """ + LIBRARY_SESSION + """
                  ORDER BY created_at DESC
                  LIMIT %s
                 """,

@@ -60,6 +60,7 @@ from routes.exams           import router as exams_router
 from routes.today           import router as today_router
 from routes.basics          import router as basics_router
 from routes.video           import router as video_router
+from routes.video_library   import router as video_library_router
 from routes.ocr             import router as ocr_router
 from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
@@ -222,6 +223,7 @@ app.include_router(basics_router)
 app.include_router(translation_router)
 app.include_router(exams_router)
 app.include_router(video_router)
+app.include_router(video_library_router)
 app.include_router(ocr_router)
 app.include_router(onboarding_router)
 app.include_router(credits_router)

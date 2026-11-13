@@ -1501,6 +1501,115 @@
   gap: var(--sp-2);
   overflow-x: auto;
 }
+/* 図書館 (plan 322) — the public library of analysed videos, the owner's
+   pick B of three drawn ("just the pictures"): a title with one picker
+   beside it, then the videos' stills in a grid, each with its first line
+   and nothing else. Under the shelf on the desk, in the video's sheet on
+   a phone; one rule lays both. */
+.anl-lib {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  margin-top: var(--sp-5);
+  min-width: 0;
+}
+.anl-lib__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.anl-lib__title {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: var(--text-primary);
+}
+/* The picker: the 番付's scope select (.bzp__scope) at a field's shape,
+   its chevron drawn over the native one it hides. */
+.anl-lib__kind {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--text-primary);
+}
+.anl-lib__select {
+  appearance: none;
+  height: 40px;
+  padding: 0 var(--sp-7) 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+.anl-lib__select:focus-visible { outline: 2px solid var(--sel-line); outline-offset: 2px; }
+.anl-lib__chev { position: absolute; right: var(--sp-4); pointer-events: none; color: var(--text-secondary); }
+/* Two stills a row under the desk; four in the desk's column (the desk
+   section, at the end of this file). */
+.anl-lib__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-5) var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.anl-lib__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.anl-lib__still {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  background: var(--bg-card-hover);
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+}
+.anl-lib__item:hover .anl-lib__still,
+.anl-lib__item:focus-visible .anl-lib__still { transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) {
+  .anl-lib__still { transition: none; }
+  .anl-lib__item:hover .anl-lib__still,
+  .anl-lib__item:focus-visible .anl-lib__still { transform: none; }
+}
+.anl-lib__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.anl-lib__line {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.45;
+}
+.anl-lib__more { align-self: center; }
 /* A chip's count: the console's own count register, beside its word. */
 .chip__n {
   font-family: var(--font-display);
@@ -35561,6 +35670,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
     gap: var(--sp-4);
+  }
+  /* 図書館 (plan 322): the library's stills, four a row, as drawn. */
+  .anl-lib__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-6) var(--sp-5);
   }
   .anl-card {
     position: relative;
