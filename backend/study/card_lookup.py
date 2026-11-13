@@ -4168,7 +4168,32 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
         base, said = _potential_base(lemma), _potential_base(m.lemma_reading)
         if base and said:
             hit = jmdict_db.get_by_key(base, said)
+    if hit is None and m.pos == "other" and not m.proper and not m.unknown and m.lemma_reading \
+            and nxt is not None and (nxt.pos == "auxiliary" or (nxt.pos == "particle" and nxt.surface == "に")):
+        # (only a stem that is said as one: 柔らかな, 暖かだ, 細かに -- the
+        # さよう of ふくさようの is 副作用's, no 左様, plan 323)
+        hit = _pool_adjectival_noun(m, lemma)
     return hit
+
+
+def _pool_adjectival_noun(m, lemma: str) -> dict | None:
+    """The pool row a な-adjective's stem is (plan 323), where UniDic spells
+    it otherwise than JMdict does: あたたかな is UniDic's 温か, whose row
+    JMdict files under 暖か; 柔らかな光 and 細かな点 are the same. A
+    reading is what the two share, and it names the word only where one
+    row of that reading is an adjectival noun ("adj-na") -- or, of
+    several, one that is spelled with a kanji of the lemma."""
+    said = morphology.kata_to_hira(m.lemma_reading)
+    if len(said) < 2:
+        return None
+    rows = [row for row in jmdict_db.by_kana(said)
+            if morphology.kata_to_hira(row.get("kana") or "") == said and "adj-na" in {
+                t for sense in jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []
+                for t in sense.get("tags") or ()}]
+    if len(rows) > 1:
+        mine = {c for c in lemma if is_kanji(c)}
+        rows = [row for row in rows if mine & set(row.get("kanji") or "")]
+    return rows[0] if len(rows) == 1 else None
 
 
 _E_TO_U = dict(zip("えけげせてねべめれ", "うくぐすつぬぶむる"))

@@ -5312,3 +5312,37 @@ class ThePlansFoldsReadInEveryLanguageTests(unittest.TestCase):
         self.assertIsNotNone(card_lookup.resolve_pool_compound(morphemes, 0, hits))
         with mock.patch.object(jmdict_fr, "pool_line", return_value=None):
             self.assertIsNone(card_lookup.resolve_pool_compound(morphemes, 0, hits))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AdjectivalNounStemTests(unittest.TestCase):
+    """Plan 323: a な-adjective's stem UniDic spells otherwise than JMdict
+    does is still the pool's word, so it lights though the deck has no card
+    for it (あたたかな is UniDic's 温か, the pool's row 暖か) -- in English
+    where the layers have no line for it: a word lit in English beats a
+    word that says nothing."""
+
+    def test_the_stem_is_the_pools_row(self) -> None:
+        for sentence, surface, written in (("心あたたかであること", "あたたか", "暖か"), ("あたたかな部屋だ。", "あたたか", "暖か"),
+                                           ("暖かな日が続く。", "暖か", "暖か"), ("柔らかな光が差す。", "柔らか", "柔らか"),
+                                           ("細かな点まで気をつける。", "細か", "細か")):
+            with self.subTest(sentence=sentence):
+                match = token_of(sentence, surface)["vocab_match"]
+                self.assertIsNotNone(match)
+                self.assertTrue(match["pool"])
+                self.assertEqual(match["entry"]["kanji"], written)
+                self.assertTrue(match["entry"]["meaning"])
+
+    def test_a_deck_card_still_answers_first(self) -> None:
+        for sentence, surface, kanji in (("静かな部屋だ。", "静か", "静か"), ("あたたかい部屋だ。", "あたたかい", "暖かい")):
+            with self.subTest(sentence=sentence):
+                match = token_of(sentence, surface)["vocab_match"]
+                self.assertFalse(match.get("pool"))
+                self.assertEqual(match["entry"]["kanji"], kanji)
+
+    def test_a_word_that_is_no_adjectival_noun_is_left_alone(self) -> None:
+        # (a reading no adj-na row has, a verb, a name: nothing is guessed)
+        for sentence, surface in (("あたたまる部屋だ。", "あたたまる"), ("ひろしは来た。", "ひろし")):
+            with self.subTest(sentence=sentence):
+                match = token_of(sentence, surface)["vocab_match"]
+                self.assertFalse(match and match.get("entry", {}).get("kanji") == "暖か")
