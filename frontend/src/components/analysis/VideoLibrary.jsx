@@ -107,7 +107,7 @@ export function VideoLibrary({ t, session, onOpen }) {
       </header>
       {counts && counts.all > 0 && (
         <div className="anl-lib__filters">
-          <Chips label={t.shelfFilter}>
+          <Chips label={t.shelfFilter} className="anl-lib__kinds">
             {chips.map(c => (
               <Chip key={c.key} on={active === c.key} onClick={() => setFilter(c.key)}>
                 {c.label}<span className="chip__n">{c.n}</span>

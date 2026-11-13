@@ -1524,14 +1524,6 @@
   flex-direction: column;
   gap: var(--sp-2);
 }
-/* The kinds ride one line and scroll sideways, as the shelf's chips do,
-   rather than wrap into a second line of stretched ones; the order is
-   two chips and shares its row. */
-.anl-lib__filters .console__chips:first-child {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-}
-.anl-lib__filters .console__chips:first-child .chip { flex: none; }
 .anl-lib__more { align-self: center; }
 /* A chip's count: the console's own count register, beside its word. */
 .chip__n {
@@ -7679,6 +7671,14 @@ textarea:focus-visible {
   justify-content: center;
 }
 .console__chips .chip:only-child { flex: none; }
+
+/* 図書館 (plan 322): the kinds ride one line and scroll sideways, as the shelf's chips do,
+   rather than wrap into a second line of stretched ones; the order is
+   two chips and shares its row. */
+.anl-lib__kinds {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
 
 /* ── the platform card, on a line (the Practice gate) ── */
 .platform-card--line { --rail: var(--line-color); }
