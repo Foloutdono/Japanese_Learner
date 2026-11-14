@@ -453,8 +453,8 @@ describe('SentenceBreakdown', () => {
   // grammatical word: は, へ, です／だ) from a PATTERN built around one.
   // Both are numbered cards under the words, in the sentence's order,
   // and each is framed on the line under its number -- the analyser's
-  // layout (plan 134). The verb's endings (〜ます, 〜た) are neither:
-  // they ride their word as a tag.
+  // layout (plan 134). The verb's endings (〜ます, 〜た) ride their word
+  // as a tag as well, and since plan 324 take a number like any point.
 
   const WA = { pattern: 'は', level: 'N5', raw_id: 'grammar_N5_は', kind: 'marker',
     meaning: { en: 'marks the sentence topic', fr: 'marque le thème de la phrase' } }
@@ -514,7 +514,7 @@ describe('SentenceBreakdown', () => {
     expect(keep.parentElement.classList.contains('bkd-line')).toBe(true)
   })
 
-  it('an ending rides its word as a tag and takes no number (plan 160)', async () => {
+  it('an ending rides its word as a tag and is numbered too (plans 160, 324)', async () => {
     const MASHITA = { pattern: '〜ました／〜ませんでした', level: 'N5', raw_id: 'grammar_N5_〜ました', kind: 'pattern',
       start: 5, end: 8, segments: [[5, 8]], meaning: { en: 'polite past', fr: 'passé poli' } }
     const analysis = {
@@ -526,8 +526,9 @@ describe('SentenceBreakdown', () => {
     const rows = document.querySelectorAll('.bkd-row')
     expect(rows[1].querySelector('.bkd-row__ending').textContent).toBe('＋ました')
     expect(rows[1].getAttribute('aria-label')).toContain('ました : passé poli')
-    expect([...document.querySelectorAll('.bkd-point__pattern')].map(p => p.textContent)).toEqual(['は'])
-    expect(document.querySelectorAll('.bkd-frame')).toHaveLength(1)
+    // The ending is a point like the others: a card under its number, and a frame on its words.
+    expect([...document.querySelectorAll('.bkd-point__pattern')].map(p => p.textContent)).toEqual(['は', '〜ました／〜ませんでした'])
+    expect(document.querySelectorAll('.bkd-frame')).toHaveLength(2)
   })
 
   // Plan 160: 〜てはいけません's いけ has no card (it is no 行く "to go"),

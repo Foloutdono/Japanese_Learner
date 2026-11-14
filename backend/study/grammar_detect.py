@@ -8318,7 +8318,8 @@ _REFUSALS = {
     "か": lambda tokens, s, e, _g: _in_set_phrase(tokens, s) or (
         (i := _index_at(tokens, s)) is not None and (_embedded_question_at(tokens, i) or _nandaka(tokens, i)
                                                      or _in_kadouka(tokens, i) or _in_kamo(tokens, i))),
-    "も": _mo_refused,
+    "も": lambda tokens, s, e, g: _emphatic_refused(tokens, s, e, g) or _mo_refused(tokens, s, e, g),
+    "は": lambda tokens, s, e, g: _emphatic_refused(tokens, s, e, g),        # (plan 324)
     # (千円やで, あかんで: the west's よ, no place or means, plan 272)
     # (ではない, ではありません: the copula's negative, no place or means,
     # plan 306 -- the 地域 of 地域ではなくてはならない keeps its place)
@@ -9848,6 +9849,80 @@ def _too_much_spans(tokens):
     return out
 
 
+# A verb's ます-stem the tokenizer files as a noun (plan 324): あり read
+# alone, 読み, 笑い, and 来, whose reading it keeps as the noun ライ. The
+# verb it is the stem of is the evidence -- 電話 and 勉強 are nouns before
+# は and も, whose しない is する's plain, no verb stem and no point.
+_STEM_TO_DICT = {"い": "う", "き": "く", "ぎ": "ぐ", "し": "す", "ち": "つ", "に": "ぬ", "び": "ぶ", "み": "む", "り": "る"}
+
+
+@lru_cache(maxsize=None)
+def _stem_of_a_verb(surface: str) -> bool:
+    """Whether `surface`, a noun to the tokenizer, is a verb's ます-stem
+    spelled out: 読み (読む), 笑い (笑う), 忘れ (忘れる), あり (ある)."""
+    if surface == "来":
+        return True
+    if len(surface) < 2 and surface != "あり" or surface[0] in "おご":
+        return False
+    forms = []
+    if surface[-1] in _STEM_TO_DICT:
+        forms.append(surface[:-1] + _STEM_TO_DICT[surface[-1]])
+    if surface[-1] in "いえけげせぜてでねべへめれりきぎしじちぢにびみ":
+        forms.append(surface + "る")
+    for form in forms:
+        found = morphology.tokenize(form) or []
+        if len(found) == 1 and found[0].pos == "verb" and found[0].surface == form:
+            return True
+    return False
+
+
+def _emphatic_negative(tokens, i: int):
+    """(stem, end) where the は or も at tokens[i] is the one of 〜はしない／
+    〜もしない (plan 324): `stem` is "verb" where a verb's ます-stem (or し)
+    stands just before it and "noun" where the tokenizer filed that stem as
+    a noun (_stem_of_a_verb), `end` where the negative that closes it ends
+    (ない, なかっ, ません's ん); None for any other は or も."""
+    p = tokens[i]
+    if not (p.pos == "particle" and p.surface in ("は", "も") and 0 < i < len(tokens) - 2):
+        return None
+    before, shi, neg = tokens[i - 1], tokens[i + 1], tokens[i + 2]
+    if before.end != p.start or not (shi.lemma == "為る" and shi.surface == "し" and shi.start == p.end):
+        return None
+    if before.pos in ("verb", "auxiliary") and (before.cform.startswith("連用形") or before.surface == "し"):
+        stem = "verb"
+    elif before.pos == "noun" and _stem_of_a_verb(before.surface):
+        stem = "noun"
+    else:
+        return None
+    if neg.lemma in ("ない", "無い"):
+        return stem, neg.end
+    if neg.lemma == "ます" and i + 3 < len(tokens) and tokens[i + 3].lemma == "ず":
+        return stem, tokens[i + 3].end
+    return None
+
+
+def _emphatic_noun_stem_spans(tokens):
+    """〜はしない／〜もしない on a stem the tokenizer calls a noun (plan
+    324): ありはしない, 読みはしない, 笑いもしなかった, 来はしません -- the
+    particle, し, and the negative; the verb stems are the letters
+    matcher's. The noun before は or も must be the stem of a verb:
+    勉強もしない is する's, and no stem."""
+    out = []
+    for i in range(1, len(tokens) - 2):
+        read = _emphatic_negative(tokens, i)
+        if read is not None and read[0] == "noun":
+            out.append((tokens[i].start, read[1]))
+    return out
+
+
+def _emphatic_refused(tokens, s, e, _g) -> bool:
+    """The は of "topic" and the も of "also" are no such particle where
+    they are 〜はしない／〜もしない's own (ありはしない, 見もしなかった,
+    plan 324): the point names what they do there."""
+    i, _t = _tok_at(tokens, s)
+    return i is not None and _emphatic_negative(tokens, i) is not None
+
+
 _EXTRA_RULES = (
     ("〜と", _conditional_to_spans),
     ("〜てからというもの", _since_a_noun_spans),
@@ -9898,6 +9973,8 @@ _EXTRA_RULES = (
     ("〜ずくめ", _zukume_spans),
     ("〜手前", _temae_spans),
     ("〜どころではない", _dokoro_spans),
+    # plan 324
+    ("〜はしない／〜もしない", _emphatic_noun_stem_spans),
     ("〜ゆえに", _because_ga_yue_spans),
     *((p, partial(_even_de_spans, p)) for p in ("〜すら", "〜さえ")),
     ("〜でも", _even_demo_spans),
@@ -9968,6 +10045,8 @@ _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans, _with
                            *(rule for p, rule in _EXTRA_RULES if getattr(rule, "func", None) is _even_de_spans),
                            _even_demo_spans, _topic_after_beki_spans, _not_certain_none_spans,
                            _seems_after_a_state_spans,
+                           # (plan 324: the lessons' stems are verbs, the matcher's; this reads the noun-filed ones)
+                           _emphatic_noun_stem_spans,
                            _because_of_spans, _must_neba_spans, _indefinite_spans, _until_spans,
                            # (plan 272: the lessons write the が beside its
                            # predicate; the rule reads it with words between)

@@ -2571,7 +2571,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 49: plan 323 -- a な-adjective's stem the deck has no card for is the pool's
 # word (あたたかな 暖か, 柔らかな, 細かな), in English where the layers
 # have no line for it.
-LOCAL_REV = 49
+# 50: plan 324 -- 〜はしない／〜もしない, the emphatic negative (ありはしない,
+# 見もしなかった): a catalogue point of its own, N3, whose は or も is no longer
+# read as the topic marker.
+LOCAL_REV = 50
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
