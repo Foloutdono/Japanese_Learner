@@ -5187,7 +5187,9 @@ class WhatTheSecondPassGlossedTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, surface).startswith(opening), gloss_of(sentence, surface))
         self.assertIn("で", [g["pattern"] for g in token_of("これでいい。", "で").get("grammar") or []])
-        self.assertTrue(gloss_of("止められはしない。", "は").startswith("(between a verb's stem and しない)"))
+        # (a は that a point is written on says nothing of its own: since plan 324 the
+        # point is 〜はしない／〜もしない, once a particle's gloss)
+        self.assertIn("〜はしない／〜もしない", [g["pattern"] for g in token_of("止められはしない。", "は").get("grammar") or []])
         # (十時ごろまで ends a stretch: "until", no "even")
         self.assertIn("から〜まで", [g["pattern"] for g in token_of("十時ごろまで待ちます。", "まで").get("grammar") or []])
         self.assertTrue(gloss_of("親の預金にまで手をつける。", "まで").startswith("even"))

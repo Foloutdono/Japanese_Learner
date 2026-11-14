@@ -776,7 +776,7 @@ describe('SentenceBreakdown', () => {
     expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_は')
   })
 
-  it('the cards are the markers and the constructions in the sentence\'s order; an ending is neither', async () => {
+  it('the cards are the markers, the constructions and the endings in the sentence\'s order (plan 324)', async () => {
     const TEKARA = { pattern: '〜てから', level: 'N5', raw_id: 'grammar_N5_〜てから', kind: 'pattern', start: 0, end: 1, segments: [[0, 1]] }
     const analysis = {
       available: true,
@@ -787,8 +787,8 @@ describe('SentenceBreakdown', () => {
       <SentenceBreakdown analysis={analysis} t={T} layout="rows" onTokenClick={() => {}} onGrammarOpen={() => {}} />
     ))
     const listed = [...document.querySelectorAll('.bkd-point__pattern')]
-    expect(listed.map(c => c.textContent)).toEqual(['〜てから', 'は'])
-    expect([...document.querySelectorAll('.bkd-point .anl-num')].map(n => n.textContent)).toEqual(['1', '2'])
+    expect(listed.map(c => c.textContent)).toEqual(['〜てから', 'は', '〜ます／〜ません'])
+    expect([...document.querySelectorAll('.bkd-point .anl-num')].map(n => n.textContent)).toEqual(['1', '2', '3'])
   })
 
   it('leaves the cards as text when a screen has nowhere to open a point', async () => {
