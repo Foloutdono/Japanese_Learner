@@ -28,25 +28,24 @@ export function coversToken(point, token) {
 
 // The verb's own endings (plan 160): the polite and the plain forms,
 // present and past, affirmative and negative. Each is a point with a
-// card, but not a rule a learner reads a sentence by -- 作ります is 作る
-// made polite -- so it rides its word as a tag (the words list's
-// `endings`, rows.js) rather than taking a number beside 〜てはいけません.
-// The N4 forms (the passive, the potential, the causative) are rules,
-// and keep theirs.
+// card, and the words list still tags its word with them (作ります is 作る
+// + ます, rows.js), but since plan 324 they are numbered like any other
+// point: a learner is given every key a sentence is read by, however
+// close to its word, so ない and た are framed and carded too.
 const ENDINGS = new Set(['〜ます／〜ません', '〜ました／〜ませんでした', 'た形 〜た', 'ない形 〜ない'])
 export function isEnding(point) {
   return ENDINGS.has(point?.pattern)
 }
 
 // Every point the sentence reads by -- the particles' markers (を, で,
-// は) with the constructions, the endings left to their words -- in the
-// order they stand in the sentence, so the numbers on the cards and on
-// the line read left to right (plan 134, owner-directed; the practice
-// breakdown's too since plan 160). One list for GrammarPoints, the
-// line's frames (SentenceLine, SubtitleLine) and the card in focus.
+// は), the constructions and the verb's endings -- in the order they
+// stand in the sentence, so the numbers on the cards and on the line
+// read left to right (plan 134, owner-directed; the practice
+// breakdown's too since plan 160; the endings' too since plan 324, the
+// owner's call). One list for GrammarPoints, the line's frames
+// (SentenceLine, SubtitleLine) and the card in focus.
 export function numberedPointsOf(analysis) {
   return [...(analysis?.grammar ?? [])]
-    .filter(g => !isEnding(g))
     .sort((a, b) => (a.start ?? 0) - (b.start ?? 0))
 }
 

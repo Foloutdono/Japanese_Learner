@@ -2568,7 +2568,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # (「ゆずる」とは、…あげることだ), no advice; 〜に決まっている after a count
 # is 決まる's « set for » (出発は九時に決まっている), no sure guess; and the
 # catalogue's corrected sentences, whose lessons the detector reads.
-LOCAL_REV = 48
+# 49: plan 323 -- a な-adjective's stem the deck has no card for is the pool's
+# word (あたたかな 暖か, 柔らかな, 細かな), in English where the layers
+# have no line for it.
+# 50: plan 324 -- 〜はしない／〜もしない, the emphatic negative (ありはしない,
+# 見もしなかった): a catalogue point of its own, N3, whose は or も is no longer
+# read as the topic marker.
+LOCAL_REV = 50
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
