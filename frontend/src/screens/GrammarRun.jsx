@@ -20,7 +20,7 @@ import { useAsk } from '../hooks/useAsk'
 import { GrammarWrite } from '../components/study/GrammarWork'
 import { BuildEntry, GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
 import { useBuild } from '../hooks/useBuild'
-import { cardShape, choiceAnswer, grammarSentence } from '../domain/cardShape'
+import { cardShape, choiceAnswer, grammarSentence, grammarSentenceTr } from '../domain/cardShape'
 import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
@@ -217,6 +217,8 @@ export default function GrammarRun({ session }) {
   // the next card is drawn under this one's reveal for a render.
   const sentence = card ? grammarSentence(card, entry?.verdict) : null
   useRevealSpeech(sentence, answered, card?.card_id)
+  // The same sentence taken apart, from the reveal corner (BreakdownSheet).
+  const breakdown = sentence ? { sentence, translation: grammarSentenceTr(card, entry?.verdict) } : null
 
   if (!valid) return <Navigate replace to={level ? platforms : '/learn/grammar'} />
 
@@ -398,6 +400,7 @@ export default function GrammarRun({ session }) {
                     {answered && isWrite && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
+                      breakdown={breakdown}
                       dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
                   </>
                 ) : isContrast ? (
@@ -405,6 +408,7 @@ export default function GrammarRun({ session }) {
                     <GrammarChoose card={card} revealed={answered} selected={selected} t={t} />
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
+                      breakdown={breakdown}
                       dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
                   </>
                 ) : !choicesOn ? (
@@ -450,6 +454,7 @@ export default function GrammarRun({ session }) {
                     dictId={pointId}
                     dictLabel={card.grammar}
                     session={session}
+                    breakdown={breakdown}
                   />
                 ) : (
                   /* Choices on — the prompt does NOT swap: the answer is
@@ -471,6 +476,7 @@ export default function GrammarRun({ session }) {
                     {isFill && answered && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
+                      breakdown={breakdown}
                       dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
                   </>
                 )}
