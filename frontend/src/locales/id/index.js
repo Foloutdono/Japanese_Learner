@@ -1495,6 +1495,7 @@ const reading = {
   // (ReadingRun.jsx, DictationRun.jsx) — shown once a phrase has been
   // graded.
   showBreakdown:        'Tampilkan rincian',
+  breakdownSentence:    'Uraikan kalimatnya',
   hideBreakdown:        'Sembunyikan rincian',
   preparingBreakdown:   'Menyiapkan rincian…',
   // The settled failure, which 書取 can actually reach: its breakdown
