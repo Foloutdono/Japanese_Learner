@@ -7,7 +7,8 @@ import { countUse } from '../../lib/screenTrail'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
-import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon, BooksIcon } from '../ui/Icons'
+import { BreakdownSheet } from './BreakdownSheet'
+import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon, BooksIcon, TextLinesIcon } from '../ui/Icons'
 import { GrammarLessonSheet } from './GrammarLesson'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
@@ -638,7 +639,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 // in index.css) — the caller is expected to render this as a child of
 // a `position: relative` card (PromptCard/.flashcard), not out in the
 // surrounding page flow.
-export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
+export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound, lesson, breakdown }) {
   // Same as Flashcard's own reset — a caller reusing this across cards
   // (passing the card's id as resetKey) shouldn't carry a dictionary
   // sheet left open from the previous card into the next. Handled by
@@ -658,12 +659,14 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
       sound={sound}
       onReplaySound={onReplaySound}
       lesson={lesson}
+      breakdown={breakdown}
     />
   )
 }
 
-function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
+function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound, lesson, breakdown }) {
   const [showDictionary, setShowDictionary] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
   // On the desk, inside a run with a side column (plan 114), the entry
   // is docked beside the card the moment the card is revealed, and the
   // 🔍 that would open the same entry in a sheet is not offered. The
@@ -702,7 +705,21 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
   // in, on the desk too.
   const canLesson = revealed && Boolean(lesson)
 
-  if (!canLookUp && !canPlaySound && !canLesson) return null
+  // A card that says a sentence (`breakdown`: the sentence and its
+  // translation) opens it taken apart, in a sheet (BreakdownSheet).
+  const canBreakDown = revealed && Boolean(breakdown?.sentence) && Boolean(session)
+  const closeBreakdown = useCallback((e) => {
+    e?.stopPropagation?.()
+    setShowBreakdown(false)
+  }, [])
+
+  if (!canLookUp && !canPlaySound && !canLesson && !canBreakDown) return null
+
+  function openBreakdown(e) {
+    e?.stopPropagation?.()
+    playClick()
+    setShowBreakdown(true)
+  }
 
   function openDictionary(e) {
     e?.stopPropagation?.()
@@ -742,6 +759,17 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
             <BooksIcon />
           </button>
         )}
+        {canBreakDown && (
+          <button
+            type="button"
+            onClick={openBreakdown}
+            className="reveal-action-btn"
+            title={t.breakdownSentence}
+            aria-label={t.breakdownSentence}
+          >
+            <TextLinesIcon />
+          </button>
+        )}
         {canLookUp && !docked && (
           <button
             type="button"
@@ -765,6 +793,9 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
         )}
       </div>
 
+      {showBreakdown && canBreakDown && (
+        <BreakdownSheet sentence={breakdown.sentence} translation={breakdown.translation} session={session} onClose={closeBreakdown} />
+      )}
       {showDictionary && lesson && (
         <GrammarLessonSheet id={lesson.raw_id} initial={lesson} session={session} onClose={closeDictionary} />
       )}
@@ -799,7 +830,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
 //
 // dictTerm/dictCategory/session/sound/onReplaySound are all opt-in —
 // see RevealActions above — and pass straight through to it.
-export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
+export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound, lesson, breakdown }) {
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
   // carrying over the previous card's flip state — done by remounting
@@ -822,11 +853,12 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
       sound={sound}
       onReplaySound={onReplaySound}
       lesson={lesson}
+      breakdown={breakdown}
     />
   )
 }
 
-function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
+function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound, lesson, breakdown }) {
   const desk = useDesk()
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
@@ -926,6 +958,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
         sound={sound}
         onReplaySound={onReplaySound}
         lesson={lesson}
+        breakdown={breakdown}
       />
       {/* Keyed on the flip count so each turn mounts a fresh element and
           the face animation actually replays — see `flips` above. */}

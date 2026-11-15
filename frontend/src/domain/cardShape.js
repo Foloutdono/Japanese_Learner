@@ -149,6 +149,19 @@ export function grammarSentence(card, verdict = null) {
 }
 
 /**
+ * That sentence's translation, in the learner's language, where the
+ * card carries one: what its breakdown prints under the line.
+ */
+export function grammarSentenceTr(card, verdict = null) {
+  const shape = cardShape(card)
+  if (shape.isFill) return card.fill_sentence?.tr ?? card.fill_sentence?.en ?? null
+  if (shape.isContrast) return card.contrast?.tr ?? null
+  if (shape.isBuild) return verdict?.tr ?? card.build?.tr ?? null
+  if (shape.isWrite) return card.write?.model?.tr ?? null
+  return null
+}
+
+/**
  * Which hints this CARD can actually offer, not the ones its mode
  * declares. A hand-written card without a matching extra (no
  * distractors to build, no cached sentences) has no entry for that
