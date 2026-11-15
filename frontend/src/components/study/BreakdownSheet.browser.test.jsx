@@ -43,7 +43,7 @@ function mount(props) {
 beforeEach(() => {
   localStorage.setItem('lang', 'en')
   apiFetch.mockReset()
-  apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ANALYSIS }))
+  apiFetch.mockImplementation(async url => ({ ok: true, status: 200, json: async () => (String(url).startsWith('/api/phrase') ? ANALYSIS : { results: [], total: 0 }) }))
 })
 afterEach(() => { localStorage.removeItem('lang') })
 
@@ -63,6 +63,14 @@ describe('the breakdown door', () => {
     expect(sheet.querySelector('.sheet__title').textContent).toBe(en.deskBreakdownLabel)
     expect(sheet.querySelector('.bkd')).not.toBeNull()
     expect(sheet.textContent).toContain('Please read this book.')
+
+    // A word in it is a door to its dictionary entry, over the sheet.
+    const word = [...sheet.querySelectorAll('.bkd button, .bkd [role="button"]')].find(b => b.textContent.includes('本'))
+    word.click()
+    await settle()
+    expect(document.querySelectorAll('[role="dialog"]').length).toBe(2)
+    expect(document.querySelector('.dict-sheet')).not.toBeNull()
+    expect(apiFetch.mock.calls.some(([u]) => String(u).startsWith('/api/dictionary'))).toBe(true)
   })
 
   it('is not offered before the answer, nor on a card that says no sentence', async () => {
