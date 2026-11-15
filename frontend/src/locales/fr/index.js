@@ -1444,6 +1444,7 @@ const reading = {
   // Décomposition mot par mot + sa navigation (ReadingRun.jsx,
   // DictationRun.jsx) — affichée une fois la phrase corrigée.
   showBreakdown:        'Voir la décomposition',
+  breakdownSentence:    'Décomposer la phrase',
   hideBreakdown:        'Masquer la décomposition',
   preparingBreakdown:   'Préparation de la décomposition…',
   // L'échec, une fois établi — 書取 peut vraiment l'atteindre : sa
