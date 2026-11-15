@@ -474,7 +474,8 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelectorAll('.bkd-row')).toHaveLength(1)
     const card = document.querySelector('.bkd-point')
     expect(card.tagName).toBe('BUTTON')
-    expect(card.querySelector('.anl-num').textContent).toBe('1')
+    // No number on a card since plan 325.
+    expect(card.querySelector('.anl-num')).toBeNull()
     expect(card.querySelector('.bkd-point__pattern').textContent).toBe('は')
     // Its rule's gloss, in the learner's language.
     expect(card.querySelector('.bkd-point__gloss').textContent).toBe('marque le thème de la phrase')
@@ -499,8 +500,9 @@ describe('SentenceBreakdown', () => {
     expect(line.classList.contains('bkd-line--numbered')).toBe(true)
     const frames = [...line.querySelectorAll('.bkd-frame')]
     expect(frames).toHaveLength(1)
-    expect(frames[0].querySelector('.bkd-frame__n').textContent).toBe('1')
-    expect(frames[0].textContent).toBe('1は')
+    // A hairline, and no number (plan 325).
+    expect(frames[0].querySelector('.bkd-frame__n')).toBeNull()
+    expect(frames[0].textContent).toBe('は')
     // The word the point is not written on stands outside the frame.
     expect(line.querySelector('.bkd-frame .bkd-tok--door')).toBeNull()
   })
@@ -788,7 +790,7 @@ describe('SentenceBreakdown', () => {
     ))
     const listed = [...document.querySelectorAll('.bkd-point__pattern')]
     expect(listed.map(c => c.textContent)).toEqual(['〜てから', 'は', '〜ます／〜ません'])
-    expect([...document.querySelectorAll('.bkd-point .anl-num')].map(n => n.textContent)).toEqual(['1', '2', '3'])
+    expect(document.querySelector('.bkd-point .anl-num')).toBeNull()
   })
 
   it('leaves the cards as text when a screen has nowhere to open a point', async () => {

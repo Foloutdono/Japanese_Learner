@@ -13878,12 +13878,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   color: var(--text-secondary);
 }
-/* The numbered line (plan 160): each rule framed on its words, as the
+/* The framed line (plan 160): each rule framed on its words, as the
    analyser's subtitle frames them (.anl-subs__pt), set on the ground in
-   a well of its own. The number heads its frame, inside it: at the
-   frame's corner, as the subtitle has it, it stood on the next word's
-   reading (持っ's も, 話し's はな), which the subtitle -- every word
-   holding a reading's row -- never has to fear. */
+   a well of its own. A hairline and no number since plan 325 (the
+   owner's pick B of the canvas "Tsuji grammar highlights"): the frame
+   thickens to the line's own green while its point is in hand. */
 .bkd-line--numbered {
   gap: var(--sp-2);
   padding: var(--sp-4);
@@ -13901,33 +13900,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .bkd-frame {
   display: inline-flex;
   align-items: baseline;
-  gap: var(--sp-1);
-  padding: 0 var(--sp-2) 0 var(--sp-1);
+  padding: 0 var(--sp-1);
   border-radius: var(--r-card);
-  box-shadow: inset 0 0 0 2px var(--line-grammar);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 65%, var(--text-primary));
 }
+.bkd-frame:has(.bkd-tok--lit) { box-shadow: inset 0 0 0 2px var(--line-grammar); }
 /* A point's words with no gap between them (plan 272), as the
    subtitle's frame holds them (.anl-subs__words). */
 .bkd-frame__words {
   display: inline-flex;
   align-items: baseline;
-}
-.bkd-frame__n {
-  display: inline-flex;
-  flex: none;
-  align-self: center;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--sp-5);
-  height: var(--sp-5);
-  padding: 0 var(--sp-1);
-  background: var(--line-grammar);
-  border-radius: var(--r-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  line-height: 1;
-  color: var(--bg-main);
 }
 .bkd__en {
   font-family: var(--font-display);
@@ -14096,10 +14078,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-primary);
 }
 .bkd-point__lvl { margin-left: auto; }
-/* Indented off the number, so the pattern heads its own column. */
-.bkd-point__gloss,
-.bkd-point__parts,
-.bkd-point__note { padding-left: var(--sp-7); }
 .bkd-point__gloss {
   min-width: 0;
   font-size: var(--fs-sm);
@@ -29204,8 +29182,8 @@ button.brd-stn { cursor: pointer; }
   gap: var(--sp-1);
 }
 .bkd-point__plus { color: var(--text-secondary); }
-/* The number a construction wears on its card, on the card in focus
-   and on its words in the subtitle. */
+/* The count of points on the phone's Grammar key: a roundel in the
+   grammar's green. No point wears a number since plan 325. */
 .anl-num {
   display: inline-flex;
   flex: none;
@@ -29247,16 +29225,21 @@ button.brd-stn { cursor: pointer; }
   text-align: center;
   color: var(--text-on-panel);
 }
-/* A construction framed on its words, its number at the frame's corner. */
+/* A construction framed on its words (plan 325, the owner's pick B of
+   the canvas "Tsuji grammar highlights"): a hairline, the grammar's
+   green lifted toward the ink so one pixel of it reads on the sumi, and
+   no number. The point in hand -- its card touched, its words lit --
+   takes the line's own green at a ring's weight; six rings and six
+   roundels on a line of thirteen words were louder than the words. */
 .anl-subs__pt {
   position: relative;
   display: inline-flex;
   align-items: flex-start;
-  gap: var(--sp-1);
   padding: var(--sp-1);
   border-radius: var(--r-card);
-  box-shadow: inset 0 0 0 2px var(--line-grammar);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 65%, var(--text-primary));
 }
+.anl-subs__pt:has(.tok--lit) { box-shadow: inset 0 0 0 2px var(--line-grammar); }
 /* The words a point is written on read as the one word they make (plan
    272): て + くれる is てくれる, の + で is ので -- each a word to press
    still, with no gap and no padding where two of them meet. */
@@ -29273,25 +29256,6 @@ button.brd-stn { cursor: pointer; }
   padding-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-}
-.anl-subs__n {
-  position: absolute;
-  top: calc(-1 * var(--sp-4));
-  right: calc(-1 * var(--sp-3));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--sp-6);
-  height: var(--sp-6);
-  padding: 0 var(--sp-1);
-  background: var(--line-grammar);
-  border-radius: var(--r-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  line-height: 1;
-  text-box: trim-both cap alphabetic;
-  color: var(--bg-main);
 }
 /* ── The bar: one row ── */
 .anl-pbar {
@@ -29624,29 +29588,12 @@ button.brd-stn { cursor: pointer; }
   border-bottom-width: 3px;
   font-size: var(--fs-display-fluid);
 }
-/* A grammar point as the owner picked it (G·A, "Highlighted"): no
-   frame, the point's words on a wash of the grammar's green, its number
-   on the wash's top corner. The rule under each word stays the state's
-   alone, so the wash says where a rule sits and the rule what the SRS
-   knows, both readable at once. */
-.anl-m__subs .anl-subs__pt {
-  padding: 0;
-  background: color-mix(in srgb, var(--line-grammar) 30%, transparent);
-  border-radius: var(--r-card);
-  box-shadow: none;
-}
-/* On the wash a particle's quieter ink lost its contrast: it takes the
-   line's own. */
+/* A grammar point on the phone: the hairline frame of plan 325 (it was
+   a wash of the grammar's green under a number, the owner's G·A), tight
+   on its words. The rule under each word stays the state's alone. A
+   framed particle keeps the line's own ink, as it had on the wash. */
+.anl-m__subs .anl-subs__pt { padding: 0; }
 .anl-m__subs .anl-subs__pt .tok--particle { color: var(--text-primary); }
-.anl-m__subs .anl-subs__n {
-  top: calc(-1 * var(--sp-2));
-  right: auto;
-  left: calc(-1 * var(--sp-2));
-  min-width: var(--sp-5);
-  height: var(--sp-5);
-  font-size: var(--fs-caption-xs);
-  color: var(--text-on-panel);
-}
 .anl-m__tr {
   margin: 0;
   font-size: var(--fs-lead);
@@ -29830,19 +29777,10 @@ button.brd-stn { cursor: pointer; }
 .anl-m__lyrics .anl-subs__line .tok .tok__furi { font-size: var(--fs-caption); }
 .anl-m__lyrics .anl-subs__pt {
   padding: 0;
-  background: color-mix(in srgb, var(--line-grammar) 30%, transparent);
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 65%, var(--text-on-panel));
 }
+.anl-m__lyrics .anl-subs__pt:has(.tok--lit) { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--line-grammar) 70%, var(--text-on-panel)); }
 .anl-m__lyrics .anl-subs__pt .tok--particle { color: var(--text-on-panel); }
-.anl-m__lyrics .anl-subs__n {
-  top: calc(-1 * var(--sp-2));
-  right: auto;
-  left: calc(-1 * var(--sp-2));
-  min-width: var(--sp-5);
-  height: var(--sp-5);
-  font-size: var(--fs-caption-xs);
-  color: var(--text-on-panel);
-}
 .anl-m__lyrics .anl-lyrics__now .anl-lyrics__tr { font-size: var(--fs-body); }
 /* The line stepped down where the stage would not hold it between the
    video and the dock (useLineFit, 2026-10-20): a rung down, then the
@@ -41804,12 +41742,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .anl-subs__line .tok--on { background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
   .anl-subs__line .tok--lit { background: color-mix(in srgb, var(--line-grammar) 40%, transparent); }
   /* ── The words beside the card in focus, Explain under it ── */
-  /* The numbered frames on the sumi, in the panel's inks. */
-  .anl-slab .anl-subs__pt { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--line-grammar) 70%, var(--text-on-panel)); }
-  .anl-slab .anl-subs__n {
-    background: color-mix(in srgb, var(--line-grammar) 70%, var(--text-on-panel));
-    color: var(--bg-panel);
-  }
+  /* The frames on the sumi, in the panel's inks. */
+  .anl-slab .anl-subs__pt { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 65%, var(--text-on-panel)); }
+  .anl-slab .anl-subs__pt:has(.tok--lit) { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--line-grammar) 70%, var(--text-on-panel)); }
   .anl-desk__words {
     display: flex;
     flex-direction: column;
@@ -41984,12 +41919,9 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   button.anl-blocks__tile { cursor: pointer; }
   button.anl-blocks__tile:hover,
   button.anl-blocks__tile:focus-visible { border-color: var(--text-secondary); }
-  .anl-blocks__tile--pt,
+  .anl-blocks__tile--pt { border-color: color-mix(in srgb, var(--line-grammar) 65%, var(--text-primary)); }
   button.anl-blocks__tile--pt:hover,
-  button.anl-blocks__tile--pt:focus-visible {
-    border-color: var(--line-grammar);
-    box-shadow: inset 0 0 0 1px var(--line-grammar);
-  }
+  button.anl-blocks__tile--pt:focus-visible { border-color: var(--line-grammar); }
   .anl-blocks__jp {
     font-family: var(--font-jp);
     font-size: var(--fs-heading);
@@ -42009,24 +41941,6 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     font-family: var(--font-jp);
     font-size: var(--fs-heading);
     color: var(--text-secondary);
-  }
-  .anl-blocks__n {
-    position: absolute;
-    top: calc(-1 * var(--sp-4));
-    right: calc(-1 * var(--sp-3));
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: var(--sp-6);
-    height: var(--sp-6);
-    padding: 0 var(--sp-1);
-    background: var(--line-grammar);
-    border-radius: var(--r-pill);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    line-height: 1;
-    color: var(--bg-main);
   }
   /* The asking follows the prose: what the panel does not hold is left
      at its foot, never between the two. */
@@ -44948,25 +44862,3 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .ss-stage .gt-board { width: min(100%, 640px, max(280px, calc(100dvh - 300px))); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
-
-/* ── TRIAL (not for commit): grammar highlight option B, "Hairline" ── */
-.anl-subs__n, .bkd-frame__n, .anl-blocks__n, .bkd-point .anl-num { display: none; }
-.bkd-point__gloss, .bkd-point__parts, .bkd-point__note { padding-left: 0; }
-.bkd-frame,
-.anl-subs__pt,
-.anl-m__subs .anl-subs__pt,
-.anl-m__lyrics .anl-subs__pt {
-  background: none;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 65%, var(--text-primary));
-}
-.anl-slab .anl-subs__pt { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 65%, var(--text-primary)); }
-.bkd-frame:has(.bkd-tok--lit),
-.anl-subs__pt:has(.tok--lit),
-.anl-m__subs .anl-subs__pt:has(.tok--lit),
-.anl-slab .anl-subs__pt:has(.tok--lit) { box-shadow: inset 0 0 0 2px var(--line-grammar); }
-.anl-blocks__tile--pt,
-button.anl-blocks__tile--pt:hover,
-button.anl-blocks__tile--pt:focus-visible {
-  border-color: color-mix(in srgb, var(--line-grammar) 65%, var(--text-primary));
-  box-shadow: none;
-}

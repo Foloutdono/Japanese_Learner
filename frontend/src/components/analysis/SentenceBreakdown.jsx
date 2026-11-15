@@ -31,9 +31,9 @@ export function Legend({ t }) {
 // The word-by-word breakdown as the practice modes show it, laid out as
 // the analyser's (plan 134, the owner's pick A of five drawn on the
 // canvas "Tsuji Breakdown Panel"): the sentence as a ruby line with
-// each rule framed on its words under its number, its translation, one
+// each rule framed on its words, its translation, one
 // row per WORD -- its dictionary form, reading, meaning, level -- then
-// a numbered card per rule, and Explain at the foot. The grouping of
+// a card per rule, and Explain at the foot. The grouping of
 // morphemes into words is rows.js's.
 
 // The sentence as its tokens, the reading over each kanji, the SRS
@@ -46,11 +46,10 @@ export function Legend({ t }) {
 // one of its segments is written on wears the grammar line's tint.
 //
 // `numbered` (plan 160): each point of numberedPointsOf is framed on
-// the run of words it sits on, its number at the frame's head -- the
-// number its card under the words carries -- as the analyser's
-// subtitle frames them (SubtitleLine). A word two points cover is
-// framed once, by the first; the frame then carries every number whose
-// point begins in it.
+// the run of words it sits on, as the analyser's subtitle frames them
+// (SubtitleLine). A word two points cover is framed once, by the first.
+// The name is older than the look: since plan 325 a frame is a hairline
+// with no number, and a card finds its words by lighting them (`lit`).
 export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numbered = false }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   if (analysis?.available === false || !tokens.length) {
@@ -76,7 +75,6 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numb
   }
   const points = numbered ? numberedPointsOf(analysis) : []
   const owner = tokens.map(w => points.findIndex(p => coversToken(p, w)))
-  const firstOf = points.map(p => tokens.findIndex(w => coversToken(p, w)))
   const out = []
   let i = 0
   while (i < tokens.length) {
@@ -97,16 +95,12 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numb
     }
     let j = i
     while (j + 1 < tokens.length && owner[j + 1] === p) j += 1
-    const numbers = firstOf
-      .map((first, q) => (first >= i && first <= j ? q + 1 : null))
-      .filter(Boolean)
     const run = []
     for (let k = i; k <= j; k += 1) run.push(word(tokens[k], k))
     // The point's words with no gap between them, the one word they make
     // (plan 272): てくれる, ので.
     out.push(
       <span key={`pt-${i}`} className="bkd-frame">
-        {numbers.length > 0 && <span className="bkd-frame__n" aria-hidden="true">{numbers.join('·')}</span>}
         <span className="bkd-frame__words">{run}</span>
       </span>,
     )

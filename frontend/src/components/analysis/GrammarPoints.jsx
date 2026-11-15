@@ -3,13 +3,13 @@ import { grammarGloss } from './grammarGloss'
 import { numberedPointsOf, pointKey } from './grammarSpans'
 import { partsOf } from './rows'
 
-// ── The rules a sentence is built with (plan 095; numbered, 134 and 160) ──
+// ── The rules a sentence is built with (plans 095, 134, 160, 325) ──
 // One card per point the sentence reads by (numberedPointsOf: the
-// particles' markers with the constructions, in the sentence's order;
-// the verb's endings ride their words), the owner's G2 of the analyser
-// and, since plan 160, the practice breakdown's too: its number -- the
-// one the sentence line prints on the words the point sits on, so a
-// card and its place are found from either -- its pattern and level on
+// particles' markers, the constructions and the verb's endings, in the
+// sentence's order), the owner's G2 of the analyser and, since plan
+// 160, the practice breakdown's too. A card wore a number, the one on
+// its words in the line, until plan 325: it finds its words by lighting
+// them now. Its pattern and level on
 // one line, what it does (the catalogue's gloss, in the learner's
 // language) under them, then the words it is made of as chips, read as
 // words (partsOf: 話し + て + は + いけません, the word it attaches to
@@ -26,7 +26,7 @@ export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen }) {
   if (!points.length) return null
   return (
     <div className="bkd-points">
-      {points.map((g, i) => {
+      {points.map(g => {
         const key = pointKey(g)
         const gloss = grammarGloss(g, lang)
         const parts = partsOf(g, analysis)
@@ -42,7 +42,6 @@ export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen }) {
         const body = (
           <>
             <span className="bkd-point__head">
-              <span className="anl-num" aria-hidden="true">{i + 1}</span>
               <span className="bkd-point__pattern" lang="ja">{g.pattern}</span>
               {g.level && <span className="anl-words__lvl bkd-point__lvl">{g.level}</span>}
             </span>

@@ -2673,14 +2673,18 @@ line here says otherwise.
   and the shell's back button close it. Comprehension's button is in the
   open question's detail on the results. The thread, the five a sentence
   and the forty a day are the desk's.
-- **A graded sentence's breakdown is the analyser's, numbered** (plan 160,
+- **A graded sentence's breakdown is the analyser's, framed** (plan 160,
   the owner's pick A of five drawn on the canvas "Tsuji Breakdown Panel";
   every width, the phone's behind its toggle). The sentence line frames
-  each rule on its words under its number, in a well of its own; under
+  each rule on its words with a hairline in the grammar's green lifted
+  toward the ink, and no number (plan 325, the owner's pick B of the
+  canvas "Tsuji grammar highlights": the rule in hand, its card touched,
+  takes the line's own green at a ring's weight and its words the
+  tint), in a well of its own; under
   the translation the words, one row each, named as the dictionary names
   them (話す はなす where the sentence wrote 話し), glossed in the
   learner's language, the endings they were written with (ます, た) a
-  quiet tag after the meaning; then a numbered card per rule — the
+  quiet tag after the meaning; then a card per rule — the
   particles' markers and the constructions, in the sentence's order —
   with the words it is made of as chips, the word it attaches to unlit.
   A particle, the copula and a word a construction is written on with no
@@ -2700,7 +2704,7 @@ line here says otherwise.
   to the column's foot, the line's words on one strip under it; and one
   panel on the right whose segment (the console's `Seg`) turns it between
   the word's card in the runs' band -- following the token walked to
-  (←/→) and the word pressed -- the line's numbered grammar, a point
+  (←/→) and the word pressed -- the line's grammar, a point
   opening its lesson in that face with its ✕ giving the list back, and
   the line's construction, which Explain buys the first time the face is
   turned to: the line laid out as its blocks at `--fs-heading`, each
