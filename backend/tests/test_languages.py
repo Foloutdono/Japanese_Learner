@@ -573,7 +573,12 @@ def _identifiers_beside_languages(node, path="$") -> list[str]:
     out = []
     if isinstance(node, dict):
         if "id" in node and {"en", "fr", "es"} & node.keys():
-            text = isinstance(node.get("en"), str) and isinstance(node["id"], str)
+            en, other = node.get("en"), node["id"]
+            # a text, or a list of texts as long as the English's (a seed's
+            # four options, plan 312e)
+            text = (isinstance(en, str) and isinstance(other, str)) or (
+                isinstance(en, list) and isinstance(other, list) and len(other) == len(en)
+                and all(isinstance(x, str) for x in [*en, *other]))
             if not ("id" in SPOKEN and text):
                 out.append(path)
         for key, value in node.items():

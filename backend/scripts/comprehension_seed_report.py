@@ -54,7 +54,11 @@ QUOTE = re.compile(r"「([^」]+)」")
 SENTENCE = re.compile(r"[^。！？!?]+[。！？!?]?")
 WORDS = re.compile(r"[a-zà-ÿ]{4,}", re.I)
 STOP = set("what does this that with from have which mean meaning text sentence writer author dans texte phrase quel quelle quoi avec pour est-ce sont "
-           "significa este esta esto texto frase autor autora según dice para cuál cómo".split())
+           "significa este esta esto texto frase autor autora según dice para cuál cómo "
+           "yang apa apakah ini itu dengan dari dalam untuk pada kepada karena tidak bukan akan sudah telah "
+           "masih juga hanya saja atau tetapi namun bahwa oleh para adalah kata kalimat teks bacaan menurut "
+           "penulis arti makna maksud bagaimana mengapa siapa kapan mana berapa seperti tentang ungkapan "
+           "menyatakan menunjukkan berarti".split())
 
 
 def _squash_words(part: dict) -> str:
