@@ -44913,3 +44913,25 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .ss-stage .gt-board { width: min(100%, 640px, max(280px, calc(100dvh - 300px))); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
+
+/* ── TRIAL (not for commit): grammar highlight option B, "Hairline" ── */
+.anl-subs__n, .bkd-frame__n, .anl-blocks__n, .bkd-point .anl-num { display: none; }
+.bkd-point__gloss, .bkd-point__parts, .bkd-point__note { padding-left: 0; }
+.bkd-frame,
+.anl-subs__pt,
+.anl-m__subs .anl-subs__pt,
+.anl-m__lyrics .anl-subs__pt {
+  background: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 55%, transparent);
+}
+.anl-slab .anl-subs__pt { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-grammar) 55%, transparent); }
+.bkd-frame:has(.bkd-tok--lit),
+.anl-subs__pt:has(.tok--lit),
+.anl-m__subs .anl-subs__pt:has(.tok--lit),
+.anl-slab .anl-subs__pt:has(.tok--lit) { box-shadow: inset 0 0 0 2px var(--line-grammar); }
+.anl-blocks__tile--pt,
+button.anl-blocks__tile--pt:hover,
+button.anl-blocks__tile--pt:focus-visible {
+  border-color: color-mix(in srgb, var(--line-grammar) 55%, transparent);
+  box-shadow: none;
+}
