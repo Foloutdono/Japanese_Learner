@@ -622,9 +622,11 @@ runtime purpose.
   points' glosses and formations, since 312c in their lessons, since 312d
   in their tours and own Choisir questions (`WRITTEN`, `locales.test.js`),
   since 312e in the reading bank and the comprehension seeds (their own
-  `LANGS`): a new screen string, deck card, kanji, point (its gloss,
-  formation, lesson, tour and Choisir questions), reading-bank row or seed
-  is written in `id` in the same change, in
+  `LANGS`), since 312f in the dictation and conversation banks
+  (`listening_clips.problems`, `conversation.LANGS`): a new screen string,
+  deck card, kanji, point (its gloss, formation, lesson, tour and Choisir
+  questions), reading-bank row, seed, dictation line or scenario is
+  written in `id` in the same change, in
   standard Indonesian (EYD, KBBI; never Malay), the learner `kamu`, with
   the app's words `locales/id`'s head names (an SRS review a
   *pengulangan*, a mock exam a *tryout*). An example's translation, in any
