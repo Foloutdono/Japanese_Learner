@@ -1,7 +1,7 @@
 // TEMPORARY (not for commit): a fixture for the grammar-highlight trial's screenshots.
 import { vi } from 'vitest'
 
-export const OUT = './zzshots/b'
+export const OUT = './zzshots/b3'
 const T = [['雨', '雨', 'あめ', 'rain', 'あめ'], ['が'], ['降っ', '降る', 'ふる', 'to fall', 'ふっ'], ['て'], ['いる'], ['ので'], ['、'], ['家', '家', 'いえ', 'home', 'いえ'], ['で'], ['本', '本', 'ほん', 'book', 'ほん'], ['を'], ['読み', '読む', 'よむ', 'to read', 'よみ'], ['ます'], ['。']]
 let pos = 0
 const tokens = T.map(([surface, kanji, kana, meaning, reading]) => {
@@ -37,4 +37,21 @@ export const $$ = s => [...document.querySelectorAll(s)]
 export function type(el, text) {
   Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set.call(el, text)
   el.dispatchEvent(new Event('input', { bubbles: true }))
+}
+export const VIDEO = {
+  status: 'ready', source: 'upload', sourceRef: 'x.srt', videoId: 'dQw4w9WgXcQ', windowCapped: false, truncated: 0,
+  sentences: [
+    { ...SENT, cue_start: 36, cue_end: 40 },
+    { ...SENT, cue_start: 40, cue_end: 44 },
+  ],
+}
+export const apiJsonVideo = vi.fn(async () => VIDEO)
+export const apiUpload = vi.fn(async () => ({ sessionId: 1, status: 'generating' }))
+export async function loadSrt() {
+  const input = $('input[type="file"]')
+  const dt = new DataTransfer()
+  dt.items.add(new File([`1\n00:00:36,000 --> 00:00:40,000\n${SENT.text}\n`], 'x.srt', { type: 'text/plain' }))
+  input.files = dt.files
+  input.dispatchEvent(new Event('change', { bubbles: true }))
+  await settle(1800)
 }
