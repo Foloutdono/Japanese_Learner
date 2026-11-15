@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import threading
+from contextlib import nullcontext
 
 from fastapi import APIRouter, Depends, HTTPException
 from core import daily_limit
@@ -306,17 +307,24 @@ def _mark_job_failed(exam_id: str, error: str, cooldown_seconds: int) -> None:
         conn.close()
 
 
-def _generation_worker(exam_id: str, revision: int) -> None:
+def _generation_worker(exam_id: str, revision: int, charged: str | None = None) -> None:
     """Runs off-request. Owns the job row from 'running' through to
-    either deleted (success) or 'failed' (with a cooldown)."""
+    either deleted (success) or 'failed' (with a cooldown).
+
+    `charged` is the learner whose EXAM_PAPERS_FEATURE slot paid for
+    this paper, if one did: it is given back when no provider answered
+    any of the paper's calls (core/daily_limit.refund_unbilled)."""
     generator_version, _kind, _level, generate = EXAM_GENERATORS[exam_id]
     seed = _seed_for(exam_id, revision)
+    guard = (daily_limit.refund_unbilled(charged, EXAM_PAPERS_FEATURE)
+             if charged else nullcontext())
     try:
         # No DB connection is held across this call -- it is the slow
         # part, and an idle-in-transaction connection for its whole
         # duration was the other half of the old synchronous design's
         # cost.
-        paper = generate(seed)
+        with guard:
+            paper = generate(seed)
     except LLMUnavailable as e:
         logger.error("Exam generation for %s hit a provider failure: %s", exam_id, e)
         _mark_job_failed(exam_id, str(e), _UNAVAILABLE_COOLDOWN_SECONDS)
@@ -453,9 +461,9 @@ def _claim_generation(exam_id: str, revision: int) -> tuple[str, dict | None]:
         conn.close()
 
 
-def _start_generation(exam_id: str, revision: int) -> None:
+def _start_generation(exam_id: str, revision: int, charged: str | None = None) -> None:
     threading.Thread(
-        target=_generation_worker, args=(exam_id, revision),
+        target=_generation_worker, args=(exam_id, revision, charged),
         name=f"exam-gen:{exam_id}:r{revision}", daemon=True,
     ).start()
 
@@ -575,14 +583,17 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
         # counted -- they are the paper everyone sits. Counted only when
         # this request would start one, so the polls while it is written
         # and joining another learner's cost nothing.
-        if skipped and daily_limit.claim(user_id, EXAM_PAPERS_FEATURE, EXAM_PAPERS_DAILY_LIMIT) > EXAM_PAPERS_DAILY_LIMIT:
-            _release_generation(exam_id)
-            raise HTTPException(
-                status_code=429,
-                detail=(f"Daily limit of {EXAM_PAPERS_DAILY_LIMIT} new papers reached; "
-                        f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
-            )
-        _start_generation(exam_id, revision)
+        charged = None
+        if skipped:
+            if daily_limit.claim(user_id, EXAM_PAPERS_FEATURE, EXAM_PAPERS_DAILY_LIMIT) > EXAM_PAPERS_DAILY_LIMIT:
+                _release_generation(exam_id)
+                raise HTTPException(
+                    status_code=429,
+                    detail=(f"Daily limit of {EXAM_PAPERS_DAILY_LIMIT} new papers reached; "
+                            f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
+                )
+            charged = user_id
+        _start_generation(exam_id, revision, charged)
     if outcome == "cooldown":
         # The error text is the generator's own, safe to show: it names
         # what could not be produced, not anything about the account.

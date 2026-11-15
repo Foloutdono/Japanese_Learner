@@ -1,3 +1,5 @@
+import { intlLocale } from '../lib/locale'
+
 // ── 回数券 — the economy, as the client knows it (plan 069) ────
 // The figures mirror backend/core/credits.py so copy can print them
 // before the API has answered ("+1 every 48 min", "7 decks"); the
@@ -46,7 +48,7 @@ export const HAS_STORE = false
 export function refillClock(iso, lang) {
   const d = iso ? new Date(iso) : null
   if (!d || !Number.isFinite(d.getTime())) return '00:00'
-  return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
+  return new Intl.DateTimeFormat(intlLocale(lang), { hour: '2-digit', minute: '2-digit' }).format(d)
 }
 
 /** Minutes between two credits: the server's figure, the constant until it has answered. */

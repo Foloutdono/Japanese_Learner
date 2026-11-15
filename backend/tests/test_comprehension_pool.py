@@ -26,6 +26,8 @@ from routes import reading
 from tests.conftest import acting_as
 from tests.test_comprehension import _reply, MASHITA, KUDASAI, SENTENCE_1
 
+_REAL_CHAT = reading._chat
+
 SECOND_LEARNER = "comprehension-pool-other"
 
 
@@ -57,7 +59,7 @@ def empty_pool():
         # suite in one day would start serving repeats instead of
         # generating, and half this file would fail for a reason no
         # single test could explain.
-        _sql("DELETE FROM comprehension_usage WHERE user_id IN (%s, %s)",
+        _sql("DELETE FROM daily_usage WHERE feature = 'comprehension' AND user_id IN (%s, %s)",
              (DEV_USER_ID, SECOND_LEARNER))
     wipe()
     yield
@@ -147,6 +149,21 @@ def test_each_bucket_is_its_own_pool(client, calls, empty_pool):
     # An English exercise is not a French one: the translations, the
     # notes and every gloss in it are in the wrong language.
     assert len(calls) == 2
+
+
+def test_a_lang_outside_the_app_s_is_read_as_english(client, calls, empty_pool):
+    """Plan 211: a lang keys the pool, so one taken as sent was a fresh
+    model call, a pool row nobody reads, and the client's text in the
+    prompt. A region tag is the language; anything else is English."""
+    _get(client, lang="en")
+    with acting_as(SECOND_LEARNER):
+        _get(client, lang="en1")
+    assert len(calls) == 1
+    assert not any("en1" in m["content"] for m in calls[0])
+
+    _get(client, lang="fr-FR")
+    langs = {l for (l,) in _sql("SELECT lang FROM comprehension_pool", fetch=True)}
+    assert langs == {"en", "fr"}
 
 
 # ── what makes it safe ───────────────────────────────────────
@@ -280,8 +297,8 @@ def test_reading_from_the_pool_is_not_metered(client, calls, empty_pool, monkeyp
         assert body["repeat"] is False
     assert not calls, "a pooled exercise must never reach the model"
 
-    counted = _sql("SELECT COALESCE(SUM(count), 0) FROM comprehension_usage "
-                   "WHERE user_id = %s", (DEV_USER_ID,), fetch=True)[0][0]
+    counted = _sql("SELECT COALESCE(SUM(count), 0) FROM daily_usage "
+                   "WHERE feature = 'comprehension' AND user_id = %s", (DEV_USER_ID,), fetch=True)[0][0]
     assert counted == 0
 
 
@@ -311,7 +328,7 @@ def test_the_ceiling_counts_generations_not_attempts(client, calls, empty_pool, 
     _get(client)
     assert len(calls) == reading._COMPREHENSION_ATTEMPTS
 
-    counted = _sql("SELECT count FROM comprehension_usage WHERE user_id = %s",
+    counted = _sql("SELECT count FROM daily_usage WHERE feature = 'comprehension' AND user_id = %s",
                    (DEV_USER_ID,), fetch=True)[0][0]
     assert counted == 1
 
@@ -435,3 +452,22 @@ def test_a_broken_counter_never_costs_the_exercise(client, calls, empty_pool, mo
     monkeypatch.setattr(reading, "_claim_generation_slot", lambda user_id: 0)
     assert _get(client)["text"].startswith(SENTENCE_1)
     assert len(calls) == 1
+
+
+def test_a_generation_no_model_was_paid_for_costs_nothing(client, calls, empty_pool, monkeypatch):
+    # core/daily_limit.refund_unbilled: an outage's 503 gives the slot back.
+    from study.llm_shared import LLMUnavailable
+
+    def _down(*a, **kw):
+        raise LLMUnavailable("every provider failed")
+
+    # `calls` stubs _chat; the real one is what turns the outage into
+    # the route's 503.
+    monkeypatch.setattr(reading, "_chat", _REAL_CHAT)
+    monkeypatch.setattr(reading, "chat", _down)
+    r = client.get("/api/reading/comprehension?level=N5&lang=en")
+    assert r.status_code == 503, r.text
+    counted = _sql("SELECT COALESCE(SUM(count), 0) FROM daily_usage "
+                   "WHERE feature = 'comprehension' AND user_id = %s",
+                   (DEV_USER_ID,), fetch=True)[0][0]
+    assert counted == 0

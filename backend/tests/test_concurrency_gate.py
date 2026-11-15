@@ -160,6 +160,22 @@ class WaitingPoolTests(unittest.TestCase):
         pool.putconn(a)
         pool.putconn(pool.getconn())
 
+    def test_a_failed_put_gives_no_slot_back(self):
+        # A put the parent refuses leaves the connection lent there, so
+        # the slot stays taken: the next caller waits (a 503) rather
+        # than reaching the parent's PoolError, and the real error is
+        # the one raised, not the semaphore's ValueError.
+        from psycopg2.pool import PoolError
+
+        pool = _NoDbPool(0, 1, wait=0.05)
+        a = pool.getconn()
+        with self.assertRaises(PoolError):
+            pool.putconn(_FakeConn())  # never lent: unkeyed
+        with self.assertRaises(PoolBusy):
+            pool.getconn()
+        pool.putconn(a)
+        pool.putconn(pool.getconn())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -54,10 +54,22 @@ export function Cue({ target, radius = 'card' }) {
 
   useLayoutEffect(() => {
     let raf = 0
+    let watched = null
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => update()) : null
+    // The target can arrive after the cue, or be drawn anew (a keyed
+    // card): the observer follows whichever element the selector finds.
+    const watch = el => {
+      if (!ro || el === watched) return
+      if (watched) ro.unobserve(watched)
+      watched = el
+      if (el) ro.observe(el)
+    }
     const update = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        setRect(rectOf(target)?.rect ?? null)
+        const found = rectOf(target)
+        watch(found?.el ?? null)
+        setRect(found?.rect ?? null)
       })
     }
     update()
@@ -66,9 +78,7 @@ export function Cue({ target, radius = 'card' }) {
     window.addEventListener('scroll', update, true)
     document.addEventListener('animationend', update, true)
     document.addEventListener('transitionend', update, true)
-    const found = rectOf(target)
-    const ro = found && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null
-    if (found) ro?.observe(found.el)
+    watch(rectOf(target)?.el ?? null)
     return () => {
       cancelAnimationFrame(raf)
       late.forEach(clearTimeout)

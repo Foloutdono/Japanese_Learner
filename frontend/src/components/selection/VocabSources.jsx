@@ -39,6 +39,9 @@ import { LineDoors } from './LineDoors'
 // `source` names its tiers' domain, `base` its URL.
 const BASE = '/learn/vocab'
 
+// Case and accents set aside, so « theatre » finds Théâtre.
+const fold = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
 const share = (n, total) => `${total > 0 ? Math.min(100, (100 * n) / total) : 0}%`
 
 export default function VocabSources({ session }) {
@@ -239,8 +242,8 @@ function ThemesBand({ t, session }) {
   const [query, setQuery] = useState('')
   const themes = useJson('/api/themes', session)?.themes
   const labeled = useMemo(() => (themes ?? []).map(th => ({ ...th, label: themeLabelFor(t, th.key) })), [themes, t])
-  const q = query.trim().toLowerCase()
-  const shown = q ? labeled.filter(th => th.label.toLowerCase().includes(q)) : labeled
+  const q = fold(query.trim())
+  const shown = q ? labeled.filter(th => fold(th.label).includes(q)) : labeled
   return (
     <section className="desk-band desk-band--themes" aria-labelledby="desk-source-themes">
       <div className="desk-band__head">

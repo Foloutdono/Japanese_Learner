@@ -46,6 +46,7 @@ import { useLabelsFit } from '../hooks/useLabelsFit'
 import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
 import { PassageShelf } from '../components/analysis/PassageShelf'
+import { VideoLibrary } from '../components/analysis/VideoLibrary'
 import { EntryLine } from '../components/analysis/EntryLine'
 import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
 import { parseVideoId } from '../lib/youtube'
@@ -821,6 +822,14 @@ export default function AnalyzerScreen({ session }) {
     analyzer.startVideoFromLink(url, opts)
   }
 
+  // A video from the public library (plan 322): opened as a link's session
+  // is, ready at once.
+  function openFromLibrary(video) {
+    clearFocus()
+    setSheet(null)
+    analyzer.openLibraryVideo(video.videoId)
+  }
+
   // 歌 (plan 317): a song picked plays from the file in hand, the session
   // it opens named once the server has it; a song picked again for a
   // Passage this device did not keep is kept from now on.
@@ -1338,6 +1347,9 @@ export default function AnalyzerScreen({ session }) {
       </div>
     </>
   )
+  // The videos every learner has analysed (plan 322), beside the video's
+  // intake: under the shelf on the desk, in the video's sheet on a phone.
+  const videoLibrary = <VideoLibrary t={t} session={session} onOpen={openFromLibrary} />
   const shelf = (
     <PassageShelf
       t={t}
@@ -2120,7 +2132,7 @@ export default function AnalyzerScreen({ session }) {
           onDragLeave={onPageDragLeave}
           onDrop={onPageDrop}
         >
-          <div className="desk-intake__main">{shelf}</div>
+          <div className="desk-intake__main">{shelf}{source === 'video' && videoLibrary}</div>
           {/* The grab's walkthrough takes the column while it is open
               (plan 120), the intake back on its ✕ or Esc. The intake
               stays mounted under it, hidden: its link and its section
@@ -2210,7 +2222,7 @@ export default function AnalyzerScreen({ session }) {
             </div>
           </Sheet>
           <Sheet open={sheet === 'video'} onClose={closeSheet} title={t.sourceVideo} icon={VideoIcon} line={KAISEKI} className="anl-sheet">
-            <div id="anl-panel-video" className="anl-panel" style={{ '--line-color': KAISEKI }}>{videoIntake}</div>
+            <div id="anl-panel-video" className="anl-panel" style={{ '--line-color': KAISEKI }}>{videoIntake}{videoLibrary}</div>
           </Sheet>
           {/* 歌 (plan 317, the owner's pick S1): the ♪'s own sheet. */}
           <Sheet open={sheet === 'song'} onClose={closeSheet} title={t.sourceSong} icon={SongIcon} line={KAISEKI} className="anl-sheet">

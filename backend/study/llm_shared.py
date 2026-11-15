@@ -24,6 +24,8 @@ import logging
 import os
 import re
 import time
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from functools import lru_cache
 
@@ -48,6 +50,48 @@ class LLMUnavailable(RuntimeError):
     amount of retrying will fix. Live-diagnosed 2026-08: a dead primary
     model plus a swallowed provider failure turned one exam click into
     hundreds of doomed OpenRouter requests."""
+
+# ── The meter: was anything paid for? ────────────────────────────
+# A daily slot is given back when its call failed without any model
+# being paid (core/daily_limit.refund_unbilled): an outage must not
+# spend a learner's allowance, while a reply that came back and was
+# refused, or never arrived because it timed out mid-answer, was
+# billed and keeps its slot. LLMUnavailable alone cannot say which:
+# chat() raises it both when nobody answered and when every model's
+# 200 failed `accept`. So chat() marks the meter open around it at
+# every call that may have cost money, and the guard reads it.
+#
+# A ContextVar, not a global: two learners' requests run at once. A
+# meter is read in the thread that set it; chat() is never handed to
+# an executor under one (the exam and song workers open their own).
+@dataclass
+class Meter:
+    billed: bool = False
+    parent: "Meter | None" = None
+
+
+_METER: ContextVar["Meter | None"] = ContextVar("llm_meter", default=None)
+
+
+@contextmanager
+def metered():
+    """A Meter that says whether any chat() call made inside the block
+    may have been billed. Nested meters each see a call made inside
+    the innermost."""
+    meter = Meter(parent=_METER.get())
+    token = _METER.set(meter)
+    try:
+        yield meter
+    finally:
+        _METER.reset(token)
+
+
+def _billed() -> None:
+    meter = _METER.get()
+    while meter is not None:
+        meter.billed = True
+        meter = meter.parent
+
 
 # ── Providers ────────────────────────────────────────────────────
 # More than one, since 2026-08: OpenRouter started answering 402
@@ -708,8 +752,10 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
         )
 
     # The ONLY thing `vision` changes is which model tuple is walked.
-    # Everything else -- retry, the 400/404-vs-401/402/403 split, the
-    # dead-model and dead-provider memory -- is shared deliberately: a
+    # Everything else -- retry, the 404-vs-401/402/403 split, the
+    # dead-model and dead-provider memory -- is shared deliberately (a
+    # 400 alone is not: with media in the request it may be the file's,
+    # and is never remembered there, see below): a
     # vision model goes stale exactly the way a text model does, and the
     # primary here fails transiently often enough that the retry matters
     # MORE, not less. A provider with an empty tuple is skipped rather
@@ -738,114 +784,137 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
         )
 
     last_status = None
+    # Closed on every way out: a Session holds a pool of open sockets,
+    # and one left per call is a leak on a server that makes dozens.
     session = requests.Session()
-
-    for provider, model in attempts:
-        # Re-checked inside the loop, not just when `attempts` was built:
-        # an earlier model in this same call may have just killed the
-        # provider, and its remaining models must not be tried.
-        if provider.name in _DEAD_PROVIDERS:
-            continue
-
-        # "provider:model", not "provider/model": every model id already
-        # contains a vendor slash (nvidia/nemotron-...), so a slash here
-        # produced "nvidia/nvidia/nemotron-..." in the logs.
-        label = f"{provider.name}:{model}"
-        for _ in range(2):
-            started = time.monotonic()
-            try:
-                response = session.post(
-                    provider.url,
-                    headers={
-                        "Authorization": f"Bearer {provider.api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": model, "messages": messages,
-                        # Not a literal key: OpenAI's GPT-5 family spells
-                        # this `max_completion_tokens` and 400s on the
-                        # old name. See Provider.max_tokens_key.
-                        provider.max_tokens_key: max_tokens,
-                        # How to ask for (or suppress) a reasoning pass is
-                        # the one thing these endpoints genuinely disagree
-                        # on -- see each Provider's reasoning_body above.
-                        **provider.body_for(reasoning),
-                    },
-                    timeout=timeout,
-                )
-            except requests.RequestException as e:
-                logger.warning("%s network error: %s", label, e)
+    try:
+        for provider, model in attempts:
+            # Re-checked inside the loop, not just when `attempts` was built:
+            # an earlier model in this same call may have just killed the
+            # provider, and its remaining models must not be tried.
+            if provider.name in _DEAD_PROVIDERS:
                 continue
 
-            if response.ok:
-                # Parsed once and kept: the same body carries the answer
-                # and the usage block, and a second .json() would parse
-                # it twice per call.
+            # "provider:model", not "provider/model": every model id already
+            # contains a vendor slash (nvidia/nemotron-...), so a slash here
+            # produced "nvidia/nvidia/nemotron-..." in the logs.
+            label = f"{provider.name}:{model}"
+            for _ in range(2):
+                started = time.monotonic()
                 try:
-                    payload = response.json()
-                except ValueError:
-                    payload = None
-                try:
-                    content = payload["choices"][0]["message"]["content"]
-                except (KeyError, IndexError, TypeError):
-                    content = None
-                if isinstance(content, str):
-                    content = strip_reasoning(content)
-                else:
-                    content = None
-                rejected = False
-                if content and accept is not None:
+                    response = session.post(
+                        provider.url,
+                        headers={
+                            "Authorization": f"Bearer {provider.api_key}",
+                            "Content-Type": "application/json",
+                        },
+                        json={
+                            "model": model, "messages": messages,
+                            # Not a literal key: OpenAI's GPT-5 family spells
+                            # this `max_completion_tokens` and 400s on the
+                            # old name. See Provider.max_tokens_key.
+                            provider.max_tokens_key: max_tokens,
+                            # How to ask for (or suppress) a reasoning pass is
+                            # the one thing these endpoints genuinely disagree
+                            # on -- see each Provider's reasoning_body above.
+                            **provider.body_for(reasoning),
+                        },
+                        timeout=timeout,
+                    )
+                except requests.RequestException as e:
+                    # A read that timed out was a request the provider took
+                    # and may have answered into the void: paid for. A
+                    # connection never made (refused, DNS, connect timeout)
+                    # was not.
+                    if isinstance(e, requests.Timeout) and not isinstance(e, requests.ConnectionError):
+                        _billed()
+                    logger.warning("%s network error: %s", label, e)
+                    continue
+
+                if response.ok:
+                    # Tokens spent, whatever the body turns out to be.
+                    _billed()
+                    # Parsed once and kept: the same body carries the answer
+                    # and the usage block, and a second .json() would parse
+                    # it twice per call.
                     try:
-                        rejected = not accept(content)
-                    except Exception:
-                        logger.exception("%s: accept() raised; the reply is rejected", label)
-                        rejected = True
-                # `content` can be present but null -- observed live from
-                # minimaxai/minimax-m3, which answers 200 with a null
-                # content field. Treated as a failed attempt rather than
-                # returned, or it becomes an AttributeError deep in a
-                # caller's .strip().
-                #
-                # Either way the tokens are spent, so both branches are
-                # accounted for before one of them returns.
-                _log_usage(task, label, payload, int((time.monotonic() - started) * 1000),
-                           ok=bool(content) and not rejected)
-                if content and not rejected:
-                    logger.info("Using model %s", label)
-                    return content
-                last_status = response.status_code
-                if rejected:
-                    # The same model would most likely answer the same
-                    # way (a truncated monologue is not a flake), so on
-                    # to the next one rather than a second payment.
-                    logger.warning("%s answered, but not with a usable reply: %s", label, content[:200])
+                        payload = response.json()
+                    except ValueError:
+                        payload = None
+                    try:
+                        content = payload["choices"][0]["message"]["content"]
+                    except (KeyError, IndexError, TypeError):
+                        content = None
+                    if isinstance(content, str):
+                        content = strip_reasoning(content)
+                    else:
+                        content = None
+                    rejected = False
+                    if content and accept is not None:
+                        try:
+                            rejected = not accept(content)
+                        except Exception:
+                            logger.exception("%s: accept() raised; the reply is rejected", label)
+                            rejected = True
+                    # `content` can be present but null -- observed live from
+                    # minimaxai/minimax-m3, which answers 200 with a null
+                    # content field. Treated as a failed attempt rather than
+                    # returned, or it becomes an AttributeError deep in a
+                    # caller's .strip().
+                    #
+                    # Either way the tokens are spent, so both branches are
+                    # accounted for before one of them returns.
+                    _log_usage(task, label, payload, int((time.monotonic() - started) * 1000),
+                               ok=bool(content) and not rejected)
+                    if content and not rejected:
+                        logger.info("Using model %s", label)
+                        return content
+                    last_status = response.status_code
+                    if rejected:
+                        # The same model would most likely answer the same
+                        # way (a truncated monologue is not a flake), so on
+                        # to the next one rather than a second payment.
+                        logger.warning("%s answered, but not with a usable reply: %s", label, content[:200])
+                        break
+                    logger.error("%s returned an unusable body: %s", label, response.text[:300])
+                    continue
+
+                status = response.status_code
+                last_status = status
+                logger.warning("%s failed (%s): %s", label, status, response.text[:300])
+
+                if status in _PROVIDER_ERROR_STATUSES:
+                    _DEAD_PROVIDERS.add(provider.name)
+                    logger.error(
+                        "Dropping provider %s for the rest of this process: account error %s "
+                        "(credentials rejected, or credit/quota exhausted). %s",
+                        provider.name, status, response.text[:300],
+                    )
                     break
-                logger.error("%s returned an unusable body: %s", label, response.text[:300])
-                continue
+                if status == 400 and (vision or audio):
+                    # A 400 on a request that carries the learner's own
+                    # photo or recording is as likely to be about that
+                    # file (corrupt past its magic bytes, too large in
+                    # pixels or seconds) as about the model, so it
+                    # retires nothing: one bad upload must not switch
+                    # image reading off for every learner until the
+                    # process restarts. On to the next model, for this
+                    # request only.
+                    logger.warning("%s rejected this request's media (400); not remembered", label)
+                    break
+                if status in _PERMANENT_MODEL_STATUSES:
+                    _DEAD_MODELS.add((provider.name, model))
+                    logger.error(
+                        "Dropping model %s for the rest of this process: permanent error %s. %s",
+                        label, status, response.text[:300],
+                    )
+                    break
+                if status not in _RETRYABLE_STATUSES:
+                    break
 
-            status = response.status_code
-            last_status = status
-            logger.warning("%s failed (%s): %s", label, status, response.text[:300])
-
-            if status in _PROVIDER_ERROR_STATUSES:
-                _DEAD_PROVIDERS.add(provider.name)
-                logger.error(
-                    "Dropping provider %s for the rest of this process: account error %s "
-                    "(credentials rejected, or credit/quota exhausted). %s",
-                    provider.name, status, response.text[:300],
-                )
-                break
-            if status in _PERMANENT_MODEL_STATUSES:
-                _DEAD_MODELS.add((provider.name, model))
-                logger.error(
-                    "Dropping model %s for the rest of this process: permanent error %s. %s",
-                    label, status, response.text[:300],
-                )
-                break
-            if status not in _RETRYABLE_STATUSES:
-                break
-
-    raise LLMUnavailable(
-        "All LLM providers failed. Last error: "
-        + ("no model gave a usable reply" if last_status == 200 else str(last_status or "no response"))
-    )
+        raise LLMUnavailable(
+            "All LLM providers failed. Last error: "
+            + ("no model gave a usable reply" if last_status == 200 else str(last_status or "no response"))
+        )
+    finally:
+        session.close()

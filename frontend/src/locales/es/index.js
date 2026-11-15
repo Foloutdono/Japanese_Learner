@@ -1278,6 +1278,7 @@ const phraseAnalyzer = {
   explaining:          'Explicando…',
   explainFailed:       'La explicación no llegó. Inténtalo de nuevo.',
   explainUnavailable:  'Las explicaciones no están disponibles ahora. Inténtalo en un momento.',
+  explainLimitReached: 'Ya usaste todas las explicaciones de hoy. Vuelven mañana.',
   passageTruncated:    n => (n === 1 ? 'Solo se analizó la primera frase.' : `Solo se analizaron las primeras ${n} frases.`),
   sentenceAnalysisUnavailable: 'El análisis de esta frase no está disponible por ahora.',
   mineToDeck:          'Agregar',
@@ -1407,6 +1408,20 @@ const video = {
   videoLinkFetchOff:   'Este servidor no puede obtener subtítulos desde un enlace. Usa el marcador 字幕取り o agrega un archivo de subtítulos.',
   videoLinkAllowanceMine: 'Agotaste tus enlaces de hoy. Agrega un archivo de subtítulos o vuelve mañana.',
   videoLinkAllowanceApp: 'Se agotaron los enlaces de hoy de toda la app. Agrega un archivo de subtítulos o vuelve mañana.',
+  // ── 図書館 — la videoteca de los videos analizados (plan 322) ──
+  videoLibraryAllowance: 'Abriste tus videos de la videoteca de hoy. Vuelve mañana.',
+  vlibTitle:        'Videoteca',
+  vlibAllKinds:     'Todos los tipos',
+  vlibKind:         'Tipo de video',
+  vlibMine:         'Mis videos',
+  vlibKinds: {
+    music: 'Música', podcast: 'Podcast', drama: 'Series y películas', variety: 'Variedades', news: 'Noticias',
+    vlog: 'Vlog', lesson: 'Clases', gaming: 'Videojuegos', other: 'Otros',
+  },
+  vlibEmpty:        'Todavía no hay videos: los que analices desde un enlace se agregarán para todos.',
+  vlibEmptyMine:    'Todavía no abriste ningún video de la videoteca.',
+  vlibError:        'La videoteca no se cargó.',
+  vlibMore:         'Ver más',
   videoNoJapanese:     'Este video no tiene subtítulos en japonés. Prueba con otro video o agrega tú un archivo de subtítulos.',
   videoSubtitlesOff:   'Este video tiene los subtítulos desactivados.',
   videoSubtitlesEmpty: 'La pista de subtítulos en japonés de este video está vacía.',
@@ -2141,6 +2156,10 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'No conectado',
   linkGoogleDesc:    'Agrega Google a esta cuenta y «Continuar con Google» la abrirá en lugar de una nueva y vacía.',
+  // La misma oferta para Apple, solo en el iPhone (plan 321).
+  linkAppleLabel:    'Apple',
+  linkAppleCap:      'No conectado',
+  linkAppleDesc:     'Agrega Apple a esta cuenta y «Continuar con Apple» la abrirá en lugar de una nueva y vacía.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -2566,6 +2585,8 @@ const boarding = {
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continuar con Google',
+  // El título que Apple da a su botón, en sus palabras (plan 321).
+  continueWithApple: 'Continuar con Apple',
   orWithEmail: 'o con un correo electrónico',
   // 改札 — a round trip that came back refused (lib/authRedirect.js).
   // Both name what happened rather than "something went wrong": on the
@@ -2574,6 +2595,8 @@ const boarding = {
   // reason, not a shrug.
   oauthAlreadyLinked: 'Esa cuenta de Google ya pertenece a otro pase.',
   oauthSignInInstead: 'Iniciar sesión con esa cuenta de Google',
+  oauthAlreadyLinkedApple: 'Esa cuenta de Apple ya pertenece a otro pase.',
+  oauthLinkingOffApple: 'Ahora mismo no se puede agregar Apple a este pase. Un correo electrónico, sí.',
   nativeReturnNote: 'Sesión iniciada. Volviendo a la app…',
   nativeReturnOpen: 'Abrir Tsuji',
   oauthLinkingOff: 'Ahora mismo no se puede agregar Google a este pase. Un correo electrónico, sí.',
@@ -2771,6 +2794,7 @@ const boarding = {
   brdKeepSent: (email) => `Enlace enviado a ${email}`,
   brdKeepChange: 'Cambiar',
   brdKeptGoogle: 'Guardado en tu cuenta de Google',
+  brdKeptApple: 'Guardado en tu cuenta de Apple',
   brdKeptEmail: (email) => `Guardado · ${email}`,
   brdKeptAccount: 'Guardado en tu cuenta',
   brdKeptSwitch: 'Cambiar de cuenta',

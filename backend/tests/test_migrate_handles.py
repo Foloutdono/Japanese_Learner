@@ -147,6 +147,10 @@ class _Blind:
         row = self.cur.fetchone()
         return None if self.blind else row
 
+    def fetchall(self):
+        rows = self.cur.fetchall()
+        return [] if self.blind else rows
+
 
 def test_a_name_taken_between_the_look_and_the_write_takes_a_number_and_keeps_the_moves(learners):
     from routes.profile import claim_handle_with

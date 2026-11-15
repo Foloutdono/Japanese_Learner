@@ -50,12 +50,15 @@ def _usable(path: str) -> bool:
     A real write, not os.access: makedirs(exist_ok=True) succeeds on an
     existing read-only directory without proving anything, and
     os.access answers for the wrong thing entirely when the process
-    runs as root."""
-    probe = os.path.join(path, ".write-probe")
+    runs as root.
+
+    A probe of its own (mkstemp): two processes sharing one name raced,
+    one removing the file the other was about to, and the loser fell
+    back to the temp directory and served from a place nothing writes."""
     try:
         os.makedirs(path, exist_ok=True)
-        with open(probe, "wb"):
-            pass
+        fd, probe = tempfile.mkstemp(prefix=".write-probe-", dir=path)
+        os.close(fd)
         os.remove(probe)
     except OSError as e:
         logger.warning("Exam audio directory %s is not usable: %s", path, e)

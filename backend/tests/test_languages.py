@@ -13,6 +13,7 @@ longer has is moved with it (content/vocab_renames.py) or dropped.
 `python -m scripts.language_coverage --lang LANG` counts what is left."""
 import ast
 import json
+from datetime import datetime, timedelta, timezone
 import random
 import re
 import sqlite3
@@ -479,13 +480,11 @@ def stand_in(client):
         "/api/frequency/{domain}/card": "/api/frequency/vocab/card?tier=1&mode=vocab.flashcard.f2b",
         "/api/frequency/{domain}/cards": "/api/frequency/vocab/cards?tier=1&mode=vocab.flashcard.f2b",
         "/api/frequency/{domain}/tier/{tier}/items": "/api/frequency/vocab/tier/1/items",
-        "/api/grammar/card": "/api/grammar/card?level=N5&mode=grammar.flashcard.f2b",
         "/api/grammar/cards": "/api/grammar/cards?level=N5&mode=grammar.flashcard.f2b",
         "/api/grammar/point": f"/api/grammar/point?id={quote(point)}",
         "/api/grammar/points": "/api/grammar/points?level=N5",
         "/api/grammar/review-cards": "/api/grammar/review-cards?level=N5",
         "/api/kana/cards": "/api/kana/cards?set_name=hiragana&mode=kana.flashcard.f2b",
-        "/api/kanji/card": "/api/kanji/card?level=N5&mode=kanji.flashcard.f2b",
         "/api/kanji/cards": "/api/kanji/cards?level=N5&mode=kanji.flashcard.f2b",
         "/api/kanji/radical/{number}": "/api/kanji/radical/85",
         "/api/kanji/radicals": "/api/kanji/radicals",
@@ -493,14 +492,14 @@ def stand_in(client):
         "/api/onboarding/ride": "/api/onboarding/ride",
         "/api/reading/batch": "/api/reading/batch?source=frequency&domain=vocab&tier=1",
         "/api/station/{source}/samples": "/api/station/vocab/samples",
-        "/api/today/ahead": "/api/today/ahead?at=2026-11-10T08:00:00Z",
+        # an instant the route still answers (a day back at most): tomorrow, on the hour
+        "/api/today/ahead": "/api/today/ahead?at=" + (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%dT%H:00:00Z"),
         "/api/today/cards": "/api/today/cards",
         "/api/translation/batch": "/api/translation/batch?source=frequency&domain=vocab&tier=1",
         "/api/translation/kanji": f"/api/translation/kanji?word={quote('山')}",
         "/api/translation/vocab": f"/api/translation/vocab?word={quote('水')}",
         "/api/translations/kanji": "/api/translations/kanji",
         "/api/translations/vocab": "/api/translations/vocab",
-        "/api/vocab/card": "/api/vocab/card?level=N5&mode=vocab.flashcard.f2b",
         "/api/vocab/cards": "/api/vocab/cards?level=N5&mode=vocab.flashcard.f2b",
         "/api/vocab/review-cards": "/api/vocab/review-cards?level=N5",
         "/api/vocab/theme/{theme}/card": "/api/vocab/theme/animals/card?mode=vocab.flashcard.f2b",

@@ -98,6 +98,23 @@ def test_the_stats_reset_is_seen(client):
     assert srs._studied_days(LEARNER) == set()
 
 
+def test_the_stats_reset_clears_the_whole_schedule(client):
+    srs.review(CARD, MODE, 5)
+    # A registry row whose modes are all gone (a retired mode, an
+    # assumption given back) is the learner's too.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO cards(id) VALUES (%s)", (f"{LEARNER}:vocab_N5_火_ひ",))
+        conn.commit()
+    finally:
+        conn.close()
+    with acting_as(LEARNER):
+        assert client.delete("/api/stats/reset").status_code == 200
+    assert _sql_count("SELECT COUNT(*) FROM card_modes WHERE card_id LIKE %s") == 0
+    assert _sql_count("SELECT COUNT(*) FROM cards WHERE id LIKE %s") == 0
+
+
 def test_a_caller_cannot_change_the_kept_days():
     srs.award_practice(LEARNER, "reading", "level:N5", [5])
     days = srs._studied_days(LEARNER)

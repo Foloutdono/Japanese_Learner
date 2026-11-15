@@ -30,12 +30,14 @@ import '../../index.css'
 // about to lose their way back to their own account.
 
 const auth = { signOut: vi.fn(), updateUser: vi.fn(), refreshSession: vi.fn(async () => ({})) }
+// The iPhone's shell, where Apple is offered beside Google (plan 321).
+const iphone = { on: false }
 const connectProvider = vi.fn(async () => ({ ok: true }))
 vi.mock('../../lib/supabase', () => ({ supabase: { auth } }))
 // The page carries the data's slips since plan 139, which write through
 // apiJson and save through saveBlob; none of these cases presses them.
 vi.mock('../../lib/api', () => ({ apiFetch: vi.fn(async () => ({ ok: false })), apiJson: vi.fn(async () => ({})) }))
-vi.mock('../../lib/platform', () => ({ isNative: () => false, openExternal: vi.fn(), saveBlob: vi.fn() }))
+vi.mock('../../lib/platform', () => ({ isNative: () => false, canSignInWithApple: () => iphone.on, openExternal: vi.fn(), saveBlob: vi.fn() }))
 // Only the round trip is stubbed: hasProvider is the module's own
 // reading of a session shape and is exactly what this page branches
 // on, so it stays real.
@@ -66,7 +68,7 @@ async function page(session) {
   return screen.container
 }
 
-beforeEach(() => { connectProvider.mockClear(); auth.refreshSession.mockClear() })
+beforeEach(() => { connectProvider.mockClear(); auth.refreshSession.mockClear(); iphone.on = false })
 afterEach(async () => { await cleanup() })
 
 describe('Settings › Account', () => {
@@ -152,5 +154,51 @@ describe('connecting Google to an account that already has a key', () => {
     expect(root.textContent).toContain(fr.guestClaimDesc)
     expect(root.textContent).not.toContain(fr.linkGoogleDesc)
     expect(root.querySelectorAll('.auth-provider')).toHaveLength(1)
+  })
+})
+
+// ── 林檎 — Apple beside Google, on the iPhone (plan 321) ─────────────
+// Guideline 4.8: wherever the iPhone app offers Google, Apple is offered
+// too, and the same rules hold -- a guest's progress is LINKED, never
+// left behind, and a pass is offered only the identity it lacks.
+describe('Apple on the iPhone', () => {
+  const buttons = root => [...root.querySelectorAll('.auth-provider')].map(b => b.dataset.provider)
+
+  it('is offered to a guest beside Google, Apple first', async () => {
+    iphone.on = true
+    const root = await page(GUEST)
+    expect(buttons(root)).toEqual(['apple', 'google'])
+    expect(root.textContent).toContain(fr.continueWithApple)
+  })
+
+  it('LINKS Apple onto the guest\'s pass', async () => {
+    iphone.on = true
+    const root = await page(GUEST)
+    root.querySelector('.auth-provider[data-provider="apple"]').click()
+    await settle()
+    expect(connectProvider.mock.calls[0][0]).toEqual({ provider: 'apple', link: true })
+  })
+
+  it('offers a pass each identity it lacks, in its own slip', async () => {
+    iphone.on = true
+    const member = await page(MEMBER)
+    expect(buttons(member)).toEqual(['apple', 'google'])
+    expect(member.textContent).toContain(fr.linkAppleDesc)
+    await cleanup()
+    const withGoogle = await page(WITH_GOOGLE)
+    expect(buttons(withGoogle)).toEqual(['apple'])
+    expect(withGoogle.textContent).not.toContain(fr.linkGoogleDesc)
+  })
+
+  it('is not offered to a pass that already carries it', async () => {
+    iphone.on = true
+    const root = await page({ user: { id: 'm3', email: 'aiko@example.com', identities: [{ provider: 'apple' }, { provider: 'google' }] } })
+    expect(buttons(root)).toEqual([])
+  })
+
+  it('is never offered off the iPhone', async () => {
+    const root = await page(GUEST)
+    expect(buttons(root)).toEqual(['google'])
+    expect(root.textContent).not.toContain(fr.continueWithApple)
   })
 })

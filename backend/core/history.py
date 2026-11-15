@@ -17,8 +17,21 @@
 # fetch's budget window (routes/video.py's _fetch_refusal counts the
 # sessions a learner fetched today), which a deletion must not refund.
 # A passage is deleted outright -- its Undo analyses its text again.
+#
+# A whole YouTube video (plan 322) is not on the shelf at all: the link
+# fetch's whole-track sessions live in the public library
+# (routes/video_library.py), which every learner browses and where
+# "Mine" lists the ones a learner opened. They are neither listed here,
+# counted toward the limit nor trimmed by it. A video studied through a
+# window (a minute or two of it) is nobody's library entry and stays on
+# the shelf, counted, as it was.
 
 HISTORY_LIMIT = 30
+
+# The sessions the library holds instead of the shelf, as a SQL
+# condition over video_sessions. One place, so the shelf's listing and
+# its limit read the same rule.
+LIBRARY_SESSION = "(source = 'youtube' AND window_start IS NULL AND window_end IS NULL)"
 
 
 def trim_history(cur, user_id: str, keep: int | None = None) -> None:
@@ -36,6 +49,7 @@ def trim_history(cur, user_id: str, keep: int | None = None) -> None:
             SELECT 'session', id, created_at
               FROM video_sessions
              WHERE user_id = %(user)s AND status = 'ready' AND deleted_at IS NULL
+               AND NOT """ + LIBRARY_SESSION + """
         ), past AS (
             SELECT kind, id FROM shelf
              ORDER BY created_at DESC, id DESC

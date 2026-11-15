@@ -1,6 +1,6 @@
 """
 Study endpoints for thematic decks ("fruits", "jobs", "body parts", ...) —
-the theme counterpart to vocab.py's level-based /api/vocab/card|cards|stats,
+the theme counterpart to vocab.py's level-based /api/vocab/cards|stats,
 and structurally identical to it on purpose: same SRS plumbing
 (srs.get_due_cards / get_new_cards / preview_reviews_bulk),
 same MAX_BATCH, same review-preview/stage-promotion helpers. The only real

@@ -159,12 +159,16 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
 
   // A heartbeat, not a clock: its value is never read, only its change
   // forces a re-render each second so the derived `timeLeft` below gets
-  // recomputed against a fresh Date.now().
+  // recomputed against a fresh Date.now(). It beats only while the
+  // clock runs: before the paper arrives and on its cover there is no
+  // `timeLeft` to recompute, and the whole paper would redraw for nothing.
   const [, setTick] = useState(0)
+  const clockRunning = Boolean(exam && startedAt)
   useEffect(() => {
+    if (!clockRunning) return
     const id = setInterval(() => setTick(n => n + 1), 1000)
     return () => clearInterval(id)
-  }, [])
+  }, [clockRunning])
 
   const submitting = useRef(false)
 

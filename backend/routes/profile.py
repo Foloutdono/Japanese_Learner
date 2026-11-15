@@ -339,12 +339,16 @@ def _handle_candidates(base: str):
     """The name as it is, when it is long enough to be a username, then
     the name numbered 2, 3, ... 999 (a long name gives up letters to its
     number, within USERNAME_MAX). In order and without chance, so the
-    migration's report is what its run does."""
+    migration's report is what its run does. Every candidate is a
+    username USERNAME_RE accepts: a one-letter name skips J2 ... J9,
+    two characters, and starts at J10."""
     if len(base) >= 3:
         yield base
     for n in range(2, 1000):
         digits = str(n)
-        yield f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+        candidate = f"{base[:USERNAME_MAX - len(digits)]}{digits}"
+        if len(candidate) >= 3:
+            yield candidate
 
 
 def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
@@ -363,14 +367,20 @@ def claim_handle_with(cur, user_id: str, card_name: str) -> str | None:
     row = cur.fetchone()
     if not row or not _GENERATED_RE.match(row[0]):
         return None
+    # Every name a candidate could collide with, in one look: a candidate
+    # is the base cut to make room for at most three digits, so all of
+    # them start with its first USERNAME_MAX - 3 letters (ASCII letters
+    # and digits only, so nothing in the pattern needs escaping). There
+    # is no index on lower(username), so one scan here replaces one per
+    # candidate -- up to 999 for a name many learners share.
+    cur.execute(
+        "SELECT lower(username) FROM user_profiles"
+        " WHERE lower(username) LIKE lower(%s) || '%%' AND user_id <> %s",
+        (base[:USERNAME_MAX - 3], user_id),
+    )
+    taken = {row[0] for row in cur.fetchall()}
     for candidate in _handle_candidates(base):
-        if content_filter.refused(candidate, name=True):
-            continue
-        cur.execute(
-            "SELECT 1 FROM user_profiles WHERE lower(username) = lower(%s) AND user_id <> %s",
-            (candidate, user_id),
-        )
-        if cur.fetchone():
+        if candidate.lower() in taken or content_filter.refused(candidate, name=True):
             continue
         # A savepoint, so a refusal leaves the caller's transaction (the
         # migration's, with every handle it has moved) standing.

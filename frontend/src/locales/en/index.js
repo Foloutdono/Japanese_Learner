@@ -1274,6 +1274,7 @@ const phraseAnalyzer = {
   explaining:          'Explaining…',
   explainFailed:       'The explanation did not come through. Try again.',
   explainUnavailable:  'Explanations are unavailable right now. Try again shortly.',
+  explainLimitReached: "That's every explanation for today. They're back tomorrow.",
   passageTruncated:    n => `Only the first ${n} ${n === 1 ? 'sentence was' : 'sentences were'} analyzed.`,
   sentenceAnalysisUnavailable: 'Analysis is temporarily unavailable for this sentence.',
   mineToDeck:          'Mine',
@@ -1403,6 +1404,20 @@ const video = {
   videoLinkFetchOff:   'This server cannot fetch subtitles from a link. Use the 字幕取り bookmark, or add a subtitle file.',
   videoLinkAllowanceMine: 'You have used today’s link allowance. Add a subtitle file, or come back tomorrow.',
   videoLinkAllowanceApp: 'Today’s link allowance for the whole app is used up. Add a subtitle file, or come back tomorrow.',
+  // ── 図書館 — the public library of analysed videos (plan 322) ──
+  videoLibraryAllowance: 'You have opened today’s allowance of library videos. Come back tomorrow.',
+  vlibTitle:        'Video library',
+  vlibAllKinds:     'All kinds',
+  vlibKind:         'Kind of video',
+  vlibMine:         'My videos',
+  vlibKinds: {
+    music: 'Music', podcast: 'Podcast', drama: 'Drama & film', variety: 'Variety', news: 'News',
+    vlog: 'Vlog', lesson: 'Lesson', gaming: 'Gaming', other: 'Other',
+  },
+  vlibEmpty:        'No video yet: the ones you analyze from a link will be added for everyone.',
+  vlibEmptyMine:    'You have not opened a library video yet.',
+  vlibError:        'The library did not load.',
+  vlibMore:         'Show more',
   videoNoJapanese:     'This video has no Japanese subtitles. Try another video, or add a subtitle file yourself.',
   videoSubtitlesOff:   'This video has its subtitles turned off.',
   videoSubtitlesEmpty: 'This video’s Japanese subtitle track is empty.',
@@ -2139,6 +2154,10 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'Not connected',
   linkGoogleDesc:    'Add Google to this account, and “Continue with Google” will open it rather than a new, empty one.',
+  // The same offer for Apple, on the iPhone alone (plan 321).
+  linkAppleLabel:    'Apple',
+  linkAppleCap:      'Not connected',
+  linkAppleDesc:     'Add Apple to this account, and “Continue with Apple” will open it rather than a new, empty one.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -2564,6 +2583,8 @@ const boarding = {
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continue with Google',
+  // Apple's own title for its button, in its own words (plan 321).
+  continueWithApple: 'Continue with Apple',
   orWithEmail: 'or with an email address',
   // 改札 — a round trip that came back refused (lib/authRedirect.js).
   // Both name what happened rather than "something went wrong": on the
@@ -2572,6 +2593,8 @@ const boarding = {
   // reason, not a shrug.
   oauthAlreadyLinked: 'That Google account already belongs to another pass.',
   oauthSignInInstead: 'Sign in with that Google account',
+  oauthAlreadyLinkedApple: 'That Apple Account already belongs to another pass.',
+  oauthLinkingOffApple: 'Apple cannot be added to this pass right now. An email address can.',
   nativeReturnNote:  'Signed in. Returning to the app…',
   nativeReturnOpen:  'Open Tsuji',
   oauthLinkingOff: 'Google cannot be added to this pass right now. An email address can.',
@@ -2770,6 +2793,7 @@ const boarding = {
   brdKeepSent: (email) => `Link sent to ${email}`,
   brdKeepChange: 'Change',
   brdKeptGoogle: 'Kept on your Google account',
+  brdKeptApple: 'Kept on your Apple Account',
   brdKeptEmail: (email) => `Kept · ${email}`,
   brdKeptAccount: 'Kept on your account',
   brdKeptSwitch: 'Switch account',

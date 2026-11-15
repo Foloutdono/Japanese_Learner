@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import en from '../locales/en/index.js'
 import fr from '../locales/fr/index.js'
+import { forgetCachedJson } from '../lib/cachedJson'
 
 // The bug this pins, in one sentence: "still generating" arrives as HTTP
 // 202, which is a SUCCESS status, so apiJson RESOLVES rather than
@@ -652,5 +653,43 @@ describe('AnalyzerScreen polling', () => {
     expect(screen.container.querySelector('.anl-explainpanel__body').textContent).toBe('An introduction.')
     expect(screen.container.querySelector('.anl-explainpanel__again').textContent).toBe('Expliquer à nouveau')
     expect(screen.container.querySelector('.anl-explainpanel__error')).toBeNull()
+  })
+
+  // 図書館 (plan 322): a video another learner's link analysed. Picking it
+  // asks the server to open it, and what comes back is read as any
+  // session is: the first poll is a 200 and the stage is drawn.
+  it('opens a video from the library, ready at once', async () => {
+    forgetCachedJson()
+    apiJson.mockImplementation(async path => {
+      if (path.startsWith('/api/video/library/')) {
+        return { sessionId: 9, status: 'ready', videoId: 'aaaaaaaaaaa' }
+      }
+      if (path.startsWith('/api/video/library')) {
+        return {
+          videos: [{
+            videoId: 'aaaaaaaaaaa', category: 'music', lineCount: 2, firstLine: '猫が好き',
+            truncated: 0, addedAt: new Date().toISOString(), learners: 4, mine: false,
+          }],
+          total: 1, categories: ['music'], counts: { all: 1, mine: 0, music: 1 },
+        }
+      }
+      if (path === '/api/video/session/9') {
+        return { ...videoSession(), source: 'youtube', sourceRef: 'aaaaaaaaaaa', videoId: 'aaaaaaaaaaa' }
+      }
+      return {}
+    })
+
+    const screen = await renderScreen()
+    await goToPlatform(screen, 'video')
+    await settle(120)
+    const card = screen.container.querySelector('.anl-lib__item')
+    expect(card.textContent).toContain('猫が好き')
+    card.click()
+    await settle(200)
+
+    const opened = apiJson.mock.calls.find(c => c[0] === '/api/video/library/aaaaaaaaaaa/open')
+    expect(opened?.[2]).toMatchObject({ method: 'POST' })
+    expect(screen.container.querySelectorAll('.anl-stop').length).toBe(2)
+    expect(playerProps.last?.videoId).toBe('aaaaaaaaaaa')
   })
 })

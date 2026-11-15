@@ -10,5 +10,12 @@
 	<array>
 		<string>group.app.tsuji</string>
 	</array>
+	<!-- 林檎 (plan 321): Sign in with Apple, beside Google (guideline 4.8).
+	     The App ID app.tsuji has to have Sign In with Apple enabled too,
+	     or the profile match makes cannot sign this (docs/release.md). -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
 </dict>
 </plist>

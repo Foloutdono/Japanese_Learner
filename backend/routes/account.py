@@ -48,12 +48,23 @@ that window, make a request that lazily re-seeds a user_profiles row
 (routes/profile.py's ensure_profile_row) — a random username under a
 dead uuid, no personal data. The deleting device signs out at once, and
 the row is harmless; documented rather than engineered around.
+
+-- Apple's grant (plan 321) ----------------------------------------
+A learner who signed in with Apple on the iPhone has a grant Apple asks
+us to revoke when the account goes (core/apple_signin.py). It is revoked
+first, while the token that does it is still in apple_grants, and never
+holds the deletion up: Apple unreachable is logged and the erasure goes
+on, since a deletion that waits on a third party is one a learner cannot
+finish. POST /api/account/apple is where that token comes from: the app
+posts the sign-in's one-use authorization code straight after it.
 """
 import logging
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
+import core.apple_signin as apple_signin
 import core.auth as auth
 from core.auth import get_user_id
 from core.db import db_conn
@@ -98,15 +109,13 @@ PLAN = [
     ("reading_log",         "user_id = %(user)s",       "reading practice history"),
     ("comprehension_log",   "user_id = %(user)s",       "reading comprehension history"),
     ("comprehension_served", "user_id = %(user)s",      "which pooled exercises this learner has read"),
-    ("comprehension_usage", "user_id = %(user)s",        "the daily new-exercise counters"),
     ("translation_log",     "user_id = %(user)s",       "translation practice history"),
     ("dictation_log",       "user_id = %(user)s",       "dictation practice history"),
     ("composition_log",     "user_id = %(user)s",       "composition practice history"),
     ("conversation_log",    "user_id = %(user)s",       "conversation practice history (plan 217)"),
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
     ("frequency_overrides", "user_id = %(user)s",       "per-user frequency-tier tweaks"),
-    ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),
-    ("daily_usage",         "user_id = %(user)s",       "the daily counters, per feature (composition's reviews, the asking)"),
+    ("daily_usage",         "user_id = %(user)s",       "the daily counters, per feature (the asking, the OCR, new exercises...)"),
     ("dictionary_favorites", "user_id = %(user)s",      "the dictionary's shelf of kept entries"),
     ("agenda_blocks",       "user_id = %(user)s",       "the weekly agenda: study blocks and their reminders"),
     ("grammar_tours",       "user_id = %(user)s",       "how each grammar point's first tour went (plan 187)"),
@@ -118,6 +127,7 @@ PLAN = [
     ("banzuke_division",    "user_id = %(user)s",       "the board's division, this week and the last (plan 262)"),
     ("banzuke_rank",        "user_id = %(user)s",       "the board's place at the start of the day, for the moves"),
     ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
+    ("apple_grants",        "user_id = %(user)s",       "the Sign in with Apple grant, kept to revoke it here (plan 321)"),
     # 対戦 (plan 279). A duel whose only real player is this learner goes
     # whole (the cascade takes its rows, a ghost's copy with them), read
     # off pvp_entries, so it comes first; a duel shared with another
@@ -144,6 +154,7 @@ SHARED = {
     "grammar_sentences":     "generated content cache keyed by (level, pattern)",
     "phrase_analysis_cache": "keyed by a hash of the phrase; shared across every caller",
     "banzuke_marks":         "which board week was settled and which day's places taken; no learner's rows",
+    "video_library":         "every whole YouTube video a link fetch made ready, once, for every learner (plan 322); anonymous, no learner on a row: a learner's own sessions of it are video_sessions, in PLAN",
 }
 
 
@@ -240,9 +251,25 @@ def _delete_auth_user(user_id: str) -> bool:
     raise AuthDeleteError(f"{r.status_code} {r.text[:200]}")
 
 
+class AppleGrant(BaseModel):
+    # Apple's authorization codes run to about a hundred characters.
+    code: str = Field(min_length=1, max_length=1024)
+
+
+@router.post("/api/account/apple")
+def keep_apple_grant(body: AppleGrant, user_id: str = Depends(get_user_id)):
+    """The code a Sign in with Apple has just brought, exchanged and
+    kept so the account's deletion can revoke the grant (plan 321).
+    `kept` is false where there is no key to exchange it with: the
+    sign-in stands either way, and the app does not wait on it."""
+    return {"kept": apple_signin.keep(user_id, body.code)}
+
+
 @router.delete("/api/account")
 def delete_account(user_id: str = Depends(get_user_id)):
     logger.info("Deleting account user_id=%s", user_id)
+    # Before the rows: the token that revokes the grant is one of them.
+    apple_revoked = apple_signin.revoke_for(user_id)
     after: list = []
     conn = db_conn()
     try:
@@ -268,4 +295,4 @@ def delete_account(user_id: str = Depends(get_user_id)):
             status_code=502,
             detail="Your data was erased, but the sign-in account could not be removed yet. Please try again.",
         )
-    return {"ok": True, "deleted": counts, "auth_deleted": auth_deleted}
+    return {"ok": True, "deleted": counts, "auth_deleted": auth_deleted, "apple_revoked": apple_revoked}

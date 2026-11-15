@@ -5,6 +5,7 @@ import { useLang } from '../../LangContext'
 import { videoErrorMessage } from './videoErrors'
 import { songForHearing } from '../../lib/songAudio'
 import { keepSong } from '../../lib/songStore'
+import { explainErrorText } from '../../lib/explainSentence'
 
 // ── One Passage, three ways in ────────────────────────────
 // The seam that makes 解析 one screen instead of two (plan 027). A
@@ -339,6 +340,26 @@ export function useAnalyzerSession(session) {
     }
   }
 
+  // ── The library (plan 322) ───────────────────────────────
+  // A video another learner's link already analysed: the server makes the
+  // learner's own session over its copy, ready at once, and from there it
+  // is read as any session is (the poll's first GET is a 200). No fetch,
+  // so none of the link allowance; refused only past the day's openings.
+  async function openLibraryVideo(videoId) {
+    if (!videoId) return
+    countUse('analyzer', 'video')
+    const run = beginRun()
+    try {
+      const data = await apiJson(`/api/video/library/${encodeURIComponent(videoId)}/open`, session, { method: 'POST' })
+      if (run !== runIdRef.current) return
+      setVideoSessionId(data.sessionId)
+    } catch (e) {
+      if (run !== runIdRef.current) return
+      setError({ video: e })
+      setStatus('failed')
+    }
+  }
+
   async function startVideoFromFile(file, { url, start, end, timing, translations }) {
     if (!file) return
     countUse('analyzer', 'video')
@@ -538,11 +559,11 @@ export function useAnalyzerSession(session) {
       if (run !== runIdRef.current) return
       setExplainError(prev => ({
         ...prev,
-        // 503 is the provider being down, which is temporary and worth
-        // saying so. Anything else is a generic failure. Never the
+        // 429 is the day's explanations spent, 503 the provider down,
+        // anything else a generic failure (explainErrorText). Never the
         // server's own sentence: ApiError's message is never empty, so
         // the backend's English used to win every time (plan 215).
-        [index]: e?.status === 503 ? t.explainUnavailable : t.explainFailed,
+        [index]: explainErrorText(e, t),
       }))
     } finally {
       setExplaining(prev => ({ ...prev, [index]: false }))
@@ -678,6 +699,7 @@ export function useAnalyzerSession(session) {
     analyzeText,
     startVideoFromFile,
     startVideoFromLink,
+    openLibraryVideo,
     startVideoFromTranscript,
     startSongFromFile,
     explain,

@@ -289,6 +289,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # in event_daily. `count` is the day's slots taken, this one
     # included; `over` whether it is past `limit`.
     "ai_use":         frozenset({"feature", "count", "limit", "over"}),
+    # The slot an ai_use took, given back by core/daily_limit.release
+    # because no model was paid for the call (a provider outage). The
+    # day's calls are ai_use less ai_refund.
+    "ai_refund":      frozenset({"feature"}),
 
     # ── Friction ─────────────────────────────────────────────────
     # An uncaught error or rejected promise, by screen. NO MESSAGE AND
@@ -339,6 +343,13 @@ EVENTS: dict[str, frozenset[str]] = {
 # run keys, a boarding step from BoardingFlow). Two keys are held to a
 # SHAPE instead, on every name, below: `route` and `path`.
 _RUN_DOORS = frozenset({"today", "learn", "practice", "deck", "ride", "exam", "other"})
+# Every feature core/daily_limit counts: the `feature` of ai_use and
+# ai_refund. A ration added there is added here, or its rows lose it.
+_AI_FEATURES = frozenset({"ask", "composition", "translation_review", "deep_analysis",
+                          "exam_paper", "line_translation", "song_transcribe",
+                          "conversation_talk", "conversation_review", "lyrics_sort",
+                          "video_category", "ocr", "comprehension"})
+
 VALUES: dict[str, dict[str, frozenset[str]]] = {
     # Why the gate's first request failed (plan 312): its 45 s ran out,
     # the server answered 5xx (a restart answers 502), or no answer came.
@@ -356,7 +367,7 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
     "boarding_done": {
         "level_how": frozenset({"pick", "test"}),
         "placed":    frozenset({"N5", "N4", "N3", "N2", "N1"}),
-        "kept":      frozenset({"google", "password", "link", "already", "none"}),
+        "kept":      frozenset({"google", "apple", "password", "link", "already", "none"}),
         # The door the learner came in by (plan 313, lib/arrival.js): the
         # link's ?src=, else the class of the page that sent them, else
         # the store (the native app), else nothing known.
@@ -399,9 +410,8 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
                               "standard", "relaxed", "slow", "untimed",
                               "on", "off", "N5", "N4", "N3", "N2", "N1", "changed"}),
     },
-    "ai_use":       {"feature": frozenset({"ask", "composition", "translation_review",
-                                         "deep_analysis", "exam_paper", "line_translation",
-                                         "song_transcribe"})},
+    "ai_use":       {"feature": _AI_FEATURES},
+    "ai_refund":    {"feature": _AI_FEATURES},
     # What a refused fare was for (core/credits.FARES): a review, or
     # since plan 279 a ranked duel's departure or a duel's corrections.
     "fare_blocked": {"kind": frozenset({"review", "duel", "duel_review"})},

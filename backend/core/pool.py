@@ -41,7 +41,11 @@ class WaitingPool(ThreadedConnectionPool):
             raise
 
     def putconn(self, conn=None, key=None, close=False):
-        try:
-            super().putconn(conn, key, close)
-        finally:
-            self._slots.release()
+        # A slot is given back only when the parent took the connection
+        # back. On a failed put (an unkeyed connection, a rollback that
+        # raised) the parent still counts the connection as lent, so a
+        # slot released here would let getconn() past the wait and into
+        # the parent's PoolError -- a 500 instead of a wait -- or raise
+        # the semaphore's ValueError over the real error.
+        super().putconn(conn, key, close)
+        self._slots.release()

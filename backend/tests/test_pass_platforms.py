@@ -10,11 +10,11 @@ from pathlib import Path
 from fastapi import params
 
 from core.credits import require_pass
-from routes import ask, composition, conversation, dictation, exams, ocr, phrase, reading, translation, video
+from routes import ask, composition, conversation, dictation, exams, ocr, phrase, reading, translation, video, video_library
 
 # Which platform fronts which router module. reading.py serves both the
 # reading practice and the comprehension exercises; the analyzer is the
-# phrase, ocr and video routers together; the asking (routes/ask.py,
+# phrase, ocr, video and video-library routers together; the asking (routes/ask.py,
 # plan 131) is a panel inside the five practice runs.
 FRONTED_BY = {
     "reading": (reading, ask),
@@ -26,7 +26,7 @@ FRONTED_BY = {
     # talk IS the conversation with the model.
     "conversation": (conversation,),
     "exam": (exams,),
-    "analyzer": (phrase, ocr, video),
+    "analyzer": (phrase, ocr, video, video_library),
 }
 
 

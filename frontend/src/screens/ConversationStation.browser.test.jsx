@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { LangProvider } from '../LangContext'
+import { LangProvider, useLang } from '../LangContext'
 
 // ── 会話 — the conversation station (plan 217) ────────────────────
 // A scenario is chosen by how the learner will answer and at which
@@ -56,9 +56,16 @@ function Probe() {
   return null
 }
 
+// A button that switches the interface's language, as Réglages does.
+function SwitchTo({ code }) {
+  const { switchLang } = useLang()
+  return <button type="button" className="switch-lang" onClick={() => switchLang(code)}>{code}</button>
+}
+
 async function station(entry = '/practice/conversation') {
   const screen = await render(
     <LangProvider>
+      <SwitchTo code="en" />
       <MemoryRouter initialEntries={[entry]}>
         <Routes>
           <Route path="/practice/conversation" element={<ConversationStation session={null} />} />
@@ -173,6 +180,17 @@ describe('the conversation station', () => {
     expect(root.querySelector('.empty--error')).not.toBeNull()
     root.querySelector('.empty__action').click()
     await settle(160)
+    expect(titles(root)).toEqual(['À l’hôtel', 'À la clinique'])
+  })
+
+  it('drops a failure once a new language has asked again and been answered', async () => {
+    apiJson.mockImplementationOnce(async () => { throw new Error('down') })
+    const root = await station()
+    expect(root.querySelector('.empty--error')).not.toBeNull()
+    root.querySelector('.switch-lang').click()
+    await settle(160)
+    expect(apiJson.mock.calls.at(-1)[0]).toContain('lang=en')
+    expect(root.querySelector('.empty--error')).toBeNull()
     expect(titles(root)).toEqual(['À l’hôtel', 'À la clinique'])
   })
 })

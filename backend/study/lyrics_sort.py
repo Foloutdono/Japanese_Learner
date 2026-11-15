@@ -193,9 +193,11 @@ def sort_lines(user_id: str, lines: list[dict], known: dict, about: str = "") ->
     if wanted:
         if daily_limit.claim(user_id, LYRICS_SORT_FEATURE, LYRICS_SORT_DAILY_LIMIT) > LYRICS_SORT_DAILY_LIMIT:
             raise OverLimit()
-        for at in range(0, len(wanted), CALL_LINES):
-            chunk = wanted[at:at + CALL_LINES]
-            fresh.update(zip(chunk, ask_kinds(chunk, about)))
+        # One slot for every chunk: given back only if none was billed.
+        with daily_limit.refund_unbilled(user_id, LYRICS_SORT_FEATURE):
+            for at in range(0, len(wanted), CALL_LINES):
+                chunk = wanted[at:at + CALL_LINES]
+                fresh.update(zip(chunk, ask_kinds(chunk, about)))
     return sort_by_patterns(lines, {**known, **fresh}), fresh
 
 

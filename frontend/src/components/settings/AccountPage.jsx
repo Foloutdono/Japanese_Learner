@@ -5,7 +5,7 @@ import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 import { API_ORIGIN } from '../../lib/origin'
 import { isNative, openExternal } from '../../lib/platform'
 import { isGuest } from '../../lib/guest'
-import { hasProvider } from '../../lib/oauth'
+import { hasProvider, providersHere } from '../../lib/oauth'
 import { useClaim } from '../../hooks/useClaim'
 import { ClaimFields } from '../account/ClaimAccount'
 import { ProviderButton } from '../account/ProviderButton'
@@ -48,7 +48,7 @@ function ClaimSlip() {
             user instead would walk away from it without saying so. If
             manual linking is off on the project the error says so and
             nothing is lost. */}
-        <ProviderButton link onError={claim.setError} />
+        {providersHere().map(p => <ProviderButton key={p} provider={p} link onError={claim.setError} />)}
         {/* Only until the fields below have news of their own: a URL
             refusal lasts the whole page load, and stacking it over the
             claim's own answer reads as two faults where there is one. */}
@@ -96,22 +96,33 @@ function ClaimSlip() {
 // `link`, never a plain sign-in, for the reason ClaimSlip gives: this
 // learner has real progress, and signing in as somebody else would
 // walk away from it silently.
-function LinkGoogleSlip() {
+//
+// Apple's button on the iPhone (plan 321) opens a pass the same way, so
+// it is offered the same way, from its own slip. Its refusals never
+// come back on the URL: Apple's sheet does not leave the page.
+const LINK_SLIP = {
+  google: { label: 'linkGoogleLabel', cap: 'linkGoogleCap', desc: 'linkGoogleDesc' },
+  apple: { label: 'linkAppleLabel', cap: 'linkAppleCap', desc: 'linkAppleDesc' },
+}
+
+function LinkProviderSlip({ provider }) {
   const { t } = useLang()
   const [error, setError] = useState(null)
   // Same rule as the slip above: a refusal read off the URL is a fact
   // about this page load (lib/authRedirect.js), and it stands only
   // until the button has news of its own.
-  const refused = authRedirectError()
+  const refused = provider === 'google' ? authRedirectError() : null
+  const words = LINK_SLIP[provider]
   return (
-    <Slip label={t.linkGoogleLabel} cap={t.linkGoogleCap} across>
-      <p className="slip__hint">{t.linkGoogleDesc}</p>
+    <Slip label={t[words.label]} cap={t[words.cap]} across>
+      <p className="slip__hint">{t[words.desc]}</p>
       {/* On the web this never resolves — the page has left for
           Google and comes back as a new load, where the slip is
           simply gone. In the shell it does resolve, and the session
           in memory still says "no Google": refreshing it is what
           takes the offer off the screen. */}
       <ProviderButton
+        provider={provider}
         link
         onDone={() => supabase.auth.refreshSession()}
         onError={setError}
@@ -129,8 +140,8 @@ export function AccountPage({ session }) {
   const { t, lang } = useLang()
   const guest = isGuest(session)
   // A guest is offered the whole account (ClaimSlip, Google included);
-  // anyone else is offered only the identity they are missing.
-  const offerGoogle = !guest && !!session && !hasProvider(session, 'google')
+  // anyone else is offered only the identities they are missing.
+  const missing = !guest && session ? providersHere().filter(p => !hasProvider(session, p)) : []
   // Two halves (plan 139): whose card this is, and what it holds — the
   // data page's slips, which were a row of their own. Sign out is here
   // alone: the column's foot printed a second one. On a desk page wide
@@ -147,7 +158,7 @@ export function AccountPage({ session }) {
       )}
       {/* Under the address, because it is about that address: this is
           the second key to the same pass, not a second pass. */}
-      {offerGoogle && <LinkGoogleSlip />}
+      {missing.map(p => <LinkProviderSlip key={p} provider={p} />)}
       <SlipRow>
         <Slip label={t.privacyPolicy}>
           {/* In the shell the policy opens in the system browser at the web

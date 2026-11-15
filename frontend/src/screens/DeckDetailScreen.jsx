@@ -1031,7 +1031,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         <input value={renameTo} onChange={e => setRenameTo(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !composing(e) && renameAndPublish()}
           placeholder={t.deckNamePlaceholder} aria-label={t.deckNamePlaceholder}
-          className="field" />
+          className="field" maxLength={120} />
         <button type="button" className="btn-primary" disabled={busy || !renameTo.trim()} onClick={renameAndPublish}>
           {t.libraryRename}
         </button>

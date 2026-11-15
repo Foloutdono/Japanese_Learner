@@ -61,6 +61,9 @@ export function useLibrary(session) {
   const [structure, setStructure] = useState('all')
   const [loading, setLoading] = useState(true)
   const [failed, setFailed]   = useState(false)
+  // Asks the same page again: More after a failed page retries it, where
+  // stepping on would skip its decks for good.
+  const [attempt, setAttempt] = useState(0)
 
   const debounceRef = useRef(null)
   const searchRef   = useRef(null)
@@ -97,10 +100,18 @@ export function useLibrary(session) {
         // own words, and the trail never carries those (core/events.py).
         if (page === 0) track('library_view', { sort, results: data.total ?? results.length, filtered: narrowed })
       })
-      .catch(() => { if (live) { setLoading(false); setFailed(true) } })
+      .catch(() => {
+        if (!live) return
+        setLoading(false)
+        setFailed(true)
+        // A first page that failed has no shelf: the last ordering's
+        // decks are not this question's answer, and More would page on
+        // from a page never received.
+        if (page === 0) { setDecks([]); setHasMore(false) }
+      })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `narrowed` is these two.
-  }, [session, sort, page, term, structure])
+  }, [session, sort, page, term, structure, attempt])
 
   // Only the structures the library actually holds, in the app's own
   // order: deckTypes.js declares the order (and the glyph and the
@@ -111,6 +122,7 @@ export function useLibrary(session) {
   )
 
   function chooseSort(next) {
+    if (next === sort) return
     playUi('click-mode-selection')
     setPage(0)
     setSort(next)
@@ -150,7 +162,8 @@ export function useLibrary(session) {
 
   function nextPage() {
     playUi('click-mode-selection')
-    setPage(p => p + 1)
+    if (failed) setAttempt(a => a + 1)
+    else setPage(p => p + 1)
   }
 
   return {

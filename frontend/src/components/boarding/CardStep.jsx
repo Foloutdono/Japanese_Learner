@@ -27,7 +27,7 @@ import { playClick } from '../../lib/audio'
 // An arrival screen: no head, no ‹ (the origin is the way back, and a
 // phone's own Back still is). `contract` is the print as the boarding
 // holds it ({ from, to, valid, service, hour, lines, name }); `kept`
-// where the card lives ({ state: 'device' | 'sent' | 'google' |
+// where the card lives ({ state: 'device' | 'sent' | 'google' | 'apple' |
 // 'account', email }).
 
 function issuedBack(t, lang, contract, credits) {
@@ -147,7 +147,10 @@ function KeepLine({ kept, onKeep, onSwitch = null }) {
     <p className="brd-keep-line brd-keep-line--kept" data-kept={kept.state}>
       <CheckMark />
       <span className="brd-keep-line__txt">
-        {kept.email ? t.brdKeptEmail(kept.email) : kept.state === 'google' ? t.brdKeptGoogle : t.brdKeptAccount}
+        {kept.email ? t.brdKeptEmail(kept.email)
+          : kept.state === 'google' ? t.brdKeptGoogle
+          : kept.state === 'apple' ? t.brdKeptApple
+          : t.brdKeptAccount}
       </span>
       {kept.email && onSwitch && (
         <button type="button" className="brd-keep-line__go" onClick={() => { playClick(); onSwitch() }} data-action="switch-account">{t.brdKeptSwitch}</button>

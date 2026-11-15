@@ -71,6 +71,7 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate, currentId = 
               onKeyDown={e => e.key === 'Enter' && !composing(e) && submitCreate()}
               placeholder={t.createDeck}
               aria-label={t.createDeck}
+              maxLength={120}
               autoFocus
             />
             <button type="button" onClick={submitCreate} disabled={!name.trim()} className="btn-primary picker-row__create">

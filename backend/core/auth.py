@@ -204,3 +204,9 @@ def prefixed(card_ids: list[str], user_id: str) -> list[str]:
 def unprefixed(card_id: str, user_id: str) -> str:
     prefix = f"{user_id}:"
     return card_id[len(prefix):] if card_id.startswith(prefix) else card_id
+# The bounds of a card id and a mode key a request body may carry (plan
+# 211: no text param without one). The longest id the course serves is
+# under thirty characters, a mode key under twenty-five; these leave
+# room for a custom or pool card and refuse a megabyte stored as an id.
+CARD_ID_MAX = 160
+MODE_MAX = 64

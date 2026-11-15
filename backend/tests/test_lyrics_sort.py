@@ -133,10 +133,13 @@ def test_a_model_that_is_down_keeps_every_line_and_nothing_is_stored(client, mon
         raise LLMUnavailable("no provider")
 
     monkeypatch.setattr(lyrics_sort, "chat", down)
+    before = _used(lyrics_sort.LYRICS_SORT_FEATURE)
     body = client.post(f"/api/video/session/{session_id}/lyrics").json()
     assert body["sorted"] is False and body["reason"] == "ai_unavailable"
     assert body["kinds"].count("sung") == 5
     assert _stored(session_id) is None
+    # No model was paid: the day's song is given back.
+    assert _used(lyrics_sort.LYRICS_SORT_FEATURE) == before
 
 
 def test_a_sort_under_another_revision_is_asked_again(client, monkeypatch, plenty):
@@ -163,3 +166,15 @@ def test_another_learner_s_session_is_not_found(client, plenty):
     session_id = _ready(client, "song.txt", SONG)
     with acting_as(OTHER_USER):
         assert client.post(f"/api/video/session/{session_id}/lyrics").status_code == 404
+
+
+def _used(feature: str) -> int:
+    from core.auth import DEV_USER_ID
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COALESCE(SUM(count), 0) FROM daily_usage WHERE user_id = %s AND feature = %s",
+                        (DEV_USER_ID, feature))
+            return cur.fetchone()[0]
+    finally:
+        conn.close()

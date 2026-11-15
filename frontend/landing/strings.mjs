@@ -231,7 +231,7 @@ const fr = facts => {
     tools: {
       kicker: 'Les outils',
       h2: 'Un dictionnaire japonais-français et un analyseur de phrases',
-      body: "Tape, photographie ou colle un lien YouTube : Tsuji découpe la phrase mot à mot et numérote sa grammaire. La photo est lue sur ton appareil ; l'image ne le quitte pas.",
+      body: "Tape, photographie ou colle un lien YouTube : Tsuji découpe la phrase mot à mot et numérote sa grammaire. La photo n'est pas conservée.",
       stage: 'En cours',
       sense: '1. gare, station',
       compounds: [['駅', '員', 'えきいん', 'employé de gare'], ['駅', '前', 'えきまえ', 'devant la gare'], ['東京', '駅', 'とうきょうえき', 'gare de Tokyo']],
@@ -480,7 +480,7 @@ const en = facts => {
     tools: {
       kicker: 'The tools',
       h2: 'A Japanese dictionary and a sentence analyser',
-      body: 'Type, photograph or paste a YouTube link: Tsuji takes the sentence apart word by word and numbers its grammar. The photo is read on your device; the image never leaves it.',
+      body: 'Type, photograph or paste a YouTube link: Tsuji takes the sentence apart word by word and numbers its grammar. The photo is not kept.',
       stage: 'Learning',
       sense: '1. station',
       compounds: [['駅', '員', 'えきいん', 'station attendant'], ['駅', '前', 'えきまえ', 'in front of the station'], ['東京', '駅', 'とうきょうえき', 'Tokyo Station']],
@@ -725,7 +725,7 @@ const es = facts => {
     tools: {
       kicker: 'Herramientas',
       h2: 'Un diccionario de japonés y un analizador de frases',
-      body: 'Escribe, fotografía o pega un enlace de YouTube: Tsuji desglosa la frase palabra por palabra y numera su gramática. La foto se lee en tu dispositivo; la imagen nunca sale de él.',
+      body: 'Escribe, fotografía o pega un enlace de YouTube: Tsuji desglosa la frase palabra por palabra y numera su gramática. La foto no se guarda.',
       stage: 'En curso',
       sense: '1. estación',
       compounds: [['駅', '員', 'えきいん', 'empleado de estación'], ['駅', '前', 'えきまえ', 'delante de la estación'], ['東京', '駅', 'とうきょうえき', 'estación de Tokio']],

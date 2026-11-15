@@ -6,8 +6,8 @@ import random
 from dataclasses import dataclass
 from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
-from pydantic import BaseModel
-from core.auth import get_user_id, prefixed, unprefixed
+from pydantic import BaseModel, Field
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import bell, content_filter, credits
 from core.db import db_conn
 from core.pace import new_card_limit, resolve_pace
@@ -111,10 +111,9 @@ MAX_BATCH = 25
 # The section builders take a resolved Mode now rather than a mode
 # string (see _build_kanji_card's docstring for why `format` went away).
 # A deck's session still arrives carrying whatever key get_deck_modes
-# advertised, so resolve it here against the source it belongs to —
-# which also means a legacy key keeps working through LEGACY_ALIASES
-# while the frontend catches up. Restructuring decks.py's own mode
-# handling is the deck-structures phase, not this one.
+# advertised, so resolve it here against the source it belongs to.
+# Restructuring decks.py's own mode handling is the deck-structures
+# phase, not this one.
 def _wrap_kana(raw_id, entry, level, level_list, mode, lang, stage, preview):
     m = resolve_for_source(MODE_KANA, mode)
     if m is None:
@@ -846,8 +845,14 @@ def _ensure_deck_schema() -> None:
 _ensure_deck_schema()
 
 
+# A deck's name, as the forms let it be typed (DecksScreen, the song
+# sheets: maxLength 120). Bounded here too (plan 211): a client is not
+# what holds a text param to a size.
+DECK_NAME_MAX = 120
+
+
 class DeckPayload(BaseModel):
-    name: str
+    name: str = Field(max_length=DECK_NAME_MAX)
     # The deck's STRUCTURE, which decides what it can hold and which
     # modes it offers (see STRUCTURES). `standard` -- a plain front/back
     # pair -- is the default, being the only one that needs nothing.
@@ -883,8 +888,8 @@ MAX_BATCH = 500
 
 
 class ReviewPayload(BaseModel):
-    card_id:    str
-    mode:       str
+    card_id:    str = Field(max_length=CARD_ID_MAX)
+    mode:       str = Field(max_length=MODE_MAX)
     quality:    int
     # Mirrors kanji.py/vocab.py/grammar.py's ReviewPayload.prev_stage
     # — sent back by the client from the card payload it was handed,
@@ -1084,7 +1089,7 @@ def _like(term: str) -> str:
 
 
 class DeckEditPayload(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, max_length=DECK_NAME_MAX)
     description: str | None = None
 
 
@@ -1794,6 +1799,10 @@ def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
 def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
     if payload.type not in DECK_TYPES:
         raise HTTPException(status_code=400, detail="Invalid deck type")
+    # As a rename does: a name of spaces is no name.
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="A deck needs a name")
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -1803,7 +1812,7 @@ def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
                 INSERT INTO decks (user_id, name, type)
                 VALUES (%s, %s, %s)
                 RETURNING id, name, type, created_at
-            """, (user_id, payload.name, payload.type))
+            """, (user_id, name, payload.type))
             deck = dict(cur.fetchone())
         conn.commit()
         deck["card_count"] = 0

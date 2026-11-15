@@ -1833,11 +1833,14 @@ class RealLineWordTests(unittest.TestCase):
 
     def test_what_a_particle_says_where_no_point_is(self) -> None:
         for sentence, surface, start in (("儚き夢よ　いずこへゆかん", "よ", "(after a noun) calls out"),
-                                         ("誰にも止められはしない", "は", "(between a verb's stem and しない)"),
                                          ("怖くなんかないもん。ちょっとびっくりしただけだし。", "もん", "")):
             with self.subTest(sentence=sentence):
                 gloss = token_of(sentence, surface)["gloss"]
                 self.assertTrue(gloss["en"].startswith(start) and gloss["fr"])
+        # (a は between a verb's stem and しない is a point since plan 324,
+        # 〜はしない／〜もしない, once this particle's gloss)
+        self.assertIn("〜はしない／〜もしない",
+                      [g["pattern"] for g in token_of("誰にも止められはしない", "は").get("grammar") or []])
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
@@ -2682,11 +2685,13 @@ class SeventhReviewWordTests(unittest.TestCase):
                                          ("なんでやねん、そんなん聞いてへんわ。", "そんなん", "(Kansai, casual) = そんなの"),
                                          ("なんでやねん、そんなん聞いてへんわ。", "て", "(before へん) = ている"),
                                          ("あかん、もう歩かれへん。", "れ", "(the west, before へん) can"),
-                                         ("ほんまに？それめっちゃおもろいやん。", "ほんまに", "(Kansai) really"),
-                                         ("満員電車で足を踏まれたのに、相手は謝りもしなかった。", "も",
-                                          "(between a verb's stem and しない) not even")):
+                                         ("ほんまに？それめっちゃおもろいやん。", "ほんまに", "(Kansai) really")):
             with self.subTest(sentence=sentence, surface=surface):
                 self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
+        # (も between a verb's stem and しない, "not even", is 〜はしない／〜もしない
+        # since plan 324, once this particle's gloss)
+        self.assertIn("〜はしない／〜もしない",
+                      [g["pattern"] for g in token_of("満員電車で足を踏まれたのに、相手は謝りもしなかった。", "も").get("grammar") or []])
         self.assertIsNotNone(token_of("あれは何ですか。", "あれ").get("vocab_match"))
 
 
@@ -5187,7 +5192,9 @@ class WhatTheSecondPassGlossedTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertTrue(gloss_of(sentence, surface).startswith(opening), gloss_of(sentence, surface))
         self.assertIn("で", [g["pattern"] for g in token_of("これでいい。", "で").get("grammar") or []])
-        self.assertTrue(gloss_of("止められはしない。", "は").startswith("(between a verb's stem and しない)"))
+        # (a は that a point is written on says nothing of its own: since plan 324 the
+        # point is 〜はしない／〜もしない, once a particle's gloss)
+        self.assertIn("〜はしない／〜もしない", [g["pattern"] for g in token_of("止められはしない。", "は").get("grammar") or []])
         # (十時ごろまで ends a stretch: "until", no "even")
         self.assertIn("から〜まで", [g["pattern"] for g in token_of("十時ごろまで待ちます。", "まで").get("grammar") or []])
         self.assertTrue(gloss_of("親の預金にまで手をつける。", "まで").startswith("even"))
@@ -5312,3 +5319,37 @@ class ThePlansFoldsReadInEveryLanguageTests(unittest.TestCase):
         self.assertIsNotNone(card_lookup.resolve_pool_compound(morphemes, 0, hits))
         with mock.patch.object(jmdict_fr, "pool_line", return_value=None):
             self.assertIsNone(card_lookup.resolve_pool_compound(morphemes, 0, hits))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AdjectivalNounStemTests(unittest.TestCase):
+    """Plan 323: a な-adjective's stem UniDic spells otherwise than JMdict
+    does is still the pool's word, so it lights though the deck has no card
+    for it (あたたかな is UniDic's 温か, the pool's row 暖か) -- in English
+    where the layers have no line for it: a word lit in English beats a
+    word that says nothing."""
+
+    def test_the_stem_is_the_pools_row(self) -> None:
+        for sentence, surface, written in (("心あたたかであること", "あたたか", "暖か"), ("あたたかな部屋だ。", "あたたか", "暖か"),
+                                           ("暖かな日が続く。", "暖か", "暖か"), ("柔らかな光が差す。", "柔らか", "柔らか"),
+                                           ("細かな点まで気をつける。", "細か", "細か")):
+            with self.subTest(sentence=sentence):
+                match = token_of(sentence, surface)["vocab_match"]
+                self.assertIsNotNone(match)
+                self.assertTrue(match["pool"])
+                self.assertEqual(match["entry"]["kanji"], written)
+                self.assertTrue(match["entry"]["meaning"])
+
+    def test_a_deck_card_still_answers_first(self) -> None:
+        for sentence, surface, kanji in (("静かな部屋だ。", "静か", "静か"), ("あたたかい部屋だ。", "あたたかい", "暖かい")):
+            with self.subTest(sentence=sentence):
+                match = token_of(sentence, surface)["vocab_match"]
+                self.assertFalse(match.get("pool"))
+                self.assertEqual(match["entry"]["kanji"], kanji)
+
+    def test_a_word_that_is_no_adjectival_noun_is_left_alone(self) -> None:
+        # (a reading no adj-na row has, a verb, a name: nothing is guessed)
+        for sentence, surface in (("あたたまる部屋だ。", "あたたまる"), ("ひろしは来た。", "ひろし")):
+            with self.subTest(sentence=sentence):
+                match = token_of(sentence, surface)["vocab_match"]
+                self.assertFalse(match and match.get("entry", {}).get("kanji") == "暖か")

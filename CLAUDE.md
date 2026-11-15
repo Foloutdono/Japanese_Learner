@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **321**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **326**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -417,13 +417,45 @@ runtime purpose.
   sources (`phrase.KeepRequest`, `video._SOURCE_NAMES`,
   `passages.kindOf`) takes it in the same change, or a line pinned from
   a song is refused.
+- **A video the server fetched belongs to everybody, and to nobody (plan
+  322).** Every whole YouTube video a learner's link fetch made ready is
+  kept once in `video_library` (`routes/video_library.py`), anonymous: no
+  learner is on a row, an entry shows how many have studied it and never
+  who. Only what the server fetched itself joins (`video_library.joins`:
+  source `youtube`, no window): an upload or a grab only *names* a video
+  id, so its text is the learner's and stays private, as does a paste, a
+  song and a window of a video. The next learner who pastes that link or
+  picks it from the library opens a session of their own over the copy
+  (`open_for`, `from_library`): no fetch, none of the link allowance
+  (`_fetch_refusal` leaves it out), at most `OPEN_DAILY_CAP` a day. These
+  sessions are not on the analyser's shelf and do not count toward its
+  thirty (`core/history.LIBRARY_SESSION`, read by the listing and the
+  limit alike); "Mine" is the learner's own sessions of library videos.
+  A video's kind (`study/video_category.CATEGORIES`) is told once by a
+  model from a sample of its lines, on the learner's `video_category`
+  ration, and a video no model sorted is NULL, under "all" alone, and
+  sorted when next opened; a change to the prompt or the set bumps
+  `CATEGORY_REV`. A new thing the library keeps per video is read by
+  every learner, so it holds nothing a learner typed, and what a learner
+  adds to their own session (a model's translations, a lyrics sort)
+  never copies back. `python -m scripts.backfill_video_library` brings in
+  the videos analysed before it, once, after the deploy; `privacy.html`
+  says it in the three languages.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
 - **Model calls are rationed and costed.** A new feature that calls a model
   goes through `core/daily_limit.py` (`daily_usage`) for its daily ceiling and
   into `scripts/llm_cost_model.py` for its cost. Nothing the learner typed is
-  kept.
+  kept. The slot is claimed before the call, and the call is made inside
+  `daily_limit.refund_unbilled(user_id, feature)`, which gives the slot
+  back when it fails with `LLMUnavailable` and `llm_shared`'s meter says
+  no model was paid (2026-11-11): an outage costs nothing, while a reply
+  that was refused, unreadable or timed out mid-answer keeps its slot. A
+  worker off the request opens it in its own thread.
+  `tests/test_ai_refund.py` fails on a module that claims without it,
+  and the feature goes in `events._AI_FEATURES` (and `track.js`), or its
+  `ai_use` and `ai_refund` rows lose their `feature`.
 - **No learner can flood the server (plan 211).** The API is one worker:
   `core/concurrency.py` runs a learner's requests a few at a time, and
   both DB pools wait for a connection (`core/pool.py`) rather than fail.
@@ -667,6 +699,15 @@ runtime purpose.
   request. An iOS target that calls one of Apple's required-reason APIs
   (UserDefaults, file dates) names it in its `PrivacyInfo.xcprivacy`.
   `src/native.shells.test.js` holds all of it.
+- **On the iPhone, Apple stands beside Google (plan 321).** App Review's
+  4.8 refuses an iPhone app that offers Google alone, so every place a
+  provider button is drawn maps over `providersHere()` (`lib/oauth.js`):
+  Apple first, in the iOS shell only, through the system's sheet
+  (`TsujiAppleSignInPlugin.swift`) and `signInWithIdToken` or
+  `linkIdentity` with its token, never a redirect. A new door that offers
+  Google offers Apple the same way. The sign-in's one-use code is kept as
+  a grant the account's deletion revokes (`core/apple_signin.py`,
+  `apple_grants`), as Apple asks; `docs/oauth.md` has the dashboards.
 - **An assumption is not history (plan 224).** A card the level rule
   marked known and nobody has asked about (`SRSEngine.is_assumed`) is
   the app's guess about a self-declared level. Its first answer is a
@@ -1078,6 +1119,26 @@ history was folded into the rollup.
 
 ```bash
 python -m scripts.recount_known_checks  # report; --yes to apply, --user to scope
+```
+
+And one after the deploy that carries plan 320, which moved the OCR and
+comprehension ceilings onto `core/daily_limit.py`: it folds the rows of
+their old tables (`ocr_usage`, `comprehension_usage`) into `daily_usage`
+as `ocr` and `comprehension`, adding a day counted in both, and drops
+the two tables, which nothing reads or erases any more.
+
+```bash
+python -m scripts.migrate_daily_usage  # report (the run, rolled back); --yes to apply
+```
+
+And one after the deploy that carries plan 322, which takes whole YouTube
+videos off the analyser's shelf and into the public library: without it a
+video a learner fetched before is on neither. It adds the oldest ready,
+whole, link-fetched session of each video the library lacks, with no kind
+(a model sorts a video as it is next opened, so the script spends nothing).
+
+```bash
+python -m scripts.backfill_video_library  # report; --yes to apply
 ```
 
 And one after any deploy that changes the voice (plan 121 did, from edge-tts

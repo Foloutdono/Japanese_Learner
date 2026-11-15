@@ -22,3 +22,15 @@ export async function explainSentence(session, phrase, lang) {
   if (!r.ok) throw new Error(String(r.status))
   return r.json()
 }
+
+// What a failed Explain says, in the learner's language: a 429 is the
+// day's explanations spent (routes/phrase.py's DEEP_DAILY_LIMIT, the
+// only 429 an explain route gives), which "Try again" would only
+// spend again; a 503 is the provider down. Reads an ApiError's
+// `status` or explainSentence's own Error('503').
+export function explainErrorText(e, t) {
+  const status = e?.status ?? Number(e?.message)
+  if (status === 429) return t.explainLimitReached
+  if (status === 503) return t.explainUnavailable
+  return t.explainFailed
+}

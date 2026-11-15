@@ -1,6 +1,7 @@
 # One counter for every daily ceiling (core/daily_limit.py, plan 125).
 #
-# The rules ocr_usage and comprehension_usage each enforced alone, held
+# The rules ocr_usage and comprehension_usage each enforced alone (both
+# moved here by plan 320), held
 # once: a slot per claim, features and learners counted apart, the
 # learner's own day, and a database failure that fails open.
 import datetime as dt

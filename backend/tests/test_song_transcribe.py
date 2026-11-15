@@ -140,6 +140,9 @@ class _Session:
     def __init__(self):
         self.models = []
 
+    def close(self):
+        pass
+
     def post(self, url, headers=None, json=None, timeout=None):
         self.models.append(json["model"])
 
@@ -246,10 +249,13 @@ def test_a_song_no_model_could_hear_fails_with_its_code(client, monkeypatch, son
     def unavailable(*a, **k):
         raise LLMUnavailable("down")
     monkeypatch.setattr(song_transcribe, "chat", unavailable)
+    before = _usage(song_transcribe.FEATURE)
     posted = _post(client, wav(2))
     failed = _poll(client, posted.json()["sessionId"])
     assert failed.status_code == 503
     assert failed.json()["code"] == "song_unavailable"
+    # No model heard it: the worker gave the day's song back.
+    assert _usage(song_transcribe.FEATURE) == before
 
 
 def test_a_server_that_hears_nothing_refuses_up_front(client, monkeypatch, song_feature):

@@ -57,8 +57,11 @@ export default function ImportCardsMenu({ structure, onImport, onClose }) {
   async function handleImport() {
     if (whole.length === 0 || importing) return
     setImporting(true)
-    await onImport(whole.map(({ fields, notes }) => ({ fields, notes })), skipped)
-    setImporting(false)
+    try {
+      await onImport(whole.map(({ fields, notes }) => ({ fields, notes })), skipped)
+    } finally {
+      setImporting(false)
+    }
   }
 
   const colName = col => columnLabel(col, t)

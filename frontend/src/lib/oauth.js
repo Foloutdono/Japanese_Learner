@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { isNative } from './platform'
+import { canSignInWithApple, isNative } from './platform'
 import { API_ORIGIN } from './origin'
 import { NATIVE_REDIRECT, NATIVE_RETURN_PATH } from './nativeReturn'
 
@@ -133,6 +133,7 @@ function refusalCode(url) {
  * unlinked — see components/settings/AccountPage.jsx.
  */
 export async function connectProvider({ provider = 'google', link = false } = {}) {
+  if (provider === 'apple') return connectApple({ link })
   const inShell = isNative()
   const options = {
     redirectTo: redirectTarget(),
@@ -191,6 +192,65 @@ export async function connectProvider({ provider = 'google', link = false } = {}
     return { ok: true }
   } catch (err) {
     return { ok: false, message: err?.message }
+  }
+}
+
+// ── 林檎 — Sign in with Apple (plan 321) ───────────────────────────
+// Apple's guideline 4.8: an iPhone app that offers Google must offer an
+// equivalent beside it, one that lets the learner keep their address
+// private. So on the iPhone, wherever Google is offered, Apple is too
+// (providersHere), first, as the platform's own.
+//
+// None of Google's round trip applies. The system draws the sheet over
+// the app (lib/native.js's signInWithApple) and answers in-process with
+// an identity token, which Supabase checks against the bundle id and
+// turns into a session: signInWithIdToken to sign in, linkIdentity with
+// the token to put Apple onto a guest's pass. Nothing leaves the
+// WebView, so there is no redirect to allowlist and no fragment to read.
+//
+// The nonce is what ties the token to this sign-in: the plugin hands
+// Apple its SHA-256 and Supabase hashes the raw one to compare, so a
+// token lifted from elsewhere cannot be replayed here.
+//
+// The answer also carries a one-use authorization code, posted to the
+// server straight after (POST /api/account/apple): only the server can
+// exchange it, for the token that revokes the grant when the account is
+// deleted, as Apple asks (backend/core/apple_signin.py). It is not
+// awaited: a sign-in never fails on it.
+
+/** The providers offered here, in the order they are drawn. */
+export function providersHere() {
+  return canSignInWithApple() ? ['apple', 'google'] : ['google']
+}
+
+function rawNonce() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32))
+  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
+}
+
+function keepAppleGrant(code, session) {
+  if (!code || !session) return
+  import('./api')
+    .then(({ apiFetch }) => apiFetch('/api/account/apple', session, { method: 'POST', body: JSON.stringify({ code }) }))
+    .catch(() => {})
+}
+
+async function connectApple({ link }) {
+  if (!canSignInWithApple()) return { ok: false, provider: 'apple', code: 'provider_unavailable', message: 'apple sign-in is the iPhone shell\'s alone' }
+  try {
+    const nonce = rawNonce()
+    const { signInWithApple } = await native()
+    const answer = await signInWithApple(nonce)
+    if (!answer) return { ok: false, cancelled: true }
+    const credentials = { provider: 'apple', token: answer.identityToken, nonce }
+    const { data, error } = link
+      ? await supabase.auth.linkIdentity(credentials)
+      : await supabase.auth.signInWithIdToken(credentials)
+    if (error) return { ok: false, provider: 'apple', code: error.code, message: error.message }
+    keepAppleGrant(answer.authorizationCode, data?.session)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, provider: 'apple', message: err?.message }
   }
 }
 

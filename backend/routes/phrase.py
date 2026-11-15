@@ -677,7 +677,8 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
                         f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"
                     ),
                 )
-            llm_result = _call_llm(text, lang, _deep_points(analysis, lang), context)
+            with daily_limit.refund_unbilled(user_id, DEEP_FEATURE):
+                llm_result = _call_llm(text, lang, _deep_points(analysis, lang), context)
             _store_analysis(text, lang, llm_result, context)
             if cached is not None:
                 # The same sentence again further down the Passage

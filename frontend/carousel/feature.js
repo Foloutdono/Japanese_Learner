@@ -114,7 +114,14 @@ const reply = i => `.kaiwa-reply >> nth=${i}`
 const BODY = '.prompt-card__body > *'
 // Once graded: the learner's rating, then the sentence's breakdown and Ask
 // (a question offered, picked by what it says), the answer it gets.
+// The rating is a key of the bar the recorded learner is on, the app's
+// default four (the bank's profile says `simple`: Missed 1, Almost 2,
+// Correct 4, Easy 5; `domain/ratingScales.js`), named here by its verdict:
+// a quality the bar does not draw is a key the recorder waits for in vain
+// (3, Difficult, left the four on 2026-10-26, and two scripts tapped it).
 const RATE = q => `.rating-bar__btn--q${q}`
+const CORRECT = 4   // the answer right
+const ALMOST = 2    // a slip short of it: the near miss
 const BREAKDOWN_OPEN = '.prose__breakdown > .btn-secondary:not(.ask-launch)'
 const ASK_OPEN = '.prose__breakdown .ask-launch'
 const OFFER = has => `.ask__offer:has-text("${has}")`
@@ -237,7 +244,7 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rating-bar' },
       { wait: 1200 },
       { shot: 'checked', focus: '.prompt-card' },
-      ...lookSteps(4, { offer: 'に' }),
+      ...lookSteps(CORRECT, { offer: 'に' }),
     ],
     beats: [
       ...gateBeats({ en: 'Read real Japanese.', fr: 'Lis du vrai japonais.' }),
@@ -397,7 +404,7 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rvw__verdict' },
       { wait: 1200 },
       { shot: 'reviewed', focus: BODY },
-      ...lookSteps(3, { offer: 'てください' }),
+      ...lookSteps(ALMOST, { offer: 'てください' }),
     ],
     beats: [
       ...gateBeats({ en: 'Say it in Japanese.', fr: 'Dis-le en japonais.' }),
@@ -448,7 +455,7 @@ export const FEATURES = {
       { click: SUBMIT, ready: '.rating-bar' },
       { wait: 900 },
       { shot: 'checked', focus: '.prompt-card' },
-      ...lookSteps(3, { typed: d.asked }),
+      ...lookSteps(ALMOST, { typed: d.asked }),
     ],
     beats: [
       ...gateBeats({ en: 'Train your ear.', fr: 'Entraîne ton oreille.' }),

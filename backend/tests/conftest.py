@@ -49,7 +49,7 @@ _worker_database()
 # user than the one its requests run as. That mistake is invisible locally,
 # where the fallback happens to be right, and in CI it leaks rows between
 # tests: an onboarding profile left behind under the real id made three pace
-# assertions read someone else's target, and an uncleared ocr_usage row made
+# assertions read someone else's target, and an uncleared OCR counter row (daily_usage) made
 # the rate-limit tests start already throttled. Import DEV_USER_ID from
 # core.auth instead; that is the id every request actually resolves to.
 
@@ -71,6 +71,21 @@ def _fresh_history():
     review_log and xp_ledger by hand, so each starts with none kept."""
     from core.srs_instance import srs
     srs.forget_all_history()
+
+
+@pytest.fixture(autouse=True)
+def _fresh_video_library():
+    """The video library (plan 322) is one table for every learner, and a
+    link fetched by one test is a video the next one is answered from
+    instead of fetching, so each test starts with it empty."""
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM video_library")
+        conn.commit()
+    finally:
+        conn.close()
 
 
 # ── A second learner ──────────────────────────────────────────

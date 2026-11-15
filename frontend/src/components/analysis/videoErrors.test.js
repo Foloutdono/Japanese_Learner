@@ -16,6 +16,8 @@ const DOOR = {
   link_fetch_disabled: 'videoLinkFetchOff',
   link_allowance_mine: 'videoLinkAllowanceMine',
   link_allowance_app: 'videoLinkAllowanceApp',
+  // 図書館 (plan 322): the day's openings of library videos.
+  library_allowance: 'videoLibraryAllowance',
   file_too_large: 'subtitleTooLarge',
   transcript_too_long: 'transcriptTooLong',
   session_preparing: 'videoStillPreparing',

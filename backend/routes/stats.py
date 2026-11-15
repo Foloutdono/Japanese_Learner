@@ -287,8 +287,6 @@ def reset_stats(user_id: str = Depends(get_user_id),
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT DISTINCT card_id FROM card_modes WHERE card_id LIKE %s", (prefix,))
-            keys_to_delete = [row[0] for row in cur.fetchall()]
             # Deleted first, and in one transaction with nothing else, so a
             # failure cannot leave the schedule cleared while the history
             # that explains it survives.
@@ -315,5 +313,18 @@ def reset_stats(user_id: str = Depends(get_user_id),
     finally:
         conn.close()
     srs.forget_history(user_id)
-    srs.delete_cards(keys_to_delete)
+    # The schedule, by the same prefix: an id read off card_modes alone
+    # missed a `cards` row with no mode left (a retired mode, an
+    # assumption given back), and cost a round trip to read.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM card_modes WHERE card_id LIKE %s", (prefix,))
+            cur.execute("DELETE FROM cards WHERE id LIKE %s", (prefix,))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
     return {"ok": True}

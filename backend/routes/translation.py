@@ -297,20 +297,21 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     # reading._chat already handles the multi-model fallback chain and
     # raises HTTPException(503, ...) if every provider fails -- nothing
     # to add here.
-    content = reading._chat(
-        [
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": "Review my translation attempt."},
-        ],
-        # The shape is small -- composition's review, a field or two
-        # larger, is served in 1000 -- and a 3,000-token ceiling on a
-        # reasoning model is paid in latency, not in quality.
-        max_tokens=1000,
-        task="translation-review",
-        # A model that thinks out loud and runs out of tokens before its
-        # JSON answers 200 with a monologue; the next model is asked.
-        accept=tutor_review.acceptable_reply,
-    )
+    with daily_limit.refund_unbilled(user_id, FEATURE):
+        content = reading._chat(
+            [
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": "Review my translation attempt."},
+            ],
+            # The shape is small -- composition's review, a field or two
+            # larger, is served in 1000 -- and a 3,000-token ceiling on a
+            # reasoning model is paid in latency, not in quality.
+            max_tokens=1000,
+            task="translation-review",
+            # A model that thinks out loud and runs out of tokens before its
+            # JSON answers 200 with a monologue; the next model is asked.
+            accept=tutor_review.acceptable_reply,
+        )
     review = _parse_review(content)
     if review is None:
         # Not the shape. Prose that reads as a review is still one, so

@@ -4251,3 +4251,51 @@ class AnErrandIsNoPlaceGoneToTests(unittest.TestCase):
                                ("本を返しに図書館に行く。", "に図書館に行く")):
             with self.subTest(sentence=sentence):
                 self.assertEqual(found_in(sentence).get("〜に行きます"), text)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class EmphaticNegationTests(unittest.TestCase):
+    """Plan 324: 〜はしない／〜もしない is は or も right after a verb's
+    ます-stem and a negative する -- ありはしない, 知りもしなかった, 来はしま
+    せんでした -- the stems the tokenizer files as nouns (あり read alone,
+    読み, 笑い, 来) included. A noun before は or も is the topic of an
+    ordinary する (電話はしない, 勉強もしない), and a form that is not the
+    stem (食べてはしない, 行くはしない) is no point."""
+
+    P = "〜はしない／〜もしない"
+
+    def test_its_stems(self) -> None:
+        for sentence, text in (("そんな話は、だれも信じはしないよ。", "はしない"),
+                               ("彼は私の顔を見もしなかった。", "もしなかっ"),
+                               ("ありはしないとわかっている", "はしない"),       # (あり alone is the noun 有り)
+                               ("いくら探してもありはしない。", "はしない"),
+                               ("来はしないよ。", "はしない"),
+                               ("読みはしない。", "はしない"),
+                               ("彼は笑いもしなかった。", "もしなかっ"),
+                               ("社長は一言も話しはしませんでした。", "はしません"),
+                               ("わたしはあなたとの約束を忘れはしません。", "はしません"),
+                               ("しはしないと決めた。", "はしない")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(self.P), text)
+
+    def test_a_noun_before_は_is_the_topic_of_する(self) -> None:
+        for sentence in ("電話はしない。", "勉強もしない。", "あの子は勉強はしないが、本はよく読む。", "ダンスはしない。",
+                         "運動はしません。", "食事もしないで寝た。", "掃除もしなかった。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(self.P, found_in(sentence))
+
+    def test_a_form_that_is_not_the_stem_is_no_point(self) -> None:
+        for sentence in ("食べてはしない。", "行くはしない。", "高くはない。", "きれいではない。", "食べはする。",
+                         "あの本はどこにもありません。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(self.P, found_in(sentence))
+
+    def test_its_particle_is_read_once(self) -> None:
+        """The は of ありはしない is no topic and the も of 見もしなかった
+        no "also": the point names what each does there, and the は and も
+        of an ordinary sentence stay what they were."""
+        self.assertNotIn("は", found_in("ありはしないとわかっている"))
+        self.assertNotIn("も", found_in("来もしなかった"))
+        self.assertEqual(found_in("私も行きます。").get("も"), "も")
+        self.assertEqual(found_in("私は行く。").get("は"), "は")
+        self.assertEqual(found_in("電話はしない。").get("は"), "は")

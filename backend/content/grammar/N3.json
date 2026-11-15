@@ -18066,6 +18066,544 @@
     }
   },
   {
+    "pattern": "〜はしない／〜もしない",
+    "structure": "verb stem + はしない／もしない",
+    "structure_fr": "radical verbal + はしない／もしない",
+    "structure_es": "raíz verbal + はしない／もしない",
+    "meaning": {
+      "en": "not at all, not even (a firmer negative)",
+      "fr": "ne… pas du tout, ne… même pas (négation renforcée)",
+      "es": "en absoluto, ni siquiera (una negación más firme)",
+      "id": "sama sekali tidak, bahkan tidak (penyangkalan yang lebih tegas)"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**ます-stem + は／も + しない** makes a negative firmer. 忘れはしない is « I will not forget, not at all »; 見もしない is « does not even look ». する itself gives しはしない.",
+        "fr": "**radical en ます + は／も + しない** renforce une négation. 忘れはしない, c'est « je n'oublierai pas, absolument pas » ; 見もしない, « ne regarde même pas ». する donne しはしない.",
+        "es": "**raíz ます + は／も + しない** refuerza una negación. 忘れはしない es «no lo olvidaré, en absoluto»; 見もしない es «ni siquiera mira». する da しはしない.",
+        "id": "**batang ます + は／も + しない** mempertegas penyangkalan. 忘れはしない berarti “aku tidak akan lupa, sama sekali tidak”; 見もしない berarti “melihat pun tidak”. する sendiri menjadi しはしない."
+      },
+      {
+        "kind": "use",
+        "en": "- Firm denial, a flat « never »: だれも信じはしない.\n- « Not even »: 見もしない, 聞きもしない.\n- Nothing to be found: 探してもありはしない.\n- Polite and past: しません, しませんでした, しなかった (知りもしませんでした).",
+        "fr": "- Refus net, un « jamais » : だれも信じはしない.\n- « Même pas » : 見もしない, 聞きもしない.\n- Introuvable : 探してもありはしない.\n- Poli et passé : しません, しませんでした, しなかった (知りもしませんでした).",
+        "es": "- Negativa firme, un «nunca» rotundo: だれも信じはしない.\n- «Ni siquiera»: 見もしない, 聞きもしない.\n- No se encuentra: 探してもありはしない.\n- Cortés y pasado: しません, しませんでした, しなかった (知りもしませんでした).",
+        "id": "- Penyangkalan tegas, “tidak akan pernah”: だれも信じはしない.\n- “Bahkan tidak”: 見もしない, 聞きもしない.\n- Tidak ada di mana pun: 探してもありはしない.\n- Sopan dan lampau: しません, しませんでした, しなかった (知りもしませんでした)."
+      },
+      {
+        "kind": "careful",
+        "en": "This は is not the topic marker: in 勉強はしない it is the noun that is set apart, and the verb is a plain する. Casual speech also says 〜やしない (言いやしない). The positive 〜はする (« it does, but… ») is another use, not taught here.",
+        "fr": "Ce は n'est pas la marque du thème : dans 勉強はしない, c'est le nom qui est mis à part, et le verbe est un simple する. À l'oral familier on dit aussi 〜やしない (言いやしない). Le 〜はする positif (« il le fait, mais… ») est un autre emploi, qu'on ne voit pas ici.",
+        "es": "Este は no marca el tema: en 勉強はしない es el sustantivo el que se destaca, y el verbo es un する normal. En lenguaje coloquial también se dice 〜やしない (言いやしない). El 〜はする afirmativo («sí lo hace, pero…») es otro uso, que no se ve aquí.",
+        "id": "は ini bukan penanda topik: dalam 勉強はしない, kata bendanyalah yang dipisahkan, dan kata kerjanya する biasa. Dalam percakapan santai juga dikatakan 〜やしない (言いやしない). Bentuk positif 〜はする (“memang melakukannya, tetapi…”) adalah pemakaian lain, tidak diajarkan di sini."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "ない形 〜ない",
+        "en": "ない: a plain denial; はしない／もしない: the same denial, pressed harder (« not at all », « not even »).",
+        "fr": "ない : un simple refus ; はしない／もしない : le même refus, appuyé (« pas du tout », « même pas »).",
+        "es": "ない: una negativa simple; はしない／もしない: la misma negativa, más enfática («en absoluto», «ni siquiera»).",
+        "id": "ない: penyangkalan biasa; はしない／もしない: penyangkalan yang sama, lebih ditekankan (“sama sekali tidak”, “bahkan tidak”)."
+      },
+      {
+        "pattern": "〜はずがない",
+        "en": "はしない: it will not happen, or it is not there; はずがない: by my reasoning, it cannot be.",
+        "fr": "はしない : cela n'arrivera pas, ou ce n'est pas là ; はずがない : d'après mon raisonnement, cela ne peut pas être.",
+        "es": "はしない: no ocurrirá, o no está ahí; はずがない: según mi razonamiento, no puede ser.",
+        "id": "はしない: hal itu tidak akan terjadi, atau tidak ada di sana; はずがない: menurut penalaranku, hal itu tidak mungkin."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "そんな話は、だれも信じはしないよ。",
+        "en": "Nobody will believe a story like that.",
+        "fr": "Personne ne croira une histoire pareille.",
+        "es": "Nadie va a creer una historia así.",
+        "register": "casual",
+        "id": "Tidak akan ada yang percaya cerita seperti itu."
+      },
+      {
+        "jp": "あの人は、わたしの方を見もしなかった。",
+        "en": "He didn't even look my way.",
+        "fr": "Il n'a même pas regardé de mon côté.",
+        "es": "Ni siquiera me miró.",
+        "register": "casual",
+        "id": "Orang itu bahkan tidak melirik ke arahku."
+      },
+      {
+        "jp": "ほかの店を回ってみたが、どこにもありはしなかった。",
+        "en": "I tried the other shops, but it was nowhere to be found.",
+        "fr": "J'ai fait les autres magasins, mais je n'en ai trouvé nulle part.",
+        "es": "Probé en las otras tiendas, pero no estaba en ninguna parte.",
+        "register": "written",
+        "id": "Aku sudah mencoba ke toko-toko lain, tetapi barang itu tidak ada di mana pun."
+      },
+      {
+        "jp": "わたしは、あなたとの約束を忘れはしません。",
+        "en": "I will never forget my promise to you.",
+        "fr": "Je n'oublierai jamais ma promesse envers vous.",
+        "es": "Jamás olvidaré mi promesa con usted.",
+        "register": "polite",
+        "id": "Saya tidak akan pernah melupakan janji saya kepada Anda."
+      }
+    ],
+    "tour": {
+      "twists": [
+        {
+          "notion": {
+            "en": "は stressing the denial",
+            "fr": "は qui appuie le refus",
+            "es": "は que refuerza la negación",
+            "id": "は yang menekankan penyangkalan"
+          },
+          "jp": "彼女はけっして人の悪口を言いはしない。",
+          "tr": {
+            "en": "She never speaks ill of anyone.",
+            "fr": "Elle ne dit jamais de mal de personne.",
+            "es": "Ella nunca habla mal de nadie.",
+            "id": "Dia sama sekali tidak pernah menjelek-jelekkan orang lain."
+          },
+          "ask": {
+            "en": "What does は do between 言い and しない?",
+            "fr": "Que fait は entre 言い et しない ?",
+            "es": "¿Qué hace は entre 言い y しない?",
+            "id": "Apa fungsi は di antara 言い dan しない?"
+          },
+          "choices": [
+            {
+              "en": "It presses the denial: she really never does.",
+              "fr": "Il appuie le refus : jamais, vraiment.",
+              "es": "Refuerza la negativa: nunca, de verdad.",
+              "id": "Menegaskan penyangkalan: dia benar-benar tidak pernah."
+            },
+            {
+              "en": "It marks 言い as the topic of the sentence.",
+              "fr": "Il marque 言い comme thème de la phrase.",
+              "es": "Marca 言い como el tema de la oración.",
+              "id": "Menandai 言い sebagai topik dalam kalimat ini."
+            },
+            {
+              "en": "It says she speaks ill of some people.",
+              "fr": "Il dit qu'elle dit du mal de certaines personnes.",
+              "es": "Dice que habla mal de algunas personas.",
+              "id": "Menyatakan bahwa dia menjelek-jelekkan sebagian orang."
+            }
+          ],
+          "why": {
+            "en": "After a verb stem, は makes the negative firmer: 言いはしない is a stronger 言わない. It marks no topic.",
+            "fr": "Après un radical verbal, は renforce la négation : 言いはしない est un 言わない plus ferme. Il ne marque aucun thème.",
+            "es": "Después de una raíz verbal, は hace la negación más firme: 言いはしない es un 言わない más fuerte. No marca ningún tema.",
+            "id": "Setelah batang kata kerja, は mempertegas penyangkalan: 言いはしない adalah 言わない yang lebih kuat. は ini tidak menandai topik."
+          },
+          "kind": "usage"
+        },
+        {
+          "notion": {
+            "en": "も, « not even »",
+            "fr": "も, « même pas »",
+            "es": "も, «ni siquiera»",
+            "id": "も, “bahkan tidak”"
+          },
+          "jp": "朝から忙しくて、水を飲みもしなかった。",
+          "tr": {
+            "en": "I was busy all morning and didn't even drink water.",
+            "fr": "J'ai eu une matinée si chargée que je n'ai même pas bu d'eau.",
+            "es": "Tuve tanto que hacer toda la mañana que ni siquiera bebí agua.",
+            "id": "Sejak pagi aku sibuk sampai minum air pun tidak."
+          },
+          "ask": {
+            "en": "What does も add to 飲みもしなかった?",
+            "fr": "Qu'ajoute も à 飲みもしなかった ?",
+            "es": "¿Qué añade も a 飲みもしなかった?",
+            "id": "Apa yang ditambahkan も pada 飲みもしなかった?"
+          },
+          "choices": [
+            {
+              "en": "Not even: not so much as a sip of water.",
+              "fr": "Même pas : pas même une gorgée d'eau.",
+              "es": "Ni siquiera: ni un sorbo de agua.",
+              "id": "Bahkan tidak: seteguk air pun tidak diminum."
+            },
+            {
+              "en": "Also: no water either, like the rest.",
+              "fr": "Aussi : pas d'eau non plus, comme le reste.",
+              "es": "También: tampoco agua, como lo demás.",
+              "id": "Juga: air pun tidak, sama seperti yang lain."
+            },
+            {
+              "en": "Only: nothing but water.",
+              "fr": "Seulement : rien que de l'eau.",
+              "es": "Solo: nada más que agua.",
+              "id": "Hanya: tidak ada apa-apa selain air."
+            }
+          ],
+          "why": {
+            "en": "も after the stem is « even »: the least thing was not done either. It is not the も of « also ».",
+            "fr": "も après le radical veut dire « même » : la moindre chose n'a pas été faite. Ce n'est pas le も de « aussi ».",
+            "es": "も tras la raíz significa «ni siquiera»: ni lo mínimo se hizo. No es el も de «también».",
+            "id": "も setelah batang berarti “bahkan”: hal yang paling kecil pun tidak dilakukan. Ini bukan も yang berarti “juga”."
+          },
+          "kind": "usage"
+        },
+        {
+          "notion": {
+            "en": "Polite and past",
+            "fr": "Poli et passé",
+            "es": "Cortés y pasado",
+            "id": "Sopan dan lampau"
+          },
+          "jp": "彼はわたしの話を聞きもしませんでした。",
+          "tr": {
+            "en": "He didn't even listen to what I said.",
+            "fr": "Il n'a même pas écouté ce que je disais.",
+            "es": "Ni siquiera escuchó lo que dije.",
+            "id": "Dia bahkan tidak mendengarkan omonganku."
+          },
+          "ask": {
+            "en": "Which part of 聞きもしませんでした carries the politeness and the past?",
+            "fr": "Quelle partie de 聞きもしませんでした porte la politesse et le passé ?",
+            "es": "¿Qué parte de 聞きもしませんでした lleva la cortesía y el pasado?",
+            "id": "Bagian mana dari 聞きもしませんでした yang membawa kesopanan dan kala lampau?"
+          },
+          "choices": [
+            {
+              "en": "The end: it becomes しませんでした.",
+              "fr": "La fin : elle devient しませんでした.",
+              "es": "El final: se convierte en しませんでした.",
+              "id": "Bagian akhirnya: berubah menjadi しませんでした."
+            },
+            {
+              "en": "The stem: it turns into 聞きました before も.",
+              "fr": "Le radical : il devient 聞きました devant も.",
+              "es": "La raíz: se convierte en 聞きました ante も.",
+              "id": "Batangnya: berubah menjadi 聞きました sebelum も."
+            },
+            {
+              "en": "The も: it turns into もでした.",
+              "fr": "Le も : il devient もでした.",
+              "es": "El も: se convierte en もでした.",
+              "id": "Partikel も: berubah menjadi もでした."
+            }
+          ],
+          "why": {
+            "en": "Only the する at the end changes: しない, しません, しなかった, しませんでした. 聞き + も stays as it is.",
+            "fr": "Seul le する final change : しない, しません, しなかった, しませんでした. 聞き + も ne bouge pas.",
+            "es": "Solo cambia el する final: しない, しません, しなかった, しませんでした. 聞き + も se queda igual.",
+            "id": "Hanya する di akhir yang berubah: しない, しません, しなかった, しませんでした. 聞き + も tetap seperti semula."
+          },
+          "kind": "usage"
+        },
+        {
+          "notion": {
+            "en": "Not a noun's は",
+            "fr": "Pas le は d'un nom",
+            "es": "No el は de un sustantivo",
+            "id": "Bukan は sesudah kata benda"
+          },
+          "jp": "あの子は勉強はしないが、本はよく読む。",
+          "tr": {
+            "en": "That child doesn't study, but reads a lot of books.",
+            "fr": "Cet enfant n'étudie pas, mais il lit beaucoup de livres.",
+            "es": "Ese niño no estudia, pero lee muchos libros.",
+            "id": "Anak itu tidak belajar, tetapi banyak membaca buku."
+          },
+          "ask": {
+            "en": "Is 勉強はしない built like 食べはしない?",
+            "fr": "勉強はしない est-il construit comme 食べはしない ?",
+            "es": "¿Se construye 勉強はしない como 食べはしない?",
+            "id": "Apakah 勉強はしない dibentuk seperti 食べはしない?"
+          },
+          "choices": [
+            {
+              "en": "No: 勉強 is a noun, set apart by は.",
+              "fr": "Non : 勉強 est un nom, mis à part par は.",
+              "es": "No: 勉強 es un sustantivo, destacado por は.",
+              "id": "Tidak: 勉強 kata benda, dipisahkan oleh は."
+            },
+            {
+              "en": "Yes: both press the denial of the verb.",
+              "fr": "Oui : les deux appuient le refus du verbe.",
+              "es": "Sí: ambos refuerzan la negativa del verbo.",
+              "id": "Ya: keduanya menegaskan penyangkalan kata kerja."
+            },
+            {
+              "en": "Yes: both mean « not even » the verb.",
+              "fr": "Oui : les deux veulent dire « même pas » le verbe.",
+              "es": "Sí: ambos significan «ni siquiera» el verbo.",
+              "id": "Ya: keduanya berarti “bahkan tidak” melakukan."
+            }
+          ],
+          "why": {
+            "en": "Beside a noun, は is the contrast topic: 勉強は… but 本は…. The pressing は stands right after a verb stem.",
+            "fr": "À côté d'un nom, は est le thème de contraste : 勉強は… mais 本は…. Le は d'insistance se met juste après un radical verbal.",
+            "es": "Junto a un sustantivo, は es el tema de contraste: 勉強は… pero 本は…. El は enfático va justo después de una raíz verbal.",
+            "id": "Di samping kata benda, は adalah topik kontras: 勉強は… tetapi 本は…. は yang menegaskan berdiri tepat setelah batang kata kerja."
+          },
+          "pair": [
+            "勉強はしない",
+            "食べはしない"
+          ],
+          "kind": "trap"
+        }
+      ],
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie",
+          "es": "Una amiga",
+          "id": "Seorang teman"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "あれ、きっぷがないの？かばんの中は見た？",
+            "en": "Huh, you can't find your ticket? Did you look in your bag?",
+            "fr": "Tiens, tu ne trouves pas ton billet ? Tu as regardé dans ton sac ?",
+            "es": "Vaya, ¿no encuentras el boleto? ¿Miraste en la mochila?",
+            "id": "Lho, tiketmu tidak ada? Sudah lihat di dalam tas?"
+          },
+          {
+            "who": "me",
+            "jp": "うん。ぜんぶ見たけど、どこにもありはしなかったよ。",
+            "en": "Yes. I looked through everything, and it's nowhere.",
+            "fr": "Oui. J'ai tout regardé, et il n'est nulle part.",
+            "es": "Sí. Miré todo y no está en ninguna parte.",
+            "id": "Sudah. Semuanya sudah kulihat, tapi tidak ada di mana pun."
+          },
+          {
+            "who": "them",
+            "jp": "うそでしょ。ポケットの中は？",
+            "en": "No way. What about your pockets?",
+            "fr": "Non, pas possible. Et dans tes poches ?",
+            "es": "No puede ser. ¿Y en los bolsillos?",
+            "id": "Masa sih. Di saku bagaimana?"
+          }
+        ],
+        "note": {
+          "en": "はしない／もしない: the denial pressed harder. Said after a thorough search, it means « really nothing there ».",
+          "fr": "はしない／もしない : le refus appuyé. Dit après une recherche minutieuse, il veut dire « il n'y a vraiment rien ».",
+          "es": "はしない／もしない: la negativa más enfática. Dicho tras una búsqueda minuciosa, significa «de verdad no hay nada».",
+          "id": "はしない／もしない: penyangkalan yang lebih ditekankan. Diucapkan setelah mencari dengan teliti, artinya “benar-benar tidak ada”."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "もう一度、かばんをさがしてみたら？",
+            "en": "Why don't you look in your bag once more?",
+            "fr": "Tu devrais fouiller encore une fois ton sac ?",
+            "es": "¿Por qué no buscas otra vez en la mochila?",
+            "id": "Coba cari sekali lagi di tasmu?"
+          },
+          "task": {
+            "en": "Say that you already looked, and it really isn't in the bag.",
+            "fr": "Dis que tu as déjà regardé, et qu'il n'est vraiment pas dans le sac.",
+            "es": "Di que ya miraste, y que de verdad no está en la mochila.",
+            "id": "Katakan bahwa kamu sudah melihatnya, dan tiket itu benar-benar tidak ada di tas."
+          },
+          "choices": [
+            "もう見たよ。かばんには、ありはしないんだ。",
+            "もう見たよ。かばんには、あるにちがいないんだ。",
+            "もう見たよ。かばんには、まだあるんだ。"
+          ],
+          "why": {
+            "en": "Already searched, so nothing in there: ありはしない. あるにちがいない says it must be there, and まだある that it still is.",
+            "fr": "Déjà cherché, donc rien dedans : ありはしない. あるにちがいない dit qu'il doit y être, et まだある qu'il y est encore.",
+            "es": "Ya buscaste, así que no hay nada: ありはしない. あるにちがいない dice que tiene que estar, y まだある que aún está.",
+            "id": "Sudah dicari, jadi tidak ada apa-apa di sana: ありはしない. あるにちがいない berarti pasti ada di sana, dan まだある berarti masih ada."
+          }
+        }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?",
+            "es": "¿Qué forma completa la oración?",
+            "id": "Bentuk mana yang melengkapi kalimat ini?"
+          },
+          "jp": "今さがしても、あの本はどこにもあり＿＿＿。",
+          "tr": {
+            "en": "Even if you look now, that book is nowhere to be found.",
+            "fr": "Même en cherchant maintenant, ce livre est introuvable.",
+            "es": "Aunque busques ahora, ese libro no está en ninguna parte.",
+            "id": "Biarpun dicari sekarang, buku itu tidak akan ditemukan di mana pun."
+          },
+          "choices": [
+            "はしない",
+            "はしなかった",
+            "るはしない"
+          ],
+          "why": {
+            "en": "The stem あり + はしない. はしなかった is the past, but the search is now, and ありる is no stem: は goes right after あり.",
+            "fr": "Le radical あり + はしない. はしなかった est le passé, mais la recherche se fait maintenant, et ありる n'est pas un radical : は suit directement あり.",
+            "es": "La raíz あり + はしない. はしなかった es el pasado, pero la búsqueda es ahora, y ありる no es una raíz: は va justo después de あり.",
+            "id": "Batang あり + はしない. はしなかった adalah bentuk lampau, padahal pencariannya sekarang, dan ありる bukan batang: は langsung mengikuti あり."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the speaker's friend?",
+            "fr": "Que dit la phrase de l'ami de la personne qui parle ?",
+            "es": "¿Qué dice la oración sobre el amigo de quien habla?",
+            "id": "Apa yang dikatakan kalimat ini tentang teman si pembicara?"
+          },
+          "jp": "友だちは、わたしの手紙を読みもしないで返した。",
+          "tr": {
+            "en": "My friend sent my letter back without even reading it.",
+            "fr": "Mon ami a renvoyé ma lettre sans même la lire.",
+            "es": "Mi amigo devolvió mi carta sin siquiera leerla.",
+            "id": "Temanku mengembalikan suratku tanpa membacanya sedikit pun."
+          },
+          "choices": [
+            {
+              "en": "The friend didn't read the letter at all.",
+              "fr": "L'ami n'a pas lu la lettre du tout.",
+              "es": "El amigo no leyó la carta en absoluto.",
+              "id": "Teman itu sama sekali tidak membaca suratnya."
+            },
+            {
+              "en": "The friend read the letter only in part.",
+              "fr": "L'ami n'a lu la lettre qu'en partie.",
+              "es": "El amigo leyó la carta solo en parte.",
+              "id": "Teman itu hanya membaca sebagian suratnya."
+            },
+            {
+              "en": "The friend read the letter too, like the others.",
+              "fr": "L'ami a lu la lettre aussi, comme les autres.",
+              "es": "El amigo también leyó la carta, como los demás.",
+              "id": "Teman itu juga membaca suratnya, seperti yang lain."
+            }
+          ],
+          "why": {
+            "en": "読みもしないで is « without even reading »: not one line. It is not « reading too ».",
+            "fr": "読みもしないで veut dire « sans même lire » : pas une ligne. Ce n'est pas « lire aussi ».",
+            "es": "読みもしないで es «sin ni siquiera leer»: ni una línea. No es «leer también».",
+            "id": "読みもしないで berarti “tanpa membacanya sedikit pun”: satu baris pun tidak. Bukan “juga membaca”."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?",
+            "es": "¿Qué forma completa la oración?",
+            "id": "Bentuk mana yang melengkapi kalimat ini?"
+          },
+          "jp": "会議で、社長は一言も話し＿＿＿。",
+          "tr": {
+            "en": "At the meeting, the president did not say a single word.",
+            "fr": "À la réunion, le président n'a pas dit un seul mot.",
+            "es": "En la reunión, el presidente no dijo ni una palabra.",
+            "id": "Dalam rapat itu, direktur tidak berbicara sepatah kata pun."
+          },
+          "choices": [
+            "はしませんでした",
+            "はしませんでしたか",
+            "はしないでした"
+          ],
+          "why": {
+            "en": "The past and the polite style go on する: しませんでした. しないでした is the slip, and ...か turns it into a question.",
+            "fr": "Le passé et le style poli se mettent sur する : しませんでした. しないでした est la faute courante, et ...か en fait une question.",
+            "es": "El pasado y el estilo cortés van en する: しませんでした. しないでした es el error típico, y ...か lo convierte en pregunta.",
+            "id": "Kala lampau dan gaya sopan diletakkan pada する: しませんでした. しないでした adalah kesalahan yang umum, dan ...か menjadikannya pertanyaan."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your manager asks if you will tell the client about the mistake. Say, politely, that you never would.",
+            "fr": "Votre chef demande si vous allez parler de l'erreur au client. Dites poliment que vous ne le feriez jamais.",
+            "es": "Tu jefe pregunta si vas a contarle el error al cliente. Di con cortesía que jamás lo harías.",
+            "id": "Atasanmu bertanya apakah kamu akan memberi tahu klien tentang kesalahan itu. Katakan dengan sopan bahwa kamu tidak akan pernah melakukannya."
+          },
+          "choices": [
+            "お客さまには、言いはしません。",
+            "お客さまには、言いはしないよ。",
+            "お客さまには、言いはしたくありません。"
+          ],
+          "why": {
+            "en": "To a manager, the polite しません: 言いはしません. 言いはしないよ is plain and too blunt, and 言いはしたくありません says you do not want to, not that you never would.",
+            "fr": "À un chef, il faut しません, le poli : 言いはしません. 言いはしないよ est familier et trop brusque, et 言いはしたくありません dit que vous ne voulez pas, pas que vous ne le feriez jamais.",
+            "es": "A un jefe, hay que usar しません, la forma cortés: 言いはしません. 言いはしないよ es llano y demasiado brusco, y 言いはしたくありません dice que no quieres, no que jamás lo harías.",
+            "id": "Kepada atasan, pakai bentuk sopan しません: 言いはしません. 言いはしないよ terlalu santai dan blak-blakan, dan 言いはしたくありません berarti kamu tidak mau, bukan bahwa kamu tidak akan pernah melakukannya."
+          }
+        }
+      ]
+    },
+    "choose": [
+      {
+        "jp": "あの人のうそなんて、わたしは信じ＿＿＿よ。",
+        "tr": {
+          "en": "I'm certainly not going to believe his lies.",
+          "fr": "Je ne vais certainement pas croire ses mensonges.",
+          "es": "Desde luego no voy a creer sus mentiras.",
+          "id": "Aku jelas tidak akan percaya kebohongan orang itu."
+        },
+        "choices": [
+          "はしない",
+          "はしなかった",
+          "るはしない"
+        ],
+        "slips": [
+          "はしなかった"
+        ],
+        "why": {
+          "en": "The stem 信じ + はしない presses the denial. はしなかった is the past, and 信じるはしない puts は after the dictionary form.",
+          "fr": "Le radical 信じ + はしない appuie le refus. はしなかった est le passé, et 信じるはしない met は après la forme du dictionnaire.",
+          "es": "La raíz 信じ + はしない refuerza la negativa. はしなかった es el pasado, y 信じるはしない pone は tras la forma de diccionario.",
+          "id": "Batang 信じ + はしない mempertegas penyangkalan. はしなかった adalah bentuk lampau, dan 信じるはしない meletakkan は setelah bentuk kamus."
+        }
+      },
+      {
+        "jp": "いそがしくて、昼ごはんを食べ＿＿＿。",
+        "tr": {
+          "en": "I was so busy I didn't even eat lunch.",
+          "fr": "J'avais tellement à faire que je n'ai même pas déjeuné.",
+          "es": "Tenía tanto que hacer que ni siquiera almorcé.",
+          "id": "Aku begitu sibuk sampai makan siang pun tidak."
+        },
+        "choices": [
+          "もしなかった",
+          "もしている",
+          "もしたかった"
+        ],
+        "why": {
+          "en": "« Not even » is も + しなかった after the stem. もしている and もしたかった are not negative.",
+          "fr": "« Même pas » est も + しなかった après le radical. もしている et もしたかった ne sont pas négatifs.",
+          "es": "«Ni siquiera» es も + しなかった tras la raíz. もしている y もしたかった no son negativos.",
+          "id": "“Bahkan tidak” adalah も + しなかった setelah batang. もしている dan もしたかった bukan bentuk negatif."
+        }
+      },
+      {
+        "jp": "どれだけ探しても、ほしかった本はどこにもあり＿＿＿。",
+        "tr": {
+          "en": "However much I looked, the book I wanted was nowhere to be found.",
+          "fr": "J'ai eu beau chercher, le livre que je voulais était introuvable.",
+          "es": "Por mucho que busqué, el libro que quería no estaba en ninguna parte.",
+          "id": "Sekeras apa pun aku mencari, buku yang kuinginkan tidak ada di mana pun."
+        },
+        "choices": [
+          "はしなかった",
+          "はなかった",
+          "もなかった"
+        ],
+        "why": {
+          "en": "The stem あり + はしなかった: the denial pressed, in the past. あり + はなかった and あり + もなかった are not words.",
+          "fr": "Le radical あり + はしなかった : le refus appuyé, au passé. あり + はなかった et あり + もなかった n'existent pas.",
+          "es": "La raíz あり + はしなかった: la negativa enfática, en pasado. あり + はなかった y あり + もなかった no existen.",
+          "id": "Batang あり + はしなかった: penyangkalan yang ditegaskan, dalam kala lampau. あり + はなかった dan あり + もなかった bukan kata yang ada."
+        }
+      }
+    ],
+    "structure_id": "batang kata kerja + はしない／もしない"
+  },
+  {
     "pattern": "〜っぱなし",
     "structure": "verb stem + っぱなし",
     "structure_fr": "radical verbal + っぱなし",

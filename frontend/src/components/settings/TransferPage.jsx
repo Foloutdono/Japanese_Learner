@@ -171,18 +171,24 @@ export function TransferPage({ session }) {
   async function punch() {
     if (phase !== 'printed' || !payload) return
     playClick()
+    // Recommencer stays on the ticket while it is written: a ticket
+    // left that way is not punched when the answer comes back.
+    const turn = ++asked.current
     setPhase('importing')
     setError(null)
     try {
       const body = await apiJson('/api/transfer/import', session, {
         method: 'POST', body: JSON.stringify({ source, notes: payload.body.notes }),
       })
-      setResult(body)
+      // Written either way: what waits for its check, and Today, are true.
       setWaiting(body.waiting)
-      setPhase('punched')
       refreshToday()
       refreshSummary()
+      if (turn !== asked.current) return
+      setResult(body)
+      setPhase('punched')
     } catch (e) {
+      if (turn !== asked.current) return
       setError(e?.status === 413 ? 'tooMany' : 'server')
       setPhase('printed')
     }

@@ -879,7 +879,11 @@ The studio lists the seven under 実践 with each video's page, posts and
 command. Its preview is the gate the video ends on: the rest is recorded
 where the command runs. When a screen of the app changes, its script's
 selectors are what to check (`plate`, `stop`, `.stage__foot`, the run's
-own classes, Ask's offers by their words). A step that finds nothing to tap says so in the render's
+own classes, Ask's offers by their words). A rating is tapped by its
+verdict (`CORRECT`, `ALMOST`), a key of the bar the bank's profile puts
+the learner on: the dictation's slip and the translation's are rated
+Almost, the near miss, and `src/carousel.test.js` fails on a key that
+bar does not draw. A step that finds nothing to tap says so in the render's
 log, and an API the app asks for and the bank does not answer gets `{}`,
 which is logged too.
 

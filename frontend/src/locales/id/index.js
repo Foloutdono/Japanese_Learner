@@ -1283,6 +1283,7 @@ const phraseAnalyzer = {
   explaining:          'Menjelaskan…',
   explainFailed:       'Penjelasan gagal dimuat. Coba lagi.',
   explainUnavailable:  'Penjelasan sedang tidak tersedia. Coba sebentar lagi.',
+  explainLimitReached: 'Jatah penjelasan hari ini sudah habis. Besok tersedia lagi.',
   passageTruncated:    n => `Hanya ${n} kalimat pertama yang dianalisis.`,
   sentenceAnalysisUnavailable: 'Analisis kalimat ini untuk sementara tidak tersedia.',
   mineToDeck:          'Tambah',
@@ -1412,6 +1413,20 @@ const video = {
   videoLinkFetchOff:   'Server ini tidak bisa mengambil subtitle dari tautan. Gunakan bookmark 字幕取り, atau tambahkan file subtitle.',
   videoLinkAllowanceMine: 'Jatah tautanmu hari ini sudah habis. Tambahkan file subtitle, atau kembali besok.',
   videoLinkAllowanceApp: 'Jatah tautan hari ini untuk seluruh aplikasi sudah habis. Tambahkan file subtitle, atau kembali besok.',
+  // ── 図書館 — the public library of analysed videos (plan 322) ──
+  videoLibraryAllowance: 'Kamu sudah membuka jatah video perpustakaan hari ini. Kembali lagi besok.',
+  vlibTitle:        'Perpustakaan video',
+  vlibAllKinds:     'Semua jenis',
+  vlibKind:         'Jenis video',
+  vlibMine:         'Videoku',
+  vlibKinds: {
+    music: 'Musik', podcast: 'Podcast', drama: 'Drama & film', variety: 'Acara ragam', news: 'Berita',
+    vlog: 'Vlog', lesson: 'Pelajaran', gaming: 'Gim', other: 'Lainnya',
+  },
+  vlibEmpty:        'Belum ada video: video yang kamu analisis dari tautan akan ditambahkan untuk semua orang.',
+  vlibEmptyMine:    'Kamu belum membuka video dari perpustakaan.',
+  vlibError:        'Perpustakaan gagal dimuat.',
+  vlibMore:         'Tampilkan lebih banyak',
   videoNoJapanese:     'Video ini tidak punya subtitle bahasa Jepang. Coba video lain, atau tambahkan sendiri file subtitle.',
   videoSubtitlesOff:   'Subtitle video ini dinonaktifkan.',
   videoSubtitlesEmpty: 'Trek subtitle bahasa Jepang video ini kosong.',
@@ -2151,6 +2166,10 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'Belum terhubung',
   linkGoogleDesc:    'Tambahkan Google ke akun ini, dan “Lanjutkan dengan Google” akan membuka akun ini, bukan akun baru yang kosong.',
+  // The same offer for Apple, on the iPhone alone (plan 321).
+  linkAppleLabel:    'Apple',
+  linkAppleCap:      'Belum terhubung',
+  linkAppleDesc:     'Tambahkan Apple ke akun ini, dan “Lanjutkan dengan Apple” akan membuka akun ini, bukan akun baru yang kosong.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -2576,6 +2595,8 @@ const boarding = {
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Lanjutkan dengan Google',
+  // Apple's own title for its button, in its own words (plan 321).
+  continueWithApple: 'Lanjutkan dengan Apple',
   orWithEmail: 'atau dengan alamat email',
   // 改札 — a round trip that came back refused (lib/authRedirect.js).
   // Both name what happened rather than "something went wrong": on the
@@ -2584,6 +2605,8 @@ const boarding = {
   // reason, not a shrug.
   oauthAlreadyLinked: 'Akun Google itu sudah terhubung ke Pass lain.',
   oauthSignInInstead: 'Masuk dengan akun Google itu',
+  oauthAlreadyLinkedApple: 'Akun Apple itu sudah terhubung ke Pass lain.',
+  oauthLinkingOffApple: 'Apple belum bisa ditambahkan ke Pass ini sekarang. Alamat email bisa.',
   nativeReturnNote:  'Berhasil masuk. Kembali ke aplikasi…',
   nativeReturnOpen:  'Buka Tsuji',
   oauthLinkingOff: 'Google belum bisa ditambahkan ke Pass ini sekarang. Alamat email bisa.',
@@ -2782,6 +2805,7 @@ const boarding = {
   brdKeepSent: (email) => `Tautan terkirim ke ${email}`,
   brdKeepChange: 'Ubah',
   brdKeptGoogle: 'Tersimpan di akun Google-mu',
+  brdKeptApple: 'Tersimpan di akun Apple-mu',
   brdKeptEmail: (email) => `Tersimpan · ${email}`,
   brdKeptAccount: 'Tersimpan di akunmu',
   brdKeptSwitch: 'Ganti akun',

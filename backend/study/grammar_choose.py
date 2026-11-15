@@ -65,10 +65,6 @@ def choose_items(entry: dict) -> list[dict]:
     return list(entry.get("choose") or [])
 
 
-def fillings_of(item: dict) -> list[str]:
-    return list(item["choices"])
-
-
 def cut(jp: str, filling: str) -> tuple[list[dict], list[dict]] | None:
     """(the sentence's parts with the hole, the parts of the filling) for
     `filling` standing in `jp`'s blank; None when the hole does not fall on

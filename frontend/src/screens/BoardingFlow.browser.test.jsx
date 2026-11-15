@@ -49,14 +49,22 @@ vi.mock('../lib/api', () => ({
 // (lib/guest.js claimAccount, plan 270), and what it REFUSES with is the
 // point of one test below.
 const updateUser = vi.fn()
+// Apple's link (plan 321): the token put onto the guest's pass.
+const linkIdentity = vi.fn()
 vi.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
       getSession: async () => ({ data: { session: { access_token: 'tok' } } }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
       updateUser: (...a) => updateUser(...a),
+      linkIdentity: (...a) => linkIdentity(...a),
     },
   },
+}))
+// The iPhone's shell, where Apple's sheet answers (plan 321).
+const iphoneRef = { current: false }
+vi.mock('../lib/native', () => ({
+  signInWithApple: async () => ({ identityToken: 'id.token', authorizationCode: 'c.1' }),
 }))
 // The reminder is native-only; one test flips it on.
 const nudgeRef = { current: false }
@@ -66,6 +74,7 @@ const requestNudge = vi.fn(async () => nudgeRef.current)
 const nudgeState = { current: 'prompt' }
 vi.mock('../lib/platform', () => ({
   isNative: () => nudgeRef.current,
+  canSignInWithApple: () => iphoneRef.current,
   canNudge: () => nudgeRef.current,
   requestNudgePermission: () => requestNudge(),
   nudgePermission: async () => nudgeState.current,
@@ -226,8 +235,10 @@ beforeEach(() => {
   saved.mockClear()
   requestNudge.mockClear()
   nudgeRef.current = false
+  iphoneRef.current = false
   oauthRefusal.current = null
   updateUser.mockReset()
+  linkIdentity.mockReset()
   sessionStorage.removeItem(STASH_KEY)
   seedCredits(CREDITS)
   apiJson.mockImplementation(async path => (path === '/api/onboarding/volumes' ? VOLUMES : {}))
@@ -660,6 +671,31 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="issue"]')
     await settle(80)
     expect(done()[0]).toMatchObject({ kept: 'password' })
+  })
+
+  // 林檎 (plan 321): on the iPhone Apple stands first, beside Google, and
+  // keeps the guest's pass the way Google does -- linked, never a new
+  // account -- without writing the boarding down, since its sheet never
+  // leaves the page.
+  it('on the iPhone, Apple keeps a guest’s card, linked, from its own sheet', async () => {
+    iphoneRef.current = true
+    linkIdentity.mockResolvedValue({ data: { session: { access_token: 'tok2' } }, error: null })
+    const { screen } = await renderFlow({ guest: true })
+    await toCardBeginner(screen)
+    await click(screen, '[data-action="keep"]')
+    await settle(60)
+    const providers = [...sheet().querySelectorAll('.auth-provider')].map(b => b.dataset.provider)
+    expect(providers).toEqual(['apple', 'google'])
+    await clickSheet('.auth-provider[data-provider="apple"]')
+    await settle(60)
+    expect(linkIdentity).toHaveBeenCalledWith(expect.objectContaining({ provider: 'apple', token: 'id.token' }))
+    expect(sessionStorage.getItem(STASH_KEY)).toBeNull()
+    expect(sheet()).toBeNull()
+    // The one-use code, for the grant the account's deletion revokes.
+    expect(apiFetch.mock.calls.some(c => c[0] === '/api/account/apple')).toBe(true)
+    await click(screen, '[data-action="issue"]')
+    await settle(80)
+    expect(done()[0]).toMatchObject({ kept: 'apple' })
   })
 
   it('says two passwords that differ before asking anyone', async () => {

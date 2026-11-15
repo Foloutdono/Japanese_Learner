@@ -50,7 +50,7 @@ def _cleanup(*uids):
             for uid in uids:
                 for table, _keep, _extra, _why in PER_USER:
                     cur.execute(f'DELETE FROM "{table}" WHERE user_id = %s', (uid,))
-                cur.execute("DELETE FROM ocr_usage WHERE user_id = %s", (uid,))
+                cur.execute("DELETE FROM daily_usage WHERE user_id = %s", (uid,))
         conn.commit()
     finally:
         conn.close()
@@ -223,8 +223,8 @@ def test_under_the_cap_nothing_is_touched():
         _cleanup(uid)
 
 
-def test_todays_ocr_counter_survives_the_age_policy():
-    # routes/ocr.py reads CURRENT_DATE's row to rate-limit; pruning it
+def test_todays_daily_counter_survives_the_age_policy():
+    # core/daily_limit.py reads today's row to rate-limit; pruning it
     # would hand a throttled client a fresh allowance.
     from scripts.prune_logs import _older_than
 
@@ -232,10 +232,10 @@ def test_todays_ocr_counter_survives_the_age_policy():
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO ocr_usage(user_id, day, count) "
-                        "VALUES (%s, CURRENT_DATE, 5)", (uid,))
-            cur.execute("INSERT INTO ocr_usage(user_id, day, count) "
-                        "VALUES (%s, CURRENT_DATE - 400, 5)", (uid,))
+            cur.execute("INSERT INTO daily_usage(user_id, feature, day, count) "
+                        "VALUES (%s, 'ocr', CURRENT_DATE, 5)", (uid,))
+            cur.execute("INSERT INTO daily_usage(user_id, feature, day, count) "
+                        "VALUES (%s, 'ocr', CURRENT_DATE - 400, 5)", (uid,))
         conn.commit()
     finally:
         conn.close()
@@ -244,7 +244,7 @@ def test_todays_ocr_counter_survives_the_age_policy():
         conn = db_conn()
         try:
             with conn.cursor() as cur:
-                removed = _older_than(cur, "ocr_usage", "day", 30, scope, params,
+                removed = _older_than(cur, "daily_usage", "day", 30, scope, params,
                                       count_only=False)
             conn.commit()
         finally:
@@ -253,7 +253,7 @@ def test_todays_ocr_counter_survives_the_age_policy():
         conn = db_conn()
         try:
             with conn.cursor() as cur:
-                cur.execute("SELECT day = CURRENT_DATE FROM ocr_usage WHERE user_id = %s",
+                cur.execute("SELECT day = CURRENT_DATE FROM daily_usage WHERE user_id = %s",
                             (uid,))
                 assert cur.fetchall() == [(True,)]
         finally:

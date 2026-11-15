@@ -1239,6 +1239,7 @@ const phraseAnalyzer = {
   explaining:          'Explication en cours…',
   explainFailed:       'L\'explication n\'est pas arrivée. Réessaie.',
   explainUnavailable:  'Les explications sont indisponibles pour le moment. Réessaie dans un instant.',
+  explainLimitReached: "Tu as utilisé toutes les explications du jour. Elles reviennent demain.",
   passageTruncated:    n => (n === 1 ? 'Seule la première phrase a été analysée.' : `Seules les ${n} premières phrases ont été analysées.`),
   sentenceAnalysisUnavailable: 'Analyse temporairement indisponible pour cette phrase.',
   mineToDeck:          'Ajouter',
@@ -1360,6 +1361,20 @@ const video = {
   videoLinkFetchOff:   'Ce serveur ne sait pas récupérer les sous-titres d’un lien. Utilise le favori 字幕取り, ou ajoute un fichier de sous-titres.',
   videoLinkAllowanceMine: 'Tu as utilisé tes liens du jour. Ajoute un fichier de sous-titres, ou reviens demain.',
   videoLinkAllowanceApp: 'Les liens du jour sont épuisés pour toute l’application. Ajoute un fichier de sous-titres, ou reviens demain.',
+  // ── 図書館 — la vidéothèque des vidéos analysées (plan 322) ──
+  videoLibraryAllowance: 'Tu as ouvert tes vidéos de la vidéothèque pour aujourd’hui. Reviens demain.',
+  vlibTitle:        'Vidéothèque',
+  vlibAllKinds:     'Tous les genres',
+  vlibKind:         'Genre de vidéo',
+  vlibMine:         'Mes vidéos',
+  vlibKinds: {
+    music: 'Musique', podcast: 'Podcast', drama: 'Séries et films', variety: 'Variétés', news: 'Actualités',
+    vlog: 'Vlog', lesson: 'Cours', gaming: 'Jeux vidéo', other: 'Autre',
+  },
+  vlibEmpty:        'Aucune vidéo pour le moment : celles que tu analyses depuis un lien seront ajoutées pour tout le monde.',
+  vlibEmptyMine:    'Tu n’as pas encore ouvert de vidéo de la vidéothèque.',
+  vlibError:        'La vidéothèque ne s’est pas chargée.',
+  vlibMore:         'Voir plus',
   videoNoJapanese:     'Cette vidéo n’a pas de sous-titres japonais. Essaie une autre vidéo, ou ajoute toi-même un fichier de sous-titres.',
   videoSubtitlesOff:   'Les sous-titres de cette vidéo sont désactivés.',
   videoSubtitlesEmpty: 'La piste de sous-titres japonais de cette vidéo est vide.',
@@ -2086,6 +2101,10 @@ const settings = {
   linkGoogleLabel:   'Google',
   linkGoogleCap:     'Non connecté',
   linkGoogleDesc:    'Ajoute Google à ce compte, et « Continuer avec Google » ouvrira celui-ci plutôt qu\'une nouvelle carte vide.',
+  // La même offre pour Apple, sur l'iPhone seulement (plan 321).
+  linkAppleLabel:    'Apple',
+  linkAppleCap:      'Non connecté',
+  linkAppleDesc:     'Ajoute Apple à ce compte, et « Continuer avec Apple » ouvrira celui-ci plutôt qu\'une nouvelle carte vide.',
 
   // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
   // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
@@ -2495,6 +2514,8 @@ const boarding = {
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
   continueWithGoogle: 'Continuer avec Google',
+  // Le titre qu'Apple donne à son bouton, dans ses mots (plan 321).
+  continueWithApple: 'Continuer avec Apple',
   orWithEmail: 'ou avec une adresse e-mail',
   // 改札 — un aller-retour revenu refusé (lib/authRedirect.js). Les
   // deux nomment ce qui s'est passé plutôt qu'« une erreur est
@@ -2503,6 +2524,8 @@ const boarding = {
   // raison, pas un haussement d'épaules.
   oauthAlreadyLinked: 'Ce compte Google appartient déjà à une autre carte.',
   oauthSignInInstead: 'Se connecter avec ce compte Google',
+  oauthAlreadyLinkedApple: 'Ce compte Apple appartient déjà à une autre carte.',
+  oauthLinkingOffApple: 'Apple ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
   nativeReturnNote:  'Connecté. Retour vers l’application…',
   nativeReturnOpen:  'Ouvrir Tsuji',
   oauthLinkingOff: 'Google ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
@@ -2704,6 +2727,7 @@ const boarding = {
   brdKeepSent: (email) => `Lien envoyé à ${email}`,
   brdKeepChange: 'Changer',
   brdKeptGoogle: 'Gardée sur ton compte Google',
+  brdKeptApple: 'Gardée sur ton compte Apple',
   brdKeptEmail: (email) => `Gardée · ${email}`,
   brdKeptAccount: 'Gardée sur ton compte',
   brdKeptSwitch: 'Changer de compte',

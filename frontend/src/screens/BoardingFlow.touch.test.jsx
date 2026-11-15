@@ -72,6 +72,7 @@ vi.mock('../lib/supabase', () => ({
 // to a calendar instead.
 vi.mock('../lib/platform', () => ({
   isNative: () => false,
+  canSignInWithApple: () => false,
   canNudge: () => false,
   requestNudgePermission: async () => false,
   nudgePermission: async () => 'denied',

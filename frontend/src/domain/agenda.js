@@ -1,3 +1,5 @@
+import { intlLocale } from '../lib/locale'
+
 // ── 時間割 — the weekly agenda, as the app reasons about it (plan 181) ──
 // A learner's timetable of study blocks: a subject, the weekdays it
 // repeats on, the minutes of the day it spans and whether and how early
@@ -193,7 +195,7 @@ export function forServer(blocks) {
 /** A weekday's name in the learner's language (`width` is Intl's:
  *  'long', 'short' or 'narrow'), from a week that starts on a Monday. */
 export function dayName(day, lang, width = 'short') {
-  return new Intl.DateTimeFormat(lang, { weekday: width }).format(new Date(2024, 0, 1 + day))
+  return new Intl.DateTimeFormat(intlLocale(lang), { weekday: width }).format(new Date(2024, 0, 1 + day))
 }
 
 /** The days of a block as a short line: "Mon–Fri", "Mon, Wed–Thu",

@@ -59,7 +59,7 @@ from pydantic import BaseModel, Field
 
 import psycopg2.extras
 
-from core.auth import get_user_id, prefixed, unprefixed
+from core.auth import CARD_ID_MAX, MODE_MAX, get_user_id, prefixed, unprefixed
 from core import credits, events, learner_modes, review_plan
 from core.db import db_conn
 from core.lines import lines_or_all
@@ -1431,8 +1431,8 @@ def post_basics_skip(user_id: str = Depends(get_user_id)):
 
 
 class TodayReviewPayload(BaseModel):
-    card_id: str
-    mode: str
+    card_id: str = Field(max_length=CARD_ID_MAX)
+    mode: str = Field(max_length=MODE_MAX)
     quality: int
     prev_stage: str | None = None
 
@@ -1482,10 +1482,8 @@ MAX_STALE_CHECK = 200
 
 
 class SavedCard(BaseModel):
-    card_id: str
-    mode: str
-
-
+    card_id: str = Field(max_length=CARD_ID_MAX)
+    mode: str = Field(max_length=MODE_MAX)
 class StaleCheckPayload(BaseModel):
     cards: list[SavedCard] = Field(default_factory=list, max_length=MAX_STALE_CHECK)
 

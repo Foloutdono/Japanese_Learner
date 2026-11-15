@@ -59,7 +59,7 @@ from study.dictation import measure_forms
 from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
 from study.modes import resolve as resolve_mode
-from study.placement import PER_LEVEL, build_placement_paper, recommend_level, strip_answers, walk
+from study.placement import PER_LEVEL, PLACEMENT_LADDER, build_placement_paper, recommend_level, strip_answers, walk
 from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
@@ -86,7 +86,10 @@ class ScorePayload(BaseModel):
     seed: int = Field(ge=0, lt=2 ** _SEED_BITS)
     # Partial submissions are legal — "stop here, this is too hard" is
     # the early exit, and unanswered questions simply score as wrong.
-    answers: dict[str, str] = {}
+    # Bounded (plan 211) by the paper's own size: one answer a question.
+    answers: dict[str, str] = Field(
+        default_factory=dict, max_length=sum(len(kinds) for _, kinds in PLACEMENT_LADDER),
+    )
 
 
 class ClimbPayload(BaseModel):

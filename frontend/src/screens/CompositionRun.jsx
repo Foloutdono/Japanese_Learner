@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
-import { explainSentence } from '../lib/explainSentence'
+import { explainSentence, explainErrorText } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { runSource } from '../domain/sentenceSource'
@@ -265,7 +265,7 @@ function Session({ session, level }) {
       .then(d => { if (analysisLineRef.current === key) setAnalysis(d) })
       .catch(e => {
         if (analysisLineRef.current !== key) return
-        setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+        setExplainError(explainErrorText(e, t))
       })
       .finally(() => { if (analysisLineRef.current === key) setExplaining(false) })
   }

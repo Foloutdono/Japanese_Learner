@@ -167,8 +167,9 @@ def translate_block(user_id: str, lines: list[dict], index: int, lang_name: str,
         end = start + len(block)
         before = [s.get("text") or "" for s in lines[max(0, start - CONTEXT):start]]
         after = [s.get("text") or "" for s in lines[end:end + CONTEXT]]
-        got = translate_lines(wanted, [b for b in before if b], [a for a in after if a],
-                              lang_name, title, channel, kind)
+        with daily_limit.refund_unbilled(user_id, LINE_TRANSLATION_FEATURE):
+            got = translate_lines(wanted, [b for b in before if b], [a for a in after if a],
+                                  lang_name, title, channel, kind)
         found = {text: tr for text, tr in zip(wanted, got) if usable(text, tr)}
     merged = {**known, **found}
     return start, [

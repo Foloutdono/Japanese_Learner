@@ -5,6 +5,7 @@ import { Sheet } from '../chrome/Sheet'
 import { HourglassIcon, BoltIcon, BellIcon, BooksIcon, PencilIcon, UserIcon } from '../ui/Icons'
 import { Emphasized } from '../ui/Emphasized'
 import { ProviderButton } from '../account/ProviderButton'
+import { providersHere } from '../../lib/oauth'
 import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../lib/authRedirect'
 import { authErrorMessage } from '../../lib/authErrors'
 import { claimAccount } from '../../lib/guest'
@@ -19,6 +20,7 @@ import {
 import { CARD_NAME_MAX, cardNameLength } from '../../domain/passCard'
 import { BoardLink, Continue } from './BoardFrame'
 import { CheckMark, LockMark } from './icons'
+import { intlLocale } from '../../lib/locale'
 
 // ── 乗車 — the card's sheets (plan 247) ──────────────────────────
 // The owner's pick C of the boarding's canvas, "the card is the form":
@@ -140,7 +142,7 @@ export function RhythmSheet({ open, onClose, value, onPick, rides = null, stop =
 
 function DepartureBoard({ value, onChange, rides, stop, first }) {
   const { t, lang } = useLang()
-  const date = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric' })
+  const date = new Intl.DateTimeFormat(intlLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })
   const goal = stop && stop !== 'novice' ? stop : null
   return (
     <>
@@ -480,7 +482,8 @@ function NamePlate({ value, onSave }) {
 // under the card keeps saying where the card lives. On the web Google
 // leaves the page, so `onLeaveForAuth` writes the answers down first; a
 // refusal comes back on the URL (lib/authRedirect.js) and is said here.
-// `onKept(by, email)`: 'google', or 'password' with the address.
+// `onKept(by, email)`: 'google' or 'apple' (plan 321), or 'password'
+// with the address.
 // `sent`: the address waiting on its confirmation, if one is.
 export function AccountSheet({ open, onClose, onLeaveForAuth = null, onKept, onSent, onGuest = null, sent = null }) {
   const { t } = useLang()
@@ -528,7 +531,11 @@ function KeepForm({ onClose, onLeaveForAuth, onKept, onSent, onGuest, sent }) {
   return (
     <>
       <p className="brd-sheet__lede">{onGuest ? t.brdAccountAsk : t.brdAccountLede}</p>
-      <ProviderButton link className="auth-provider brd-provider" onBeforeRedirect={onLeaveForAuth} onDone={() => onKept('google')} onError={setError} />
+      {/* Apple's sheet (plan 321) never leaves the page, so it writes
+          nothing down: a stash left behind would resume as Google's. */}
+      {providersHere().map(p => (
+        <ProviderButton key={p} provider={p} link className="auth-provider brd-provider" onBeforeRedirect={p === 'google' ? onLeaveForAuth : null} onDone={() => onKept(p)} onError={setError} />
+      ))}
       {refused && !error && (
         <p className="auth-message auth-message--error" role="alert" data-oauth="refused">{authRedirectMessage(refused, t)}</p>
       )}

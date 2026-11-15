@@ -23,6 +23,7 @@ import TableStep from '../components/intro/TableStep'
 import PairsStep from '../components/intro/PairsStep'
 import SentenceStep from '../components/intro/SentenceStep'
 import RouteStep from '../components/intro/RouteStep'
+import { intlLocale } from '../lib/locale'
 
 // ── 入門 — the introduction before the first card (plan 170) ────
 // A learner who answered « Pas encore » to the boarding's kana question
@@ -160,8 +161,8 @@ export default function RideIntro({ session, covered = false, first = false, dry
     const now = new Date()
     const kana = kanaFigures(volumes, summary?.kanaKnown ?? 'none', perDay, now)
     const n5 = planFigures(volumes, 'N5', 'N5', perDay, summary?.kanaKnown ?? 'none', now, linesOrAll(summary?.lines))
-    const day = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
-    const full = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric' })
+    const day = new Intl.DateTimeFormat(intlLocale(lang), { day: 'numeric', month: 'short' })
+    const full = new Intl.DateTimeFormat(intlLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })
     return { perDay, kana: kana.kana > 0 ? day.format(kana.date) : null, n5: full.format(n5.date) }
   }, [volumes, summary?.dailyNewTarget, summary?.kanaKnown, summary?.lines, lang])
 

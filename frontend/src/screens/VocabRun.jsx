@@ -104,7 +104,7 @@ export default function VocabRun({ session }) {
     const url = studyBy === 'level'
       ? `/api/vocab/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : studyBy === 'theme'
-      ? `/api/vocab/theme/${theme}/cards?mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      ? `/api/vocab/theme/${theme}/cards?level=${themeLevel}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
       : `/api/frequency/${freqDomain}/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
     const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
     return (data.cards ?? []).map(c => ({ ...c, lang }))

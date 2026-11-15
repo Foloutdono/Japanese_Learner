@@ -600,12 +600,39 @@ CREATE TABLE video_sessions (
     -- Which lines are the song (plan 264, study/lyrics_sort.py),
     -- {"rev", "kinds": {line text: kind}}; NULL until a lyrics deck is
     -- made of the session.
-    lyrics_sort   JSONB
+    lyrics_sort   JSONB,
+    -- A session opened from the public library (plan 322) rather than
+    -- fetched: it spent none of the link allowance, so the fetch budget
+    -- (routes/video.py's _fetch_refusal) does not count it.
+    from_library  BOOLEAN NOT NULL DEFAULT FALSE
 );
 ALTER TABLE video_sessions ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_video_sessions_user
 ON video_sessions(user_id, created_at DESC);
+
+CREATE INDEX idx_video_sessions_video
+ON video_sessions(video_id) WHERE source = 'youtube';
+
+-- 動画の図書館 (plan 322): every YouTube video a learner's link fetch
+-- has analysed, once, for everybody. One row per video, the whole
+-- track, with no learner on it: it is anonymous on purpose. Owned by
+-- routes/video_library.py. `category` is one of
+-- study/video_category.CATEGORIES, NULL until the model has sorted it.
+CREATE TABLE video_library (
+    video_id     TEXT PRIMARY KEY,
+    category     TEXT,
+    sentences    JSONB NOT NULL,
+    translations JSONB NOT NULL DEFAULT '{}'::jsonb,
+    truncated    INTEGER NOT NULL DEFAULT 0,
+    line_count   INTEGER NOT NULL DEFAULT 0,
+    first_line   TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE video_library ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_video_library_category
+ON video_library(category, created_at DESC);
 
 -- The claim lock -- same pattern as exam_generation_jobs
 -- (study/exam_schema.py), one row per session while work is running or
@@ -672,25 +699,6 @@ CREATE TABLE comprehension_served (
     PRIMARY KEY (user_id, pool_id)
 );
 ALTER TABLE comprehension_served ENABLE ROW LEVEL SECURITY;
-
--- How many comprehension exercises this learner has had GENERATED for
--- them today, on their own day (user_profiles.tz_offset_min). Owned by
--- routes/reading.py. Only pool misses are counted: an exercise served
--- from comprehension_pool was already paid for, so reading twenty of
--- those costs nothing and is not metered. Past the ceiling the learner
--- is handed a text they have read before rather than refused.
---
--- Same shape as ocr_usage on purpose. The third counter this app needed
--- (作文's tutor review, plan 125) went into the shared daily_usage table
--- below instead; these two stay as they are until moving them is worth
--- a migration -- see core/daily_limit.py.
-CREATE TABLE comprehension_usage (
-    user_id TEXT NOT NULL,
-    day     DATE NOT NULL,
-    count   INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, day)
-);
-ALTER TABLE comprehension_usage ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE exam_papers (
     exam_id           TEXT NOT NULL,
@@ -1024,25 +1032,14 @@ ALTER TABLE conversation_log ENABLE ROW LEVEL SECURITY;
 CREATE INDEX idx_conversation_log_user
 ON conversation_log(user_id, created_at);
 
--- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
--- endpoint. Nothing here costs money (NVIDIA's vision models are on the
--- free tier), so this bounds draw on the SHARED free quota that the
--- analyzer's deep tier and exam generation also depend on: one client
--- in a retry loop would otherwise degrade those too.
-CREATE TABLE ocr_usage (
-    user_id  TEXT NOT NULL,
-    day      DATE NOT NULL,
-    count    INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, day)
-);
-ALTER TABLE ocr_usage ENABLE ROW LEVEL SECURITY;
-
 -- ── The daily counters, one table (plan 125) ────────────────────────
 -- Owned by core/daily_limit.py. One row per (learner, feature, local
--- day); `feature` names the ceiling -- "composition", the tutor's
--- reviews of a learner's own sentences, today. The third counter this
--- app needed and the first shared one: ocr_usage and comprehension_usage
--- above keep their own tables until moving them is worth a migration.
+-- day); `feature` names the ceiling (the routes' *_FEATURE constants:
+-- "composition", "ask", "ocr", "comprehension" ...). The third counter
+-- this app needed and the first shared one; plan 320 moved the two
+-- older ones in (ocr_usage, comprehension_usage, dropped by
+-- scripts/migrate_daily_usage.py). "comprehension" counts pool misses
+-- only: an exercise served from comprehension_pool was already paid for.
 CREATE TABLE daily_usage (
     user_id TEXT NOT NULL,
     feature TEXT NOT NULL,
@@ -1382,3 +1379,17 @@ CREATE TABLE pvp_ratings (
 );
 ALTER TABLE pvp_ratings ENABLE ROW LEVEL SECURITY;
 CREATE INDEX pvp_ratings_rating ON pvp_ratings (rating DESC, user_id);
+
+-- ── 林檎 — the Sign in with Apple grant ─────────────────────────────
+-- Owned by core/apple_signin.py (plan 321). The refresh token a sign-in's
+-- authorization code was exchanged for, kept for one purpose: revoking
+-- the learner's grant with Apple when the account is deleted, as Apple
+-- asks of an app that offers Sign in with Apple. Nothing else of Apple's
+-- answer is kept. No cascade from auth (ADR 0010): DELETE /api/account
+-- revokes it and clears the row; scripts/purge_orphans.py clears it.
+CREATE TABLE apple_grants (
+    user_id       TEXT PRIMARY KEY,
+    refresh_token TEXT NOT NULL,
+    kept_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE apple_grants ENABLE ROW LEVEL SECURITY;

@@ -11,6 +11,7 @@ import zlib
 import pytest
 
 import routes.ocr as ocr_module
+from core import daily_limit
 from study.llm_shared import LLMUnavailable
 from core.auth import DEV_USER_ID
 from core.db import db_conn
@@ -36,7 +37,7 @@ def _reset_usage():
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM ocr_usage WHERE user_id = %s", (DEV_USER_ID,))
+            cur.execute("DELETE FROM daily_usage WHERE feature = 'ocr' AND user_id = %s", (DEV_USER_ID,))
         conn.commit()
     finally:
         conn.close()
@@ -158,12 +159,15 @@ def test_daily_limit_returns_429_and_names_the_limit(client, monkeypatch):
     assert "2" in third.json()["detail"]
 
 
-def test_a_failed_call_still_costs_a_slot(client, monkeypatch):
+def test_a_billed_call_that_fails_still_costs_a_slot(client, monkeypatch):
     """Counted before the model call on purpose: a client retrying a
-    failing call is exactly what the cap exists to stop."""
+    failing call is exactly what the cap exists to stop. Only a call no
+    model was paid for gives its slot back (below)."""
+    from study import llm_shared
     monkeypatch.setattr(ocr_module, "_DAILY_OCR_LIMIT", 1)
 
     def _boom(*a, **k):
+        llm_shared._billed()
         raise LLMUnavailable("down")
 
     monkeypatch.setattr(ocr_module, "chat", _boom)
@@ -205,15 +209,15 @@ def test_the_day_is_the_learners_not_the_servers(client, monkeypatch):
         return date(2030, 1, 2)
 
     monkeypatch.setattr(ocr_module, "chat", lambda *a, **k: "猫")
-    monkeypatch.setattr(ocr_module, "local_today", _fake_local_today)
+    monkeypatch.setattr(daily_limit, "local_today", _fake_local_today)
     assert _post(client).status_code == 200
 
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT day FROM ocr_usage WHERE user_id = %s", (DEV_USER_ID,))
+            cur.execute("SELECT day FROM daily_usage WHERE feature = 'ocr' AND user_id = %s", (DEV_USER_ID,))
             rows = cur.fetchall()
-            cur.execute("DELETE FROM ocr_usage WHERE user_id = %s", (DEV_USER_ID,))
+            cur.execute("DELETE FROM daily_usage WHERE feature = 'ocr' AND user_id = %s", (DEV_USER_ID,))
         conn.commit()
     finally:
         conn.close()
@@ -263,7 +267,7 @@ def test_the_offset_comes_from_the_learners_profile(client, monkeypatch):
     _set_offset(540)   # UTC+9
     try:
         monkeypatch.setattr(ocr_module, "chat", lambda *a, **k: "猫")
-        monkeypatch.setattr(ocr_module, "local_today", _fake_local_today)
+        monkeypatch.setattr(daily_limit, "local_today", _fake_local_today)
         assert _post(client).status_code == 200
         assert seen == [540]
     finally:
@@ -280,3 +284,20 @@ def test_the_refusal_says_when_the_allowance_returns(client, monkeypatch):
     detail = _post(client).json()["detail"]
     assert "1 per day" in detail
     assert "resets" in detail
+
+
+def test_an_outage_nobody_billed_gives_the_slot_back(client, monkeypatch):
+    # core/daily_limit.refund_unbilled: the 503 costs the learner nothing.
+    def _boom(*a, **k):
+        raise LLMUnavailable("no vision models")
+
+    monkeypatch.setattr(ocr_module, "chat", _boom)
+    assert _post(client).status_code == 503
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COALESCE(SUM(count), 0) FROM daily_usage "
+                        "WHERE feature = 'ocr' AND user_id = %s", (DEV_USER_ID,))
+            assert cur.fetchone()[0] == 0
+    finally:
+        conn.close()

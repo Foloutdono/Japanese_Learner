@@ -156,6 +156,16 @@ FEATURES = {
         "asked. Four songs a month. LYRICS_SORT_DAILY_LIMIT caps it at 20 "
         "songs/day, which bounds the abuse row.",
     ),
+    "video_category": (
+        4, 900, 20,
+        "Which kind of video a library video is (plan 322): music, podcast, "
+        "drama... Asked once when a link fetch adds a video the library "
+        "lacks, never again for it, so the figure is the library's growth, "
+        "not the traffic: four new videos a month. In: a ~350-token system block (stable, cached) and "
+        "at most 45 caption lines (1,800 characters). Out: {\"category\": "
+        "\"music\"}. VIDEO_CATEGORY_DAILY_LIMIT caps it at 30 videos/day a "
+        "learner, which bounds the abuse row.",
+    ),
     "song_transcription": (
         4, 8000, 1800,
         "A song heard (plan 317): a learner adds one as an audio file, "
