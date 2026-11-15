@@ -1,7 +1,7 @@
 // TEMPORARY (not for commit): a fixture for the grammar-highlight trial's screenshots.
 import { vi } from 'vitest'
 
-export const OUT = './zzshots/b3'
+export const OUT = './zzshots/words'
 const T = [['雨', '雨', 'あめ', 'rain', 'あめ'], ['が'], ['降っ', '降る', 'ふる', 'to fall', 'ふっ'], ['て'], ['いる'], ['ので'], ['、'], ['家', '家', 'いえ', 'home', 'いえ'], ['で'], ['本', '本', 'ほん', 'book', 'ほん'], ['を'], ['読み', '読む', 'よむ', 'to read', 'よみ'], ['ます'], ['。']]
 let pos = 0
 const tokens = T.map(([surface, kanji, kana, meaning, reading]) => {
