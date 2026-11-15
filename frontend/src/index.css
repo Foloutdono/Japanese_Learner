@@ -40185,6 +40185,10 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
      the tiles and the fill sentence already let them go. On the desk
      only, so the phone stays as it is. */
   :is(.pcard-lead__jp, .bkd-line, .bkd-row__word, .dict-word__jp, .furigana-word) rt { user-select: none; }
+  /* The stop in the analyser's left column, without its route line (see
+     .anl-desk__rail below): the room the rail and the dot took goes back
+     to the line. Here, before the focus twin, for the cascade's order. */
+  .anl-desk__rail .anl-stop { padding-left: var(--sp-4); }
   /* Every hover has its focus twin (DESIGN.md, Controls) on the surfaces
      the desk sets in its pages and columns: a keyboard reader was given
      the global ring and none of what the pointer is shown -- the
@@ -41540,6 +41544,11 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+  /* No route line in this column (the owner's call): its rail and its
+     dots took a fifth of a narrow column from the lines they stood
+     beside. The line in hand is said by its ground and its edge. */
+  .anl-desk__rail .anl-stop__rail,
+  .anl-desk__rail .anl-stop__marker { display: none; }
   .anl-desk__points {
     min-height: 0;
     padding: var(--sp-4);
@@ -42187,14 +42196,12 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
     color: var(--text-secondary);
   }
   .anl-desk__side .anl-words__item {
-    flex-direction: column;
-    flex-wrap: nowrap;
+    flex-flow: column nowrap;
     align-items: stretch;
     gap: var(--sp-2);
   }
   .anl-desk__side .anl-words__item > .anl-words__row { flex: none; }
   .anl-desk__side .anl-words__act { margin-left: 0; }
-  .anl-desk__side .anl-words__act > * { flex: 1; }
   .anl-desk__side .anl-words__add { width: 100%; }
 
   /* ── 机 — the practice stations, filled (plan 159) ──
