@@ -43,7 +43,7 @@ SPEAKERS = {"reader": "reader", "them": "A", "me": "B"}
 
 _SUBDIR = "grammar"
 # The catalogue's lines come to a few thousand clips of ~20 KB.
-_MAX_BYTES = 120 * 1024 * 1024
+_MAX_BYTES = 500 * 1024 * 1024
 _EVICT_TO = int(_MAX_BYTES * 0.75)
 
 _locks_guard = threading.Lock()

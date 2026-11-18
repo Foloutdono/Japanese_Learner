@@ -29,10 +29,10 @@ the one a learner is served.
 
 -- The stores' caps --------------------------------------------
 Two stores are capped and evict their oldest clips past the cap:
-word_tts at 100 MB and grammar_audio at 120 MB. The words, N5 to N1,
-come to about 70 MB and fit. The whole grammar store (examples, tours
-and conversation) comes near or past its cap, so the report gives an
-estimate for each store, and the run makes the grammar store's parts in
+word_tts at 100 MB and grammar_audio at 500 MB. The words, N5 to N1,
+come to about 70 MB and fit, and so does the whole grammar store
+(examples, tours and conversation). The report still gives an
+estimate for each store, and the run still makes the grammar store's parts in
 the order examples, tours, conversation: if anything is evicted, it is
 the examples, the least asked for, and never the conversation lines.
 

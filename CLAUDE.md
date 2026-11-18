@@ -876,10 +876,10 @@ python -m scripts.prewarm_all_audio --yes          # ... and make it (--part, --
 line the app can say, at every level: the card readings (`words`),
 dictation, the catalogue's examples, the tours and the 会話 bank
 (`conversation`). All of it is about 15,500 clips and 14 hours on the
-engine at Starter. The words, N5 to N1, fit their store's cap; the
-grammar store (examples, tours, conversation) is estimated past its
-120 MB, so it makes the examples first, and the conversation lines,
-made last, are the last the store would evict.
+engine at Starter. The words, N5 to N1, fit their store's cap, and
+the grammar store (examples, tours, conversation) fits its 500 MB; it
+still makes the examples first, so if the store ever filled, the
+conversation lines, made last, would be the last it evicted.
 
 The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
 which voices only lines the catalogue says, by who says them: the reader
