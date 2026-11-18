@@ -12,11 +12,13 @@ import { tokenTimes, sungAt } from './wordTimes'
 // right column follow it.
 //
 // A grammar point -- a construction or a particle's marker, the rows of
-// GrammarPoints `numbered` -- is framed on the words it sits on, its
-// number at the frame's corner, so the card in the left column and its
-// place in the sentence are found from either (the owner's G2). The
-// words inside a frame stand together, as the one word they make. A word two points cover is framed once, by the
-// first; the frame then carries every number whose point begins in it.
+// GrammarPoints -- is framed on the words it sits on: a hairline, and
+// no number since plan 325 (the owner's pick B of the canvas "Tsuji
+// grammar highlights"). A card and its place in the sentence are found
+// from either by the light: the card in hand lights its words, and
+// their frame takes the ring's weight. The words inside a frame stand
+// together, as the one word they make. A word two points cover is
+// framed once, by the first.
 //
 // 字幕の流れ (2026-09-27): while the video is inside the line, its words
 // are read out as they are said -- the words to come faded, the word
@@ -37,7 +39,6 @@ export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhea
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   const points = numberedPointsOf(analysis)
   const owner = tokens.map(w => points.findIndex(p => coversToken(p, w)))
-  const firstOf = points.map(p => tokens.findIndex(w => coversToken(p, w)))
   const lineRef = useRef(null)
   useSung(analysis, playhead, playing, lineRef, timing)
 
@@ -71,9 +72,6 @@ export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhea
     }
     let j = i
     while (j + 1 < tokens.length && owner[j + 1] === p) j += 1
-    const numbers = firstOf
-      .map((first, q) => (first >= i && first <= j ? q + 1 : null))
-      .filter(Boolean)
     const run = []
     for (let k = i; k <= j; k += 1) run.push(word(k))
     // The point's words read as the one word they make (plan 272): て +
@@ -81,7 +79,6 @@ export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhea
     // press, but no gap between them.
     out.push(
       <span key={`pt-${i}`} className="anl-subs__pt">
-        {numbers.length > 0 && <span className="anl-subs__n" aria-hidden="true">{numbers.join('·')}</span>}
         <span className="anl-subs__words">{run}</span>
       </span>,
     )

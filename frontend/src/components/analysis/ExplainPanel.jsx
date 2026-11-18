@@ -18,7 +18,7 @@ import { wordGloss } from './tokens'
 //
 // Laid out as the owner's pick B of the same canvas's "The Construction
 // face": the line as its building blocks at a heading's size, each named
-// under it -- a word by its gloss, a point's run framed under its number
+// under it -- a word by its gloss, a point's run framed
 // as on the subtitle and named by its gloss -- then the prose, the
 // Japanese it names in the line's weight, "Explain again" a quiet word
 // under it, and the asking right under that. A block is a door: a
@@ -77,17 +77,15 @@ function Construction({ frame, explanation, analysis, onPoint, t }) {
 // A mark is no block: a comma or a full stop stands between them.
 const MARK = /^[\p{P}\p{S}\s]+$/u
 
-// The line as its blocks: a point's run one block, under its number --
-// the run SubtitleLine frames, its numbers those of every point that
-// starts in it -- each other word one; each named under it when the
-// breakdown names it.
+// The line as its blocks: a point's run one block -- the run
+// SubtitleLine frames, edged in the grammar's ink -- each other word
+// one; each named under it when the breakdown names it.
 function Blocks({ analysis, onWord, onPoint }) {
   const lang = useLang()?.lang
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   if (!tokens.length) return null
   const points = numberedPointsOf(analysis)
   const owner = tokens.map(w => points.findIndex(p => coversToken(p, w)))
-  const firstOf = points.map(p => tokens.findIndex(w => coversToken(p, w)))
   const out = []
   for (let i = 0; i < tokens.length;) {
     let j = i
@@ -99,13 +97,11 @@ function Blocks({ analysis, onWord, onPoint }) {
       i = j + 1
       continue
     }
-    const numbers = point ? firstOf.map((first, q) => (first >= i && first <= j ? q + 1 : null)).filter(Boolean) : []
     const gloss = point ? grammarGloss(point, lang) : wordGloss(tokens[i], lang)
     const word = i
     const open = point ? onPoint && (() => onPoint(point)) : onWord && tokens[i].vocab_match && (() => onWord(word))
     const body = (
       <>
-        {numbers.length > 0 && <span className="anl-blocks__n" aria-hidden="true">{numbers.join('·')}</span>}
         <span className="anl-blocks__jp" lang="ja">{surface}</span>
         <span className="anl-blocks__gloss" aria-hidden={gloss ? undefined : true}>{gloss || '\u00a0'}</span>
       </>

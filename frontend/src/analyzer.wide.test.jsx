@@ -498,12 +498,14 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     expect(fold.getAttribute('aria-expanded')).toBe('false')
   })
 
-  it('walks the sentences from the bar and follows the grammar from its number', async () => {
+  it('walks the sentences from the bar and follows the grammar from its card', async () => {
     await openVideo()
-    expect($('.anl-subs__pt .anl-subs__n').textContent).toBe('1')
+    expect($('.anl-subs__pt')).not.toBeNull()
+    expect($('.anl-subs__n')).toBeNull()
     faceNamed('Grammaire').click()
     await settle()
-    expect($('.anl-face__points .anl-num').textContent).toBe('1')
+    expect($('.anl-face__points .bkd-point')).not.toBeNull()
+    expect($('.anl-face__points .anl-num')).toBeNull()
     $('button[aria-label="Phrase suivante"]').click()
     await settle()
     expect($('.anl-subs__count').textContent).toContain('2 / 2')
@@ -595,10 +597,11 @@ describe('the panel\'s three faces (plan 242)', () => {
     await expect.poll(() => $('.anl-explainpanel__body')?.textContent).toBe(EXPLANATION)
     expect(apiJson.mock.calls.filter(([u]) => String(u).includes('/explain')).length).toBe(1)
     // The line as its blocks (the owner's pick B): each word one, a
-    // point's run one under its number, framed, as on the subtitle.
+    // point's run one, framed, as on the subtitle.
     const tiles = $$('.anl-blocks__tile')
     expect(tiles.map(b => b.querySelector('.anl-blocks__jp').textContent)).toEqual(['雨', 'を', '見', 'ている'])
-    expect($$('.anl-blocks__tile--pt .anl-blocks__n').map(n => n.textContent)).toEqual(['1', '2'])
+    expect($$('.anl-blocks__tile--pt')).toHaveLength(2)
+    expect($('.anl-blocks__n')).toBeNull()
     // Each named under it: a word by its gloss, a point by its own.
     expect(tiles[0].querySelector('.anl-blocks__gloss').textContent).toBe('rain')
     expect(tiles[1].querySelector('.anl-blocks__gloss').textContent).toBe('object')
