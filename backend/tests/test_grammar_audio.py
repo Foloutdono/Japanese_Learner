@@ -38,6 +38,15 @@ def test_the_catalogue_says_each_line_by_its_speaker():
     assert not grammar_audio.speakable(example, "narrator")
 
 
+def test_every_reading_bank_sentence_is_said_by_the_reader():
+    # Reading practice says its sentence on reveal, and on a phone with
+    # no Japanese voice this store is the only voice it has.
+    from content.reading_sentences import BY_LEVEL
+    rows = [row for rows in BY_LEVEL.values() for row in rows]
+    assert rows
+    assert all(grammar_audio.speakable(row["jp"], "reader") for row in rows)
+
+
 def test_two_speakers_never_share_a_clip():
     _example, them, _me, _r = _lines()
     assert grammar_audio.clip_name(them, "them") != grammar_audio.clip_name(them, "me")

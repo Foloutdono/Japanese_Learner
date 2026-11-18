@@ -8,16 +8,18 @@ Make every clip the app can say, ahead of the learner (plan 235).
 -- What "everything" is ---------------------------------------
 Every line a route will voice is fixed by the content (ADR 0006): no
 endpoint says what a learner typed. So the clips that can ever exist are
-a finite list, and this walks all of it, in five parts:
+a finite list, and this walks all of it, in six parts:
 
   words         the card readings, /api/tts (study/word_tts.deck_readings)
   dictation     the 書取 bank (content/listening_clips.py)
   examples      every grammar point's example sentences, in the reader's voice
+  reading       the reading bank's sentences (content/reading_sentences.py),
+                in the reader's voice
   tours         each point's twists and scene (plan 187d)
   conversation  the 会話 bank (plan 217): the other person's lines in A's
                 voice, and every reply the learner can pick in B's
 
-The last three are one store, /api/grammar/audio (study/grammar_audio).
+The last four are one store, /api/grammar/audio (study/grammar_audio).
 Exam papers are not here: their clips hang off stored papers, so they
 need the database; `scripts.revoice_audio --yes` makes those.
 
@@ -31,9 +33,9 @@ the one a learner is served.
 Two stores are capped and evict their oldest clips past the cap:
 word_tts at 100 MB and grammar_audio at 500 MB. The words, N5 to N1,
 come to about 70 MB and fit, and so does the whole grammar store
-(examples, tours and conversation). The report still gives an
+(examples, reading, tours and conversation). The report still gives an
 estimate for each store, and the run still makes the grammar store's parts in
-the order examples, tours, conversation: if anything is evicted, it is
+the order examples, reading, tours, conversation: if anything is evicted, it is
 the examples, the least asked for, and never the conversation lines.
 
 -- Safe to stop, safe to run twice -----------------------------
@@ -85,7 +87,7 @@ logger = logging.getLogger("prewarm_all_audio")
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 # In the order they are made: within the grammar store, the most wanted
 # last, so the store's eviction (oldest first) reaches it last.
-PARTS = ("words", "dictation", "examples", "tours", "conversation")
+PARTS = ("words", "dictation", "examples", "reading", "tours", "conversation")
 
 # What the report assumes. A bound rather than a promise, measured on the
 # engine at Starter's 0.5 CPU (docs/adr/0019): a word ~2 s and ~10 KB
@@ -153,6 +155,10 @@ def _examples(level: str) -> list[Clip]:
             for ex in entry.get("examples", []) if ex.get("jp")]
 
 
+def _reading(level: str) -> list[Clip]:
+    return [_line("reading", level, jp, "reader") for jp in grammar_audio.reading_lines((level,))]
+
+
 def _tours(level: str) -> list[Clip]:
     out = []
     for entry in GRAMMAR_POINTS_BY_LEVEL.get(level, []):
@@ -185,6 +191,7 @@ BUILDERS = {
     "words": _words,
     "dictation": _dictations,
     "examples": _examples,
+    "reading": _reading,
     "tours": _tours,
     "conversation": _conversations,
 }
@@ -192,6 +199,7 @@ BUILDERS = {
 STORES = {
     "words": ("word", word_tts._MAX_BYTES),
     "examples": ("grammar", grammar_audio._MAX_BYTES),
+    "reading": ("grammar", grammar_audio._MAX_BYTES),
     "tours": ("grammar", grammar_audio._MAX_BYTES),
     "conversation": ("grammar", grammar_audio._MAX_BYTES),
 }

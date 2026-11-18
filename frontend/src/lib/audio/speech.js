@@ -203,7 +203,8 @@ function wordClipPath(text) {
 
 // A sentence's clip, from the grammar catalogue's reader (plan 187d):
 // the one server voice for a sentence, and only for a sentence the
-// catalogue says -- an example, a twist, a Choisir question.
+// catalogue says -- an example, a twist, a Choisir question -- or the
+// reading bank does (backend/content/reading_sentences.py).
 function sentenceClipPath(text) {
   return `/api/grammar/audio?text=${encodeURIComponent(text)}&who=reader`
 }
@@ -314,7 +315,7 @@ export function speakJapanese(text) {
 // The same two ways as a word, in the same order, with one difference:
 // the server's fallback is the grammar catalogue's reader, not /api/tts,
 // which declines a sentence. A sentence neither the device nor the
-// catalogue can say (a reading sentence on a phone with no Japanese
+// catalogue can say (a Tatoeba sentence on a phone with no Japanese
 // voice) is silence, as an unknown word is. Not cut at its commas the
 // way spokenForm cuts a packed reading: a sentence's 、 is a pause.
 export function speakSentence(text) {
