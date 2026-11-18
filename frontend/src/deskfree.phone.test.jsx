@@ -1629,8 +1629,8 @@ describe('the console (plans 124, 174)', () => {
     const floor = document.querySelector('.screen > .run-floor')
     expect(floor.getBoundingClientRect().height).toBe(60)
     expect(floor.querySelector('.run-floor__track').getAttribute('role')).toBe('progressbar')
-    // The meter follows the head, inside the stage.
-    expect(document.querySelector('.stage__head + .run-meter')).not.toBeNull()
+    // No meter under the head since plan 326.
+    expect(document.querySelector('.run-meter')).toBeNull()
     expect(getComputedStyle(document.querySelector('.rating-bar')).position).toBe('sticky')
   })
 })
@@ -1667,11 +1667,10 @@ describe('the three panels (plan 126)', () => {
     expect(bar.classList.contains('rating-bar--idle')).toBe(true)
     expect(bar.classList.contains('rating-bar--unlit')).toBe(false)
     expect([...document.querySelectorAll('.rating-bar__btn')].some(b => b.disabled)).toBe(false)
-    // The count left rides the meter since plan 174, its length the
-    // three left and no rating yet.
-    expect(document.querySelector('.today-remaining')).toBeNull()
-    expect(document.querySelectorAll('.run-meter__s')).toHaveLength(3)
-    expect(document.querySelector('.run-meter__n').textContent).toBe('0/ 3')
+    // The count left is the head's pill again since plan 326, which
+    // retired the meter under it.
+    expect(document.querySelector('.today-remaining').textContent).toBe('3')
+    expect(document.querySelector('.run-meter')).toBeNull()
     expect(document.querySelector('.screen > .run-floor')).not.toBeNull()
   })
 })
@@ -1803,11 +1802,10 @@ describe('the run\'s lines (plan 129)', () => {
     await settle(300)
     expect(document.querySelector('.screen').className).toBe('screen')
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
-    // The head's score rides the meter since plan 174, a segment for the
-    // one sentence rated, in its verdict's ink.
-    expect(document.querySelector('.stage__head .today-remaining')).toBeNull()
-    expect(document.querySelector('.run-meter__n').textContent).toBe('1 / 1')
-    expect(document.querySelector('.run-meter__s--done.run-meter__s--q5')).not.toBeNull()
+    // The head's score is its pill again since plan 326, which retired
+    // the meter under it.
+    expect(document.querySelector('.stage__head .today-remaining').textContent).toBe('1 / 1')
+    expect(document.querySelector('.run-meter')).toBeNull()
     expect(document.querySelector('.screen > .run-floor')).not.toBeNull()
     expect(document.querySelector('.stage .prose__breakdown button')).not.toBeNull()
     expect(document.querySelector('kbd')).toBeNull()

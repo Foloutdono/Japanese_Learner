@@ -23,6 +23,9 @@ import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import PromptCard from '../components/study/PromptCard'
 import HintBar from '../components/study/HintBar'
+import { CardStrip } from '../components/study/CardStrip'
+import { useFuriganaDefault } from '../hooks/useFuriganaDefault'
+import { hasStrip } from '../domain/cardContents'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import { speakJapanese, playUi, isSpeakOnReveal } from '../lib/audio'
@@ -124,6 +127,8 @@ export default function VocabRun({ session }) {
     mode,
     checkCached,
   })
+  // Furigana chosen in Réglages › Card contents (plan 326).
+  useFuriganaDefault(card, setActiveHints)
   const currentId = useRef(card?.card_id)
   useEffect(() => { currentId.current = card?.card_id }, [card?.card_id])
 
@@ -348,7 +353,7 @@ export default function VocabRun({ session }) {
         {card && !loading && (
           <>
             <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={gates.locked} speaks />
+                     onToggle={toggleHint} disabled={gates.locked} speaks personalize={hasStrip(card)} />
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}
@@ -476,6 +481,10 @@ export default function VocabRun({ session }) {
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
+
+            {/* The strip the learner chose (plan 326): under the card,
+                the question's part before the card is turned. */}
+            <CardStrip card={card} revealed={showRating} session={session} />
 
             <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>

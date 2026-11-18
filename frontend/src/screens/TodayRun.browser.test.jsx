@@ -60,9 +60,10 @@ function Gate() {
 }
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
-// The cards the run's meter (plan 174) has left: its segments not yet
-// rated -- the one in hand and the unlit ones after it.
-const left = root => root.querySelectorAll('.run-meter .run-meter__s:not(.run-meter__s--done)').length
+// The cards the run has left, the one in hand among them: the head's
+// pill (the meter under it that counted them since plan 174 is retired
+// by plan 326).
+const left = root => Number(root.querySelector('.today-remaining')?.textContent ?? NaN)
 
 function mount(entry = '/today/run') {
   return render(
@@ -101,14 +102,12 @@ describe('TodayRun', () => {
     await settle(300)
 
     // The stage, not a screen with a bar: ‹ Gate, the lane in the gate's
-    // words, the mode under it, the pass -- and under the head the run's
-    // meter (plan 174), a segment a card, the ones left unrated.
+    // words, the mode under it, the cards left in its pill, the pass.
     const stage = screen.container.querySelector('main.stage')
     expect(stage, `no stage — page: ${screen.container.textContent.slice(0, 300)}`).toBeTruthy()
     expect(document.querySelector('.hud')).toBeNull()
     expect(stage.querySelector('.stage__leave').textContent).toContain('Portique')
     expect(stage.querySelector('.stage__where-jp').textContent).toContain('Hiragana')
-    expect(stage.querySelector('.today-remaining')).toBeNull()
     expect(left(stage)).toBe(1)
     expect(stage.querySelector('.hstrip--solo [data-guide="hud.pass"]')).toBeTruthy()
     expect(stage.querySelector('.prompt-card')).toBeTruthy()

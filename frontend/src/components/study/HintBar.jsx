@@ -1,9 +1,10 @@
 import { useContext, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { RunPanelsContext } from './runPanels'
-import { PlusIcon } from '../ui/Icons'
+import { PlusIcon, MinusIcon, SlidersIcon } from '../ui/Icons'
 import SpeakToggle from './SpeakToggle'
 
 // ── The hint switch ───────────────────────────────────────────
@@ -32,11 +33,15 @@ import SpeakToggle from './SpeakToggle'
 //   speaks    — true when this card says its answer once revealed: the
 //               speak-on-reveal switch (SpeakToggle) then stands last in
 //               the row, and the row shows even with no hint to offer
+//   personalize — true on a card that can stand a strip (plan 326,
+//               domain/cardContents.hasStrip): its last pill, the
+//               sliders alone, opens Réglages › Card contents and comes
+//               back to the run, whose queue is kept (useCardSession)
 //
 // On the desk (plan 115) C shows and hides the choices, the one hint a
 // learner reaches for card after card — never Ctrl+C, never from a
 // field, never under a dialog — and the switch prints its cap.
-export default function HintBar({ available = [], active = [], onToggle, disabled = false, speaks = false }) {
+export default function HintBar({ available = [], active = [], onToggle, disabled = false, speaks = false, personalize = false }) {
   const { t } = useLang()
   const desk = useDesk()
   // On the run's panels the card panel lists the keys (plan 126).
@@ -53,7 +58,7 @@ export default function HintBar({ available = [], active = [], onToggle, disable
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [choices, onToggle])
-  if (available.length === 0 && !speaks) return null
+  if (available.length === 0 && !speaks && !personalize) return null
 
   const isOn = key => (active instanceof Set ? active.has(key) : active.includes(key))
 
@@ -86,13 +91,35 @@ export default function HintBar({ available = [], active = [], onToggle, disable
           >
             {/* Study.dc.html draws a plus, not a bulb: these ADD a
                 register to the card rather than offer a hint. */}
-            <PlusIcon size={14} />
+            {/* Since plan 326 the label is the register alone (the row
+                must hold on one line in every language, beside the
+                read-aloud and Personalize icons): the glyph says the
+                rest, a plus to add it, a minus once it is on. */}
+            {on ? <MinusIcon size={14} /> : <PlusIcon size={14} />}
             {on ? hideLabel : showLabel}
             {desk && !panels && key === 'indice_1' && <kbd className="desk-kbd" aria-hidden="true">C</kbd>}
           </button>
         )
       })}
       {speaks && <SpeakToggle />}
+      {personalize && <Personalize label={t.ccPersonalize} />}
     </div>
+  )
+}
+
+// Réglages › Card contents, and back to this run (plan 326).
+function Personalize({ label }) {
+  const location = useLocation()
+  return (
+    <Link
+      to="/profile/settings/cards"
+      state={{ back: `${location.pathname}${location.search}` }}
+      className="study-assist__toggle study-assist__toggle--icon study-assist__toggle--go"
+      aria-label={label}
+      title={label}
+      data-action="personalize"
+    >
+      <SlidersIcon size={14} />
+    </Link>
   )
 }

@@ -117,3 +117,11 @@ class TestQueryBounds:
         assert resp.status_code == 422
         resp = client.post("/api/decks", json={"name": "   ", "type": "standard"})
         assert resp.status_code == 400
+
+
+def test_card_extras_ids_are_bounded():
+    """plan 326: a run asks for its batch's strips, never a deck's -- the
+    id list is bounded at the query, and the extras at thirty cards."""
+    assert client.get("/api/card-extras", params={"ids": "x" * 3001}).status_code == 422
+    assert client.get("/api/card-extras", params={"ids": "vocab_N4_届ける_とどける"}).status_code == 200
+    assert client.get("/api/card-extras", params={"ids": "a", "lang": "x" * 9}).status_code == 422

@@ -126,4 +126,6 @@ export default {
     ios: 'Mantén pulsada la pantalla de bloqueo, toca Personalizar y añade Tsuji.',
     android: 'Mantén pulsada la pantalla de inicio, toca Widgets y arrastra Tsuji hasta ella.',
   },
+  // Plan 326: añadido for agregado.
+  settingsCardsValue: n => `${n} añadido${n === 1 ? '' : 's'}`,
 }

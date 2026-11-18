@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **326**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **327**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -441,6 +441,18 @@ runtime purpose.
   never copies back. `python -m scripts.backfill_video_library` brings in
   the videos analysed before it, once, after the deploy; `privacy.html`
   says it in the three languages.
+- **A card's strip says what the dictionary says, and never answers the
+  card (plan 326).** Réglages › Card contents (`user_profiles.card_contents`,
+  `study/card_contents.py`) adds rows under a flip card's answer, served by
+  `/api/card-extras` from the dictionary's own data in the learner's
+  language (`study/card_extras.py`); a piece the content lacks is absent,
+  never invented. What may stand over the QUESTION is the client's rule,
+  `domain/cardContents.fieldsFor`: only on word → meaning, and a sentence
+  there never with its translation. A verb's pair comes from
+  `datas/vocab/verb_pairs.json`, written by hand and held to JMdict's
+  vt/vi tags (`tests/test_card_extras.py`), never guessed from a shared
+  kanji; a deck rename moves its key there too. A new field is added to
+  both `FIELDS` (the test holds them equal) with its locale lines.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
