@@ -43,6 +43,29 @@ class FrenchLayerTests(unittest.TestCase):
         missing = sorted(sentences - set(french))
         self.assertEqual(missing[:10], [], f"{len(missing)} deck sentences without French")
 
+    def test_every_sentence_the_dictionary_holds_has_french_and_spanish(self) -> None:
+        # Not only the deck's first senses: reading practice serves any
+        # sense's sentences (a pool word's, a deck word's past the senses
+        # its entry shows), and /api/grammar/audio voices only a sentence
+        # the layer holds. 160 under か, から, 掛かる... once had neither.
+        import json
+        import sqlite3
+        from content import example_fixes
+        conn = sqlite3.connect(f"file:{jmdict_db._DB_PATH}?mode=ro", uri=True)
+        fixes = example_fixes.fixes()
+        sentences = set()
+        for table in ("senses", "curated_senses"):
+            for (blob,) in conn.execute(f"SELECT blob FROM {table}"):
+                for sense in json.loads(blob):
+                    for ex in sense.get("examples", []):
+                        jp = ex.get("jp")
+                        if jp:
+                            sentences.add(fixes[jp]["jp"] if jp in fixes else jp)
+        for lang in jmdict_fr.LANGS:
+            missing = sorted(jp for jp in sentences if jmdict_fr.example(jp, lang) is None)
+            self.assertEqual(missing[:10], [], f"{len(missing)} sentences without their {lang} "
+                             "(scripts/build_jmdict_fr.py)")
+
 
 class DictionaryEntryTests(unittest.TestCase):
     def test_a_french_entry_reads_in_french_and_says_so(self) -> None:

@@ -69,7 +69,7 @@ def test_every_word_reading_n5_to_n1_is_planned_once():
 
 
 def test_a_planned_line_is_one_the_route_will_serve():
-    for clip in prewarm.plan(("examples", "tours", "conversation"), prewarm.LEVELS):
+    for clip in prewarm.plan(("examples", "reading", "tours", "conversation"), prewarm.LEVELS):
         _, who, text = clip.key
         assert grammar_audio.speakable(text, who), clip
 

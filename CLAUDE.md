@@ -874,16 +874,18 @@ python -m scripts.prewarm_all_audio --yes          # ... and make it (--part, --
 
 `prewarm_all_audio` gathers the three warm-ups into one run over every
 line the app can say, at every level: the card readings (`words`),
-dictation, the catalogue's examples, the tours and the 会話 bank
-(`conversation`). All of it is about 15,500 clips and 14 hours on the
-engine at Starter. The words, N5 to N1, fit their store's cap; the
-grammar store (examples, tours, conversation) is estimated past its
-120 MB, so it makes the examples first, and the conversation lines,
-made last, are the last the store would evict.
+dictation, the catalogue's examples, the reading bank's sentences
+(`reading`), the tours and the 会話 bank (`conversation`). All of it is about 15,500 clips and 14 hours on the
+engine at Starter. The words, N5 to N1, fit their store's cap, and
+the grammar store (examples, tours, conversation) fits its 500 MB; it
+still makes the examples first, so if the store ever filled, the
+conversation lines, made last, would be the last it evicted.
 
 The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
 which voices only lines the catalogue says, by who says them: the reader
-for an example or a twist, speaker A for the other person in a scene and
+for an example, a twist, a reading-bank sentence or a Tatoeba sentence
+the French layer holds (reading practice's voice on a phone without a
+Japanese one; the Tatoeba ones are made on request, never prewarmed), speaker A for the other person in a scene and
 B for the learner. `build_grammar_audio` makes them ahead of the first
 learner, as `build_dictation_audio` does for dictation; without it each
 line is made on the request that wants it. Without `--tours` it also
