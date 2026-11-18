@@ -27,13 +27,23 @@
 # reader's voice: reading practice says its sentence once the answer is
 # out, and on a phone with no Japanese voice this store is the only way
 # it can (lib/audio/speech.js, speakSentence). Hand-written and finite,
-# like the rest; the Tatoeba sentences reading also serves are not here.
+# like the rest.
+#
+# And the Tatoeba sentences reading serves past the bank (a deck word's
+# examples, a pool word's): the reader says any sentence the French layer
+# holds (content/jmdict_fr.example, which also answers for a sentence the
+# course corrected or wrote, content/example_fixes). Some 28k sentences,
+# too many for a set held in memory, so they are asked of the layer's
+# indexed SQLite rather than added to catalog(); still a fixed list, never
+# what a learner typed. They are made on the request that wants them, not
+# ahead (prewarm_all_audio leaves them out): all of them would fill the
+# store past its cap, and the cap evicts the oldest first.
 import logging
 import os
 import threading
 from functools import lru_cache
 
-from content import reading_sentences
+from content import jmdict_fr, reading_sentences
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from study import conversation
 from study import voice_engine as engine
@@ -118,7 +128,17 @@ def conversation_lines() -> list[tuple[list[str], list[str]]]:
 
 
 def speakable(text: str, who: str) -> bool:
-    return who in SPEAKERS and isinstance(text, str) and text in catalog()[who]
+    if who not in SPEAKERS or not isinstance(text, str) or not text:
+        return False
+    if text in catalog()[who]:
+        return True
+    return who == "reader" and is_corpus_sentence(text)
+
+
+def is_corpus_sentence(text: str) -> bool:
+    """A Tatoeba sentence the app serves: one the French layer holds, or
+    one the course corrected or wrote (both answered by jmdict_fr.example)."""
+    return jmdict_fr.example(text) is not None
 
 
 def clip_dir() -> str:
@@ -172,4 +192,4 @@ def clip_for(text: str, who: str, *, force: bool = False) -> str:
     return path
 
 
-__all__ = ["SPEAKERS", "READER_SLOT", "TTSFailed", "catalog", "conversation_lines", "speakable", "clip_for", "clip_dir", "clip_name"]
+__all__ = ["SPEAKERS", "READER_SLOT", "TTSFailed", "catalog", "conversation_lines", "speakable", "is_corpus_sentence", "clip_for", "clip_dir", "clip_name"]
