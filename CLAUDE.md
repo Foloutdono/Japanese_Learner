@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **327**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **328**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -452,7 +452,10 @@ runtime purpose.
   `datas/vocab/verb_pairs.json`, written by hand and held to JMdict's
   vt/vi tags (`tests/test_card_extras.py`), never guessed from a shared
   kanji; a deck rename moves its key there too. A new field is added to
-  both `FIELDS` (the test holds them equal) with its locale lines.
+  both `FIELDS` (the test holds them equal) with its locale lines. A
+  run changes the choice in a panel over the card (`CardContentsSheet`,
+  plan 327), never by leaving the queue, and the strip's sentence opens
+  its breakdown only once the card is turned.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

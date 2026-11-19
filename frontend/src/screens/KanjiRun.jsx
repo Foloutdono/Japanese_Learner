@@ -24,7 +24,7 @@ import { useReviewGates } from '../hooks/useReviewGates'
 import PromptCard from '../components/study/PromptCard'
 import HintBar from '../components/study/HintBar'
 import { CardStrip } from '../components/study/CardStrip'
-import { hasStrip } from '../domain/cardContents'
+import { hasStrip, lineOf } from '../domain/cardContents'
 import ReadingsInput from '../components/study/ReadingsInput'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
@@ -338,7 +338,7 @@ export default function KanjiRun({ session }) {
         {card && !loading && !glyphing && (
           <>
             <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={gates.locked} personalize={hasStrip(card)} />
+                     onToggle={toggleHint} disabled={gates.locked} personalize={hasStrip(card) ? lineOf(card) : null} session={session} />
             <CardTransition
               className="specimen-card-stage"
               cardKey={card.card_id}
