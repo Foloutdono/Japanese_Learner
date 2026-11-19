@@ -42,6 +42,9 @@ vi.mock('../dictionary/DictionaryDetail', () => ({
   speakJapanese: (...a) => speak(...a),
   DictionaryLookupSheet: ({ term, category }) => <div className="test-sheet" data-term={term} data-category={category} />,
 }))
+vi.mock('./BreakdownSheet', () => ({
+  BreakdownSheet: ({ sentence, translation }) => <div className="test-breakdown" data-sentence={sentence} data-tr={translation} />,
+}))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { CardStrip } = await import('./CardStrip')
@@ -106,6 +109,27 @@ describe('the strip under the card', () => {
     expect($('.test-sheet').dataset.category).toBe('kanji')
   })
 
+  it('breaks the sentence down once turned, never over the question (plan 327)', async () => {
+    await strip(word('vocab.flashcard.f2b'), false)
+    expect($('[data-action="strip-breakdown"]')).toBeNull()
+    await cleanup()
+    await strip(word('vocab.flashcard.f2b'), true)
+    $('[data-action="strip-breakdown"]').click()
+    await settle(40)
+    expect($('.test-breakdown').dataset.sentence).toBe('家に届けていただけますか。')
+    expect($('.test-breakdown').dataset.tr).toBe('Pourriez-vous me le livrer à domicile ?')
+  })
+
+  it('asks again when the choice changes under the same card (plan 327)', async () => {
+    await strip(word('vocab.flashcard.f2b'), true)
+    const asked = () => apiJson.mock.calls.filter(([p]) => p.startsWith('/api/card-extras')).length
+    expect(asked()).toBe(1)
+    const { setCardContents } = await import('../../stores/cardContents')
+    await setCardContents('vocab', ['example'], session)
+    await settle()
+    expect(asked()).toBe(2)
+  })
+
   it('says the sentence', async () => {
     await strip(word('vocab.flashcard.f2b'), true)
     $(`button[aria-label="${fr.ccPlaySentence}"]`).click()
@@ -121,15 +145,17 @@ describe('the strip under the card', () => {
 })
 
 describe('Personalize', () => {
-  it('is the row\'s last pill, the sliders alone, and leads to Card contents with the way back', async () => {
+  it('is the row\'s last pill, the sliders alone, and opens the panel over the run (plan 327)', async () => {
     await render(
       <LangProvider>
         <MemoryRouter initialEntries={['/learn/vocab/N4/vocab.flashcard.f2b']}>
           <Routes>
             <Route path="/learn/vocab/:level/:mode" element={
-              <HintBar available={['indice_1', 'indice_3']} active={[]} onToggle={() => {}} speaks personalize />
+              <>
+                <HintBar available={['indice_1', 'indice_3']} active={[]} onToggle={() => {}} speaks personalize="kanji" session={session} />
+                <div className="test-card">card</div>
+              </>
             } />
-            <Route path="/profile/settings/cards" element={<CardContentsPage session={session} />} />
           </Routes>
         </MemoryRouter>
       </LangProvider>,
@@ -145,8 +171,10 @@ describe('Personalize', () => {
     expect(top.size).toBe(1)
     go.click()
     await settle()
-    expect($('.cc-row')).not.toBeNull()
-    expect($('.stage__leave').textContent).toContain(fr.back)
+    // A panel, the run left standing under it, opened on the card's line.
+    expect($('[role="dialog"].cc-sheet')).not.toBeNull()
+    expect($('.test-card')).not.toBeNull()
+    expect($$('.cc-sheet .cc-row').map(r => r.dataset.field)).toEqual(['words', 'radical', 'strokes'])
   })
 })
 
@@ -156,6 +184,11 @@ describe('Réglages › Card contents', () => {
     await settle()
     const rows = $$('.cc-row')
     expect(rows.map(r => r.dataset.field)).toEqual(['furigana', 'sentence', 'example', 'kanji', 'meanings', 'pair', 'verb'])
+    // The owner's pick C (plan 327): each side headed by its kanji in a
+    // ring and its name, each row opening on its field's kanji.
+    expect($$('.cc-group__head').map(h => h.textContent)).toEqual([`問${fr.ccQuestion}`, `答${fr.ccAnswer}`])
+    expect($$('.cc-group')[0].getAttribute('aria-labelledby')).toBe($$('.cc-group__title')[0].id)
+    expect(rows.map(r => r.querySelector('.cc-row__glyph').textContent).join('')).toBe('ふ文例漢意対動')
     const switches = $$('.cc-row [role="switch"]')
     expect(switches.map(s => s.getAttribute('aria-checked'))).toEqual(['false', 'true', 'true', 'true', 'false', 'true', 'true'])
     switches[4].click()

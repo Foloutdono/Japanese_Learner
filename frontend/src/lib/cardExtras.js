@@ -91,9 +91,13 @@ function subscribe(fn) {
 export function useCardExtras(id, lang, session, active, also = []) {
   const extras = useSyncExternalStore(subscribe, () => (id ? peekCardExtras(id, lang) : undefined))
   const alsoKey = also.join(',')
+  // `missing` re-asks once the kept strips are forgotten: a change of
+  // choice in the panel over the run (plan 327) leaves the same card in
+  // hand, so nothing else here moves.
+  const missing = extras === undefined
   useEffect(() => {
-    if (!active || !id) return
+    if (!active || !id || !missing) return
     askCardExtras([id, ...(alsoKey ? alsoKey.split(',') : [])], lang, session)
-  }, [active, id, lang, session, alsoKey])
+  }, [active, id, lang, session, alsoKey, missing])
   return extras
 }

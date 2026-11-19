@@ -6,7 +6,8 @@ import { useCardExtras } from '../../lib/cardExtras'
 import { useCardContents } from '../../stores/cardContents'
 import { choseAny, fieldsFor, hasStrip } from '../../domain/cardContents'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
-import { ChevronIcon } from '../ui/Icons'
+import { ChevronIcon, TextLinesIcon } from '../ui/Icons'
+import { BreakdownSheet } from './BreakdownSheet'
 
 // ── 札の帯 — the strip under a flip card (plan 326) ─────────────────
 // The owner's pick B of the canvas "Tsuji — card templates": the card
@@ -17,7 +18,9 @@ import { ChevronIcon } from '../ui/Icons'
 // its translation: domain/cardContents.js); once turned, the rest. Each
 // row about another entry (a kanji, the pair, a word with the kanji,
 // the word's forms) opens that entry in the dictionary's sheet, over
-// the run, which keeps its place; the sentence has its own voice.
+// the run, which keeps its place; the sentence has its own voice and,
+// once the card is turned (plan 327), its breakdown: never over the
+// question, where the breakdown's gloss of the word would answer it.
 // A learner who chose nothing sees nothing, and asks for nothing.
 
 function Sentence({ example }) {
@@ -50,6 +53,7 @@ export function CardStrip({ card, revealed, session, next = [] }) {
   const asks = wanted && (question.length > 0 || answer.length > 0)
   const extras = useCardExtras(card?.card_id, content, session, asks, next)
   const [entry, setEntry] = useState(null)
+  const [brokenDown, setBrokenDown] = useState(false)
 
   if (!asks || !extras) return null
   const fields = new Set(revealed ? answer : question.filter(f => f === 'sentence'))
@@ -68,12 +72,23 @@ export function CardStrip({ card, revealed, session, next = [] }) {
           {/* The translation is the answer's alone. */}
           {revealed && fields.has('example') && example.tr && <span className="cstrip__tr">{example.tr}</span>}
         </span>
-        <button
-          type="button" className="reveal-action-btn" aria-label={t.ccPlaySentence} title={t.ccPlaySentence}
-          onClick={e => { e.stopPropagation(); speakJapanese(example.jp) }}
-        >
-          <SpeakIcon />
-        </button>
+        <span className="cstrip__acts">
+          <button
+            type="button" className="reveal-action-btn" aria-label={t.ccPlaySentence} title={t.ccPlaySentence}
+            onClick={e => { e.stopPropagation(); speakJapanese(example.jp) }}
+          >
+            <SpeakIcon />
+          </button>
+          {revealed && session && (
+            <button
+              type="button" className="reveal-action-btn" aria-label={t.breakdownSentence} title={t.breakdownSentence}
+              data-action="strip-breakdown"
+              onClick={e => { e.stopPropagation(); playClick(); setBrokenDown(true) }}
+            >
+              <TextLinesIcon />
+            </button>
+          )}
+        </span>
       </div>,
     )
   }
@@ -146,6 +161,12 @@ export function CardStrip({ card, revealed, session, next = [] }) {
   return (
     <>
       <div className="cstrip" data-guide="card.strip">{rows}</div>
+      {brokenDown && revealed && example && (
+        <BreakdownSheet
+          sentence={example.jp} translation={example.tr || null} session={session}
+          onClose={e => { e?.stopPropagation?.(); setBrokenDown(false) }}
+        />
+      )}
       {entry && (
         <DictionaryLookupSheet
           term={entry.term} kana={entry.kana} category={entry.category} session={session}

@@ -25,7 +25,7 @@ import PromptCard from '../components/study/PromptCard'
 import HintBar from '../components/study/HintBar'
 import { CardStrip } from '../components/study/CardStrip'
 import { useFuriganaDefault } from '../hooks/useFuriganaDefault'
-import { hasStrip } from '../domain/cardContents'
+import { hasStrip, lineOf } from '../domain/cardContents'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import { speakJapanese, playUi, isSpeakOnReveal } from '../lib/audio'
@@ -353,7 +353,7 @@ export default function VocabRun({ session }) {
         {card && !loading && (
           <>
             <HintBar available={availableHints} active={activeHints}
-                     onToggle={toggleHint} disabled={gates.locked} speaks personalize={hasStrip(card)} />
+                     onToggle={toggleHint} disabled={gates.locked} speaks personalize={hasStrip(card) ? lineOf(card) : null} session={session} />
             <CardTransition
               className="vocab-card-boost"
               cardKey={card.card_id}

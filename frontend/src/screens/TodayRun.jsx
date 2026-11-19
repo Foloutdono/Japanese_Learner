@@ -25,7 +25,7 @@ import RatingBar from '../components/study/RatingBar'
 import HintBar from '../components/study/HintBar'
 import { CardStrip } from '../components/study/CardStrip'
 import { useFuriganaDefault } from '../hooks/useFuriganaDefault'
-import { hasStrip } from '../domain/cardContents'
+import { hasStrip, lineOf } from '../domain/cardContents'
 import SpeakToggle from '../components/study/SpeakToggle'
 import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import SessionError from '../components/study/SessionError'
@@ -549,7 +549,7 @@ export default function TodayRun({ session }) {
             <HintBar
               available={availableHints} active={activeHints}
               onToggle={toggleHint} disabled={gates.locked} speaks={speaksWord}
-              personalize={hasStrip(card)}
+              personalize={hasStrip(card) ? lineOf(card) : null} session={session}
             />
 
             <CardTransition

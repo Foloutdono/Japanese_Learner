@@ -1,11 +1,12 @@
-import { useContext, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useContext, useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
+import { playClick } from '../../lib/audio'
 import { RunPanelsContext } from './runPanels'
 import { PlusIcon, MinusIcon, SlidersIcon } from '../ui/Icons'
 import SpeakToggle from './SpeakToggle'
+import { CardContentsSheet } from '../settings/CardContentsPage'
 
 // ── The hint switch ───────────────────────────────────────────
 // A hint is something you reach for on a card you are stuck on, so it
@@ -33,16 +34,18 @@ import SpeakToggle from './SpeakToggle'
 //   speaks    — true when this card says its answer once revealed: the
 //               speak-on-reveal switch (SpeakToggle) then stands last in
 //               the row, and the row shows even with no hint to offer
-//   personalize — true on a card that can stand a strip (plan 326,
-//               domain/cardContents.hasStrip): its last pill, the
-//               sliders alone, opens Réglages › Card contents and comes
-//               back to the run, whose queue is kept (useCardSession)
+//   personalize — the line ('vocab' | 'kanji') of a card that can stand
+//               a strip (plan 326, domain/cardContents), else null: its
+//               last pill, the sliders alone, opens the Card contents
+//               panel over the run on that line (plan 327), the queue
+//               and the card left as they stand; `session` writes it
 //
 // On the desk (plan 115) C shows and hides the choices, the one hint a
 // learner reaches for card after card — never Ctrl+C, never from a
 // field, never under a dialog — and the switch prints its cap.
-export default function HintBar({ available = [], active = [], onToggle, disabled = false, speaks = false, personalize = false }) {
+export default function HintBar({ available = [], active = [], onToggle, disabled = false, speaks = false, personalize = null, session = null }) {
   const { t } = useLang()
+  const [personalizing, setPersonalizing] = useState(false)
   const desk = useDesk()
   // On the run's panels the card panel lists the keys (plan 126).
   const panels = useContext(RunPanelsContext)
@@ -102,24 +105,21 @@ export default function HintBar({ available = [], active = [], onToggle, disable
         )
       })}
       {speaks && <SpeakToggle />}
-      {personalize && <Personalize label={t.ccPersonalize} />}
+      {personalize && (
+        <button
+          type="button"
+          className="study-assist__toggle study-assist__toggle--icon study-assist__toggle--go"
+          aria-label={t.ccPersonalize}
+          title={t.ccPersonalize}
+          data-action="personalize"
+          onClick={() => { playClick(); setPersonalizing(true) }}
+        >
+          <SlidersIcon size={14} />
+        </button>
+      )}
+      {personalizing && personalize && (
+        <CardContentsSheet session={session} line={personalize} onClose={() => setPersonalizing(false)} />
+      )}
     </div>
-  )
-}
-
-// Réglages › Card contents, and back to this run (plan 326).
-function Personalize({ label }) {
-  const location = useLocation()
-  return (
-    <Link
-      to="/profile/settings/cards"
-      state={{ back: `${location.pathname}${location.search}` }}
-      className="study-assist__toggle study-assist__toggle--icon study-assist__toggle--go"
-      aria-label={label}
-      title={label}
-      data-action="personalize"
-    >
-      <SlidersIcon size={14} />
-    </Link>
   )
 }
