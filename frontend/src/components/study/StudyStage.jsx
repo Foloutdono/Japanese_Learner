@@ -8,7 +8,7 @@ import { useLang } from '../../LangContext'
 import { EntryDockContext } from './entryDock'
 import { RunPanelsContext, RunConsoleContext } from './runPanels'
 import { RunPanel } from './RunPanel'
-import { RunMeter, RunFloor } from './RunConsole'
+import { RunFloor } from './RunConsole'
 import { CardFlag } from '../feedback/FeedbackSheet'
 
 // ── The run's frame (plan 070) ────────────────────────────────
@@ -55,16 +55,15 @@ import { CardFlag } from '../feedback/FeedbackSheet'
 // (RunRecords).
 //
 // Below the desk a run with `records` wears the console instead (plan
-// 174, components/study/RunConsole.jsx): the run's meter under the head
-// -- a segment a rating, "n / total" when `remaining` is a count, the
-// run's own score when it is a string (a practice run's) -- and
-// the level on the floor in place of the level bar. The head's remaining
-// pill goes (the meter carries it) and so does the run's own hairline
-// (RunConsoleContext). `meter={false}` keeps a run on the old floor: the
-// comprehension run, whose answers are graded together at its end.
-// A node for `meter` stands in the meter's place on the console (the
-// conversation's route and stub, plan 237), null for nothing there yet;
-// the floor stays the console's.
+// 174, components/study/RunConsole.jsx): the level on the floor in place
+// of the level bar, and no hairline of its own (RunConsoleContext). The
+// console's meter under the head (a segment a rating) is gone since plan
+// 326, the owner's call, to give the card's strip its room: the head's
+// remaining pill says the count, or a practice run's score, again.
+// `meter={false}` keeps a run on the old floor: the comprehension run,
+// whose answers are graded together at its end. A node for `meter`
+// stands under the head (the conversation's route and stub, plan 237),
+// null for nothing there yet; the floor stays the console's.
 // `report` (plan 222, door B): `{ card }` once a card is answered, and
 // the head draws the card's flag after the screen's own aside
 // (components/feedback/FeedbackSheet.jsx, CardFlag); null before the
@@ -105,11 +104,11 @@ export function StudyStage({
         <EntryDockContext.Provider value={split}>
           <StageHead
             onLeave={onLeave} leaveLabel={leaveLabel} leaveWord={leaveWord}
-            where={where} sub={sub} tally={tally} remaining={panels || runConsole ? undefined : remaining}
+            where={where} sub={sub} tally={tally} remaining={panels ? undefined : remaining}
             pass={pass} onPass={openBalance} keys={!panels} help={panels}
             aside={report ? <>{aside}<CardFlag card={report.card} /></> : aside}
           />
-          {runConsole && (meter === true ? <RunMeter remaining={remaining ?? null} /> : meter)}
+          {runConsole && meter !== true && meter}
           {children}
         </EntryDockContext.Provider>
       </main>

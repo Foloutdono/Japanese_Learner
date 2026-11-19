@@ -17,6 +17,7 @@ import { SoundPage } from '../components/settings/SoundPage'
 import { RatingPage } from '../components/settings/RatingPage'
 import { ReadingPacePage } from '../components/settings/ReadingPacePage'
 import { ModesPage } from '../components/settings/ModesPage'
+import { CardContentsPage } from '../components/settings/CardContentsPage'
 import { HelpPage } from '../components/settings/HelpPage'
 import { AccountPage } from '../components/settings/AccountPage'
 import { CreditsPage } from '../components/settings/CreditsPage'
@@ -54,6 +55,7 @@ const PAGES = {
   rating: RatingPage,
   reading: ReadingPacePage,
   modes: ModesPage,
+  cards: CardContentsPage,
   help: HelpPage,
   write: WritePage,
   account: AccountPage,

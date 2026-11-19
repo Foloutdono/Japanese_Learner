@@ -10,6 +10,8 @@ import { useReadingPace } from '../../stores/readingPace'
 import { useProfileSummaryState } from '../../stores/profileSummary'
 import { useAgenda } from '../../stores/agenda'
 import { useTodaySummary } from '../../stores/today'
+import { useCardContents } from '../../stores/cardContents'
+import { CARD_LINES } from '../../domain/cardContents'
 import { openPaywall } from '../../stores/credits'
 import { useOfferable } from '../../hooks/useOfferable'
 import { paceFactor } from '../../domain/readingPace'
@@ -18,6 +20,7 @@ import { SOURCES } from '../../domain/paywall'
 import {
   ChevronIcon, MonitorIcon, SpeakerIcon, BellIcon, StarIcon, HourglassIcon,
   InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon, MessageIcon, ImportIcon, SlidersIcon,
+  PageIcon,
 } from '../ui/Icons'
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
@@ -58,6 +61,7 @@ function useGroups(session) {
   const { summary } = useProfileSummaryState()
   const { blocks } = useAgenda()
   const review = useTodaySummary().data?.review
+  const cards = useCardContents().data
 
   const langLabel = LANGUAGES.find(l => l.code === locale)?.label ?? locale
   const themeLabel = { auto: t.themeAuto, dark: t.themeDark, light: t.themeLight }[theme]
@@ -82,6 +86,7 @@ function useGroups(session) {
       { id: 'agenda', Icon: CalendarIcon, label: t.settingsAgenda, value: blocks?.length ? t.agdRowValue(blocks.length) : t.agdRowEmpty },
       { id: 'reviews', Icon: CardIcon, label: t.settingsReviews, value: reviewsValue(review, t, lang) },
       { id: 'modes', Icon: SlidersIcon, label: t.settingsModes, value: t.settingsModesValue },
+      { id: 'cards', Icon: PageIcon, label: t.settingsCards, value: cardsValue(cards, t) },
       { id: 'rating', Icon: StarIcon, iconProps: { filled: false }, label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
       { id: 'reading', Icon: HourglassIcon, label: t.settingsReadingPace, value: t.readingPaceOption[pace], spec: <PaceLine factor={paceFactor(pace)} /> },
       { id: 'help', Icon: InfoIcon, label: t.settingsHelp, value: t.settingsHelpValue },
@@ -93,6 +98,13 @@ function useGroups(session) {
       { id: 'credits', Icon: BooksIcon, label: t.settingsCredits, value: t.settingsCreditsCount(ATTRIBUTIONS.length) },
     ],
   ]
+}
+
+// What Settings › Card contents adds (plan 326): nothing, or how many.
+function cardsValue(cards, t) {
+  if (!cards) return ''
+  const n = CARD_LINES.reduce((sum, line) => sum + (cards[line]?.length ?? 0), 0)
+  return n ? t.settingsCardsValue(n) : t.settingsCardsValueNone
 }
 
 // What Settings › Reviews is set to (plan 217): an absence ahead, a

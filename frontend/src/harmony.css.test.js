@@ -99,8 +99,6 @@ describe('調和 — the harmony rules (plan 174)', () => {
     // On the four, Easy is the blue key and Correct a plain one.
     expect(rule('.rating-bar__buttons--4 .rating-bar__btn--q5')).toContain('var(--rating-correct)')
     expect(decl(rule('.rating-bar__buttons--4 .rating-bar__btn.rating-bar__btn--q4'), 'background')).toBe('var(--key-face)')
-    // The run's meter wears the keys' inks too, as the learner's bar has them.
-    expect(rule('.run-meter__s--q4')).toContain('var(--verdict-q4)')
     expect(rule(':root[data-rating-scale="simple"]')).toContain('--verdict-q5: var(--rating-correct)')
   })
 

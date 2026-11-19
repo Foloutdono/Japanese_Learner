@@ -13,17 +13,9 @@ import { FareFigure } from '../chrome/Hud'
 // desk splits what its floor used to stack into the two places each
 // belongs.
 //
-//   RunMeter   under the head, this run: a segment a rating, in its
-//              verdict's ink (the rating tiles' own -- the pill above
-//              each word is this segment at the bar's scale), the one
-//              in hand lit, the rest unlit to the run's length, and
-//              "n / total" at its end. A run with no length -- a deck's
-//              open session, a practice run, which refill as they go --
-//              draws the ratings so far and the one in hand, and counts
-//              them alone -- or prints the score the run hands it (a
-//              practice run's "3 / 5", right of answered), which its head
-//              printed before. Past forty segments the gaps close into one
-//              bar.
+//   RunMeter   (retired by plan 326, the owner's call: the strip under
+//              the head went to give the card's strip its room; the
+//              head's remaining pill says the count again.)
 //   RunFloor   the floor, the level: the card's struck 辻 with its road
 //              filled to the climb (the HUD's own mark), the level, the
 //              climb's track with this run's gain lit on it, and the
@@ -34,46 +26,6 @@ import { FareFigure } from '../chrome/Hud'
 // The balance stays in the head (StageHead's pocket pass), where the
 // owner asked to keep it. Both read the run's tally (stores/runTally)
 // and the summary, so no screen hands them anything but the length.
-
-// A run's segment ink, by quality -- the rating tiles' classes.
-const Q_CLASS = q => `run-meter__s--q${Math.max(0, Math.min(5, q))}`
-
-// Past this many segments the meter is one bar: a hundred 2px slivers
-// with gaps read as a comb.
-const DENSE = 40
-// An open run's segments keep one width until there are this many; then
-// they share the bar as a run with a length does.
-const OPEN_FIXED = 24
-
-export function RunMeter({ remaining = null }) {
-  const { t } = useLang()
-  const { verdicts } = useRunTally()
-  const done = verdicts.length
-  const total = Number.isFinite(remaining) ? done + Math.max(0, remaining) : null
-  const score = typeof remaining === 'string' ? remaining : null
-  // A finished run with a length has no card in hand.
-  const slots = total ?? done + 1
-  const open = total == null
-  const dense = slots > DENSE
-  const fixed = open && slots <= OPEN_FIXED
-  const cls = ['run-meter', dense && 'run-meter--dense', fixed && 'run-meter--open'].filter(Boolean).join(' ')
-  return (
-    <div className={cls} role="img" aria-label={[t.runMeter(done, total), score].filter(Boolean).join(' · ')}>
-      <span className="run-meter__segs" aria-hidden="true">
-        {Array.from({ length: slots }, (_, i) => (
-          <i
-            key={i}
-            className={`run-meter__s${i < done ? ` run-meter__s--done ${Q_CLASS(verdicts[i])}` : i === done ? ' run-meter__s--now' : ''}`}
-          />
-        ))}
-      </span>
-      <b className="run-meter__n" aria-hidden="true">
-        {score ?? done}
-        {score == null && total != null && <small>/ {total}</small>}
-      </b>
-    </div>
-  )
-}
 
 // Where the next level waits on the track: the last tenth of the climb.
 const NEAR = 0.9

@@ -1833,11 +1833,24 @@ class RealLineWordTests(unittest.TestCase):
 
     def test_what_a_particle_says_where_no_point_is(self) -> None:
         for sentence, surface, start in (("儚き夢よ　いずこへゆかん", "よ", "(after a noun) calls out"),
-                                         ("誰にも止められはしない", "は", "(between a verb's stem and しない)"),
                                          ("怖くなんかないもん。ちょっとびっくりしただけだし。", "もん", "")):
             with self.subTest(sentence=sentence):
                 gloss = token_of(sentence, surface)["gloss"]
                 self.assertTrue(gloss["en"].startswith(start) and gloss["fr"])
+
+    def test_a_verbs_stem_and_shinai_is_the_point_since_324(self) -> None:
+        # は and も between a verb's stem and しない said what they did by
+        # a gloss of their own while no point was written on them; since
+        # plan 324 the catalogue's 〜はしない／〜もしない is, and a part
+        # a point is written on says it through the point (plan 266).
+        for sentence, surface in (("誰にも止められはしない", "は"),
+                                  ("満員電車で足を踏まれたのに、相手は謝りもしなかった。", "も")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                points = [g["pattern"] for g in token.get("grammar") or []]
+                self.assertIn("〜はしない／〜もしない", points)
+                meaning = token["grammar"][points.index("〜はしない／〜もしない")]["meaning"]
+                self.assertTrue(meaning["en"] and meaning["fr"] and meaning["es"])
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
@@ -2682,9 +2695,7 @@ class SeventhReviewWordTests(unittest.TestCase):
                                          ("なんでやねん、そんなん聞いてへんわ。", "そんなん", "(Kansai, casual) = そんなの"),
                                          ("なんでやねん、そんなん聞いてへんわ。", "て", "(before へん) = ている"),
                                          ("あかん、もう歩かれへん。", "れ", "(the west, before へん) can"),
-                                         ("ほんまに？それめっちゃおもろいやん。", "ほんまに", "(Kansai) really"),
-                                         ("満員電車で足を踏まれたのに、相手は謝りもしなかった。", "も",
-                                          "(between a verb's stem and しない) not even")):
+                                         ("ほんまに？それめっちゃおもろいやん。", "ほんまに", "(Kansai) really")):
             with self.subTest(sentence=sentence, surface=surface):
                 self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
         self.assertIsNotNone(token_of("あれは何ですか。", "あれ").get("vocab_match"))

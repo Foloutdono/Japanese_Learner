@@ -23,6 +23,9 @@ import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import ReadingsInput from '../components/study/ReadingsInput'
 import RatingBar from '../components/study/RatingBar'
 import HintBar from '../components/study/HintBar'
+import { CardStrip } from '../components/study/CardStrip'
+import { useFuriganaDefault } from '../hooks/useFuriganaDefault'
+import { hasStrip } from '../domain/cardContents'
 import SpeakToggle from '../components/study/SpeakToggle'
 import { useRevealSpeech } from '../hooks/useRevealSpeech'
 import SessionError from '../components/study/SessionError'
@@ -263,6 +266,9 @@ export default function TodayRun({ session }) {
     setTyped('')
     setShowEx(false)
   }, [card?.card_id, card?.mode, cardNonce])
+  // Furigana chosen in Réglages › Card contents (plan 326), after the
+  // reset above, since Today clears the hints for each card.
+  useFuriganaDefault(card, setActiveHints, { perCard: true })
 
   // The finish (plan 191, 終着): once the queue is genuinely empty —
   // never on a failed fetch, which the error branch below owns — a run
@@ -543,6 +549,7 @@ export default function TodayRun({ session }) {
             <HintBar
               available={availableHints} active={activeHints}
               onToggle={toggleHint} disabled={gates.locked} speaks={speaksWord}
+              personalize={hasStrip(card)}
             />
 
             <CardTransition
@@ -685,6 +692,9 @@ export default function TodayRun({ session }) {
             {/* Construire's entry, under the card as the practice runs
                 take theirs (plan 194). */}
             {entry && !answered && <BuildEntry entry={entry} t={t} />}
+
+            {/* The strip the learner chose (plan 326). */}
+            <CardStrip card={card} revealed={showRating} session={session} />
 
             {/* The bar comes up where Choisir's dock (on a phone) and
                 Construire's entry stood (plan 194). */}

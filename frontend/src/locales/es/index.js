@@ -751,7 +751,6 @@ const quiz = {
   levelUp:          '¡Nuevo nivel!',
   levelShort:       'Nv',
   // 上下 (plan 174): the run's meter under the head, for a screen reader.
-  runMeter:          (n, total) => (total == null ? `${n} calificada${n === 1 ? '' : 's'}` : `${n} de ${total}`),
 
 }
 
@@ -927,6 +926,32 @@ const stats = {
   levelStay:          l => `Seguir en ${l}`,
   // 主 — the mode each line is ridden in (plan 273), Settings › Main
   // modes and its confirm sheet.
+  // 札の中身 — Ajustes › Contenido de las tarjetas y la franja bajo la tarjeta (plan 326)
+  settingsCards:      'Contenido de las tarjetas',
+  settingsCardsValueNone: 'Tal como están',
+  settingsCardsValue: n => `${n} agregado${n === 1 ? '' : 's'}`,
+  ccQuestion:         'En la pregunta',
+  ccAnswer:           'Debajo de la respuesta',
+  ccHint:             'La pregunta solo ofrece lo que no delata la respuesta.',
+  ccField: {
+    furigana: 'Furigana', sentence: 'Una frase', example: 'Ejemplo', kanji: 'Sus kanji',
+    meanings: 'Otros significados', pair: 'Su par', verb: 'Tipo de verbo',
+    words: 'Palabras con él', radical: 'Radical', strokes: 'Trazos',
+  },
+  ccSample: {
+    sentence: 'Solo en japonés, nunca traducida',
+    kanji: 'entregar · alcanzar · llegar',
+    meanings: 'declarar (a las autoridades)',
+    pair: 'llegar, por sí solo',
+    verb: 'Verbo ichidan · transitivo',
+    words: 'enviar · emisión',
+    radical: 'caminar',
+  },
+  ccAlso:             'También',
+  ccForms:            'Formas',
+  ccStrokes:          n => `${n} trazos`,
+  ccPlaySentence:     'Escuchar la frase',
+  ccPersonalize:      'Personalizar las tarjetas',
   settingsModes:      'Modos principales',
   settingsModesValue: 'Uno por línea',
   settingsModesHint:  'Hoy enseña cada línea en su modo principal. Agrega otros de sus modos junto al principal, aquí o desde Hoy.',
@@ -1927,12 +1952,12 @@ const misc = {
   // components/study/HintBar.jsx. These replace the old "MCQ mode"
   // labels, because multiple choice is a help level now, not an
   // exercise.
-  hintChoicesShow:    'Mostrar opciones',
-  hintChoicesHide:    'Ocultar opciones',
-  hintSentencesShow:  'Mostrar una frase',
-  hintSentencesHide:  'Ocultar la frase',
-  hintFuriganaShow:   'Mostrar furigana',
-  hintFuriganaHide:   'Ocultar furigana',
+  hintChoicesShow:    'Opciones',
+  hintChoicesHide:    'Opciones',
+  hintSentencesShow:  'Frase',
+  hintSentencesHide:  'Frase',
+  hintFuriganaShow:   'Furigana',
+  hintFuriganaHide:   'Furigana',
   // The speak-on-reveal switch beside them (components/study/SpeakToggle.jsx):
   // the name stays, the title says what a tap does.
   speakOnReveal:      'Leer en voz alta al revelar',

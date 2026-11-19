@@ -884,6 +884,32 @@ const stats = {
   levelStay:          l => `Rester à ${l}`,
   // 主 — le mode de chaque ligne (plan 273), Réglages › Modes
   // principaux et sa feuille de confirmation.
+  // 札の中身 — Réglages › Contenu des cartes et le bandeau sous la carte (plan 326)
+  settingsCards:      'Contenu des cartes',
+  settingsCardsValueNone: 'Telles quelles',
+  settingsCardsValue: n => `${n} ajout${n > 1 ? 's' : ''}`,
+  ccQuestion:         'Sur la question',
+  ccAnswer:           'Sous la réponse',
+  ccHint:             'La question ne propose que ce qui ne trahit pas la réponse.',
+  ccField: {
+    furigana: 'Furigana', sentence: 'Une phrase', example: 'Exemple', kanji: 'Ses kanji',
+    meanings: 'Autres sens', pair: 'Sa paire', verb: 'Type de verbe',
+    words: 'Mots qui l’emploient', radical: 'Clé', strokes: 'Traits',
+  },
+  ccSample: {
+    sentence: 'En japonais seulement, jamais traduite',
+    kanji: 'livrer · parvenir · arriver',
+    meanings: 'déclarer (aux autorités)',
+    pair: 'parvenir, de lui-même',
+    verb: 'Verbe ichidan · transitif',
+    words: 'envoyer · émission',
+    radical: 'marche',
+  },
+  ccAlso:             'Aussi',
+  ccForms:            'Formes',
+  ccStrokes:          n => `${n} traits`,
+  ccPlaySentence:     'Écouter la phrase',
+  ccPersonalize:      'Personnaliser les cartes',
   settingsModes:      'Modes principaux',
   settingsModesValue: 'Un par ligne',
   settingsModesHint:  'Aujourd’hui t’apprend chaque ligne dans son mode principal. Ajoute d’autres modes à côté, ici ou depuis Aujourd’hui.',
@@ -1617,7 +1643,6 @@ const dictionary = {
   level:             'Niveau',
   levelShort:        'Niv',
   // 上下 (plan 174) : le compteur du trajet sous l'en-tête, pour un lecteur d'écran.
-  runMeter:          (n, total) => (total == null ? `${n} noté${n > 1 ? 's' : ''}` : `${n} sur ${total}`),
   listen:            'Écouter',
   displayedKanji:    'kanji affichés',
   displayedEntries:  'entrées affichées',
@@ -1884,12 +1909,12 @@ const misc = {
   // voir components/study/HintBar.jsx. Ils remplacent les anciens
   // libellés « QCM », le choix multiple étant désormais un niveau
   // d'aide et non un exercice.
-  hintChoicesShow:    'Afficher les choix',
-  hintChoicesHide:    'Masquer les choix',
-  hintSentencesShow:  'Afficher une phrase',
-  hintSentencesHide:  'Masquer la phrase',
-  hintFuriganaShow:   'Afficher les furigana',
-  hintFuriganaHide:   'Masquer les furigana',
+  hintChoicesShow:    'Choix',
+  hintChoicesHide:    'Choix',
+  hintSentencesShow:  'Phrase',
+  hintSentencesHide:  'Phrase',
+  hintFuriganaShow:   'Furigana',
+  hintFuriganaHide:   'Furigana',
   // L'interrupteur de la voix à côté (components/study/SpeakToggle.jsx) :
   // le nom reste, le titre dit ce que fait un appui.
   speakOnReveal:      'Lecture à la révélation',
