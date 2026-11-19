@@ -926,8 +926,8 @@ const stats = {
   settingsCards:      'Card contents',
   settingsCardsValueNone: 'As they are',
   settingsCardsValue: n => `${n} added`,
-  ccQuestion:         'On the question',
-  ccAnswer:           'Under the answer',
+  ccQuestion:         'The question',
+  ccAnswer:           'The answer',
   ccHint:             'The question only offers what cannot give the answer away.',
   ccField: {
     furigana: 'Furigana', sentence: 'A sentence', example: 'Example', kanji: 'Its kanji',

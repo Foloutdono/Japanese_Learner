@@ -888,8 +888,8 @@ const stats = {
   settingsCards:      'Contenu des cartes',
   settingsCardsValueNone: 'Telles quelles',
   settingsCardsValue: n => `${n} ajout${n > 1 ? 's' : ''}`,
-  ccQuestion:         'Sur la question',
-  ccAnswer:           'Sous la réponse',
+  ccQuestion:         'La question',
+  ccAnswer:           'La réponse',
   ccHint:             'La question ne propose que ce qui ne trahit pas la réponse.',
   ccField: {
     furigana: 'Furigana', sentence: 'Une phrase', example: 'Exemple', kanji: 'Ses kanji',

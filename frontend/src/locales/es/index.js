@@ -930,8 +930,8 @@ const stats = {
   settingsCards:      'Contenido de las tarjetas',
   settingsCardsValueNone: 'Tal como están',
   settingsCardsValue: n => `${n} agregado${n === 1 ? '' : 's'}`,
-  ccQuestion:         'En la pregunta',
-  ccAnswer:           'Debajo de la respuesta',
+  ccQuestion:         'La pregunta',
+  ccAnswer:           'La respuesta',
   ccHint:             'La pregunta solo ofrece lo que no delata la respuesta.',
   ccField: {
     furigana: 'Furigana', sentence: 'Una frase', example: 'Ejemplo', kanji: 'Sus kanji',

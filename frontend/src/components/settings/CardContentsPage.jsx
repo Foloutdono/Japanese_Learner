@@ -43,17 +43,29 @@ function Sample({ field, t }) {
   }
 }
 
+// The glyph before each row, the kanji that names the field (the
+// owner's pick C of plan 327's titles): 問 and 答 head the two sides.
+const GLYPHS = {
+  furigana: 'ふ', sentence: '文', example: '例', kanji: '漢', meanings: '意',
+  pair: '対', verb: '動', words: '語', radical: '部', strokes: '画',
+}
+
 function Rows({ line, side, fields, on, onFlip, t }) {
   if (fields.length === 0) return null
   return (
     <section className="cc-group" aria-labelledby={`cc-${line}-${side}`}>
-      <span className="cc-group__cap" id={`cc-${line}-${side}`}>{side === 'question' ? t.ccQuestion : t.ccAnswer}</span>
+      <div className="cc-group__head">
+        <span lang="ja" className="cc-group__seal" aria-hidden="true">{side === 'question' ? '問' : '答'}</span>
+        <h3 className="cc-group__title" id={`cc-${line}-${side}`}>{side === 'question' ? t.ccQuestion : t.ccAnswer}</h3>
+        <span className="cc-group__rule" aria-hidden="true" />
+      </div>
       <div className="stg-list">
         {fields.map(field => {
           const checked = on.includes(field)
           const labelId = `cc-${line}-${field}`
           return (
             <div key={field} className="stg-row cc-row" data-field={field}>
+              <span lang="ja" className="stg-row__icon cc-row__glyph" aria-hidden="true">{GLYPHS[field]}</span>
               <span className="stg-row__names">
                 <span className="stg-row__jp" id={labelId}>{t.ccField[field]}</span>
                 <Sample field={field} t={t} />

@@ -24575,7 +24575,36 @@ form.stage__foot > .btn-primary {
    own page uses (.bz-switch) and, under its name, the field shown on one
    of the course's words. */
 .cc-group { display: flex; flex-direction: column; gap: var(--sp-3); }
-.cc-group__cap { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* A side's heading (plan 327, the owner's pick C): 問 or 答 in a ring,
+   the side named in the serif, a hairline to the edge; each row then
+   opens on the kanji that names its field. */
+.cc-group__head { display: flex; align-items: center; gap: var(--sp-3); }
+.cc-group__seal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--sp-7);
+  height: var(--sp-7);
+  border: 2px solid var(--pass-ink);
+  border-radius: var(--r-pill);
+  font-family: var(--font-serif);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--pass-ink);
+}
+.cc-group__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.cc-group__rule { flex: 1; height: 1px; background: var(--surface-line); }
+.cc-row__glyph {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
 .cc-row__sample {
   display: block;
   font-size: var(--fs-sm);

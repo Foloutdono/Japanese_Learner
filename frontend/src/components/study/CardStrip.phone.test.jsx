@@ -184,6 +184,11 @@ describe('Réglages › Card contents', () => {
     await settle()
     const rows = $$('.cc-row')
     expect(rows.map(r => r.dataset.field)).toEqual(['furigana', 'sentence', 'example', 'kanji', 'meanings', 'pair', 'verb'])
+    // The owner's pick C (plan 327): each side headed by its kanji in a
+    // ring and its name, each row opening on its field's kanji.
+    expect($$('.cc-group__head').map(h => h.textContent)).toEqual([`問${fr.ccQuestion}`, `答${fr.ccAnswer}`])
+    expect($$('.cc-group')[0].getAttribute('aria-labelledby')).toBe($$('.cc-group__title')[0].id)
+    expect(rows.map(r => r.querySelector('.cc-row__glyph').textContent).join('')).toBe('ふ文例漢意対動')
     const switches = $$('.cc-row [role="switch"]')
     expect(switches.map(s => s.getAttribute('aria-checked'))).toEqual(['false', 'true', 'true', 'true', 'false', 'true', 'true'])
     switches[4].click()
