@@ -70,7 +70,7 @@ def test_a_rival_the_lesson_calls_the_same_is_never_offered():
     assert not offered, offered[:10]
 
 
-# A twin the catalogue joins to a point only through another (plan 325b):
+# A twin the catalogue joins to a point only through another (plan 328b):
 # no compare line names it beside the point, yet it says the same in the
 # point's hole: 日本語のみならず for 日本語ばかりか, 世界中で起きている after
 # 日本ばかりか as after 日本に限らず, 雨なら for 雨の場合, 急いだとしても for

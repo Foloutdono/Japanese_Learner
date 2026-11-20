@@ -80,7 +80,7 @@ def _same_family(pattern: str) -> frozenset[str]:
     なくてはいけない, which is the twin of ないといけない, so none of them
     is drawn as a filler in another's hole, where it would say the same.
 
-    The whole chain, not one link (plan 325b): it finds the twins no
+    The whole chain, not one link (plan 328b): it finds the twins no
     compare line names (のみならず in ばかりか's hole, なら in 場合's,
     としても in たところで's), and the points it joins that are not twins
     (通りに and うちに, through とともに) are only fillers that would have
