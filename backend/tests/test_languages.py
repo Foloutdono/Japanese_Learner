@@ -465,7 +465,12 @@ def stand_in(client):
         assert client.post(f"/api/decks/{deck}/cards", json={"front": "君の名前", "back": "きみのなまえ"}).status_code == 200
         assert client.post(f"/api/decks/{deck}/publish", json={}).status_code == 200
         scenario = client.get("/api/conversation/scenarios", params={"lang": "en"}).json()["scenarios"][0]["id"]
+        # every field a flip card can carry (plan 326), so the strip is read in the language
+        assert client.patch("/api/profile/learning", json={"cardContents": {
+            "vocab": ["furigana", "sentence", "example", "kanji", "meanings", "pair", "verb"],
+            "kanji": ["words", "radical", "strokes"]}}).status_code == 200
     cases = {
+        "/api/card-extras": "/api/card-extras?ids=" + quote("vocab_N4_届ける_とどける,kanji_N4_送"),
         "/api/basics/{unit_id}": f"/api/basics/{basics.units()[0]['id']}",
         "/api/composition/batch": "/api/composition/batch?level=N5",
         "/api/conversation/scenario/{scenario_id}": f"/api/conversation/scenario/{scenario}",

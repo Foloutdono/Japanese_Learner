@@ -22,11 +22,28 @@
 # B's every reply the learner can give -- the model reply, its
 # alternatives and the two wrong ones, as a tour's scene voices every
 # choice. The same two voices, the same store: a scene is a scene.
+#
+# And the reading bank's sentences (content/reading_sentences.py), in the
+# reader's voice: reading practice says its sentence once the answer is
+# out, and on a phone with no Japanese voice this store is the only way
+# it can (lib/audio/speech.js, speakSentence). Hand-written and finite,
+# like the rest.
+#
+# And the Tatoeba sentences reading serves past the bank (a deck word's
+# examples, a pool word's): the reader says any sentence the French layer
+# holds (content/jmdict_fr.example, which also answers for a sentence the
+# course corrected or wrote, content/example_fixes). Some 28k sentences,
+# too many for a set held in memory, so they are asked of the layer's
+# indexed SQLite rather than added to catalog(); still a fixed list, never
+# what a learner typed. They are made on the request that wants them, not
+# ahead (prewarm_all_audio leaves them out): all of them would fill the
+# store past its cap, and the cap evicts the oldest first.
 import logging
 import os
 import threading
 from functools import lru_cache
 
+from content import jmdict_fr, reading_sentences
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from study import conversation
 from study import voice_engine as engine
@@ -42,8 +59,9 @@ logger = logging.getLogger(__name__)
 SPEAKERS = {"reader": "reader", "them": "A", "me": "B"}
 
 _SUBDIR = "grammar"
-# The catalogue's lines come to a few thousand clips of ~20 KB.
-_MAX_BYTES = 120 * 1024 * 1024
+# The catalogue's lines and the reading bank come to a few thousand clips
+# of ~20 KB.
+_MAX_BYTES = 500 * 1024 * 1024
 _EVICT_TO = int(_MAX_BYTES * 0.75)
 
 _locks_guard = threading.Lock()
@@ -57,7 +75,8 @@ def _lock_for(key: str) -> threading.Lock:
 
 @lru_cache(maxsize=1)
 def catalog() -> dict[str, frozenset[str]]:
-    """Every line the tours say, by who says it."""
+    """Every line the tours, the 会話 bank and the reading bank say, by
+    who says it."""
     said: dict[str, set[str]] = {who: set() for who in SPEAKERS}
     for entries in GRAMMAR_POINTS_BY_LEVEL.values():
         for entry in entries:
@@ -77,7 +96,16 @@ def catalog() -> dict[str, frozenset[str]]:
     for them, me in conversation_lines():
         said["them"].update(them)
         said["me"].update(me)
+    said["reader"].update(reading_lines())
     return {who: frozenset(lines) for who, lines in said.items()}
+
+
+def reading_lines(levels=None) -> list[str]:
+    """The reading bank's sentences, said by the reader."""
+    return [row["jp"]
+            for level, rows in reading_sentences.BY_LEVEL.items()
+            if levels is None or level in levels
+            for row in rows if row.get("jp")]
 
 
 def conversation_lines() -> list[tuple[list[str], list[str]]]:
@@ -100,7 +128,17 @@ def conversation_lines() -> list[tuple[list[str], list[str]]]:
 
 
 def speakable(text: str, who: str) -> bool:
-    return who in SPEAKERS and isinstance(text, str) and text in catalog()[who]
+    if who not in SPEAKERS or not isinstance(text, str) or not text:
+        return False
+    if text in catalog()[who]:
+        return True
+    return who == "reader" and is_corpus_sentence(text)
+
+
+def is_corpus_sentence(text: str) -> bool:
+    """A Tatoeba sentence the app serves: one the French layer holds, or
+    one the course corrected or wrote (both answered by jmdict_fr.example)."""
+    return jmdict_fr.example(text) is not None
 
 
 def clip_dir() -> str:
@@ -154,4 +192,4 @@ def clip_for(text: str, who: str, *, force: bool = False) -> str:
     return path
 
 
-__all__ = ["SPEAKERS", "READER_SLOT", "TTSFailed", "catalog", "conversation_lines", "speakable", "clip_for", "clip_dir", "clip_name"]
+__all__ = ["SPEAKERS", "READER_SLOT", "TTSFailed", "catalog", "conversation_lines", "speakable", "is_corpus_sentence", "clip_for", "clip_dir", "clip_name"]

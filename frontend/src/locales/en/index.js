@@ -747,7 +747,6 @@ const quiz = {
   levelUp:          'Level up!',
   levelShort:       'Lv',
   // 上下 (plan 174): the run's meter under the head, for a screen reader.
-  runMeter:          (n, total) => (total == null ? `${n} rated` : `${n} of ${total}`),
 
 }
 
@@ -923,6 +922,32 @@ const stats = {
   levelStay:          l => `Stay at ${l}`,
   // 主 — the mode each line is ridden in (plan 273), Settings › Main
   // modes and its confirm sheet.
+  // 札の中身 — Réglages › Card contents and the strip under a card (plan 326)
+  settingsCards:      'Card contents',
+  settingsCardsValueNone: 'As they are',
+  settingsCardsValue: n => `${n} added`,
+  ccQuestion:         'The question',
+  ccAnswer:           'The answer',
+  ccHint:             'The question only offers what cannot give the answer away.',
+  ccField: {
+    furigana: 'Furigana', sentence: 'A sentence', example: 'Example', kanji: 'Its kanji',
+    meanings: 'Other meanings', pair: 'Its pair', verb: 'Verb type',
+    words: 'Words with it', radical: 'Radical', strokes: 'Strokes',
+  },
+  ccSample: {
+    sentence: 'In Japanese only, never its translation',
+    kanji: 'deliver · reach · arrive',
+    meanings: 'to report (to the authorities)',
+    pair: 'to reach, by itself',
+    verb: 'Ichidan verb · transitive',
+    words: 'to send · broadcast',
+    radical: 'walk',
+  },
+  ccAlso:             'Also',
+  ccForms:            'Forms',
+  ccStrokes:          n => `${n} strokes`,
+  ccPlaySentence:     'Play the sentence',
+  ccPersonalize:      'Personalize the cards',
   settingsModes:      'Main modes',
   settingsModesValue: 'One per line',
   settingsModesHint:  'Today teaches each line in its main mode. Add more of its modes beside it, here or from Today.',
@@ -1923,12 +1948,12 @@ const misc = {
   // components/study/HintBar.jsx. These replace the old "MCQ mode"
   // labels, because multiple choice is a help level now, not an
   // exercise.
-  hintChoicesShow:    'Show choices',
-  hintChoicesHide:    'Hide choices',
-  hintSentencesShow:  'Show a sentence',
-  hintSentencesHide:  'Hide the sentence',
-  hintFuriganaShow:   'Show furigana',
-  hintFuriganaHide:   'Hide furigana',
+  hintChoicesShow:    'Choices',
+  hintChoicesHide:    'Choices',
+  hintSentencesShow:  'Sentence',
+  hintSentencesHide:  'Sentence',
+  hintFuriganaShow:   'Furigana',
+  hintFuriganaHide:   'Furigana',
   // The speak-on-reveal switch beside them (components/study/SpeakToggle.jsx):
   // the name stays, the title says what a tap does.
   speakOnReveal:      'Speak on reveal',

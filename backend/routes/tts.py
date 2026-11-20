@@ -53,9 +53,10 @@ def study_audio(text: str = Query(min_length=1, max_length=64),
 # The examples and the scene a grammar point's tour plays, each in the
 # voice of who says it (study/grammar_audio.py). Unauthenticated for the
 # reason above: a line is served only if the catalogue says it, by that
-# speaker, so nothing per-learner and nothing invented is reachable.
+# speaker (or, for the reader, the reading bank or a Tatoeba sentence the
+# app serves), so nothing per-learner and nothing invented is reachable.
 @router.get("/api/grammar/audio")
-def grammar_audio(text: str = Query(min_length=1, max_length=80),
+def grammar_audio(text: str = Query(min_length=1, max_length=120),  # a Tatoeba sentence runs to 103
                   who: str = Query(default="reader", pattern="^(reader|them|me)$"),
                   v: str | None = Query(default=None, max_length=16)):  # noqa: ARG001 -- cache key only
     from study import grammar_audio as lines

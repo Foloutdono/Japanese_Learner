@@ -1808,12 +1808,10 @@ scrolls away:
 
 - **the run's console** (上下, plan 174, the owner's pick "console C
   refined"; `components/study/RunConsole.jsx`): a run with a tally splits
-  what its floor used to stack into the two places each belongs. Under the
-  head, **the meter** — a segment a rating in its verdict's ink (the rating
-  tile's own pill), the card in hand lit, the rest unlit to the run's
-  length, and `n / total` at its end; a run with no length draws the
-  ratings so far at one width, and past forty segments the gaps close into
-  one bar. On the floor, **the level** — the card's struck 辻 filled to the
+  what its floor used to stack. The meter it drew under the head (a
+  segment a rating) is retired since plan 326, the owner's call, to give
+  the card's strip its room: the head's pill says `n / total`, or a
+  practice run's score, again. On the floor, **the level** — the card's struck 辻 filled to the
   climb, the level, the track with this run's gain lit on it, the run's XP
   and the fare rising off it (`--run-floor-h`, 60px). The balance stays in
   the head's pocket pass, where the owner asked to keep it. A run without the console — no tally, or
@@ -1821,7 +1819,9 @@ scrolls away:
   would sit empty — keeps the old floor: the head's own count, the level
   bar, and the deck's hairline rule (three inks and no figures, the inks the
   card's own seal wears);
-- the hint switches are a row of pills under it;
+- the hint switches are one row of pills under the head (plan 326: the
+  hints say their register alone, `+ Choices`, so the row holds in every
+  language beside the read-aloud and Personalize icons);
 - **the card grows** to fill whatever the answer widget leaves, so a lone
   kana sits in the middle of a tall card and four choices under a kanji
   leave it its floor. The card's seal stays anchored to the card, not to the
@@ -2673,14 +2673,18 @@ line here says otherwise.
   and the shell's back button close it. Comprehension's button is in the
   open question's detail on the results. The thread, the five a sentence
   and the forty a day are the desk's.
-- **A graded sentence's breakdown is the analyser's, numbered** (plan 160,
+- **A graded sentence's breakdown is the analyser's, framed** (plan 160,
   the owner's pick A of five drawn on the canvas "Tsuji Breakdown Panel";
   every width, the phone's behind its toggle). The sentence line frames
-  each rule on its words under its number, in a well of its own; under
+  each rule on its words with a hairline in the grammar's green lifted
+  toward the ink, and no number (plan 325, the owner's pick B of the
+  canvas "Tsuji grammar highlights": the rule in hand, its card touched,
+  takes the line's own green at a ring's weight and its words the
+  tint), in a well of its own; under
   the translation the words, one row each, named as the dictionary names
   them (話す はなす where the sentence wrote 話し), glossed in the
   learner's language, the endings they were written with (ます, た) a
-  quiet tag after the meaning; then a numbered card per rule — the
+  quiet tag after the meaning; then a card per rule — the
   particles' markers and the constructions, in the sentence's order —
   with the words it is made of as chips, the word it attaches to unlit.
   A particle, the copula and a word a construction is written on with no
@@ -2700,7 +2704,7 @@ line here says otherwise.
   to the column's foot, the line's words on one strip under it; and one
   panel on the right whose segment (the console's `Seg`) turns it between
   the word's card in the runs' band -- following the token walked to
-  (←/→) and the word pressed -- the line's numbered grammar, a point
+  (←/→) and the word pressed -- the line's grammar, a point
   opening its lesson in that face with its ✕ giving the list back, and
   the line's construction, which Explain buys the first time the face is
   turned to: the line laid out as its blocks at `--fs-heading`, each

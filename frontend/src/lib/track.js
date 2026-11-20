@@ -177,7 +177,7 @@ export const VALUES = {
   transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
   transfer_offer: { choice: ['go', 'later'] },
   setting_change: {
-    setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target', 'main_mode', 'today_mode'],
+    setting: ['theme', 'lang', 'rating_scale', 'reading_pace', 'sound', 'notifications', 'level', 'lines', 'daily_target', 'main_mode', 'today_mode', 'card_contents'],
     value: ['light', 'dark', 'auto', 'fr', 'en', 'es', 'es-ES', 'binary', 'simple', 'full', 'standard', 'relaxed', 'slow', 'untimed', 'on', 'off', 'N5', 'N4', 'N3', 'N2', 'N1', 'changed'],
   },
   ai_use: { feature: ['ask', 'composition', 'translation_review', 'deep_analysis', 'exam_paper', 'line_translation', 'song_transcribe', 'conversation_talk', 'conversation_review', 'lyrics_sort', 'video_category', 'ocr', 'comprehension'] },

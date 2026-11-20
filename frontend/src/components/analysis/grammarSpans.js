@@ -39,11 +39,12 @@ export function isEnding(point) {
 
 // Every point the sentence reads by -- the particles' markers (を, で,
 // は), the constructions and the verb's endings -- in the order they
-// stand in the sentence, so the numbers on the cards and on the line
-// read left to right (plan 134, owner-directed; the practice
-// breakdown's too since plan 160; the endings' too since plan 324, the
-// owner's call). One list for GrammarPoints, the line's frames
-// (SentenceLine, SubtitleLine) and the card in focus.
+// stand in the sentence, so the cards read as the line does, left to
+// right (plan 134, owner-directed; the practice breakdown's too since
+// plan 160; the endings' too since plan 324, the owner's call). One
+// list for GrammarPoints, the line's frames (SentenceLine,
+// SubtitleLine) and the card in focus. The name is from when each wore
+// a number, on its card and on its words; plan 325 took the numbers off.
 export function numberedPointsOf(analysis) {
   return [...(analysis?.grammar ?? [])]
     .sort((a, b) => (a.start ?? 0) - (b.start ?? 0))

@@ -336,6 +336,25 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(gloss.clientHeight / parseFloat(getComputedStyle(gloss).lineHeight)).toBeCloseTo(2, 0)
   })
 
+  // The column is a quarter of the window: on one row with the word,
+  // its reading and its level, the gloss was left a few pixels and
+  // printed as slivers of letters. It stands whole under them, and the
+  // deck action takes the ground's width under the row.
+  it('prints each word\'s gloss whole under it in the side column', async () => {
+    await mount()
+    await analyze()
+    for (const row of $$('.anl-desk__side .anl-words__row')) {
+      const gloss = row.querySelector('.anl-words__gloss').getBoundingClientRect()
+      const word = row.querySelector('.anl-words__word').getBoundingClientRect()
+      expect(gloss.top).toBeGreaterThan(word.bottom - 1)
+      expect(gloss.width).toBeGreaterThan(row.getBoundingClientRect().width / 2)
+    }
+    const item = box('.anl-words__item')
+    const add = box('.anl-words__item .anl-words__add')
+    expect(add.top).toBeGreaterThan(box('.anl-words__item .anl-words__row').bottom - 1)
+    expect(add.width).toBeGreaterThan(item.width * 0.8)
+  })
+
   it('draws no ring round the result while the arrows walk it', async () => {
     await mount()
     await analyze()
@@ -494,10 +513,11 @@ describe('the analyser on the desk (plan 134)', () => {
     await mount()
     await analyze('雨を見ている')
     // The particle's marker and the construction, in the sentence's order.
-    expect($$('.anl-desk__points .anl-num').map(n => n.textContent)).toEqual(['1', '2'])
+    // No point wears a number, on its card or on its words (plan 325).
+    expect($('.anl-desk__points .anl-num')).toBeNull()
     expect($$('.anl-desk__points .bkd-point__pattern').map(n => n.textContent)).toEqual(['を', '〜ている'])
     const frames = $$('.anl-subs__pt')
-    expect(frames.map(f => f.querySelector('.anl-subs__n').textContent)).toEqual(['1', '2'])
+    expect($('.anl-subs__n')).toBeNull()
     expect([...frames[0].querySelectorAll('.tok__word')].map(w => w.textContent)).toEqual(['を'])
     expect([...frames[1].querySelectorAll('.tok__word')].map(w => w.textContent)).toEqual(['て', 'いる'])
 
@@ -506,6 +526,9 @@ describe('the analyser on the desk (plan 134)', () => {
     // The point is the card in focus: its words lit on the subtitle, its
     // card beside the list, its entry on the right.
     expect($$('.anl-subs .tok--lit').map(tk => tk.querySelector('.tok__word').textContent)).toEqual(['て', 'いる'])
+    // The frame in hand takes a ring's weight; the other stays a hairline.
+    expect(getComputedStyle($$('.anl-subs__pt')[1]).boxShadow).toContain('2px')
+    expect(getComputedStyle($$('.anl-subs__pt')[0]).boxShadow).toContain('1px')
     expect($('.anl-words__row--on')).toBeNull()
     expect($('.anl-words__item')).toBeNull()
     expect(shown()).toBe('〜ている')

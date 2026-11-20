@@ -1842,6 +1842,20 @@ class RealLineWordTests(unittest.TestCase):
         self.assertIn("〜はしない／〜もしない",
                       [g["pattern"] for g in token_of("誰にも止められはしない", "は").get("grammar") or []])
 
+    def test_a_verbs_stem_and_shinai_is_the_point_since_324(self) -> None:
+        # は and も between a verb's stem and しない said what they did by
+        # a gloss of their own while no point was written on them; since
+        # plan 324 the catalogue's 〜はしない／〜もしない is, and a part
+        # a point is written on says it through the point (plan 266).
+        for sentence, surface in (("誰にも止められはしない", "は"),
+                                  ("満員電車で足を踏まれたのに、相手は謝りもしなかった。", "も")):
+            with self.subTest(sentence=sentence):
+                token = token_of(sentence, surface)
+                points = [g["pattern"] for g in token.get("grammar") or []]
+                self.assertIn("〜はしない／〜もしない", points)
+                meaning = token["grammar"][points.index("〜はしない／〜もしない")]["meaning"]
+                self.assertTrue(meaning["en"] and meaning["fr"] and meaning["es"])
+
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class ChatAndStreamWordTests(unittest.TestCase):

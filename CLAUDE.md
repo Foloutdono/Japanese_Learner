@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **326**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **329**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -441,6 +441,21 @@ runtime purpose.
   never copies back. `python -m scripts.backfill_video_library` brings in
   the videos analysed before it, once, after the deploy; `privacy.html`
   says it in the three languages.
+- **A card's strip says what the dictionary says, and never answers the
+  card (plan 326).** Réglages › Card contents (`user_profiles.card_contents`,
+  `study/card_contents.py`) adds rows under a flip card's answer, served by
+  `/api/card-extras` from the dictionary's own data in the learner's
+  language (`study/card_extras.py`); a piece the content lacks is absent,
+  never invented. What may stand over the QUESTION is the client's rule,
+  `domain/cardContents.fieldsFor`: only on word → meaning, and a sentence
+  there never with its translation. A verb's pair comes from
+  `datas/vocab/verb_pairs.json`, written by hand and held to JMdict's
+  vt/vi tags (`tests/test_card_extras.py`), never guessed from a shared
+  kanji; a deck rename moves its key there too. A new field is added to
+  both `FIELDS` (the test holds them equal) with its locale lines. A
+  run changes the choice in a panel over the card (`CardContentsSheet`,
+  plan 327), never by leaving the queue, and the strip's sentence opens
+  its breakdown only once the card is turned.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -930,16 +945,18 @@ python -m scripts.prewarm_all_audio --yes          # ... and make it (--part, --
 
 `prewarm_all_audio` gathers the three warm-ups into one run over every
 line the app can say, at every level: the card readings (`words`),
-dictation, the catalogue's examples, the tours and the 会話 bank
-(`conversation`). All of it is about 15,500 clips and 14 hours on the
-engine at Starter. The words, N5 to N1, fit their store's cap; the
-grammar store (examples, tours, conversation) is estimated past its
-120 MB, so it makes the examples first, and the conversation lines,
-made last, are the last the store would evict.
+dictation, the catalogue's examples, the reading bank's sentences
+(`reading`), the tours and the 会話 bank (`conversation`). All of it is about 15,500 clips and 14 hours on the
+engine at Starter. The words, N5 to N1, fit their store's cap, and
+the grammar store (examples, tours, conversation) fits its 500 MB; it
+still makes the examples first, so if the store ever filled, the
+conversation lines, made last, would be the last it evicted.
 
 The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
 which voices only lines the catalogue says, by who says them: the reader
-for an example or a twist, speaker A for the other person in a scene and
+for an example, a twist, a reading-bank sentence or a Tatoeba sentence
+the French layer holds (reading practice's voice on a phone without a
+Japanese one; the Tatoeba ones are made on request, never prewarmed), speaker A for the other person in a scene and
 B for the learner. `build_grammar_audio` makes them ahead of the first
 learner, as `build_dictation_audio` does for dictation; without it each
 line is made on the request that wants it. Without `--tours` it also

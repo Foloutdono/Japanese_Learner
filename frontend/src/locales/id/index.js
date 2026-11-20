@@ -756,7 +756,6 @@ const quiz = {
   levelUp:          'Naik level!',
   levelShort:       'Lv',
   // 上下 (plan 174): the run's meter under the head, for a screen reader.
-  runMeter:          (n, total) => (total == null ? `${n} dinilai` : `${n} dari ${total}`),
 
 }
 
@@ -932,6 +931,31 @@ const stats = {
   levelStay:          l => `Tetap di ${l}`,
   // 主 — the mode each line is ridden in (plan 273), Settings › Main
   // modes and its confirm sheet.
+  settingsCards:      'Isi kartu',
+  settingsCardsValueNone: 'Apa adanya',
+  settingsCardsValue: n => `${n} ditambahkan`,
+  ccQuestion:         'Pertanyaan',
+  ccAnswer:           'Jawaban',
+  ccHint:             'Sisi pertanyaan hanya menampilkan hal yang tidak membocorkan jawabannya.',
+  ccField: {
+    furigana: 'Furigana', sentence: 'Sebuah kalimat', example: 'Contoh', kanji: 'Kanjinya',
+    meanings: 'Arti lain', pair: 'Pasangannya', verb: 'Jenis kata kerja',
+    words: 'Kata yang memakainya', radical: 'Radikal', strokes: 'Goresan',
+  },
+  ccSample: {
+    sentence: 'Hanya dalam bahasa Jepang, tanpa terjemahan',
+    kanji: 'mengantar · sampai · tiba',
+    meanings: 'melapor (kepada pihak berwenang)',
+    pair: 'sampai, dengan sendirinya',
+    verb: 'Kata kerja ichidan · transitif',
+    words: 'mengirim · siaran',
+    radical: 'berjalan',
+  },
+  ccAlso:             'Juga',
+  ccForms:            'Bentuk',
+  ccStrokes:          n => `${n} goresan`,
+  ccPlaySentence:     'Putar kalimatnya',
+  ccPersonalize:      'Atur isi kartu',
   settingsModes:      'Mode utama',
   settingsModesValue: 'Satu per jalur',
   settingsModesHint:  'Hari Ini mengajarkan setiap jalur dalam mode utamanya. Tambahkan mode lainnya di sampingnya, di sini atau dari Hari Ini.',

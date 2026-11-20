@@ -17,11 +17,11 @@ from core.rls import enable_rls
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import content_filter, credits, events, learner_modes, review_plan
+from core import content_filter, credits, events, learner_card_contents, learner_modes, review_plan
 from core.lines import clean_lines
 from content.kana_data import KANA_SETS
 from srs.xp import level_progress, next_milestone
-from study import banzuke, level_fit, level_rule, main_modes
+from study import banzuke, card_contents, level_fit, level_rule, main_modes
 from study import modes as study_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
@@ -194,6 +194,10 @@ def _init_db() -> None:
                 # every line in its default, nothing added.
                 ("main_modes", "JSONB"),
                 ("extra_modes", "JSONB"),
+                # 札の中身 — what a flip card shows besides its answer,
+                # {line: [field]} (plan 326, study/card_contents.py).
+                # NULL is never chosen: today's card, nothing added.
+                ("card_contents", "JSONB"),
                 # 署名 — the first name the card prints (plan 247), in
                 # any script: not the username, which stays the public
                 # handle. NULL = never asked (an account boarded before
@@ -674,6 +678,10 @@ class LearningPayload(BaseModel):
     # that line alone; the lines not sent keep theirs.
     mainModes: dict[str, str] | None = None
     extraModes: dict[str, list[str]] | None = None
+    # 札の中身 (plan 326): what a flip card shows besides its answer,
+    # {line: [field]}, from Réglages › Card contents. Each line sent
+    # replaces that line alone.
+    cardContents: dict[str, list[str]] | None = None
     # With a main mode changed: False starts the new mode from zero
     # rather than marking what the old one mastered known in it.
     # Unsent is True, the carry the confirm sheet leads with.
@@ -688,6 +696,11 @@ class LearningPayload(BaseModel):
     @classmethod
     def valid_extra_modes(cls, v):
         return main_modes.clean_extra(v)
+
+    @field_validator("cardContents")
+    @classmethod
+    def valid_card_contents(cls, v):
+        return card_contents.clean(v)
 
     @field_validator("uiLang")
     @classmethod
@@ -1226,6 +1239,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.extraModes is not None:
         sets.append("extra_modes = COALESCE(extra_modes, '{}'::jsonb) || %s::jsonb")
         args.append(json.dumps(payload.extraModes))
+    if payload.cardContents is not None:
+        sets.append("card_contents = COALESCE(card_contents, '{}'::jsonb) || %s::jsonb")
+        args.append(json.dumps(payload.cardContents))
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -1279,6 +1295,8 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         # each main-mode change marked known.
         "modes": modes_after,
         "mainSwitch": switched,
+        # 札の中身 (plan 326): what the flip cards show, as it now stands.
+        "cardContents": learner_card_contents.read(user_id) if payload.cardContents is not None else None,
     }
 
 
@@ -1332,6 +1350,13 @@ def get_modes(user_id: str = Depends(get_user_id)):
             "extra": {s: list(m) for s, m in main_modes.EXTRA_CHOICES.items()},
         },
     }
+
+
+@router.get("/api/profile/card-contents")
+def get_card_contents(user_id: str = Depends(get_user_id)):
+    """札の中身 (plan 326): what the learner's flip cards show besides
+    their answer, every line answered, and what each line offers."""
+    return {**learner_card_contents.read(user_id), "choices": card_contents.choices()}
 
 
 @router.get("/api/profile/modes/preview")

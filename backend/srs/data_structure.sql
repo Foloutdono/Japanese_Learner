@@ -295,6 +295,10 @@ CREATE TABLE user_profiles (
     -- chosen (study/main_modes.py).
     main_modes JSONB,
     extra_modes JSONB,
+    -- 札の中身 (plan 326): what a flip card shows besides its answer,
+    -- {line: [field]}. NULL = never chosen, today's card
+    -- (study/card_contents.py).
+    card_contents JSONB,
     -- 署名 (plan 247): the first name the card prints, in any script, up
     -- to 24 characters -- not the username, which stays the public
     -- handle (番付, the library). NULL = never asked (an account boarded

@@ -237,7 +237,7 @@ describe('the result on a phone (plan 219, the owner\'s pick D)', () => {
     expect(document.querySelector('[role="dialog"]')).toBeNull()
   })
 
-  it('numbers each grammar point on its card and on its words, each card a door to its lesson', async () => {
+  it('frames each grammar point on its words, its card a door to its lesson', async () => {
     const screen = await renderScreen()
     await analyze(screen)
     // The cards are the dock's Grammar sheet, its count on the tool.
@@ -246,10 +246,10 @@ describe('the result on a phone (plan 219, the owner\'s pick D)', () => {
     tool.click()
     await settle(100)
     const card = document.querySelector('.anl-m__sheet .anl-m__points .bkd-point')
-    expect(card.querySelector('.anl-num').textContent).toBe('1')
+    expect(card.querySelector('.anl-num')).toBeNull()
     expect(card.querySelector('.bkd-point__pattern').textContent).toBe('〜から')
     const frame = screen.container.querySelector('.anl-m__subs .anl-subs__pt')
-    expect(frame.querySelector('.anl-subs__n').textContent).toBe('1')
+    expect(frame.querySelector('.anl-subs__n')).toBeNull()
     expect(frame.querySelector('.tok__word').textContent).toBe('から')
     card.click()
     await settle(100)
