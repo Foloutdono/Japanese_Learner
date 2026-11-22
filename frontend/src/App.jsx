@@ -93,6 +93,7 @@ import ExamResult from './screens/ExamResult'
 import TranslationRun from './screens/TranslationRun'
 import AppLoading from './screens/AppLoading'
 import { FeedbackHost } from './components/feedback/FeedbackSheet'
+import { SetAsideHost } from './components/study/SetAside'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -941,6 +942,7 @@ export default function App({ front = NO_FRONT }) {
             link and a card's flag. Here for RunOutSheet's reason -- the
             run's own retry unmounts the failure that raised it. */}
         <FeedbackHost session={session} />
+        <SetAsideHost session={session} />
         <OfferScreen />
         {/* 補充 — what the refill landed while the app was closed,
             charged onto the card on arrival (plans 141, 278). Held

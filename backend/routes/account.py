@@ -97,6 +97,7 @@ PLAN = [
     ("xp_ledger",           "user_id = %(user)s",       "XP awarded outside a review"),
     ("day_clears",          "user_id = %(user)s",       "the days cleared and the milestone tickets (plan 191)"),
     ("rest_tickets",        "user_id = %(user)s",       "the rest days earned and the missed days they bridged"),
+    ("card_set_aside",      "user_id = %(user)s",       "the cards the learner set aside, never to be served (plan 328)"),
     ("custom_cards",        "user_id = %(user)s",       "hand-written personal cards"),
     ("deck_cards",          "user_id = %(user)s",       "app cards attached to a personal deck"),
     ("deck_reports",        "user_id = %(user)s",       "library decks this learner reported"),

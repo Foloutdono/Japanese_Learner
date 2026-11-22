@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **328**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **329**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -456,6 +456,18 @@ runtime purpose.
   run changes the choice in a panel over the card (`CardContentsSheet`,
   plan 327), never by leaving the queue, and the strip's sentence opens
   its breakdown only once the card is turned.
+- **A card set aside is gone from every queue, and only from the
+  queues (plan 328).** A learner sets a card aside from a run (the eye
+  beside an answered card's flag) and takes it back in Réglages › De
+  côté: `card_set_aside`, one row per namespaced card id, all its modes.
+  The engine excludes it (`srs._not_set_aside`) in every reader that
+  serves a card or counts what is owed (due rows, new picks, a mode's
+  taught cards, the forecast, the next due, the settled words), so
+  Today, a section run and the gate agree without knowing it; a new
+  reader of that kind splices it too. Setting aside is not an answer:
+  the schedule and `review_log` stay as they were, and the card taken
+  back resumes where it stood. The run drops it in every mode it holds
+  (`stores/setAside`, read by `useCardSession`), unanswered.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.

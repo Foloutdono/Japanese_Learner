@@ -67,6 +67,7 @@ from routes.journey         import router as journey_router
 from routes.review_plan     import router as review_plan_router
 from routes.account         import router as account_router
 from routes.card_extras     import router as card_extras_router
+from routes.set_aside       import router as set_aside_router
 from routes.credits         import router as credits_router
 from routes.events          import router as events_router
 from routes.tts             import router as tts_router
@@ -262,6 +263,7 @@ app.include_router(journey_router)
 app.include_router(review_plan_router)
 app.include_router(account_router)
 app.include_router(card_extras_router)
+app.include_router(set_aside_router)
 app.include_router(events_router)
 
 @app.get("/")
