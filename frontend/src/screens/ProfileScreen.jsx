@@ -203,8 +203,8 @@ export default function ProfileScreen({ session }) {
     // 対戦 (plan 279): the door to the duels under the holder's own
     // (E1), the Elo laid out under it once there is one (L1).
     duels: <DuelsInsert t={t} lang={lang} navigate={navigate} />,
-    // 任務 (plan 328): the missions' insert, drawn in the variant picked.
-    missions: <MissionsInsert />,
+    // 任務 (plan 328): the plates and the discoveries.
+    missions: <MissionsInsert session={session} />,
   }
 
   return (

@@ -7,6 +7,7 @@ import { forgetBasics } from './basics'
 import { forgetCredits } from './credits'
 import { forgetDuels } from './duels'
 import { forgetForecast } from './forecast'
+import { forgetMissions } from './missions'
 import { forgetShown } from './guide'
 import { forgetJourney } from './journey'
 import { forgetPracticeRecord } from './practiceRecord'
@@ -35,6 +36,7 @@ import { forgetCardContents } from './cardContents'
 //   the duels     the Elo, the record and the friends/requests waiting
 //                 (plan 279), a thirty-second TTL that the next
 //                 learner should not have to wait out
+//   the missions  the day's three and the book of plates (plan 328)
 //   the record    what was done at each grade of each practice
 //                 platform (the desk's Practice gate, plan 130), and
 //                 at each stop of a practice station (plan 159)
@@ -59,6 +61,7 @@ export function forgetAccount() {
   forgetSummary()
   forgetCredits()
   forgetDuels()
+  forgetMissions()
   forgetToday()
   forgetModes()
   forgetCardContents()

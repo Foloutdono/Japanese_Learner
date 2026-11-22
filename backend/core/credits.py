@@ -125,13 +125,18 @@ PASS_CARDS = 10000
 # mid-process would make one request block and the next not.
 ENFORCE = os.environ.get("CREDITS_ENFORCE") == "1"
 
-REASONS = ("refill", "review", "grant", "adjust", "duel", "duel_review")
+REASONS = ("refill", "review", "grant", "adjust", "duel", "duel_review", "mission")
 # What a fare is charged for. A review is spend()'s; the duels (plan
 # 279) pay through pay(): `duel`, a ranked duel's departure, and
 # `duel_review`, a duel's corrections. Each its own reason, so the
 # ledger and shadow mode's refusals say what was paid for -- and the
 # offer's week, which counts reviews, never counts a duel.
 FARES = ("review", "duel", "duel_review")
+# What credits are GIVEN for, apart from a hand-out (grant): a mission, a
+# discovery or an achievement (plan 328, study/missions.py). Each its own
+# reason, so the ledger says what paid and the day's income can be summed
+# against the target the missions were sized for.
+AWARDS = ("mission",)
 
 
 class OutOfCredits(Exception):
@@ -796,6 +801,44 @@ def grant(user_id: str, n: int, ref: str | None = None) -> int:
         conn.close()
     forget(user_id)
     return total
+
+
+def award(user_id: str, n: int, reason: str, ref: str | None = None, cur=None) -> None:
+    """Credits given for something done (AWARDS): a mission, a discovery,
+    an achievement. A positive row of its own reason, appended after the
+    refill has been claimed -- grant()'s way, so the clock's rules hold:
+    a balance that this takes to CAP or above stops the refill until it
+    is spent back under (the cap stops only the refill, never what was
+    earned). Nothing is written for n <= 0.
+
+    With `cur`, in the caller's transaction (a mission is marked paid in
+    the same one that pays it, so it is never paid twice nor marked paid
+    unpaid): the caller commits, and forget()s the learner once it has."""
+    if n <= 0:
+        return
+    assert reason in AWARDS, reason
+    if cur is not None:
+        _award_on(cur, user_id, n, reason, ref)
+        return
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as own:
+            _award_on(own, user_id, n, reason, ref)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    forget(user_id)
+
+
+def _award_on(cur, user_id: str, n: int, reason: str, ref: str | None) -> None:
+    now = datetime.now(timezone.utc)
+    s = _settle(cur, user_id, now, claim=True)
+    _insert(cur, user_id, n, reason, ref)
+    _restart_if_under_cap(cur, user_id, s, s["balance"] + n, now)
 
 
 # ── The gates ─────────────────────────────────────────────────

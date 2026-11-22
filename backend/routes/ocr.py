@@ -20,6 +20,7 @@ from core.credits import require_pass, resets_at
 from study.llm_shared import chat, LLMUnavailable
 from study.ocr_prompt import OCR_PROMPT, VERTICAL_HINT
 from study.text_normalize import normalize_recognized_text
+from study import missions
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -159,4 +160,8 @@ def recognize_image(
     # model back out would change its signature for every caller. It is
     # already logged ("Using model ...") at the point of choice, which is
     # where anyone diagnosing a quality regression would look anyway.
+    # 発見 (plan 328): a photo read is a discovery, once; noted after the
+    # read succeeded, and never able to fail it.
+    if text:
+        missions.note(user_id, "first_photo")
     return {"text": text, "chars": len(text)}

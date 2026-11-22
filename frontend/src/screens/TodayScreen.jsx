@@ -17,6 +17,7 @@ import RestDayNotice from '../components/dayclear/RestDayNotice'
 import { TransferSheet } from '../components/station/TransferSheet'
 import { RatingSheet } from '../components/feedback/RatingSheet'
 import { DuelsNewsSheet } from '../components/pvp/DuelsNewsSheet'
+import { MissionsNewsSheet } from '../components/missions/MissionsNewsSheet'
 import { AccountSheet } from '../components/boarding/CardSheets'
 import { noteAskedToKeep, shouldAskToKeep } from '../lib/guest'
 import { useClaimOffer, usePaywall } from '../stores/credits'
@@ -82,6 +83,10 @@ import { nativePlatform } from '../lib/platform'
 // after the guide, the transfer offer and the early-access question have
 // had their turn, and never over another sheet. « Continuer en invité »
 // is always the way past it.
+//
+// 新しい (plan 328): the missions' pill under the gate's legend is told
+// the same way (MissionsNewsSheet, `missionsNews`), after the duels' news
+// and never beside it.
 //
 // Everything this screen reads is shared: /api/today from the store
 // the tab bar's badge already reads. One request, every consumer.
@@ -173,6 +178,10 @@ export default function TodayScreen({ session }) {
   const showNews = Boolean(summary?.duelsNews) && !newsLeft && Boolean(today)
     && Boolean(summary.guided?.today) && !wasShown('today') && !guide.open && !held && !showRest && !finishing
     && !showTransfer && !showRate
+  const [missionsLeft, setMissionsLeft] = useState(false)
+  const showMissionsNews = Boolean(summary?.missionsNews) && !missionsLeft && Boolean(today)
+    && Boolean(summary.guided?.today) && !wasShown('today') && !guide.open && !held && !showRest && !finishing
+    && !showTransfer && !showRate && !showNews
   // Read once, at mount: the visit that asks keeps the sheet up.
   const [keepAsk] = useState(() => shouldAskToKeep(session))
   const [keepLeft, setKeepLeft] = useState(false)
@@ -181,7 +190,7 @@ export default function TodayScreen({ session }) {
   const paywall = usePaywall()
   const showKeep = keepAsk && !keepLeft && Boolean(today)
     && (summary?.guided?.today || wasShown('today')) && !guide.open && !held && !showRest && !finishing
-    && !showTransfer && !showRate && !showNews && !claimOffer && !paywall
+    && !showTransfer && !showRate && !showNews && !showMissionsNews && !claimOffer && !paywall
   const keepUserId = session?.user?.id
   useEffect(() => {
     if (showKeep) noteAskedToKeep(keepUserId)
@@ -236,6 +245,9 @@ export default function TodayScreen({ session }) {
       )}
       {showNews && (
         <DuelsNewsSheet session={session} onClose={() => setNewsLeft(true)} />
+      )}
+      {showMissionsNews && (
+        <MissionsNewsSheet session={session} onClose={() => setMissionsLeft(true)} />
       )}
       {showKeep && (
         <AccountSheet

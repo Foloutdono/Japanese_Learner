@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **328**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **330** (329 is the referral's). `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -240,6 +240,35 @@ runtime purpose.
   write (三社とも is no 社共), nor cutting a commoner word its last noun
   makes with what follows (最終 + 報告書, where 原材料 + 費 keeps 原材料).
   `DeckNounCompoundTests` holds both sides.
+- **A mission pays study, once, and is neither study nor chance (plan 328).**
+  `study/missions.py` holds the figures, and `tests/test_missions.py` pins
+  them: a free learner who does their missions earns about 35 credits a day
+  (3 × 8 and a bonus of 6 a day, 3 × 12 a week), which is what the refill's
+  90 was sized beside. A goal that asks a learner to beat themselves is
+  computed from their own history, capped (`NEW_MAX`, the day's ration,
+  `ACCURACY_MAX`, `VOLUME_MAX_GAIN`) and frozen on the row when assigned:
+  studying earlier in the day never raises it, and a change of the figures
+  never touches a mission already assigned. Progress is never stored,
+  only `done_at` and `paid_at`: it is read again from the logs. The reward
+  is credits through the ledger (`credits.award`, reason `mission`) and XP
+  through `award_xp` (source `mission`, written in the transaction whose
+  conditional `UPDATE ... paid_at` is what pays once), and on the pass,
+  which has no use for credits, the same number as XP. Nothing is paid to an
+  account that has not studied. `mission` is in `srs.NOT_STUDY_SOURCES`:
+  it is neither a day studied nor a practice answer, so a new reader of
+  `xp_ledger` that counts rows as practice excludes it as it does
+  `day_clear`. The repeatable XP counts on the 番付 up to `XP_DAY_CAP` a
+  local day, clipped when written; discoveries and achievements are bounded
+  by the catalogue. The choice of the day's missions is a rotation of the
+  date: nothing is random, nothing rewards a post. A discovery read off a
+  table counts only what was done after `SINCE`; the three that leave no
+  trace (a photo, an arrival date, an import) are `missions.note()`d at the
+  act. The practice modes cost no credit yet: `missions.waives()` is the seam
+  their fare will read, so a practice the day's mission asks stays free.
+  A new mission, discovery or achievement is a new id in `missions.KINDS`,
+  `events._MISSION_KINDS`, `track.js`'s `VALUES`, the route's `Kind`, the
+  three locales' `msnLabel` or `msnMark`, and `domain/missions.js`
+  (`PLATES`, `GLYPHS`), all held equal by tests.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.

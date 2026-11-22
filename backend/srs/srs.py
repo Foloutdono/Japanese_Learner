@@ -129,6 +129,10 @@ def personal_pace(times, recent=None) -> int | None:
 # The xp_ledger source the day's bonus is paid under. Not a day studied
 # (_studied_days) nor a practice answer (get_daily_practice_counts).
 DAY_CLEAR_SOURCE = "day_clear"
+# What a mission pays in XP (plan 328, study/missions.py): a bonus, like
+# the day's clear, so neither is a day studied nor a practice answer.
+MISSION_SOURCE = "mission"
+NOT_STUDY_SOURCES = [DAY_CLEAR_SOURCE, MISSION_SOURCE]
 
 # The week row's day names, Monday first (date.weekday()).
 WEEKDAY_KANJI = "月火水木金土日"
@@ -1477,20 +1481,20 @@ class SRSEngine:
         whose word is in the deck) is paid by that review and has no
         ledger row, so it is counted by the review side, not here.
 
-        The day's clear (plan 191) is a ledger row too, and no answer:
-        left out by its source."""
+        The day's clear (plan 191) and a mission's reward (plan 328) are
+        ledger rows too, and no answer: left out by their sources."""
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """
                     SELECT date_trunc('day', awarded_at)::date AS day, COUNT(*)
                     FROM xp_ledger
                     WHERE user_id = %s
-                      AND source <> %s
+                      AND source <> ALL(%s)
                       AND awarded_at >= NOW() - (%s || ' days')::interval
                     GROUP BY 1
                     ORDER BY 1 ASC
                 """
-                params = (user_id, DAY_CLEAR_SOURCE, days)
+                params = (user_id, NOT_STUDY_SOURCES, days)
                 self._log_sql("get_daily_practice_counts", sql, params)
                 cur.execute(sql, params)
                 rows = cur.fetchall()
@@ -1529,9 +1533,9 @@ class SRSEngine:
             UNION
             SELECT DISTINCT date_trunc('day', awarded_at)::date AS day
             FROM xp_ledger
-            WHERE user_id = %s AND source <> %s
+            WHERE user_id = %s AND source <> ALL(%s)
         """
-        params = (pattern, user_id, user_id, DAY_CLEAR_SOURCE)
+        params = (pattern, user_id, user_id, NOT_STUDY_SOURCES)
         self._log_sql("studied_days", sql, params)
         cur.execute(sql, params)
         return {row[0] for row in cur.fetchall()}

@@ -262,3 +262,28 @@ FROM event_log
 WHERE name IN ('transfer_import', 'transfer_undo', 'transfer_offer') AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1 ORDER BY 1;
+
+-- ==== question
+-- title: Missions faites et récoltées
+-- display: bar
+-- size: 12x8
+-- description: Pour chaque mission du catalogue (plan 328), les apprenants qui l'ont terminée (mission_done) et ceux qui ont récolté sa récompense (mission_claimed). Un écart durable entre les deux dit une récompense que personne ne prend.
+SELECT props->>'kind' AS "Mission",
+       count(DISTINCT user_id) FILTER (WHERE name = 'mission_done') AS "Terminée",
+       count(DISTINCT user_id) FILTER (WHERE name = 'mission_claimed') AS "Récoltée"
+FROM event_log
+WHERE name IN ('mission_done', 'mission_claimed') AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
+-- title: Crédits de missions par apprenant et par jour
+-- display: line
+-- size: 12x6
+-- description: La moyenne de crédits versés par les missions (raison mission du registre) à chaque apprenant qui en a reçu, par jour, contre la cible de la stratégie : 35 par jour pour qui fait tout (30 de journalières et de bonus, 5 d'hebdomadaires).
+SELECT (at AT TIME ZONE 'Europe/Paris')::date AS "Jour",
+       round(sum(delta)::numeric / count(DISTINCT user_id), 1) AS "Crédits par apprenant"
+FROM credit_ledger
+WHERE reason = 'mission' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 1;

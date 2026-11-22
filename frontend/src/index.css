@@ -32292,46 +32292,46 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 /* ── 191:primitives end ── */
 
 /* ══ 328 — 任務, the missions (plan 328) ════════════════════════════
-   Drawn in the real gate and the real holder (/dev/missions) three ways,
-   for the owner to pick from. A mission is an object about the learner,
-   so it wears the pass's materials (the card's ink, the credits' metal)
-   and never a line's colour, but for the 3px rail of the line a coupon
-   sends you to. */
+   The pill under Today's legend, the sheet of coupons it opens and the
+   holder's plates and discoveries: the owner's pick A of the drawings.
+   A mission is an object about the learner, so it wears the pass's
+   materials (the card's ink, the credits' metal) and never a line's
+   colour, but for the 3px rail of the line a practice coupon sends you to. */
 .msn-bar { display: block; height: 3px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
 .msn-bar i { display: block; height: 100%; background: var(--accent2); }
 .msn-fig { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; }
 .msn-fig small { font-weight: 500; color: inherit; opacity: 0.7; font-size: inherit; }
 .msn-stack { display: flex; flex-direction: column; gap: var(--sp-3); }
 .msn-stack--tight { gap: var(--sp-2); }
-.msn-note { margin: 0; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
+.msn-note { margin: 0; font-size: var(--fs-caption); color: var(--danger); text-align: right; }
 .msn-sub { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); font-family: var(--font-display); font-size: var(--fs-body); color: var(--text-secondary); }
 .msn-sub b { font-weight: 700; }
-.msn-sub span { font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
-.msn-foot { display: flex; justify-content: space-between; padding-top: var(--sp-3); border-top: 1px solid var(--surface-line); font-size: var(--fs-caption); color: var(--text-secondary); }
+.msn-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-3) 0 0; border: 0; border-top: 1px solid var(--surface-line); border-radius: var(--r-flat); background: none; color: var(--text-secondary); font: inherit; font-size: var(--fs-caption); cursor: pointer; }
 .msn-pop { position: absolute; right: var(--sp-4); top: 0; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--surface); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; opacity: 0; pointer-events: none; }
+.msn-sheet { gap: var(--sp-4); }
 
 /* The pill under the gate's legend: three lamps, the count, the day's sum.
    The gate's own glass, as the legend's keys and the services' door wear it. */
 .msn-pill { position: relative; display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 32px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: color-mix(in srgb, var(--bg-panel) 82%, transparent); color: var(--text-on-panel-soft); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; white-space: nowrap; cursor: pointer; }
 .msn-pill:hover, .msn-pill:focus-visible { border-color: var(--text-on-panel-soft); filter: none; }
+.msn-pill--still { cursor: default; }
 .msn-pill__n { font-variant-numeric: tabular-nums; }
 .msn-pill__n b { color: var(--text-on-panel); }
 .msn-pill__sum { color: var(--gate-gold-lit); font-weight: 700; }
-.msn-pill__dots, .msn-pill__stamps { display: inline-flex; gap: var(--sp-1); }
+.msn-pill__dots { display: inline-flex; gap: var(--sp-1); }
 .msn-pill__dots i { width: 8px; height: 8px; border: 1.5px solid currentcolor; border-radius: var(--r-pill); opacity: 0.6; }
 .msn-pill__dots i.on { border-color: var(--gate-gold-lit); background: var(--gate-gold-lit); opacity: 1; }
-.msn-pill__stamps b { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1.5px dashed currentcolor; border-radius: var(--r-pill); font-family: var(--font-jp); font-size: var(--fs-caption-xs); line-height: 1; opacity: 0.6; }
-.msn-pill__stamps b.on { border-style: solid; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); opacity: 1; transform: rotate(-4deg); }
-.msn-pop--pill { top: auto; bottom: 100%; right: 50%; translate: 50% 0; background: var(--bg-panel); color: var(--gate-gold-lit); border-color: var(--gate-gold); }
-.msn-sheet { gap: var(--sp-4); }
+/* A reward waits to be collected: a gold lamp on the pill's corner. */
+.msn-pill__flag { position: absolute; top: -2px; right: var(--sp-1); width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--gate-gold-lit); box-shadow: 0 0 0 2px var(--bg-panel); }
 
-/* A — the coupon: a body, a perforation, a stub to tear. */
+/* The coupon: a body, a perforation, a stub to tear. */
 .msn-cpn { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; border: 1px solid var(--surface-line); border-left: 3px solid var(--line-color, var(--pass-ink)); border-radius: var(--r-card); background: var(--surface); }
+.msn-cpn__btn { display: contents; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .msn-cpn__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; padding: var(--sp-4); }
 .msn-cpn__label { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
 .msn-cpn__sub { font-size: var(--fs-caption); color: var(--text-secondary); }
 .msn-cpn__stub { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 76px; padding: var(--sp-4); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease, opacity 0.3s ease; }
-.msn-cpn__stub::before, .msn-cpn__stub::after { content: ""; position: absolute; left: -7px; width: 12px; height: 12px; border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: var(--bg-main); }
+.msn-cpn__stub::before, .msn-cpn__stub::after { content: ""; position: absolute; left: -7px; width: 12px; height: 12px; border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: var(--surface); }
 .msn-cpn__stub::before { top: -7px; }
 .msn-cpn__stub::after { bottom: -7px; }
 .msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; color: var(--text-secondary); }
@@ -32342,48 +32342,26 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-cpn--torn .msn-cpn__stub { border-left-style: solid; background: none; }
 .msn-cpn__paid { font-size: var(--fs-lead); color: var(--success); }
 
-/* B — the board: 発車標 rows, the reward in the time column. */
-.msn-board { position: relative; display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--bg-panel); color: var(--text-on-panel); overflow: hidden; }
-.msn-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: var(--sp-4); align-items: center; padding: var(--sp-3) var(--sp-4); border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 13%, transparent); font-family: var(--font-display); font-size: var(--fs-sm); }
-.msn-row:first-child { border-top: 0; }
-.msn-row__time { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gate-gold-lit); }
-.msn-row__dest { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.msn-row__state { font-size: var(--fs-caption); color: var(--text-on-panel-soft); }
-.msn-row--done .msn-row__dest { color: var(--text-on-panel-soft); }
-.msn-row--done .msn-row__state { color: var(--text-on-panel); font-weight: 700; }
-.msn-row--bonus .msn-row__dest { font-weight: 500; color: var(--text-on-panel-soft); }
-
-/* C — the book: stamps inked by themselves, a lattice of firsts. */
-.msn-book { gap: var(--sp-5); }
-.msn-book__row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
-.msn-book__sep { align-self: stretch; border-left: 1px dashed var(--surface-line); }
-.msn-book__week { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
-.msn-book__wk { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; }
-.msn-stamp { display: inline-flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.msn-stamp b { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1.5px dashed var(--surface-line); border-radius: var(--r-pill); font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; line-height: 1; color: var(--text-secondary); }
-.msn-stamp--big b { width: 52px; height: 52px; font-size: var(--fs-title); }
-.msn-stamp--on b { border-style: solid; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); transform: rotate(-4deg); }
-.msn-stamp small { max-width: 72px; font-size: var(--fs-caption-xs); line-height: 1.2; text-align: center; color: var(--text-secondary); }
-.msn-collect { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); border: 0; border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; box-shadow: var(--elev-action); }
-
-/* The holder's insert (the profile). */
+/* The holder's insert (the profile): the plates, then the discoveries. */
 .msn-ins { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); }
 .msn-ins__head { display: flex; align-items: center; gap: var(--sp-4); }
 .msn-ins__names { flex: 1; min-width: 0; }
 .msn-ins__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 
 .msn-lattice { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--surface-line); border-radius: var(--r-flat); }
-.msn-lattice__cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); background: var(--surface); color: var(--text-secondary); }
+.msn-lattice__cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); border: 0; border-radius: var(--r-flat); background: var(--surface); color: var(--text-secondary); font: inherit; }
 .msn-lattice__cell b { font-family: var(--font-jp); font-size: var(--fs-lead); opacity: 0.35; }
 .msn-lattice__cell small { font-size: var(--fs-caption-xs); line-height: 1.15; text-align: center; }
 .msn-lattice__cell.on { color: var(--text-primary); }
 .msn-lattice__cell.on b { opacity: 1; color: var(--accent); }
+.msn-lattice__cell--ready { cursor: pointer; background: var(--sel-wash); }
+.msn-lattice__cell--ready small { font-weight: 700; color: var(--sel-ink); }
 .msn-lattice__cell:not(:nth-child(5n)) { border-right: 1px solid var(--surface-line); }
 .msn-lattice__cell:nth-child(-n+5) { border-bottom: 1px solid var(--surface-line); }
 
-/* The achievements: A's hanging plates, B's rings, C's seals. */
+/* The plates: a station's name board, hung. */
 .msn-plates { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); }
-.msn-plate { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-3) var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-plate); background: var(--surface); box-shadow: var(--elev-hang); text-align: center; }
+.msn-plate { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-3) var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-plate); background: var(--surface); box-shadow: var(--elev-hang); color: inherit; font: inherit; text-align: center; }
 .msn-plate::after { content: ""; position: absolute; inset: auto 0 0; height: 3px; background: var(--accent); }
 .msn-plate__code { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); }
 .msn-plate__jp { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 700; line-height: 1.1; }
@@ -32395,33 +32373,22 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-plate--off .msn-plate__jp, .msn-plate--off .msn-plate__kana { opacity: 0.4; }
 .msn-plate--off::after { background: var(--surface-line); }
 .msn-plate--max { background: linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 14%, var(--surface)) 0%, var(--surface) 100%); }
-.msn-rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-5); }
-.msn-ring { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; }
-.msn-ring__glyph { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border: 2.5px solid var(--accent2); border-radius: var(--r-pill); font-family: var(--font-serif); font-size: var(--fs-lead); font-weight: 700; line-height: 1; }
-.msn-ring__en { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 600; }
-.msn-ring--off .msn-ring__glyph { border-color: var(--surface-line); border-style: dashed; color: var(--text-secondary); }
-.msn-ring--off .msn-ring__en { color: var(--text-secondary); }
-.msn-ring--max .msn-ring__glyph { border-color: var(--text-primary); }
-.msn-seals { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--surface-line); }
-.msn-seal { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-2); background: var(--surface); color: var(--text-secondary); text-align: center; }
-.msn-seal__g { font-family: var(--font-serif); font-size: var(--fs-title); line-height: 1.1; opacity: 0.35; }
-.msn-seal small { font-size: var(--fs-caption-xs); line-height: 1.15; }
-.msn-seal.on { color: var(--text-primary); }
-.msn-seal.on .msn-seal__g { opacity: 1; color: var(--accent); transform: rotate(-4deg); }
-.msn-seal--max.on .msn-seal__g { color: var(--text-primary); }
-.msn-seal:not(:nth-child(3n)) { border-right: 1px solid var(--surface-line); }
-.msn-seal:nth-child(-n+3) { border-bottom: 1px solid var(--surface-line); }
+.msn-plate--ready { cursor: pointer; border-color: var(--sel-line); }
+.msn-plate--ready .msn-plate__foot { color: var(--sel-ink); }
 
-/* The reward, once: a row's flash, a stamp pressed, the sum rising. */
+/* The announcement (MissionsNewsSheet). */
+.msn-news__art { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.msn-news__title { margin: 0; text-wrap: balance; }
+.msn-news__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.msn-news__acts { display: flex; flex-direction: column; gap: var(--sp-4); }
+.msn-news .msn-pill { background: var(--bg-panel); }
+
+/* The reward, once: a stub's flash, the sum rising off it. */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes msn-flash { from { background: color-mix(in srgb, var(--gate-gold-lit) 28%, transparent); } to { background: transparent; } }
-  @keyframes msn-press { 0% { transform: scale(1.7) rotate(-12deg); opacity: 0; } 60% { transform: scale(0.94) rotate(-4deg); opacity: 1; } 100% { transform: scale(1) rotate(-4deg); } }
   @keyframes msn-rise { 0% { opacity: 0; transform: translateY(var(--sp-3)); } 25% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(calc(-1 * var(--sp-6))); } }
-  .msn-row.msn-just { animation: msn-flash 1.4s ease-out; }
-  .msn-stamp--on.msn-just b { animation: msn-press 0.5s cubic-bezier(0.22, 0.68, 0.32, 1); }
   .msn-cpn--torn.msn-just .msn-cpn__stub { animation: msn-flash 1s ease-out; }
   .msn-just > .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
-  .msn-pill.msn-just .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
 }
 /* ── 328:end ── */
 

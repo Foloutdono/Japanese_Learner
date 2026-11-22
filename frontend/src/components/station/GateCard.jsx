@@ -574,7 +574,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
               : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
         </div>
         {/* 任務 (plan 328): the day's missions, one small pill under the legend. */}
-        {!fin && <MissionsGate style={at(frame.cx, frame.cy + frame.fare + BELOW.keys + 30)} />}
+        {!fin && <MissionsGate session={session} style={at(frame.cx, frame.cy + frame.fare + BELOW.keys + 30)} />}
       </section>
       <span className="tdy__air" aria-hidden="true" />
 
@@ -655,7 +655,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         <div className="tdy-desk__keys tpr-at tpr-at--top" style={at(frame.cx, frame.cy + frame.fare + 62)}>
           <LineKeys mix={mix} titles={titlesOf(t)} named label={t.todayLines} />
         </div>
-        {!fin && <MissionsGate style={at(frame.cx, frame.cy + frame.fare + (short ? 168 : 128))} />}
+        {!fin && <MissionsGate session={session} style={at(frame.cx, frame.cy + frame.fare + (short ? 168 : 128))} />}
         {short && (
           <div className="tpr-at" style={at(frame.cx, frame.cy + frame.fare + 128)}>
             <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />

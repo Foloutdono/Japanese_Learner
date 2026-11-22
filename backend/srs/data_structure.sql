@@ -1397,3 +1397,41 @@ CREATE TABLE apple_grants (
     kept_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE apple_grants ENABLE ROW LEVEL SECURITY;
+
+-- Owned by study/missions.py (plan 328) -- 任務. A row a mission assigned to
+-- a learner for a local day or week ('bonus' is the day's three done): the
+-- goal, the credits and the XP are written on it and never change, so the
+-- goal is the one the learner's history gave when it was assigned.
+-- Progress is never stored, only `done_at` (the logs say the rest) and
+-- `paid_at` (the conditional UPDATE that sets it is what pays once).
+CREATE TABLE missions (
+    user_id  TEXT NOT NULL,
+    scope    TEXT NOT NULL,
+    period   DATE NOT NULL,
+    kind     TEXT NOT NULL,
+    slot     SMALLINT NOT NULL,
+    target   INTEGER NOT NULL,
+    baseline INTEGER,
+    credits  SMALLINT NOT NULL,
+    xp       SMALLINT NOT NULL,
+    platform TEXT,
+    done_at  TIMESTAMPTZ,
+    paid_at  TIMESTAMPTZ,
+    PRIMARY KEY (user_id, scope, period, kind)
+);
+ALTER TABLE missions ENABLE ROW LEVEL SECURITY;
+
+-- Owned by study/missions.py, beside it: a discovery (a feature seen once)
+-- or an achievement (a milestone), once a learner, ever. A station's plate
+-- is this row.
+CREATE TABLE mission_marks (
+    user_id    TEXT NOT NULL,
+    key        TEXT NOT NULL,
+    class      TEXT NOT NULL,
+    credits    SMALLINT NOT NULL,
+    xp         SMALLINT NOT NULL,
+    reached_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    paid_at    TIMESTAMPTZ,
+    PRIMARY KEY (user_id, key)
+);
+ALTER TABLE mission_marks ENABLE ROW LEVEL SECURITY;

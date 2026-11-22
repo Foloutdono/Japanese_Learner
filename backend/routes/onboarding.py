@@ -692,7 +692,7 @@ def mark_guided(gate: str, user_id: str = Depends(get_user_id)):
 
 # 新しい — a feature told once, by its column (plan 287). A closed set:
 # the item names a column, so it is never taken from the path as is.
-NEWS = {"duels": "duels_news_at"}
+NEWS = {"duels": "duels_news_at", "missions": "missions_news_at"}
 
 
 @router.post("/api/onboarding/news/{item}")
