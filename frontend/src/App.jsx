@@ -25,6 +25,7 @@ import SoundPalette from './screens/SoundPalette'
 import OffersPreview from './screens/OffersPreview'
 import DayClearPreview from './screens/DayClearPreview'
 import RatingPreview from './screens/RatingPreview'
+import MissionsPreview from './screens/MissionsPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
@@ -634,6 +635,8 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/dev/ride" element={<RidePreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
             <Route path="/dev/offers" element={<OffersPreview />} />
+            {/* The missions, drawn three ways (plan 328): ?v=A|B|C&plan=max. */}
+            <Route path="/dev/missions" element={<MissionsPreview />} />
             {/* 終着 (plans 191, 250): every finish of the day's run, from
                 the canvas's fixtures (?scene=…&reduced=1), on Today under
                 the shell: the bars leave and come back on a phone, the
