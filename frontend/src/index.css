@@ -34366,6 +34366,11 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   cursor: pointer;
 }
 .fb-flag::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-3)); }
+
+/* 回送 — Settings › Set aside (plan 328): the cards set aside, each the
+   flag sheet's card with its way back at the end of the row. */
+.aside-list { display: flex; flex-direction: column; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.aside-row__back { flex: none; }
 .fb-flag:hover,
 .fb-flag:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
 
