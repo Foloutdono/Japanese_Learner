@@ -32291,77 +32291,60 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .clrdev-share img { max-width: 100%; height: auto; box-shadow: var(--elev-board); }
 /* ── 191:primitives end ── */
 
-/* ══ 328 — 任務, the missions drawn three ways (/dev/missions) ══════
-   Development only. A mission is an object about the learner, so it wears
-   the pass's materials (the card's ink, the metal of the credits) and never
-   a line's colour, except the 3px rail of the line a coupon sends you to.
-   Whatever the owner picks is built from here as drawn. */
-.msn-dev { display: flex; flex-direction: column; gap: var(--sp-6); padding: var(--sp-7) var(--sp-5); color: var(--text-primary); }
-.msn-dev__head h1 { margin: 0; font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; }
-.msn-dev__head p { margin: var(--sp-1) 0 0; font-size: var(--fs-sm); color: var(--text-secondary); }
-.msn-dev__frames { display: flex; flex-wrap: wrap; gap: var(--sp-6); align-items: flex-start; }
-.msn-frame { flex: 0 1 360px; min-width: 0; width: min(100%, 360px); }
-.msn-frame__cap { margin: 0 0 var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
-.msn-frame__cap b { color: var(--sel-ink); font-weight: 700; }
-.msn-frame__body { position: relative; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--surface-line); border-radius: var(--r-identity); background: var(--bg-main); }
-
-/* The gate, as a ghost: only what the entry point stands beside. */
-.msn-ghost { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--sp-5); flex: 1; min-height: 460px; padding: var(--sp-7) var(--sp-5) var(--sp-5); }
-.msn-ghost__dial { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 140px; height: 140px; margin-block: auto; border: 2px solid var(--surface-line); border-radius: var(--r-pill); font-family: var(--font-display); }
-.msn-ghost__dial b { font-size: var(--fs-display); line-height: 1; }
-.msn-ghost__dial span { font-size: var(--fs-caption); color: var(--text-secondary); }
-.msn-ghost__go { align-self: stretch; padding: var(--sp-4); border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); text-align: center; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; box-shadow: var(--elev-action); }
-
-/* Shared figures */
+/* ══ 328 — 任務, the missions (plan 328) ════════════════════════════
+   Drawn in the real gate and the real holder (/dev/missions) three ways,
+   for the owner to pick from. A mission is an object about the learner,
+   so it wears the pass's materials (the card's ink, the credits' metal)
+   and never a line's colour, but for the 3px rail of the line a coupon
+   sends you to. */
 .msn-bar { display: block; height: 3px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
 .msn-bar i { display: block; height: 100%; background: var(--accent2); }
 .msn-fig { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; }
 .msn-fig small { font-weight: 500; color: inherit; opacity: 0.7; font-size: inherit; }
-.msn-tag { display: block; margin-bottom: var(--sp-2); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 600; color: var(--text-secondary); }
-.msn-pop { display: inline-block; margin-top: var(--sp-3); padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--sel-wash); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
-.msn-pair { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-5); }
-.msn-pair > div { flex: 1; min-width: 0; }
-.msn-pair--col { flex-direction: column; align-items: stretch; gap: var(--sp-6); }
-
-/* The pane: a sheet's body, drawn flat in its frame. */
-.msn-pane { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-3) var(--sp-5) var(--sp-5); background: var(--surface); border-top: 1px solid var(--surface-line); border-radius: var(--r-panel) var(--r-panel) 0 0; box-shadow: var(--elev-board); }
-.msn-pane--flat { box-shadow: none; border-top: 0; border-radius: 0; padding-top: var(--sp-5); }
-.msn-pane__handle { align-self: center; width: 36px; height: 4px; border-radius: var(--r-pill); background: var(--surface-line); }
-.msn-pane__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); }
-.msn-pane__head h3 { margin: 0; font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; }
-.msn-pane__head--sub h3 { font-size: var(--fs-body); color: var(--text-secondary); }
-.msn-pane__sum { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
-.msn-pane__foot { display: flex; justify-content: space-between; padding-top: var(--sp-3); border-top: 1px solid var(--surface-line); font-size: var(--fs-caption); color: var(--text-secondary); }
-.msn-note { margin: 0; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
 .msn-stack { display: flex; flex-direction: column; gap: var(--sp-3); }
 .msn-stack--tight { gap: var(--sp-2); }
+.msn-note { margin: 0; font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
+.msn-sub { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); font-family: var(--font-display); font-size: var(--fs-body); color: var(--text-secondary); }
+.msn-sub b { font-weight: 700; }
+.msn-sub span { font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+.msn-foot { display: flex; justify-content: space-between; padding-top: var(--sp-3); border-top: 1px solid var(--surface-line); font-size: var(--fs-caption); color: var(--text-secondary); }
+.msn-pop { position: absolute; right: var(--sp-4); top: 0; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--surface); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; opacity: 0; pointer-events: none; }
+.msn-pop--board { top: auto; bottom: 100%; right: var(--sp-4); background: var(--bg-panel); color: var(--gate-gold-lit); border-color: var(--gate-gold); }
+
+/* The door on the gate (A, C): the gate's own glass door, with a lamp or a row of stamps. */
+.msn-door__dots { display: inline-flex; gap: var(--sp-1); }
+.msn-door__dots i { width: 8px; height: 8px; border: 1.5px solid currentcolor; border-radius: var(--r-pill); opacity: 0.6; }
+.msn-door__dots i.on { border-color: var(--gate-gold-lit); background: var(--gate-gold-lit); opacity: 1; }
+.msn-door__stamps { display: inline-flex; gap: var(--sp-1); }
+.msn-door__stamps b { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1.5px dashed currentcolor; border-radius: var(--r-pill); font-family: var(--font-jp); font-size: var(--fs-caption-xs); line-height: 1; opacity: 0.6; }
+.msn-door__stamps b.on { border-style: solid; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); opacity: 1; transform: rotate(-4deg); }
+.msn-panel { display: flex; flex-direction: column; gap: var(--sp-4); }
+.msn-panel__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); font-family: var(--font-display); font-size: var(--fs-body); }
+.msn-panel__head b { font-size: var(--fs-lead); }
+.msn-panel__head span { font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
+.msn-panel__head--sub b { font-size: var(--fs-body); color: var(--text-secondary); }
+.msn-sheet { gap: var(--sp-4); }
 
 /* A — the coupon: a body, a perforation, a stub to tear. */
-.msn-line { display: flex; align-items: center; gap: var(--sp-3); align-self: stretch; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--surface); color: var(--text-primary); font: inherit; font-size: var(--fs-sm); font-family: var(--font-display); }
-.msn-line b { margin-left: auto; font-variant-numeric: tabular-nums; }
-.msn-line__chev { color: var(--text-secondary); }
-.msn-line__dots { display: inline-flex; gap: var(--sp-1); }
-.msn-line__dots i { width: 8px; height: 8px; border: 1.5px solid var(--text-secondary); border-radius: var(--r-pill); }
-.msn-line__dots i.on { border-color: var(--accent2); background: var(--accent2); }
 .msn-cpn { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; border: 1px solid var(--surface-line); border-left: 3px solid var(--line-color, var(--pass-ink)); border-radius: var(--r-card); background: var(--surface); }
 .msn-cpn__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; padding: var(--sp-4); }
 .msn-cpn__label { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
-.msn-cpn__ready { font-size: var(--fs-caption); color: var(--text-secondary); }
-.msn-cpn__stub { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 76px; padding: var(--sp-4); border-left: 2px dashed var(--surface-line); }
+.msn-cpn__sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.msn-cpn__stub { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 76px; padding: var(--sp-4); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease, opacity 0.3s ease; }
 .msn-cpn__stub::before, .msn-cpn__stub::after { content: ""; position: absolute; left: -7px; width: 12px; height: 12px; border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: var(--bg-main); }
 .msn-cpn__stub::before { top: -7px; }
 .msn-cpn__stub::after { bottom: -7px; }
 .msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; color: var(--text-secondary); }
-.msn-cpn--done .msn-cpn__take { color: var(--sel-ink); }
-.msn-cpn--done .msn-cpn__stub { background: var(--sel-wash); }
+.msn-cpn--ready .msn-cpn__take { color: var(--sel-ink); }
+.msn-cpn--ready .msn-cpn__stub { background: var(--sel-wash); }
 .msn-cpn__tap { font-size: var(--fs-caption-xs); font-weight: 600; color: var(--sel-ink); }
 .msn-cpn--torn { opacity: 0.6; }
 .msn-cpn--torn .msn-cpn__stub { border-left-style: solid; background: none; }
 .msn-cpn__paid { font-size: var(--fs-lead); color: var(--success); }
 
 /* B — the board: 発車標 rows, the reward in the time column. */
-.msn-board { display: flex; flex-direction: column; align-self: stretch; margin: 0 var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--pass-ink); color: var(--text-on-panel); overflow: hidden; }
-.msn-board--lg { margin: 0; }
+.msn-board { position: relative; display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--bg-panel); color: var(--text-on-panel); overflow: hidden; }
+.tdy--print .msn-board--gate { background: color-mix(in srgb, var(--bg-panel) 82%, transparent); }
 .msn-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: var(--sp-4); align-items: center; padding: var(--sp-3) var(--sp-4); border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 13%, transparent); font-family: var(--font-display); font-size: var(--fs-sm); }
 .msn-row:first-child { border-top: 0; }
 .msn-row__time { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gate-gold-lit); }
@@ -32369,28 +32352,27 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-row__state { font-size: var(--fs-caption); color: var(--text-on-panel-soft); }
 .msn-row--done .msn-row__dest { color: var(--text-on-panel-soft); }
 .msn-row--done .msn-row__state { color: var(--text-on-panel); font-weight: 700; }
-.msn-row--flip { background: color-mix(in srgb, var(--gate-gold-lit) 14%, transparent); }
 .msn-row--bonus .msn-row__dest { font-weight: 500; color: var(--text-on-panel-soft); }
 
 /* C — the book: stamps inked by themselves, a lattice of firsts. */
-.msn-holder { display: flex; align-self: stretch; gap: var(--sp-1); }
-.msn-holder__tab { flex: 1; padding: var(--sp-3) var(--sp-2); border: 1px solid var(--surface-line); border-radius: var(--r-card); text-align: center; font-family: var(--font-display); font-size: var(--fs-caption); color: var(--text-secondary); }
-.msn-holder__tab.on { color: var(--text-primary); }
-.msn-holder__tab.hot { border-color: var(--sel-line); background: var(--sel-wash); color: var(--sel-ink); font-weight: 700; }
-.msn-chip { align-self: flex-end; display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: var(--surface); font-family: var(--font-display); font-size: var(--fs-caption); }
-.msn-chip b { font-variant-numeric: tabular-nums; }
-.msn-book { display: flex; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
+.msn-book { gap: var(--sp-5); }
 .msn-book__row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
 .msn-book__sep { align-self: stretch; border-left: 1px dashed var(--surface-line); }
-.msn-book__line { margin: 0; font-family: var(--font-display); font-size: var(--fs-sm); color: var(--text-secondary); }
-.msn-book__line b { color: var(--text-primary); }
 .msn-book__week { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
 .msn-book__wk { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; }
-.msn-stamp { --stamp-ink: var(--pass-ink); display: inline-flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+.msn-stamp { display: inline-flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
 .msn-stamp b { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1.5px dashed var(--surface-line); border-radius: var(--r-pill); font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; line-height: 1; color: var(--text-secondary); }
 .msn-stamp--big b { width: 52px; height: 52px; font-size: var(--fs-title); }
 .msn-stamp--on b { border-style: solid; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); transform: rotate(-4deg); }
 .msn-stamp small { max-width: 72px; font-size: var(--fs-caption-xs); line-height: 1.2; text-align: center; color: var(--text-secondary); }
+.msn-collect { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); border: 0; border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; box-shadow: var(--elev-action); }
+
+/* The holder's insert (the profile). */
+.msn-ins { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); }
+.msn-ins__head { display: flex; align-items: center; gap: var(--sp-4); }
+.msn-ins__names { flex: 1; min-width: 0; }
+.msn-ins__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
 .msn-lattice { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--surface-line); border-radius: var(--r-flat); }
 .msn-lattice__cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); background: var(--surface); color: var(--text-secondary); }
 .msn-lattice__cell b { font-family: var(--font-jp); font-size: var(--fs-lead); opacity: 0.35; }
@@ -32399,10 +32381,9 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-lattice__cell.on b { opacity: 1; color: var(--accent); }
 .msn-lattice__cell:not(:nth-child(5n)) { border-right: 1px solid var(--surface-line); }
 .msn-lattice__cell:nth-child(-n+5) { border-bottom: 1px solid var(--surface-line); }
-.msn-collect { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); border: 0; border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; box-shadow: var(--elev-action); }
 
 /* The achievements: A's hanging plates, B's rings, C's seals. */
-.msn-plates { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); padding: var(--sp-5); }
+.msn-plates { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); }
 .msn-plate { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-3) var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-plate); background: var(--surface); box-shadow: var(--elev-hang); text-align: center; }
 .msn-plate::after { content: ""; position: absolute; inset: auto 0 0; height: 3px; background: var(--accent); }
 .msn-plate__code { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); }
@@ -32415,14 +32396,14 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-plate--off .msn-plate__jp, .msn-plate--off .msn-plate__kana { opacity: 0.4; }
 .msn-plate--off::after { background: var(--surface-line); }
 .msn-plate--max { background: linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 14%, var(--surface)) 0%, var(--surface) 100%); }
-.msn-rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-5); padding: var(--sp-5); }
+.msn-rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-5); }
 .msn-ring { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; }
 .msn-ring__glyph { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border: 2.5px solid var(--accent2); border-radius: var(--r-pill); font-family: var(--font-serif); font-size: var(--fs-lead); font-weight: 700; line-height: 1; }
 .msn-ring__en { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 600; }
 .msn-ring--off .msn-ring__glyph { border-color: var(--surface-line); border-style: dashed; color: var(--text-secondary); }
 .msn-ring--off .msn-ring__en { color: var(--text-secondary); }
 .msn-ring--max .msn-ring__glyph { border-color: var(--text-primary); }
-.msn-seals { display: grid; grid-template-columns: repeat(3, 1fr); margin: var(--sp-5); border: 1px solid var(--surface-line); }
+.msn-seals { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--surface-line); }
 .msn-seal { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-2); background: var(--surface); color: var(--text-secondary); text-align: center; }
 .msn-seal__g { font-family: var(--font-serif); font-size: var(--fs-title); line-height: 1.1; opacity: 0.35; }
 .msn-seal small { font-size: var(--fs-caption-xs); line-height: 1.15; }
@@ -32431,6 +32412,17 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-seal--max.on .msn-seal__g { color: var(--text-primary); }
 .msn-seal:not(:nth-child(3n)) { border-right: 1px solid var(--surface-line); }
 .msn-seal:nth-child(-n+3) { border-bottom: 1px solid var(--surface-line); }
+
+/* The reward, once: a row's flash, a stamp pressed, the sum rising. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes msn-flash { from { background: color-mix(in srgb, var(--gate-gold-lit) 28%, transparent); } to { background: transparent; } }
+  @keyframes msn-press { 0% { transform: scale(1.7) rotate(-12deg); opacity: 0; } 60% { transform: scale(0.94) rotate(-4deg); opacity: 1; } 100% { transform: scale(1) rotate(-4deg); } }
+  @keyframes msn-rise { 0% { opacity: 0; transform: translateY(var(--sp-3)); } 25% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(calc(-1 * var(--sp-6))); } }
+  .msn-row.msn-just { animation: msn-flash 1.4s ease-out; }
+  .msn-stamp--on.msn-just b { animation: msn-press 0.5s cubic-bezier(0.22, 0.68, 0.32, 1); }
+  .msn-cpn--torn.msn-just .msn-cpn__stub { animation: msn-flash 1s ease-out; }
+  .msn-just > .msn-pop, .msn-pop--board { animation: msn-rise 2.2s ease-out 0.1s both; }
+}
 /* ── 328:end ── */
 
 

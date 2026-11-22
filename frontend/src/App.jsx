@@ -635,8 +635,6 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/dev/ride" element={<RidePreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
             <Route path="/dev/offers" element={<OffersPreview />} />
-            {/* The missions, drawn three ways (plan 328): ?v=A|B|C&plan=max. */}
-            <Route path="/dev/missions" element={<MissionsPreview />} />
             {/* 終着 (plans 191, 250): every finish of the day's run, from
                 the canvas's fixtures (?scene=…&reduced=1), on Today under
                 the shell: the bars leave and come back on a phone, the
@@ -645,6 +643,9 @@ export default function App({ front = NO_FRONT }) {
               <Route path="/dev/dayclear" element={<DayClearPreview />} />
               {/* The early-access sheet, the web's and Android's (plan 307). */}
               <Route path="/dev/rating" element={<RatingPreview />} />
+              {/* The missions, in the real gate and the real holder, three
+                  ways (plan 328): ?v=A|B|C&screen=today|sheet|profile. */}
+              <Route path="/dev/missions" element={<MissionsPreview />} />
             </Route>
           </Routes>
           {/* The workbench replays the real boarding, so it needs the
