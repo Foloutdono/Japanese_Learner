@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMissions } from '../../stores/missions'
 import { Sheet } from '../chrome/Sheet'
-import { CalendarIcon, ChevronIcon } from '../ui/Icons'
+import { CalendarIcon } from '../ui/Icons'
 
 // ── 任務 — the missions, drawn into the app (plan 328) ─────────────
 // Three ways to stand in the same screens, for the owner to pick from at
@@ -85,11 +85,9 @@ function Board({ d, max, week = false, className = '' }) {
           <span className="msn-row__state">{tally(d.day.missions)}/3</span>
         </div>
       )}
-      {paidNow(d) && !week && <span className="msn-pop msn-pop--board">{max ? reward(d.day.missions[0], true) : `${reward(d.day.missions[0], false)} 回数券`}</span>}
     </div>
   )
 }
-const paidNow = d => d.variant === 'B' && d.step === 2
 
 // ── C — the stamps ────────────────────────────────────────────────
 function Stamp({ glyph, label, on, big = false, just: fresh = false }) {
@@ -178,74 +176,54 @@ function Seal({ p, max }) {
 }
 
 // ── the gate's slot (Today, phone and desk) ───────────────────────
-export function MissionsGate({ desk = false }) {
+// One small pill under the legend, on the dial's axis, wherever the print
+// puts it (`style` is the gate's own `at(x, y)`): three lamps, the count and
+// the day's sum. A touch opens the day, drawn the variant's way.
+function Lamps({ variant, missions }) {
+  if (variant === 'C') {
+    return (
+      <span className="msn-pill__stamps" aria-hidden="true">
+        {missions.map(m => <b key={m.id} lang="ja" className={m.done ? 'on' : ''}>{m.glyph}</b>)}
+      </span>
+    )
+  }
+  return (
+    <span className="msn-pill__dots" aria-hidden="true">
+      {missions.map(m => <i key={m.id} className={m.done ? 'on' : ''} />)}
+    </span>
+  )
+}
+
+export function MissionsGate({ style }) {
   const d = useMissions()
   const [open, setOpen] = useState(false)
   if (!d) return null
   const max = d.plan === 'max'
   const done = tally(d.day.missions)
   const sum = max ? `+${d.day.missions.length * (d.day.missions[0].xp + d.day.missions[0].credits)} XP` : '+30'
+  const weekSum = max ? '+81 XP' : '+36'
 
-  if (d.variant === 'A') {
-    const body = <CouponDay d={d} max={max} />
-    if (desk) {
-      return (
-        <section className="tdy-desk__panel msn-panel" aria-label="Missions du jour">
-          <div className="msn-panel__head"><b>Aujourd'hui</b><span>{done}/3 · {sum}</span></div>
-          {body}
-        </section>
-      )
-    }
-    return (
-      <>
-        <button type="button" className="tdy-door msn-door" aria-haspopup="dialog" onClick={() => setOpen(true)}>
-          <span className="msn-door__dots" aria-hidden="true">
-            {d.day.missions.map(m => <i key={m.id} className={m.done ? 'on' : ''} />)}
-          </span>
-          <span className="tdy-door__what"><b>Missions du jour</b>{' · '}{done}/3</span>
-          <span className="tdy-door__go">{sum}<ChevronIcon direction="right" size={16} /></span>
-        </button>
-        <Sheet open={open || Boolean(d.open)} onClose={() => setOpen(false)} title="Missions" sub={`${done} sur 3 aujourd'hui`} icon={CalendarIcon} label="Missions" className="tdy-sheet msn-sheet">
-          {body}
-          <div className="msn-sub"><b>Cette semaine</b><span>{max ? "+81 XP" : "+36"}</span></div>
-          <CouponWeek d={d} max={max} />
-          <div className="msn-foot"><span>Découvertes · 3/10</span><span>Plaques · 3</span></div>
-        </Sheet>
-      </>
-    )
-  }
-
-  if (d.variant === 'B') {
-    if (desk) {
-      return (
-        <section className="tdy-desk__panel msn-panel" aria-label="Départs du jour">
-          <div className="msn-panel__head"><b>Départs du jour</b><span>{sum}</span></div>
-          <Board d={d} max={max} />
-          <div className="msn-panel__head msn-panel__head--sub"><b>Express de la semaine</b></div>
-          <Board d={d} max={max} week />
-        </section>
-      )
-    }
-    return <Board d={d} max={max} className="msn-board--gate" />
-  }
-
-  // C
-  if (desk) {
-    return (
-      <section className="tdy-desk__panel msn-panel" aria-label="Carnet d'étapes">
-        <div className="msn-panel__head"><b>Carnet du jour</b><span>{done}/3 · {sum}</span></div>
-        <StampDay d={d} max={max} />
-      </section>
-    )
-  }
   return (
-    <button type="button" className="tdy-door msn-door msn-door--stamps">
-      <span className="msn-door__stamps" aria-hidden="true">
-        {d.day.missions.map(m => <b key={m.id} lang="ja" className={m.done ? 'on' : ''}>{m.glyph}</b>)}
-      </span>
-      <span className="tdy-door__what"><b>Carnet du jour</b>{' · '}{done}/3</span>
-      <span className="tdy-door__go">{sum}<ChevronIcon direction="right" size={16} /></span>
-    </button>
+    <>
+      <div className="tpr-at msn-at" style={style}>
+        <button type="button" className={`msn-pill msn-pill--${d.variant}${d.just ? ' msn-just' : ''}`} aria-haspopup="dialog" aria-label={`Missions du jour, ${done} sur 3`} onClick={() => setOpen(true)}>
+          <Lamps variant={d.variant} missions={d.day.missions} />
+          <span className="msn-pill__n"><b>{done}</b>/3</span>
+          <span className="msn-pill__sum">{sum}</span>
+          {d.just && d.step === 2 && <span className="msn-pop msn-pop--pill">{max ? reward(d.day.missions[0], true) : `${reward(d.day.missions[0], false)} 回数券`}</span>}
+        </button>
+      </div>
+      <Sheet open={open || Boolean(d.open)} onClose={() => setOpen(false)} title="Missions" sub={`${done} sur 3 aujourd'hui`} icon={CalendarIcon} label="Missions" className="tdy-sheet msn-sheet">
+        {d.variant === 'A' && <CouponDay d={d} max={max} />}
+        {d.variant === 'B' && <Board d={d} max={max} />}
+        {d.variant === 'C' && <StampDay d={d} max={max} />}
+        <div className="msn-sub"><b>Cette semaine</b><span>{weekSum}</span></div>
+        {d.variant === 'A' && <CouponWeek d={d} max={max} />}
+        {d.variant === 'B' && <Board d={d} max={max} week />}
+        {d.variant === 'C' && <StampWeek d={d} />}
+        <div className="msn-foot"><span>Découvertes · 3/10</span><span>Plaques · 3</span></div>
+      </Sheet>
+    </>
   )
 }
 

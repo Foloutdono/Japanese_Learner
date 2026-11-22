@@ -32309,20 +32309,20 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-sub span { font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
 .msn-foot { display: flex; justify-content: space-between; padding-top: var(--sp-3); border-top: 1px solid var(--surface-line); font-size: var(--fs-caption); color: var(--text-secondary); }
 .msn-pop { position: absolute; right: var(--sp-4); top: 0; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--surface); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; opacity: 0; pointer-events: none; }
-.msn-pop--board { top: auto; bottom: 100%; right: var(--sp-4); background: var(--bg-panel); color: var(--gate-gold-lit); border-color: var(--gate-gold); }
 
-/* The door on the gate (A, C): the gate's own glass door, with a lamp or a row of stamps. */
-.msn-door__dots { display: inline-flex; gap: var(--sp-1); }
-.msn-door__dots i { width: 8px; height: 8px; border: 1.5px solid currentcolor; border-radius: var(--r-pill); opacity: 0.6; }
-.msn-door__dots i.on { border-color: var(--gate-gold-lit); background: var(--gate-gold-lit); opacity: 1; }
-.msn-door__stamps { display: inline-flex; gap: var(--sp-1); }
-.msn-door__stamps b { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1.5px dashed currentcolor; border-radius: var(--r-pill); font-family: var(--font-jp); font-size: var(--fs-caption-xs); line-height: 1; opacity: 0.6; }
-.msn-door__stamps b.on { border-style: solid; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); opacity: 1; transform: rotate(-4deg); }
-.msn-panel { display: flex; flex-direction: column; gap: var(--sp-4); }
-.msn-panel__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); font-family: var(--font-display); font-size: var(--fs-body); }
-.msn-panel__head b { font-size: var(--fs-lead); }
-.msn-panel__head span { font-size: var(--fs-sm); font-weight: 700; color: var(--sel-ink); }
-.msn-panel__head--sub b { font-size: var(--fs-body); color: var(--text-secondary); }
+/* The pill under the gate's legend: three lamps, the count, the day's sum.
+   The gate's own glass, as the legend's keys and the services' door wear it. */
+.msn-pill { position: relative; display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 32px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: color-mix(in srgb, var(--bg-panel) 82%, transparent); color: var(--text-on-panel-soft); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; white-space: nowrap; cursor: pointer; }
+.msn-pill:hover, .msn-pill:focus-visible { border-color: var(--text-on-panel-soft); filter: none; }
+.msn-pill__n { font-variant-numeric: tabular-nums; }
+.msn-pill__n b { color: var(--text-on-panel); }
+.msn-pill__sum { color: var(--gate-gold-lit); font-weight: 700; }
+.msn-pill__dots, .msn-pill__stamps { display: inline-flex; gap: var(--sp-1); }
+.msn-pill__dots i { width: 8px; height: 8px; border: 1.5px solid currentcolor; border-radius: var(--r-pill); opacity: 0.6; }
+.msn-pill__dots i.on { border-color: var(--gate-gold-lit); background: var(--gate-gold-lit); opacity: 1; }
+.msn-pill__stamps b { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1.5px dashed currentcolor; border-radius: var(--r-pill); font-family: var(--font-jp); font-size: var(--fs-caption-xs); line-height: 1; opacity: 0.6; }
+.msn-pill__stamps b.on { border-style: solid; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); opacity: 1; transform: rotate(-4deg); }
+.msn-pop--pill { top: auto; bottom: 100%; right: 50%; translate: 50% 0; background: var(--bg-panel); color: var(--gate-gold-lit); border-color: var(--gate-gold); }
 .msn-sheet { gap: var(--sp-4); }
 
 /* A — the coupon: a body, a perforation, a stub to tear. */
@@ -32344,7 +32344,6 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 
 /* B — the board: 発車標 rows, the reward in the time column. */
 .msn-board { position: relative; display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--bg-panel); color: var(--text-on-panel); overflow: hidden; }
-.tdy--print .msn-board--gate { background: color-mix(in srgb, var(--bg-panel) 82%, transparent); }
 .msn-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: var(--sp-4); align-items: center; padding: var(--sp-3) var(--sp-4); border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 13%, transparent); font-family: var(--font-display); font-size: var(--fs-sm); }
 .msn-row:first-child { border-top: 0; }
 .msn-row__time { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gate-gold-lit); }
@@ -32421,7 +32420,8 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   .msn-row.msn-just { animation: msn-flash 1.4s ease-out; }
   .msn-stamp--on.msn-just b { animation: msn-press 0.5s cubic-bezier(0.22, 0.68, 0.32, 1); }
   .msn-cpn--torn.msn-just .msn-cpn__stub { animation: msn-flash 1s ease-out; }
-  .msn-just > .msn-pop, .msn-pop--board { animation: msn-rise 2.2s ease-out 0.1s both; }
+  .msn-just > .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
+  .msn-pill.msn-just .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
 }
 /* ── 328:end ── */
 
