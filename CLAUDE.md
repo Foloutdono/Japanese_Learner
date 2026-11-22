@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **329**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **330**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -196,6 +196,19 @@ runtime purpose.
   `grammar_ladder._variants`, plan 319), and a twist or a scene line is
   cut only where the detector reads the point: a tour sets the point
   against its rivals, and the stems' match cut the rival's sentence.
+- **A line's register is read off how it ends (plan 329).** The analysis
+  carries `register`, `plain`, `polite`, `keigo` or `None`
+  (`plain_polite.register_of`), and the breakdown prints it once, as a
+  pill under the translation. です／ます in the closing run of endings
+  makes a sentence polite, a bare finite predicate plain; a noun, a
+  greeting, a て-form or a line that says it two ways is `None`, never a
+  guess. Keigo is not a second word list: it is a sentence whose closing
+  predicate is written on one of the catalogue's keigo points
+  (`KEIGO_POINTS`, held to the catalogue by `tests/test_plain_polite.py`,
+  so a rename of one is made there too), and a plain ending counts only
+  お〜になる, since the detector reads お祝いした as お〜する. A change to
+  these rules bumps `LOCAL_REV` and is pinned with the sentence it reads
+  and the one it must not.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's

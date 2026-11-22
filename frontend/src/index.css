@@ -13969,6 +13969,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   line-height: 1.5;
 }
+/* The line's register (plan 329): the app's outlined pill, shrunk to its
+   word in the column rather than stretched across it. */
+.bkd__register { align-self: flex-start; }
 /* The rows: word | reading | meaning | level, one line each where the
    column is wide enough, and on a phone the meaning drops under the
    word so a long gloss wraps in the room the word left rather than

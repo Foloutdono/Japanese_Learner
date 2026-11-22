@@ -1266,6 +1266,11 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',
+  // Le niveau de politesse d’une ligne (plan 329), lu sur sa fin : le badge
+  // sous la traduction d’une phrase.
+  registerPlain:       'Forme neutre',
+  registerPolite:      'Forme polie',
+  registerKeigo:       'Keigo',
   // 骨組み (plan 311) : la charpente de la ligne -- ce que fait chaque
   // partie, les rôles de study/frame.ROLES, et ce que la ligne tait.
   frameLabel:          'Comment la ligne est construite',

@@ -118,6 +118,17 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numb
   )
 }
 
+// The level of politeness the line is said in (plan 329, analysis.register,
+// read by the server from how the sentence ends): one outlined pill
+// under the translation. Absent where the line says none -- a greeting,
+// a noun, a line that says it two ways -- never a guess.
+const REGISTER_KEY = { plain: 'registerPlain', polite: 'registerPolite', keigo: 'registerKeigo' }
+export function RegisterBadge({ register, t }) {
+  const label = t?.[REGISTER_KEY[register]]
+  if (!label) return null
+  return <span className="type-badge type-badge--default bkd__register" data-register={register}>{label}</span>
+}
+
 const MARK_POS = new Set(['symbol', 'punctuation'])
 const isMark = tok => MARK_POS.has(tok.pos)
 
@@ -250,6 +261,7 @@ export function SentenceBreakdown({
       <div className="bkd">
         <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} lit={light.lit} numbered />
         {translation && <span className="bkd__en">{translation}</span>}
+        {available && <RegisterBadge register={analysis?.register} t={t} />}
         {available && <WordRows analysis={analysis} t={t} onTokenClick={onTokenClick} />}
         {available && (
           <GrammarPoints analysis={analysis} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />

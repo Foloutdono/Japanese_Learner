@@ -1300,6 +1300,11 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',
+  // The level of politeness a line is said in (plan 329), read from how it
+  // ends: the badge under a sentence's translation.
+  registerPlain:       'Plain form',
+  registerPolite:      'Polite form',
+  registerKeigo:       'Keigo',
   // 骨組み (plan 311): the line's frame -- what each part does, the
   // roles of study/frame.ROLES, and what the line leaves unsaid.
   frameLabel:          'How the line is built',

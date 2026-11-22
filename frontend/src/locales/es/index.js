@@ -1304,6 +1304,11 @@ const phraseAnalyzer = {
   grammarSpotted:      'Gramática detectada',
   explainSentence:     'Explicar',
   explainAgain:        'Explicar de nuevo',
+  // El nivel de cortesía de una línea (plan 329), leído en cómo termina: la
+  // insignia bajo la traducción de una frase.
+  registerPlain:       'Forma corta',
+  registerPolite:      'Forma cortés',
+  registerKeigo:       'Keigo',
   // 骨組み (plan 311): la estructura de la línea -- qué hace cada
   // parte, los roles de study/frame.ROLES, y lo que la línea calla.
   frameLabel:          'Cómo está construida la línea',
