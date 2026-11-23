@@ -100,6 +100,31 @@ describe('the gate\'s pill', () => {
     expect(document.querySelectorAll('.msn-cpn--torn')).toHaveLength(3)
   })
 
+  it('collects everything that is done with one touch, one request each', async () => {
+    seedMissions(missionsFixture({ step: 1 }))
+    apiJson.mockResolvedValue({ paid: { credits: 8, xp: 5 }, missions: missionsFixture({ step: 1 }) })
+    const screen = await shell(<MissionsGate />)
+    await userEvent.click(screen.container.querySelector('.msn-pill'))
+    await settle()
+    const all = document.querySelector('[data-action="missions-collect-all"]')
+    expect(all.textContent).toContain(en.msnCollectAll)
+    expect(all.textContent).toContain('+14')                       // the reviews' 8 and the bonus's 6
+    await userEvent.click(all)
+    await settle(120)
+    expect(apiJson.mock.calls.map(([, , o]) => JSON.parse(o.body))).toEqual([
+      { scope: 'day', kind: 'due' }, { scope: 'bonus', kind: 'all3' },
+    ])
+  })
+
+  it('offers no collect-all for a single reward, and names a collected one for a screen reader', async () => {
+    seedMissions(missionsFixture({ step: 0 }))
+    const screen = await shell(<MissionsGate />)
+    await userEvent.click(screen.container.querySelector('.msn-pill'))
+    await settle()
+    expect(document.querySelector('[data-action="missions-collect-all"]')).toBeNull()
+    expect(document.querySelector('.msn-cpn__paid').getAttribute('aria-label')).toBe(en.msnCollected)
+  })
+
   it('says so when a reward could not be collected', async () => {
     seedMissions(missionsFixture({ step: 1 }))
     apiJson.mockRejectedValueOnce(new Error('boom'))

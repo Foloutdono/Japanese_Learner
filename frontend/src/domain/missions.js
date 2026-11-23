@@ -47,3 +47,8 @@ export function daySum(day) {
   const credits = list.reduce((n, m) => n + m.credits, 0)
   return credits > 0 ? `+${credits}` : `+${list.reduce((n, m) => n + m.xp, 0)} XP`
 }
+
+/** Several rewards as one: what a "collect all" says it will pay. */
+export function sumOf(items) {
+  return { credits: items.reduce((n, m) => n + m.credits, 0), xp: items.reduce((n, m) => n + m.xp, 0) }
+}

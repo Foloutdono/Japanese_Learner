@@ -4,7 +4,7 @@ import { useLang } from '../../LangContext'
 import { claimMission, onMissionsOpen, takeMissionsOpen, useMissions, useMissionsBook } from '../../stores/missions'
 import { countUse } from '../../lib/screenTrail'
 import { playClick } from '../../lib/audio'
-import { GLYPHS, PLATES, PLATFORM_LINE, daySum, doneCount, rewardText } from '../../domain/missions'
+import { GLYPHS, PLATES, PLATFORM_LINE, daySum, doneCount, rewardText, sumOf } from '../../domain/missions'
 import { Sheet } from '../chrome/Sheet'
 import { CalendarIcon, ChevronIcon } from '../ui/Icons'
 
@@ -35,27 +35,30 @@ function Figure({ m }) {
   return <span className="msn-fig">{m.have}<small>/{m.of}</small></span>
 }
 
-// ── the coupon: a body, a perforation, a stub to tear ─────────────
-function Coupon({ m, scope, t, collect, popped }) {
+// ── the coupon: a row of the book, its stub the tear-off ─────────
+// A book of tickets, not a pile of boxes: the day's missions share one
+// panel, divided by hairlines, with one perforation down the stub's edge.
+// A mission that is done lights its stub in the metal (the action is the
+// metal, DESIGN.md) and is a button; one collected shows 済 and quiets.
+function Coupon({ m, scope, t, collect, popped, quiet = false }) {
   const state = m.paid ? 'torn' : m.done ? 'ready' : 'open'
   const label = t.msnLabel[m.kind](m)
   const body = (
     <>
       <div className="msn-cpn__body">
         <span className="msn-cpn__label">{label}</span>
-        {state === 'open' && <><Bar m={m} /><Figure m={m} /></>}
-        {state !== 'open' && <span className="msn-cpn__sub">{state === 'torn' ? t.msnCollected : t.msnDone}</span>}
+        {state === 'open' && <span className="msn-cpn__prog"><Bar m={m} /><Figure m={m} /></span>}
       </div>
       <div className="msn-cpn__stub">
         {state === 'torn'
-          ? <span className="msn-cpn__paid" lang="ja">済</span>
+          ? <span className="msn-cpn__paid" lang="ja" role="img" aria-label={t.msnCollected}>済</span>
           : <span className="msn-cpn__take">{rewardText(m)}</span>}
         {state === 'ready' && <span className="msn-cpn__tap">{t.msnCollect}</span>}
       </div>
     </>
   )
   return (
-    <div className={`msn-cpn msn-cpn--${state}${popped === m.kind ? ' msn-just' : ''}`} style={lineOf(m)}>
+    <div className={`msn-cpn msn-cpn--${state}${quiet ? ' msn-cpn--quiet' : ''}${popped === m.kind ? ' msn-just' : ''}`} style={lineOf(m)}>
       {state === 'ready' ? (
         <button type="button" className="msn-cpn__btn" data-action="mission-collect" aria-label={`${label}, ${t.msnCollect}`} onClick={() => collect(scope, m.kind)}>{body}</button>
       ) : body}
@@ -71,17 +74,21 @@ function useCollect(session) {
   const busy = useRef(false)
   const timer = useRef(null)
   useEffect(() => () => clearTimeout(timer.current), [])
-  const collect = async (scope, kind) => {
+  // One or several rewards, one request each and one at a time: the
+  // server pays each exactly once, and a failure leaves the rest to try.
+  const collectMany = async list => {
     if (busy.current) return
     busy.current = true
     setFailed(false)
     playClick()
     try {
-      const paid = await claimMission(session, scope, kind)
-      if (paid) {
-        setPopped(kind)
-        clearTimeout(timer.current)
-        timer.current = setTimeout(() => setPopped(null), 2400)
+      for (const [scope, kind] of list) {
+        const paid = await claimMission(session, scope, kind)
+        if (paid) {
+          setPopped(kind)
+          clearTimeout(timer.current)
+          timer.current = setTimeout(() => setPopped(null), 2400)
+        }
       }
     } catch {
       setFailed(true)
@@ -89,7 +96,8 @@ function useCollect(session) {
       busy.current = false
     }
   }
-  return { collect, popped, failed }
+  const collect = (scope, kind) => collectMany([[scope, kind]])
+  return { collect, collectMany, popped, failed }
 }
 
 // ── the gate's pill, and the sheet it opens ───────────────────────
@@ -98,11 +106,17 @@ export function MissionsGate({ style, session = null }) {
   const navigate = useNavigate()
   const d = useMissions()
   const [open, setOpen] = useState(() => takeMissionsOpen())
-  const { collect, popped, failed } = useCollect(session)
+  const { collect, collectMany, popped, failed } = useCollect(session)
   useEffect(() => onMissionsOpen(() => { takeMissionsOpen(); setOpen(true) }), [])
   if (!d?.day) return null      // an answer that is not the missions' is no answer
   const done = doneCount(d.day)
   const unlit = d.day.missions.map(m => m.done)
+  // What is done and not yet collected, in the order the sheet draws it.
+  const ready = [
+    ...d.day.missions.map(m => ({ scope: 'day', m })),
+    ...(d.day.bonus ? [{ scope: 'bonus', m: d.day.bonus }] : []),
+    ...d.week.missions.map(m => ({ scope: 'week', m })),
+  ].filter(r => r.m.done && !r.m.paid)
   const show = () => { playClick(); countUse('missions', 'open'); setOpen(true) }
   return (
     <>
@@ -117,17 +131,23 @@ export function MissionsGate({ style, session = null }) {
         </button>
       </div>
       <Sheet open={open} onClose={() => setOpen(false)} title={t.msnTitle} sub={t.msnSubDay(done)} icon={CalendarIcon} label={t.msnTitle} className="tdy-sheet msn-sheet">
-        <div className="msn-stack">
+        {ready.length > 1 && (
+          <button type="button" className="msn-all" data-action="missions-collect-all" onClick={() => collectMany(ready.map(r => [r.scope, r.m.kind]))}>
+            <span>{t.msnCollectAll}</span><b>{rewardText(sumOf(ready.map(r => r.m)))}</b>
+          </button>
+        )}
+        <div className="msn-book" role="list">
           {d.day.missions.map(m => <Coupon key={m.kind} m={m} scope="day" t={t} collect={collect} popped={popped} />)}
-          {d.day.bonus && <Coupon m={d.day.bonus} scope="bonus" t={t} collect={collect} popped={popped} />}
+          {d.day.bonus && <Coupon m={d.day.bonus} scope="bonus" t={t} collect={collect} popped={popped} quiet />}
         </div>
         <div className="msn-sub"><b>{t.msnWeek}</b></div>
-        <div className="msn-stack msn-stack--tight">
+        <div className="msn-book" role="list">
           {d.week.missions.map(m => <Coupon key={m.kind} m={m} scope="week" t={t} collect={collect} popped={popped} />)}
         </div>
         {failed && <p className="msn-note" role="status">{t.msnClaimError}</p>}
         <button type="button" className="msn-foot" onClick={() => { setOpen(false); navigate('/profile') }}>
-          <span>{t.msnPlates} · {t.msnFirsts}</span>
+          <span className="pf-line__roundel" aria-hidden="true" lang="ja">札</span>
+          <span className="msn-foot__what">{t.msnPlates} · {t.msnFirsts}</span>
           <ChevronIcon direction="right" size={15} />
         </button>
       </Sheet>

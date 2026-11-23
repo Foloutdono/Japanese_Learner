@@ -32301,13 +32301,13 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-bar i { display: block; height: 100%; background: var(--accent2); }
 .msn-fig { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; }
 .msn-fig small { font-weight: 500; color: inherit; opacity: 0.7; font-size: inherit; }
-.msn-stack { display: flex; flex-direction: column; gap: var(--sp-3); }
-.msn-stack--tight { gap: var(--sp-2); }
 .msn-note { margin: 0; font-size: var(--fs-caption); color: var(--danger); text-align: right; }
 .msn-sub { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); font-family: var(--font-display); font-size: var(--fs-body); color: var(--text-secondary); }
 .msn-sub b { font-weight: 700; }
-.msn-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-3) 0 0; border: 0; border-top: 1px solid var(--surface-line); border-radius: var(--r-flat); background: none; color: var(--text-secondary); font: inherit; font-size: var(--fs-caption); cursor: pointer; }
-.msn-pop { position: absolute; right: var(--sp-4); top: 0; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--surface); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; opacity: 0; pointer-events: none; }
+.msn-foot { display: flex; align-items: center; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: transparent; color: var(--text-secondary); font: inherit; font-size: var(--fs-sm); cursor: pointer; }
+.msn-foot:hover, .msn-foot:focus-visible { border-color: var(--text-secondary); filter: none; }
+.msn-foot__what { flex: 1; text-align: left; }
+.msn-pop { position: absolute; right: var(--sp-4); top: var(--sp-1); z-index: 1; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--surface); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; opacity: 0; pointer-events: none; }
 .msn-sheet { gap: var(--sp-4); }
 
 /* The pill under the gate's legend: three lamps, the count, the day's sum.
@@ -32324,23 +32324,31 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 /* A reward waits to be collected: a gold lamp on the pill's corner. */
 .msn-pill__flag { position: absolute; top: -2px; right: var(--sp-1); width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--gate-gold-lit); box-shadow: 0 0 0 2px var(--bg-panel); }
 
-/* The coupon: a body, a perforation, a stub to tear. */
-.msn-cpn { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; border: 1px solid var(--surface-line); border-left: 3px solid var(--line-color, var(--pass-ink)); border-radius: var(--r-card); background: var(--surface); }
+/* The book: the day's missions in one panel, each a row whose stub is
+   torn off to collect it; one perforation runs down the stubs' edge. */
+.msn-book { position: relative; display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); overflow: hidden; }
+.msn-cpn { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; border-top: 1px solid var(--surface-line); border-left: 3px solid var(--line-color, transparent); }
+.msn-cpn:first-child { border-top: 0; }
 .msn-cpn__btn { display: contents; font: inherit; color: inherit; text-align: left; cursor: pointer; }
-.msn-cpn__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; padding: var(--sp-4); }
+.msn-cpn__body { display: flex; flex-direction: column; justify-content: center; gap: var(--sp-2); min-width: 0; min-height: 56px; padding: var(--sp-3) var(--sp-4); }
 .msn-cpn__label { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
-.msn-cpn__sub { font-size: var(--fs-caption); color: var(--text-secondary); }
-.msn-cpn__stub { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 76px; padding: var(--sp-4); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease, opacity 0.3s ease; }
-.msn-cpn__stub::before, .msn-cpn__stub::after { content: ""; position: absolute; left: -7px; width: 12px; height: 12px; border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: var(--surface); }
-.msn-cpn__stub::before { top: -7px; }
-.msn-cpn__stub::after { bottom: -7px; }
-.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; color: var(--text-secondary); }
-.msn-cpn--ready .msn-cpn__take { color: var(--sel-ink); }
-.msn-cpn--ready .msn-cpn__stub { background: var(--sel-wash); }
-.msn-cpn__tap { font-size: var(--fs-caption-xs); font-weight: 600; color: var(--sel-ink); }
-.msn-cpn--torn { opacity: 0.6; }
-.msn-cpn--torn .msn-cpn__stub { border-left-style: solid; background: none; }
+.msn-cpn__prog { display: flex; align-items: center; gap: var(--sp-3); }
+.msn-cpn__prog .msn-bar { flex: 1; }
+.msn-cpn__stub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); width: 84px; padding: var(--sp-3); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease; }
+.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.msn-cpn__tap { font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-on-fill); }
+.msn-cpn--ready .msn-cpn__stub { background: var(--metal); border-left-color: var(--gate-gold-deep); }
+.msn-cpn--ready .msn-cpn__take { color: var(--text-on-fill); }
+.msn-cpn--ready .msn-cpn__label { color: var(--text-primary); }
+.msn-cpn--torn .msn-cpn__label { color: var(--text-secondary); font-weight: 500; }
 .msn-cpn__paid { font-size: var(--fs-lead); color: var(--success); }
+/* The bonus is a footnote to the three, not a fourth mission. */
+.msn-cpn--quiet .msn-cpn__body { min-height: 44px; }
+.msn-cpn--quiet .msn-cpn__label { font-size: var(--fs-sm); font-weight: 500; }
+.msn-cpn--quiet .msn-cpn__take { font-size: var(--fs-body); }
+/* Collect everything that is done, in one touch. */
+.msn-all { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-5); border: 0; border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; box-shadow: var(--elev-action); cursor: pointer; }
+.msn-all b { font-variant-numeric: tabular-nums; }
 
 /* The holder's insert (the profile): the plates, then the discoveries. */
 .msn-ins { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); }
