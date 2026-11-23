@@ -97,6 +97,7 @@ PLAN = [
     ("xp_ledger",           "user_id = %(user)s",       "XP awarded outside a review"),
     ("day_clears",          "user_id = %(user)s",       "the days cleared and the milestone tickets (plan 191)"),
     ("rest_tickets",        "user_id = %(user)s",       "the rest days earned and the missed days they bridged"),
+    ("card_set_aside",      "user_id = %(user)s",       "the cards the learner set aside, never to be served (plan 328)"),
     ("custom_cards",        "user_id = %(user)s",       "hand-written personal cards"),
     ("deck_cards",          "user_id = %(user)s",       "app cards attached to a personal deck"),
     ("deck_reports",        "user_id = %(user)s",       "library decks this learner reported"),
@@ -128,8 +129,8 @@ PLAN = [
     ("banzuke_rank",        "user_id = %(user)s",       "the board's place at the start of the day, for the moves"),
     ("feedback",            "user_id = %(user)s",       "the messages written to us: problems, ideas, cards reported (plan 222)"),
     ("apple_grants",        "user_id = %(user)s",       "the Sign in with Apple grant, kept to revoke it here (plan 321)"),
-    ("missions",            "user_id = %(user)s",       "the day's and the week's missions, their goals and what they paid (plan 328)"),
-    ("mission_marks",       "user_id = %(user)s",       "the discoveries and the achievements reached (plan 328)"),
+    ("missions",            "user_id = %(user)s",       "the day's and the week's missions, their goals and what they paid (plan 331)"),
+    ("mission_marks",       "user_id = %(user)s",       "the discoveries and the achievements reached (plan 331)"),
     # 対戦 (plan 279). A duel whose only real player is this learner goes
     # whole (the cascade takes its rows, a ghost's copy with them), read
     # off pvp_entries, so it comes first; a duel shared with another

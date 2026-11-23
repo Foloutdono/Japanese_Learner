@@ -7,7 +7,7 @@ import { refreshSummary } from '../../stores/profileSummary'
 import { askMissionsOpen } from '../../stores/missions'
 import { Sheet } from '../chrome/Sheet'
 
-// ── 新しい — the missions, announced once (plan 328) ───────────────
+// ── 新しい — the missions, announced once (plan 331) ───────────────
 // As the duels' key was (plan 287): the learners who met Today before the
 // pill stood under its legend are told once. The server decides who
 // (GET /api/profile's `missionsNews`) and is told it was seen whichever

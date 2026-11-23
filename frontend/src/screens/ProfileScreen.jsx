@@ -204,9 +204,9 @@ export default function ProfileScreen({ session }) {
     // 対戦 (plan 279): the door to the duels under the holder's own
     // (E1), the Elo laid out under it once there is one (L1).
     duels: <DuelsInsert t={t} lang={lang} navigate={navigate} />,
-    // 任務 (plan 328): the plates and the discoveries.
+    // 任務 (plan 331): the plates and the discoveries.
     missions: <MissionsInsert session={session} />,
-    // 縁 (plan 329): the referral, as an insert (A) or as a door under the duels' (B).
+    // 縁 (plan 332): the referral, as an insert (A) or as a door under the duels' (B).
     referral: <ReferralInsert />,
     referralDoor: <ReferralDoor />,
   }

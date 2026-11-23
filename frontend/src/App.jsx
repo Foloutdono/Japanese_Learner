@@ -95,6 +95,7 @@ import ExamResult from './screens/ExamResult'
 import TranslationRun from './screens/TranslationRun'
 import AppLoading from './screens/AppLoading'
 import { FeedbackHost } from './components/feedback/FeedbackSheet'
+import { SetAsideHost } from './components/study/SetAside'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -645,10 +646,10 @@ export default function App({ front = NO_FRONT }) {
               {/* The early-access sheet, the web's and Android's (plan 307). */}
               <Route path="/dev/rating" element={<RatingPreview />} />
               {/* The missions, in the real gate and the real holder, three
-                  ways (plan 328): ?v=A|B|C&screen=today|sheet|profile. */}
+                  ways (plan 331): ?v=A|B|C&screen=today|sheet|profile. */}
               <Route path="/dev/missions" element={<MissionsPreview />} />
               {/* The referral, in the real gate and the real holder, two ways
-                  (plan 329): ?v=A|B&screen=today|choose|profile|manage|reward. */}
+                  (plan 332): ?v=A|B&screen=today|choose|profile|manage|reward. */}
               <Route path="/dev/referral" element={<ReferralPreview />} />
             </Route>
           </Routes>
@@ -949,6 +950,7 @@ export default function App({ front = NO_FRONT }) {
             link and a card's flag. Here for RunOutSheet's reason -- the
             run's own retry unmounts the failure that raised it. */}
         <FeedbackHost session={session} />
+        <SetAsideHost session={session} />
         <OfferScreen />
         {/* 補充 — what the refill landed while the app was closed,
             charged onto the card on arrival (plans 141, 278). Held

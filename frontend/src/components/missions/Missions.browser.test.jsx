@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
-// ── 任務 — the pill, its sheet and the plates (plan 328) ──────────────
+// ── 任務 — the pill, its sheet and the plates (plan 331) ──────────────
 // The gate's pill counts the day's missions and opens a sheet of coupons;
 // a finished one is a button, the tap collects it and the server's answer
 // redraws everything. The holder's insert hangs the plates and the

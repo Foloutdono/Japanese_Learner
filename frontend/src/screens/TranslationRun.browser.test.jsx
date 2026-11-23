@@ -177,7 +177,7 @@ describe('TranslationRun', () => {
     expect(root.querySelector('.pcard-lead .pcard-pin')).toBeNull()
   })
 
-  it('corrects a Japanese answer in place and numbers the fix on the reference\'s words (A1.1, A1.3)', async () => {
+  it('corrects a Japanese answer in place and numbers the fix on the learner\'s own words (A1.1, plan 330)', async () => {
     const review = {
       verdict: 'partial',
       summary: 'One particle.',
@@ -201,12 +201,134 @@ describe('TranslationRun', () => {
     const over = root.querySelector('.pcard-well .pcard-over')
     expect(over.querySelector('s').textContent).toBe('が')
     expect(over.querySelector('rt').textContent).toBe('は')
-    // On the reference: the words the fix is about underlined, its
-    // number after them.
+    // The number stands on what the learner wrote, in the well, and the
+    // reference is left clean (plan 330, pick C): a mistake is marked
+    // where it was made.
+    expect(root.querySelector('.pcard-well .pcard-pin').textContent).toBe('1')
     const lead = root.querySelector('.pcard-lead__jp')
-    expect(lead.querySelector('.pcard-hit').textContent).toBe('学校は')
-    expect(lead.querySelector('.pcard-pin').textContent).toBe('1')
+    expect(lead.querySelector('.pcard-hit')).toBeNull()
+    expect(lead.querySelector('.pcard-pin')).toBeNull()
     expect(root.querySelector('.rvw__row .rvw__n').textContent).toBe('1')
+  })
+
+  // ── The weighed review, on the learner's own line (plan 330, pick C) ──
+  // The answer typed in romaji is read as the kana it spells (the server's
+  // `answer_kana`), and that line is what the review marks: a wrong form
+  // struck with the right one over it, a word that was right but less
+  // natural in the near ink, a word left out at a caret. The letters are
+  // never marked, nor remarked on; they stay under the line, quiet.
+  const WEIGHED = {
+    verdict: 'partial',
+    summary: 'Compris, mais la forme du verbe est fausse.',
+    good: [],
+    fix: [
+      { given: 'のんでした', fix: 'のみました', issue: '«でした» ne suit pas un verbe.', severity: 'error' },
+      { given: 'だけを', fix: 'だけ', issue: '«を» est facultatif après 「だけ」.', severity: 'natural' },
+      { given: '', fix: 'は', issue: '«は» pose «hier» en thème.', severity: 'natural' },
+    ],
+    grammar_used: true,
+    better: 'きのうはみずだけのみました。',
+    better_parts: [{ text: 'きのうはみずだけのみました' }],
+  }
+  const KANA = 'きのうみずだけをのんでした'
+  const ROMAJI = 'kinou mizudakewonondeshita'
+  const detail = {
+    what: 'Tu as mis «でした» après 飲んで.',
+    rule: [{ label: 'Verbe', text: '飲む → 飲みます → 飲みました' }],
+    examples: [{ jp: 'コーヒーを飲みました。', tr: 'J’ai bu du café.' }],
+    memo: 'Verbe → ます, ました.',
+  }
+
+  function weighedApi() {
+    apiFetch.mockImplementation(async (url, _session, init) => {
+      const u = String(url)
+      if (u.startsWith('/api/translation/batch')) return ok({ phrases: PHRASES })
+      if (u === '/api/translation/analyze') return ok({ review: WEIGHED, analysis: WEIGHED.summary, answer_kana: KANA })
+      if (u === '/api/phrase/analyze') return ok(ANALYSIS)
+      if (u === '/api/ask') return ok({ answer: detail.what, detail, off_topic: false, left: 39, _sent: JSON.parse(init.body) })
+      return ok({})
+    })
+  }
+
+  it('marks a romaji answer as the kana it spells, by weight, and leaves the letters and the reference alone', async () => {
+    weighedApi()
+    const root = await answered(await run(), ROMAJI)
+    const well = root.querySelector('.pcard-well')
+    // The marks stand on the kana line: left to right 3, 2, 1.
+    const pins = [...well.querySelectorAll('.pcard-pin')]
+    expect(pins.map(p => p.textContent)).toEqual(['3', '2', '1'])
+    expect(pins.map(p => p.classList.contains('pcard-pin--near'))).toEqual([true, true, false])
+    // The error: the wrong form struck, the right one small over it.
+    const over = well.querySelector('.pcard-over:not(.pcard-miss--near)')
+    expect(over.querySelector('s').textContent).toBe('んで')
+    expect(over.querySelector('rt').textContent).toBe('みま')
+    // A word that was right (を after だけ) is underlined, never struck;
+    // a word left out is written over a caret.
+    expect(well.querySelector('.pcard-del--near').textContent).toBe('を')
+    expect(well.querySelector('.pcard-over--add rt').textContent).toBe('は')
+    // What was typed stays under the line, quiet, and is never marked.
+    expect(well.querySelector('.pcard-well__typed').textContent).toBe(ROMAJI)
+    // The reference is clean, and romaji is not remarked on.
+    expect(root.querySelector('.pcard-lead .pcard-pin')).toBeNull()
+    expect(root.querySelector('.pcard-lead .pcard-hit')).toBeNull()
+    expect(root.textContent.toLowerCase()).not.toContain('romaji')
+  })
+
+  it('leads with the error as a card of its own, the natural ones as a line each', async () => {
+    weighedApi()
+    const root = await answered(await run(), ROMAJI)
+    const big = root.querySelectorAll('.rvw-big')
+    expect(big).toHaveLength(1)
+    expect(big[0].querySelector('.rvw__n').textContent).toBe('1')
+    expect(big[0].querySelector('.rvw__tag').textContent).toBe('À corriger')
+    expect(big[0].querySelector('.rvw-chg__was').textContent).toBe('のんでした')
+    expect(big[0].querySelector('.rvw-chg__to').textContent).toBe('のみました')
+    const soft = [...root.querySelectorAll('.rvw-soft')]
+    expect(soft.map(r => r.querySelector('.rvw__n').textContent)).toEqual(['2', '3'])
+    expect(soft[1].querySelector('.rvw-chg__to').textContent).toBe('+ は')
+    // Each has its Détail.
+    expect(root.querySelectorAll('.rvw-btn')).toHaveLength(3)
+  })
+
+  it('a Détail asks the asking about that mistake alone, and answers in parts in its page', async () => {
+    weighedApi()
+    const root = await answered(await run(), ROMAJI)
+    root.querySelector('.rvw-big .rvw-btn').click()
+    await settle(160)
+    const [, , init] = calls('/api/ask')[0]
+    const sent = JSON.parse(init.body)
+    expect(sent.mode).toBe('translation')
+    expect(sent.explain).toEqual({
+      given: 'のんでした', fix: 'のみました', issue: '«でした» ne suit pas un verbe.', severity: 'error',
+    })
+    // (French sets a non-breaking space before the colon: frenchSpacing.)
+    expect(sent.question.replace(/\s/g, ' ')).toBe('Explique-moi le point 1 : «のんでした» → «のみました»')
+    // The question carries the Japanese the romaji spells, not the letters.
+    expect(sent.answer).toBe(KANA)
+    // The phone's asking page rises over the run with the detail, in parts.
+    const page = document.querySelector('.ask-layer')
+    expect(page.querySelector('.ask__a .ask-detail .ask-detail__what').textContent).toBe(detail.what)
+    expect(page.querySelector('.ask-detail__rule dd').textContent).toBe('飲む → 飲みます → 飲みました')
+    expect(page.querySelector('.ask-detail__memo').textContent).toBe(detail.memo)
+    // The button says it was asked, and does not ask twice.
+    const button = root.querySelector('.rvw-big .rvw-btn')
+    expect(button.textContent).toContain('Dans le chat')
+    expect(button.disabled).toBe(true)
+  })
+
+  it('a Détail that failed can be asked again', async () => {
+    apiFetch.mockImplementation(async (url) => {
+      const u = String(url)
+      if (u.startsWith('/api/translation/batch')) return ok({ phrases: PHRASES })
+      if (u === '/api/translation/analyze') return ok({ review: WEIGHED, analysis: WEIGHED.summary, answer_kana: KANA })
+      if (u === '/api/phrase/analyze') return ok(ANALYSIS)
+      if (u === '/api/ask') return { ok: false, status: 503, json: async () => ({}) }
+      return ok({})
+    })
+    const root = await answered(await run(), ROMAJI)
+    root.querySelector('.rvw-big .rvw-btn').click()
+    await settle(160)
+    expect(root.querySelector('.rvw-big .rvw-btn').disabled).toBe(false)
   })
 
   it('prints the prose when the model did not answer in the shape', async () => {

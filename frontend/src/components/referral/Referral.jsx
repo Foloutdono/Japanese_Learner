@@ -5,7 +5,7 @@ import { SearchIcon, ChevronIcon } from '../ui/Icons'
 import { SplitRow } from '../selection/SplitRow'
 import { InsertHead } from '../missions/Missions'
 
-// ── 縁 — the referral, drawn into the app (plan 329) ───────────────
+// ── 縁 — the referral, drawn into the app (plan 332) ───────────────
 // Two ways to stand in the same screens, for the owner to pick from at
 // /dev/referral: A, an insert in the holder (the filleuls as a book of
 // tickets, like the missions') and a sheet over Today that asks once;

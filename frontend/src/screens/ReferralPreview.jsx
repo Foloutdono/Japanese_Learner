@@ -13,7 +13,7 @@ import { SUMMARY, TODAY_PARTIAL } from '../components/dayclear/fixtures'
 import { referralFixture } from '../components/referral/fixtures'
 import { bookFixture, missionsFixture } from '../components/missions/fixtures'
 
-// ── /dev/referral — the referral, in the screens it lives in (plan 329) ──
+// ── /dev/referral — the referral, in the screens it lives in (plan 332) ──
 // Development only, no backend, no session: the real gate and the real
 // profile under the real shell, fed by fixtures in the server's shape
 // (components/referral/fixtures.js).

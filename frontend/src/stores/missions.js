@@ -1,7 +1,7 @@
 import { apiJson } from '../lib/api'
 import { createRemoteStore } from './remote'
 
-// ── 任務 — the missions, as the screens read them (plan 328) ──────
+// ── 任務 — the missions, as the screens read them (plan 331) ──────
 // GET /api/missions: the day's three and its bonus, the week's three and
 // what waits to be collected, read by the pill under Today's legend and
 // its sheet. GET /api/missions/book: the discoveries and the achievements,

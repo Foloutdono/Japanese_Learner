@@ -35,18 +35,29 @@ import { AskPanel } from './AskPanel'
 //   open     whether it takes a question yet: the grade is in
 //   title    the run's name, under the page's own
 //   text     comprehension's wording: a text, not a sentence
-export function AskEntry({ ask, askKey, context, open, title, text = false }) {
+//   control  the page's useAskPage, where a caller opens it from elsewhere
+//            too (plan 330: the review's Détail button asks, and the
+//            page rises over the run to show the answer); else its own
+//   launch   the button that opens it (default); `false` for the page
+//            alone, mounted where the button is not (the translation
+//            run's review asks before the sentence is graded)
+//   layer    the page itself (default); `false` for the button alone,
+//            where the page is mounted elsewhere
+export function AskEntry({ ask, askKey, context, open, title, text = false, control = null, launch = true, layer = true }) {
   const { t } = useLang()
   const desk = useDesk()
-  const page = useAskPage()
+  const own = useAskPage()
+  const page = control ?? own
   if (desk || !open) return null
   return (
     <>
-      <button type="button" className="btn-secondary ask-launch" onClick={page.show} aria-haspopup="dialog">
-        <span className="ask-launch__mark" lang="ja" aria-hidden="true">問</span>
-        {t.askOpen}
-      </button>
-      {page.open && createPortal(
+      {launch && (
+        <button type="button" className="btn-secondary ask-launch" onClick={page.show} aria-haspopup="dialog">
+          <span className="ask-launch__mark" lang="ja" aria-hidden="true">問</span>
+          {t.askOpen}
+        </button>
+      )}
+      {layer && page.open && createPortal(
         <AskPage ask={ask} askKey={askKey} context={context} title={title} text={text} onClose={page.hide} />,
         document.body,
       )}

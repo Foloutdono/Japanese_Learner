@@ -1,4 +1,4 @@
-"""任務 — the missions (plan 328): the sizing, the choice, the goals, the
+"""任務 — the missions (plan 331): the sizing, the choice, the goals, the
 payment and what a reward is never allowed to be."""
 import uuid
 from datetime import datetime, timedelta, timezone

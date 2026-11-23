@@ -133,7 +133,7 @@ REASONS = ("refill", "review", "grant", "adjust", "duel", "duel_review", "missio
 # offer's week, which counts reviews, never counts a duel.
 FARES = ("review", "duel", "duel_review")
 # What credits are GIVEN for, apart from a hand-out (grant): a mission, a
-# discovery or an achievement (plan 328, study/missions.py). Each its own
+# discovery or an achievement (plan 331, study/missions.py). Each its own
 # reason, so the ledger says what paid and the day's income can be summed
 # against the target the missions were sized for.
 AWARDS = ("mission",)

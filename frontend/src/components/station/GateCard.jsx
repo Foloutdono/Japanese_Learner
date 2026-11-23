@@ -574,7 +574,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
               ? fin.at('KEY') && <ThreadKey done={thread.rides} left={thread.total - thread.rides} t={t} className="clrk-fade" />
               : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
         </div>
-        {/* 任務 (plan 328): the day's missions, one small pill under the legend. */}
+        {/* 任務 (plan 331): the day's missions, one small pill under the legend. */}
         {!fin && <MissionsGate session={session} style={at(frame.cx, frame.cy + frame.fare + BELOW.keys + 30)} />}
       </section>
       <span className="tdy__air" aria-hidden="true" />
@@ -584,7 +584,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
             fit (plan 224), over the run's own row. */}
         <ComebackLine today={today} session={session} hold={Boolean(fin?.playing)} />
         <LevelFitLine session={session} />
-        {/* 縁 (plan 329): the notice that asks for a parrain, three days. */}
+        {/* 縁 (plan 332): the notice that asks for a parrain, three days. */}
         <ReferralNotice />
         <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
           <span className="tdy-door__what">

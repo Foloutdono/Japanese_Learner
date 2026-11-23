@@ -1,5 +1,5 @@
 // A learner on a Tuesday afternoon, in the shape the server answers
-// (GET /api/missions and /api/missions/book, plan 328), for /dev/missions
+// (GET /api/missions and /api/missions/book, plan 331), for /dev/missions
 // and the tests. `step`: 0 the reviews are not finished, 1 they are (the
 // stub waits to be torn), 2 collected. `plan: 'max'` is the pass: no
 // credits, the same sums as XP.

@@ -84,7 +84,7 @@ import { nativePlatform } from '../lib/platform'
 // had their turn, and never over another sheet. « Continuer en invité »
 // is always the way past it.
 //
-// 新しい (plan 328): the missions' pill under the gate's legend is told
+// 新しい (plan 331): the missions' pill under the gate's legend is told
 // the same way (MissionsNewsSheet, `missionsNews`), after the duels' news
 // and never beside it.
 //

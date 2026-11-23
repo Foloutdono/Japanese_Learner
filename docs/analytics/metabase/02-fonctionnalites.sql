@@ -267,7 +267,7 @@ GROUP BY 1 ORDER BY 1;
 -- title: Missions faites et récoltées
 -- display: bar
 -- size: 12x8
--- description: Pour chaque mission du catalogue (plan 328), les apprenants qui l'ont terminée (mission_done) et ceux qui ont récolté sa récompense (mission_claimed). Un écart durable entre les deux dit une récompense que personne ne prend.
+-- description: Pour chaque mission du catalogue (plan 331), les apprenants qui l'ont terminée (mission_done) et ceux qui ont récolté sa récompense (mission_claimed). Un écart durable entre les deux dit une récompense que personne ne prend.
 SELECT props->>'kind' AS "Mission",
        count(DISTINCT user_id) FILTER (WHERE name = 'mission_done') AS "Terminée",
        count(DISTINCT user_id) FILTER (WHERE name = 'mission_claimed') AS "Récoltée"

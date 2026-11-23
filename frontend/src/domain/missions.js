@@ -1,4 +1,4 @@
-// ── 任務 — what the screens know about a mission (plan 328) ────────
+// ── 任務 — what the screens know about a mission (plan 331) ────────
 // The server says which missions a learner has, how far they are and what
 // each pays (study/missions.py); the screens print them in the learner's
 // words (locales `msn*`). This is the little that is the client's: the

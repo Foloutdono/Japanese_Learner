@@ -38,7 +38,7 @@ export const STORE_PATHS = {
   record: '/api/practice/record',
   agenda: '/api/agenda',
   duels: '/api/pvp',
-  // 任務 (plan 328): the plates and discoveries the holder hangs. The day's
+  // 任務 (plan 331): the plates and discoveries the holder hangs. The day's
   // own (/api/missions) is asked by the pill on Today's gate itself.
   missionsBook: '/api/missions/book',
 }
