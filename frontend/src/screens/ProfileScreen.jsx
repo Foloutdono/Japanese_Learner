@@ -18,6 +18,7 @@ import { LineLedger } from '../components/profile/LineLedger'
 import { useAgenda } from '../stores/agenda'
 import { DuelsInsert } from '../components/pvp/DuelsInsert'
 import { MissionsInsert } from '../components/missions/Missions'
+import { ReferralInsert, ReferralDoor } from '../components/referral/Referral'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
@@ -205,6 +206,9 @@ export default function ProfileScreen({ session }) {
     duels: <DuelsInsert t={t} lang={lang} navigate={navigate} />,
     // 任務 (plan 328): the plates and the discoveries.
     missions: <MissionsInsert session={session} />,
+    // 縁 (plan 329): the referral, as an insert (A) or as a door under the duels' (B).
+    referral: <ReferralInsert />,
+    referralDoor: <ReferralDoor />,
   }
 
   return (
@@ -230,6 +234,7 @@ export default function ProfileScreen({ session }) {
               {inserts.holderDoors}
               {inserts.stamps}
               {inserts.missions}
+              {inserts.referral}
             </div>
             <div className="desk-profile__col">
               {inserts.records}
@@ -244,8 +249,10 @@ export default function ProfileScreen({ session }) {
           {inserts.pass}
           {inserts.doors}
           {inserts.duels}
+          {inserts.referralDoor}
           {inserts.stamps}
           {inserts.missions}
+          {inserts.referral}
           {inserts.tickets}
           {inserts.agenda}
           {inserts.records}

@@ -32334,8 +32334,8 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-cpn__label { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
 .msn-cpn__prog { display: flex; align-items: center; gap: var(--sp-3); }
 .msn-cpn__prog .msn-bar { flex: 1; }
-.msn-cpn__stub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); width: 84px; padding: var(--sp-3); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease; }
-.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.msn-cpn__stub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 84px; padding: var(--sp-3); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease; }
+.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text-secondary); }
 .msn-cpn__tap { font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-on-fill); }
 .msn-cpn--ready .msn-cpn__stub { background: var(--metal); border-left-color: var(--gate-gold-deep); }
 .msn-cpn--ready .msn-cpn__take { color: var(--text-on-fill); }
@@ -32399,6 +32399,31 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   .msn-just > .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
 }
 /* ── 328:end ── */
+/* ══ 329 — 縁, the referral (plan 329) ═════════════════════════════
+   Drawn in the real gate and the real holder (/dev/referral) two ways, for
+   the owner to pick from. The filleuls are the missions' book of tickets
+   (the idiom is the missions'): a row a filleul, its stub the reward. */
+.ref-sheet { gap: var(--sp-4); }
+.ref-sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.ref-prog { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+.ref-dots { display: inline-flex; gap: var(--sp-1); }
+.ref-dots i { width: 8px; height: 8px; border: 1.5px solid var(--text-secondary); border-radius: var(--r-pill); }
+.ref-dots i.on { border-color: var(--accent2); background: var(--accent2); }
+.ref-empty .msn-cpn__label { color: var(--text-secondary); font-weight: 500; }
+.ref-empty { border-left-style: dashed; }
+.ref-link { display: flex; align-items: center; gap: var(--sp-3); min-height: 44px; padding: 0 var(--sp-3) 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.ref-link__url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-sm); color: var(--text-secondary); }
+.ref-link__go { flex: none; min-height: 32px; padding-inline: var(--sp-4); }
+.ref-acts { gap: var(--sp-3); }
+.ref-notice--paid { border-color: var(--gate-gold); color: var(--text-on-panel); }
+.ref-notice--paid .tdy-door__what b { color: var(--gate-gold-lit); }
+.ref-welcome__art { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.ref-welcome__ticket { display: inline-flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-4) var(--sp-7); border-radius: var(--r-card); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); box-shadow: var(--elev-action); }
+.ref-welcome__sum { font-size: var(--fs-heading); line-height: 1; font-variant-numeric: tabular-nums; }
+.ref-welcome__unit { font-size: var(--fs-sm); font-weight: 700; }
+.ref-welcome__title { margin: 0; text-wrap: balance; }
+.ref-welcome__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+/* ── 329:end ── */
 
 
 /* ══ 247 — 乗車, the card is the form ══════════════════════════════
