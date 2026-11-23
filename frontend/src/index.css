@@ -14351,7 +14351,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: var(--sp-5);
   border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--surface-line));
   border-radius: var(--r-panel);
-  background: var(--bg-panel);
+  /* A paper ground, as the answer's well is: its inks are the theme's, so
+     the struck word and the reason read in both (Guard 5). */
+  background: var(--surface);
 }
 .rvw-big__top {
   display: flex;
@@ -14482,7 +14484,7 @@ s.rvw-chg__was { text-decoration-thickness: 2px; }
   margin: 0;
   padding: var(--sp-3) var(--sp-4);
   border-radius: var(--r-card);
-  background: var(--bg-panel);
+  background: var(--surface);
   color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
 }
 
