@@ -160,7 +160,7 @@ def recognize_image(
     # model back out would change its signature for every caller. It is
     # already logged ("Using model ...") at the point of choice, which is
     # where anyone diagnosing a quality regression would look anyway.
-    # 発見 (plan 328): a photo read is a discovery, once; noted after the
+    # 発見 (plan 331): a photo read is a discovery, once; noted after the
     # read succeeded, and never able to fail it.
     if text:
         missions.note(user_id, "first_photo")

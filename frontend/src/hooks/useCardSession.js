@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { track } from '../lib/track'
 import { runFigures, runWhere } from '../lib/runTrail'
 import { reviewsSettled } from '../lib/reviews'
+import { onCardSetAside } from '../stores/setAside'
 
 // Once the queue drops to this many unreviewed cards, kick off a
 // background refill — small enough that a refill is rarely idle for
@@ -304,6 +305,8 @@ export function useCardSession({
   // by cardKey. See ANSWERED_FLOOR_MS. Every screen used to need its
   // own copy through extraExcludeIds, and four of the six had none.
   const answeredRef = useRef(new Set())
+  // The cards set aside during this run (plan 328, below).
+  const setAsideRef = useRef(new Set())
   // advance() reads cardKey through a ref: its default is a new
   // function on every render.
   const cardKeyRef = useRef(cardKey)
@@ -517,7 +520,8 @@ export function useCardSession({
           // A card answered while this batch was out is no fresher
           // for it.
           const seen = new Set([...q.map(cardKey), ...answeredRef.current])
-          const merged = [...q, ...fresh.filter(c => !seen.has(cardKey(c)))]
+          // Nor is a card set aside while it was out (plan 328).
+          const merged = [...q, ...fresh.filter(c => !seen.has(cardKey(c)) && !setAsideRef.current.has(c?.card_id))]
           saveCache(storageKey, merged)
           return merged
         })
@@ -572,6 +576,20 @@ export function useCardSession({
     setError(null)
     setDone(false)
   }, [clearRetry])
+
+  // 回送 (plan 328): a card set aside leaves the run in every mode it
+  // holds, unanswered -- the next card shows, and nothing is counted.
+  // Kept for the run, so a batch already on its way cannot bring it
+  // back; the server deals it no more after that.
+  useEffect(() => onCardSetAside(cardId => {
+    setAsideRef.current.add(cardId)
+    setQueue(q => {
+      if (!q.some(c => c?.card_id === cardId)) return q
+      const next = q.filter(c => c?.card_id !== cardId)
+      saveCache(storageKey, next)
+      return next
+    })
+  }), [storageKey])
 
   // Pop the front card off — call this once a review has been
   // recorded (fire-and-forget, same as today) and the next card

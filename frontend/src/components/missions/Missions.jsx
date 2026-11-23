@@ -8,7 +8,7 @@ import { GLYPHS, PLATES, PLATFORM_LINE, daySum, doneCount, rewardText, sumOf } f
 import { Sheet } from '../chrome/Sheet'
 import { CalendarIcon, ChevronIcon } from '../ui/Icons'
 
-// ── 任務 — the missions, in the gate and the holder (plan 328) ────
+// ── 任務 — the missions, in the gate and the holder (plan 331) ────
 // The owner's pick of the drawings (A, everywhere): a small pill under
 // the legend on Today (MissionsGate) opens a sheet of coupons, one a
 // mission, its stub torn to collect the reward; the holder carries the

@@ -217,7 +217,7 @@ def post_transfer_import(payload: TransferPayload, user_id: str = Depends(get_us
         "source": payload.source, "notes": m.notes, "cards": len(m.hits),
         "written": written, "kept": summary["kept"],
     })
-    # 発見 (plan 328): an import is a discovery, once.
+    # 発見 (plan 331): an import is a discovery, once.
     missions.note(user_id, "first_import")
     logger.info("transfer import user_id=%s source=%s notes=%d cards=%d written=%d kept=%d",
                 user_id, payload.source, m.notes, len(m.hits), written, summary["kept"])

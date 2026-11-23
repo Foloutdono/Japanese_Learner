@@ -13969,6 +13969,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   line-height: 1.5;
 }
+/* The line's register (plan 329): the app's outlined pill, shrunk to its
+   word in the column rather than stretched across it. */
+.bkd__register { align-self: flex-start; }
 /* The rows: word | reading | meaning | level, one line each where the
    column is wide enough, and on a phone the meaning drops under the
    word so a long gloss wraps in the room the word left rather than
@@ -14324,6 +14327,167 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .rvw__verdict--partial { --badge-color: var(--warning); }
 .rvw__verdict--incorrect { --badge-color: var(--danger); }
 
+/* The weighed review (plan 330, the owner's pick C of the canvas
+   "Translation review"): a real error is a card of its own with the
+   change set large, the ones that are only less natural one quiet line
+   each, in the near ink, so the weight is read before a word is. Each
+   has a Détail button that asks the asking (AskPanel, AskDetail). A
+   card's edge is the miss ink, the family's rule for what went wrong
+   (DESIGN.md, colour); the near ink is the wave and the roundel the
+   sentence already wears (.pcard-pin--near). */
+.rvw-weighed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rvw-big {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--surface-line));
+  border-radius: var(--r-panel);
+  /* A paper ground, as the answer's well is: its inks are the theme's, so
+     the struck word and the reason read in both (Guard 5). */
+  background: var(--surface);
+}
+.rvw-big__top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.rvw__tag--error { --badge-color: var(--danger); }
+.rvw__n--near {
+  border-color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.rvw-big__chg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-3);
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.rvw-chg__was { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); font-weight: 500; }
+s.rvw-chg__was { text-decoration-thickness: 2px; }
+.rvw-chg__arrow { font-size: var(--fs-lead); color: var(--text-secondary); }
+.rvw-chg__to { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.rvw-big__why {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.rvw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  padding-inline: var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.rvw-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.rvw-btn:disabled { color: var(--text-secondary); cursor: default; }
+.rvw-btn:hover:not(:disabled) { background: var(--bg-card-hover); }
+.rvw-btn--big {
+  border-color: color-mix(in srgb, var(--warning) 70%, var(--surface-line));
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.rvw-btn--big:disabled { border-color: var(--surface-line); color: var(--text-secondary); }
+.rvw-soft {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--sp-1) var(--sp-3);
+  align-items: center;
+  padding-block: var(--sp-3);
+  border-top: 1px solid var(--surface-line);
+}
+.rvw-soft__text {
+  min-width: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.rvw-soft__chg {
+  margin-inline-end: var(--sp-2);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.rvw-soft .rvw-chg__was,
+.rvw-soft .rvw-chg__to { color: inherit; font-weight: inherit; }
+.rvw-soft .rvw-chg__arrow { margin-inline: var(--sp-2); font-size: inherit; }
+
+/* The detail of one flagged mistake, in the asking's thread (plan 330,
+   AskDetail): parts, not a paragraph. Shared by the desk's panel and the
+   phone's page, so it stands outside both's own names. */
+.ask-detail {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+.ask-detail__part { display: flex; flex-direction: column; gap: var(--sp-1); }
+.ask-detail__head {
+  margin: 0;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.ask-detail__what { margin: 0; overflow-wrap: anywhere; }
+.ask-detail__rule {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-1) var(--sp-4);
+  margin: 0;
+}
+.ask-detail__rule dt { color: var(--text-secondary); }
+.ask-detail__rule dd { margin: 0; font-family: var(--font-jp); overflow-wrap: anywhere; }
+.ask-detail__examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ask-detail__examples b {
+  display: block;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.ask-detail__examples span { color: var(--text-secondary); }
+.ask-detail__memo {
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+
 /* ── 見本 — the practice card (plan 185) ──
    The owner's pick A of the canvas "Tsuji — the practice cards", for
    reading, translation, dictation and composition
@@ -14514,6 +14678,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    end, and a bar along the well's foot, as long as the share matched --
    the card band's bar (.card-band), in the measure's quiet ink: it is
    the server's measure, not a verdict. */
+/* What was typed, under the Japanese it was read as (plan 330): the
+   learner's own romaji, quiet, never marked. */
+.pcard-well__typed {
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
 .pcard-well__fig {
   flex: none;
   line-height: 1;
@@ -14618,6 +14789,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-indent: 0;
   vertical-align: super;
   font-variant-numeric: tabular-nums;
+}
+/* A fix that is only less natural (plan 330): the learner's word was
+   right, so it is not struck. Its number and its mark stand in the near
+   ink, the wave .pcard-miss--near draws. */
+.pcard-pin--near {
+  border-color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.pcard-del--near {
+  text-decoration: underline wavy color-mix(in srgb, var(--warning) 70%, transparent);
+  text-underline-offset: 4px;
 }
 /* The words missed, under the well (A2.2): each the word, its reading
    and its meaning, the miss ink as its edge. Stacked, not side by side
@@ -32291,7 +32473,7 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .clrdev-share img { max-width: 100%; height: auto; box-shadow: var(--elev-board); }
 /* ── 191:primitives end ── */
 
-/* ══ 328 — 任務, the missions (plan 328) ════════════════════════════
+/* ══ 331 — 任務, the missions (plan 331) ════════════════════════════
    The pill under Today's legend, the sheet of coupons it opens and the
    holder's plates and discoveries: the owner's pick A of the drawings.
    A mission is an object about the learner, so it wears the pass's
@@ -32398,7 +32580,7 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   .msn-cpn--torn.msn-just .msn-cpn__stub { animation: msn-flash 1s ease-out; }
   .msn-just > .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
 }
-/* ── 328:end ── */
+/* ── 331:end ── */
 
 
 /* ══ 247 — 乗車, the card is the form ══════════════════════════════
@@ -34475,6 +34657,11 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   cursor: pointer;
 }
 .fb-flag::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-3)); }
+
+/* 回送 — Settings › Set aside (plan 328): the cards set aside, each the
+   flag sheet's card with its way back at the end of the row. */
+.aside-list { display: flex; flex-direction: column; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.aside-row__back { flex: none; }
 .fb-flag:hover,
 .fb-flag:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
 

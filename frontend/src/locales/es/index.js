@@ -930,6 +930,21 @@ const stats = {
   settingsCards:      'Contenido de las tarjetas',
   settingsCardsValueNone: 'Tal como están',
   settingsCardsValue: n => `${n} agregado${n === 1 ? '' : 's'}`,
+  // 回送 — una tarjeta apartada (plan 328): el ojo en una tarjeta
+  // respondida, su hoja, y Ajustes › Apartadas.
+  asideAsk:           'Apartar esta tarjeta',
+  asideTitle:         'Apartar esta tarjeta',
+  asideBody:          'Sale de tus repasos y de tus tarjetas nuevas, en todos los modos. Su progreso se conserva: recupérala cuando quieras en Ajustes › Apartadas.',
+  asideConfirm:       'Apartarla',
+  asideError:         'No se pudo apartar la tarjeta. Inténtalo de nuevo.',
+  asideFull:          'Ya apartaste todas las tarjetas posibles. Recupera algunas primero.',
+  settingsAside:      'Apartadas',
+  settingsAsideValue: 'Las tarjetas que no estudias',
+  asideEmpty:         'No hay tarjetas apartadas. En una tarjeta, una vez que se muestra su respuesta, el ojo junto a la bandera la aparta.',
+  asideCount:         n => `${n} ${n === 1 ? 'tarjeta apartada' : 'tarjetas apartadas'}`,
+  asideTakeBack:      'Recuperar',
+  asideTakeBackLabel: jp => `Recuperar ${jp}`,
+  asideLoadError:     'No se pudieron cargar las tarjetas apartadas.',
   ccQuestion:         'La pregunta',
   ccAnswer:           'La respuesta',
   ccHint:             'La pregunta solo ofrece lo que no delata la respuesta.',
@@ -1289,6 +1304,11 @@ const phraseAnalyzer = {
   grammarSpotted:      'Gramática detectada',
   explainSentence:     'Explicar',
   explainAgain:        'Explicar de nuevo',
+  // El nivel de cortesía de una línea (plan 329), leído en cómo termina: la
+  // insignia bajo la traducción de una frase.
+  registerPlain:       'Forma corta',
+  registerPolite:      'Forma cortés',
+  registerKeigo:       'Keigo',
   // 骨組み (plan 311): la estructura de la línea -- qué hace cada
   // parte, los roles de study/frame.ROLES, y lo que la línea calla.
   frameLabel:          'Cómo está construida la línea',
@@ -1568,6 +1588,20 @@ const translationMode = {
   reviewIncorrect:       'Incorrecto',
   reviewGood:            'Lo que funcionó',
   reviewFix:             'Por corregir',
+  // Los pesos de la corrección y su Detalle (plan 330): un error de verdad y
+  // una línea correcta que un nativo diría de otra forma, y el botón que le
+  // pide a la pregunta la explicación más larga de uno de ellos.
+  reviewNatural:         'Más natural',
+  reviewDetail:          'Detalle',
+  reviewExplain:         'Explicar en detalle',
+  reviewInChat:          'En el chat',
+  // La pregunta que el botón hace, con la voz del estudiante.
+  reviewAsk: (n, given, fix) => (given && fix
+    ? `Explícame el punto ${n}: «${given}» → «${fix}»`
+    : given ? `Explícame el punto ${n}: por qué sobra «${given}»` : `Explícame el punto ${n}: por qué se añade «${fix}»`),
+  askDetailWhat:         'Qué pasó',
+  askDetailRule:         'La regla',
+  askDetailExamples:     'Ejemplos',
   reviewGrammarUsed:     'usado',
   reviewGrammarMissed:   'no usado',
   analyzingTranslation:  'Analizando tu traducción…',
@@ -3848,7 +3882,7 @@ const pvp = {
 }
 
 const missions = {
-  // 任務 (plan 328): the day's missions, the week's, the discoveries and the
+  // 任務 (plan 331): the day's missions, the week's, the discoveries and the
   // plates. A mission's goal and reward come from the server; its words are here.
   msnTitle:       'Misiones',
   msnPillLabel:   done => `Misiones del día, ${done} de 3 hechas`,

@@ -187,7 +187,7 @@ def _init_db() -> None:
                 # in it. NULL is not told yet; routes/onboarding.py
                 # writes it, duels_news_open below reads it.
                 ("duels_news_at", "TIMESTAMPTZ"),
-                # 新しい (plan 328): the same for the missions' pill on
+                # 新しい (plan 331): the same for the missions' pill on
                 # Today's gate; missions_news_open reads it.
                 ("missions_news_at", "TIMESTAMPTZ"),
                 # 主 — the mode each line is ridden in, {line: mode},
@@ -517,7 +517,7 @@ def duels_news_open(user_id: str, guided) -> bool:
 
 def missions_news_open(user_id: str, guided) -> bool:
     """Whether Today tells this learner, once, that the day's missions now
-    stand under its legend (plan 328): GET /api/profile's `missionsNews`.
+    stand under its legend (plan 331): GET /api/profile's `missionsNews`.
     As the duels' news: a learner whose Today guide has ended, until told."""
     if "today" not in (guided or {}):
         return False

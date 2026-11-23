@@ -926,6 +926,21 @@ const stats = {
   settingsCards:      'Card contents',
   settingsCardsValueNone: 'As they are',
   settingsCardsValue: n => `${n} added`,
+  // 回送 — a card set aside (plan 328): the eye on an answered card,
+  // its sheet, and Settings › Set aside.
+  asideAsk:           'Set this card aside',
+  asideTitle:         'Set this card aside',
+  asideBody:          'It leaves your reviews and your new cards, in every mode. Its progress is kept: take it back whenever you like in Settings › Set aside.',
+  asideConfirm:       'Set it aside',
+  asideError:         'The card couldn’t be set aside. Try again.',
+  asideFull:          'You have set aside as many cards as you can. Take some back first.',
+  settingsAside:      'Set aside',
+  settingsAsideValue: 'The cards you don’t study',
+  asideEmpty:         'No card set aside. On a card, once its answer shows, the eye beside the flag sets it aside.',
+  asideCount:         n => `${n} ${n === 1 ? 'card' : 'cards'} set aside`,
+  asideTakeBack:      'Take back',
+  asideTakeBackLabel: jp => `Take back ${jp}`,
+  asideLoadError:     'The cards set aside couldn’t be loaded.',
   ccQuestion:         'The question',
   ccAnswer:           'The answer',
   ccHint:             'The question only offers what cannot give the answer away.',
@@ -1285,6 +1300,11 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',
+  // The level of politeness a line is said in (plan 329), read from how it
+  // ends: the badge under a sentence's translation.
+  registerPlain:       'Plain form',
+  registerPolite:      'Polite form',
+  registerKeigo:       'Keigo',
   // 骨組み (plan 311): the line's frame -- what each part does, the
   // roles of study/frame.ROLES, and what the line leaves unsaid.
   frameLabel:          'How the line is built',
@@ -1564,6 +1584,20 @@ const translationMode = {
   reviewIncorrect:       'Incorrect',
   reviewGood:            'What worked',
   reviewFix:             'To fix',
+  // The review's weights and its Détail (plan 330): a real error and a
+  // correct line a native would say otherwise, and the button that asks the
+  // asking for the fuller explanation of one of them.
+  reviewNatural:         'More natural',
+  reviewDetail:          'Detail',
+  reviewExplain:         'Explain in detail',
+  reviewInChat:          'In the chat',
+  // The question the button puts to the asking, in the learner's voice.
+  reviewAsk: (n, given, fix) => (given && fix
+    ? `Explain point ${n}: «${given}» → «${fix}»`
+    : given ? `Explain point ${n}: why «${given}» goes` : `Explain point ${n}: why «${fix}» is added`),
+  askDetailWhat:         'What happened',
+  askDetailRule:         'The rule',
+  askDetailExamples:     'Examples',
   reviewGrammarUsed:     'used',
   reviewGrammarMissed:   'not used',
   analyzingTranslation:  'Analyzing your translation…',
@@ -3847,7 +3881,7 @@ const pvp = {
 }
 
 const missions = {
-  // 任務 (plan 328): the day's missions, the week's, the discoveries and the
+  // 任務 (plan 331): the day's missions, the week's, the discoveries and the
   // plates. A mission's goal and reward come from the server; its words are here.
   msnTitle:       'Missions',
   msnPillLabel:   done => `Daily missions, ${done} of 3 done`,

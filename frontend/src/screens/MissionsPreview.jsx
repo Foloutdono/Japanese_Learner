@@ -11,7 +11,7 @@ import { MissionsNewsSheet } from '../components/missions/MissionsNewsSheet'
 import { SUMMARY, TODAY_PARTIAL } from '../components/dayclear/fixtures'
 import { bookFixture, missionsFixture } from '../components/missions/fixtures'
 
-// ── /dev/missions — the missions, in the screens they live in (plan 328) ──
+// ── /dev/missions — the missions, in the screens they live in (plan 331) ──
 // Development only, no backend, no session: the real gate and the real
 // profile under the real shell, fed by fixtures in the server's shape
 // (components/missions/fixtures.js).

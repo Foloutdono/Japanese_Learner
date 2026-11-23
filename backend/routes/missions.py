@@ -1,4 +1,4 @@
-"""任務 — the missions' routes (plan 328; study/missions.py has the rules).
+"""任務 — the missions' routes (plan 331; study/missions.py has the rules).
 
     GET  /api/missions         the day's three and its bonus, the week's
                                three, what waits to be collected

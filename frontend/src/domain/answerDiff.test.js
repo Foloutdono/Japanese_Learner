@@ -277,6 +277,44 @@ describe('the tutor\'s fixes, placed', () => {
     expect(runs[1]).toMatchObject({ del: 'が', n: 1 })
     expect(runs[1].ins.map(p => p.text).join('')).toBe('を')
   })
+
+  // Plan 330: the new fix names the learner's own text and what to write,
+  // plain, and says how much it weighs; a mark takes its number and its
+  // weight from it, and a word left out or taken out is placed by what it is.
+  describe('the weighed fixes of a romaji answer read as kana', () => {
+    const better = [{ text: 'きのうはみずだけのみました' }]
+    const given = 'きのうみずだけをのんでした'
+    const fixes = [
+      { given: 'のんでした', fix: 'のみました', issue: '«でした» ne suit pas un verbe.', severity: 'error' },
+      { given: 'だけを', fix: 'だけ', issue: '«を» est facultatif.', severity: 'natural' },
+      { given: '', fix: 'は', issue: '«は» pose le thème.', severity: 'natural' },
+    ]
+
+    it('numbers each mark by its fix, and marks the natural ones near', () => {
+      const marks = correctionFixes(given, better, fixes).filter(r => r.kind === 'fix')
+      expect(marks.map(m => [m.del, m.ins.map(p => p.text).join(''), m.n, m.near])).toEqual([
+        ['', 'は', 3, true],
+        ['を', '', 2, true],
+        ['んで', 'みま', 1, false],
+      ])
+    })
+
+    it('places a fix by the exact text before text that merely holds it', () => {
+      const runs = correctionFixes('ab', [{ text: 'abc' }], [
+        { given: '', fix: 'abc', severity: 'error' },
+        { given: '', fix: 'c', severity: 'natural' },
+      ]).filter(r => r.kind === 'fix')
+      expect(runs).toHaveLength(1)
+      expect(runs[0]).toMatchObject({ n: 2, near: true })
+    })
+
+    it('leaves a run no fix names unnumbered, and a legacy fix (no severity) an error', () => {
+      const runs = correctionFixes('音楽が聞きながら', [{ text: '音楽を聞きながら' }], [{ issue: '「音楽が」 is the subject.', fix: '「音楽を」' }])
+      expect(runs.find(r => r.kind === 'fix')).toMatchObject({ n: 1, near: false })
+      const bare = correctionFixes('音楽が聞きながら', [{ text: '音楽を聞きながら' }], [])
+      expect(bare.find(r => r.kind === 'fix')).toMatchObject({ n: null, near: false })
+    })
+  })
 })
 
 describe('the sentence as phrases', () => {

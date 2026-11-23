@@ -161,7 +161,7 @@ beforeEach(async () => {
 })
 
 describe('SettingsScreen — the card and the list', () => {
-  it('prints the card\'s contract and twelve rows plus the pass, each printing its value', async () => {
+  it('prints the card\'s contract and thirteen rows plus the pass, each printing its value', async () => {
     const screen = await mount()
     await settle()
     const root = screen.container
@@ -179,10 +179,10 @@ describe('SettingsScreen — the card and the list', () => {
     // No destination, so no date to be valid until.
     expect(root.querySelector('.pcb__valid')).toBeNull()
 
-    // Thirteen doors to pages, then the pass — which opens the offer sheet
+    // Fourteen doors to pages, then the pass — which opens the offer sheet
     // rather than navigating, so it is last and is not one of PAGES.
     const rows = [...root.querySelectorAll('.stg-row')]
-    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'agenda', 'reviews', 'modes', 'cards', 'rating', 'reading', 'help', 'write', 'account', 'transfer', 'credits', 'pass'])
+    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'agenda', 'reviews', 'modes', 'cards', 'aside', 'rating', 'reading', 'help', 'write', 'account', 'transfer', 'credits', 'pass'])
     const value = i => rows[i].querySelector('.stg-row__value').textContent
     expect(value(2)).toBe(T.agdRowEmpty)
     // The review plan (plan 217): no ceiling, no catch-up, no absence.
@@ -191,30 +191,32 @@ describe('SettingsScreen — the card and the list', () => {
     expect(value(4)).toBe(T.settingsModesValue)
     // Card contents (plan 326): what the cards add, nothing until asked.
     expect(rows[5].querySelector('.stg-row__value')).not.toBeNull()
-    expect(value(6)).toBe(T.settingsRatingScaleOption.simple)
-    expect(value(7)).toBe(T.readingPaceOption.standard)
+    // Set aside (plan 328): a door, its value what it is for.
+    expect(value(6)).toBe(T.settingsAsideValue)
+    expect(value(7)).toBe(T.settingsRatingScaleOption.simple)
+    expect(value(8)).toBe(T.readingPaceOption.standard)
     // Nous écrire (plan 222): a door, its value what it is for.
-    expect(value(9)).toBe(T.settingsWriteValue)
-    expect(value(10)).toBe('dev@…')
+    expect(value(10)).toBe(T.settingsWriteValue)
+    expect(value(11)).toBe('dev@…')
     // Anki (plan 243): a door, its value what it is for.
-    expect(value(11)).toBe(T.trRowValue)
-    expect(value(12)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))
+    expect(value(12)).toBe(T.trRowValue)
+    expect(value(13)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))
     // What can be seen is drawn beside the words: the served bar's dots,
     // and the standard pace's clock, half the slowest one's.
-    expect(rows[6].querySelectorAll('.stg-dots__dot')).toHaveLength(4)
+    expect(rows[7].querySelectorAll('.stg-dots__dot')).toHaveLength(4)
     expect(rows[0].querySelector('.stg-swatch')).not.toBeNull()
-    expect(rows[7].querySelector('.stg-pace__fill').style.width).toBe('50%')
+    expect(rows[8].querySelector('.stg-pace__fill').style.width).toBe('50%')
 
     // A door navigates, and React Router renders a navigation as a
     // transition: the page arrives when React gets to it, not after a
     // fixed pause, so each arrival is waited for rather than timed (a
     // 30ms settle lost that race on a loaded CI runner).
     const title = () => screen.container.querySelector('h1.bar__title')?.textContent
-    rows[10].click()
+    rows[11].click()
     await vi.waitFor(() => expect(title()).toBe(T.account))
     // ‹ Settings brings the column back.
     screen.container.querySelector('.stage__leave').click()
-    await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(14))
+    await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(15))
 
     screen.container.querySelector('.pcard-slot--settings .stg-door[data-page="service"]').click()
     await vi.waitFor(() => expect(title()).toBe(T.destService))
@@ -234,7 +236,7 @@ describe('SettingsScreen — the card and the list', () => {
   it('an unknown page falls back to the list', async () => {
     const screen = await mount('/profile/settings/nothing')
     await settle()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(14)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(15)
   })
 
   // Learning went to the pass's fields and Data into the account page
@@ -275,7 +277,7 @@ describe('SettingsScreen — the card and the list', () => {
     const screen = await mount()
     await settle()
     expect(screen.container.querySelector('.stg-row[data-page="pass"]')).toBeNull()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(13)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(14)
 
     // The credits store is module state: leave it as the rest of this
     // file expects to find it, or the pass row vanishes from every

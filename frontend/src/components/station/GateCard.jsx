@@ -573,7 +573,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
               ? fin.at('KEY') && <ThreadKey done={thread.rides} left={thread.total - thread.rides} t={t} className="clrk-fade" />
               : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
         </div>
-        {/* 任務 (plan 328): the day's missions, one small pill under the legend. */}
+        {/* 任務 (plan 331): the day's missions, one small pill under the legend. */}
         {!fin && <MissionsGate session={session} style={at(frame.cx, frame.cy + frame.fare + BELOW.keys + 30)} />}
       </section>
       <span className="tdy__air" aria-hidden="true" />

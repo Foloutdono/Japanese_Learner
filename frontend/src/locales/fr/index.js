@@ -888,6 +888,21 @@ const stats = {
   settingsCards:      'Contenu des cartes',
   settingsCardsValueNone: 'Telles quelles',
   settingsCardsValue: n => `${n} ajout${n > 1 ? 's' : ''}`,
+  // 回送 — une carte mise de côté (plan 328) : l’œil sur une carte
+  // répondue, sa feuille, et Réglages › De côté.
+  asideAsk:           'Mettre cette carte de côté',
+  asideTitle:         'Mettre cette carte de côté',
+  asideBody:          'Elle quitte tes révisions et tes nouvelles cartes, dans tous les modes. Sa progression est gardée : reprends-la quand tu veux dans Réglages › De côté.',
+  asideConfirm:       'La mettre de côté',
+  asideError:         'La carte n’a pas pu être mise de côté. Réessaie.',
+  asideFull:          'Tu as mis de côté autant de cartes que possible. Reprends-en d’abord.',
+  settingsAside:      'De côté',
+  settingsAsideValue: 'Les cartes que tu n’étudies pas',
+  asideEmpty:         'Aucune carte de côté. Sur une carte, une fois sa réponse affichée, l’œil à côté du drapeau la met de côté.',
+  asideCount:         n => `${n} ${n === 1 ? 'carte' : 'cartes'} de côté`,
+  asideTakeBack:      'Reprendre',
+  asideTakeBackLabel: jp => `Reprendre ${jp}`,
+  asideLoadError:     'Les cartes mises de côté n’ont pas pu être chargées.',
   ccQuestion:         'La question',
   ccAnswer:           'La réponse',
   ccHint:             'La question ne propose que ce qui ne trahit pas la réponse.',
@@ -1251,6 +1266,11 @@ const phraseAnalyzer = {
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',
+  // Le niveau de politesse d’une ligne (plan 329), lu sur sa fin : le badge
+  // sous la traduction d’une phrase.
+  registerPlain:       'Forme neutre',
+  registerPolite:      'Forme polie',
+  registerKeigo:       'Keigo',
   // 骨組み (plan 311) : la charpente de la ligne -- ce que fait chaque
   // partie, les rôles de study/frame.ROLES, et ce que la ligne tait.
   frameLabel:          'Comment la ligne est construite',
@@ -1526,6 +1546,20 @@ const translationMode = {
   reviewIncorrect:       'À revoir',
   reviewGood:            'Ce qui marche',
   reviewFix:             'À corriger',
+  // Les poids de la correction et son Détail (plan 330) : une vraie erreur et
+  // une ligne juste qu’un natif dirait autrement, et le bouton qui demande
+  // à la question l’explication plus longue de l’une d’elles.
+  reviewNatural:         'Plus naturel',
+  reviewDetail:          'Détail',
+  reviewExplain:         'Expliquer en détail',
+  reviewInChat:          'Dans le chat',
+  // La question que le bouton pose, dans la voix de l’apprenant.
+  reviewAsk: (n, given, fix) => (given && fix
+    ? `Explique-moi le point ${n} : «${given}» → «${fix}»`
+    : given ? `Explique-moi le point ${n} : pourquoi «${given}» disparaît` : `Explique-moi le point ${n} : pourquoi ajouter «${fix}»`),
+  askDetailWhat:         'Ce qui s’est passé',
+  askDetailRule:         'La règle',
+  askDetailExamples:     'Exemples',
   reviewGrammarUsed:     'utilisé',
   reviewGrammarMissed:   'non utilisé',
   analyzingTranslation:  'Analyse de ta traduction…',
@@ -3799,7 +3833,7 @@ const pvp = {
 }
 
 const missions = {
-  // 任務 (plan 328): the day's missions, the week's, the discoveries and the
+  // 任務 (plan 331): the day's missions, the week's, the discoveries and the
   // plates. A mission's goal and reward come from the server; its words are here.
   msnTitle:       'Missions',
   msnPillLabel:   done => `Missions du jour, ${done} sur 3 faites`,

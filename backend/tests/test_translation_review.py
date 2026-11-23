@@ -227,3 +227,94 @@ def test_a_monologue_before_the_object_still_gives_the_review(client, tutor):
     body = client.post("/api/translation/analyze", json=PAYLOAD).json()
     assert body["review"]["verdict"] == "correct"
     assert "We need" not in body["analysis"]
+
+
+# ── The review reads the answer as Japanese, and weighs its fixes (plan 330) ──
+# A romaji answer is read as the kana it spells before the tutor sees it, so
+# the tutor never remarks on the alphabet and judges the Japanese; each fix
+# names the learner's own text, what to write, and whether it is an error or
+# only less natural; the errors come first.
+
+def _weighed(**over):
+    return _reply(
+        verdict="partial",
+        summary="Understood, but the verb form is wrong.",
+        good=[],
+        fix=[
+            {"given": "だけを", "fix": "だけ", "issue": "「を」 is optional after 「だけ」", "severity": "natural"},
+            {"given": "", "fix": "は", "issue": "「きのう」 can take 「は」", "severity": "natural"},
+            {"given": "のんでした", "fix": "のみました", "issue": "「でした」 does not follow a verb", "severity": "error"},
+        ],
+        better="きのうはみずだけのみました。",
+        **over,
+    )
+
+
+def test_the_errors_come_first_whatever_order_the_model_gave():
+    review = translation._parse_review(_weighed())
+    assert [f["severity"] for f in review["fix"]] == ["error", "natural", "natural"]
+    assert review["fix"][0]["given"] == "のんでした"
+    # An omission names no text of the learner's: an empty `given`, kept.
+    assert review["fix"][2]["given"] == ""
+
+
+def test_three_natural_remarks_never_push_an_error_out():
+    review = translation._parse_review(_reply(fix=[
+        {"issue": "a", "given": "x", "fix": "y", "severity": "natural"},
+        {"issue": "b", "given": "x", "fix": "y", "severity": "natural"},
+        {"issue": "c", "given": "x", "fix": "y", "severity": "natural"},
+        {"issue": "d", "given": "x", "fix": "y", "severity": "error"},
+    ]))
+    assert [f["issue"] for f in review["fix"]] == ["d", "a", "b"]
+
+
+def test_a_fix_without_the_new_keys_reads_as_it_always_did():
+    review = translation._parse_review(_reply(fix=[{"issue": "x", "fix": "y", "severity": "serious"}]))
+    assert review["fix"] == [{"issue": "x", "fix": "y"}]
+
+
+def test_a_given_that_is_not_the_learners_text_is_dropped():
+    review = translation._parse_review(_weighed())
+    tutor_review.keep_given(review, "きのうみずだけをのんでした")
+    assert [f.get("given") for f in review["fix"]] == ["のんでした", "だけを", ""]
+    tutor_review.keep_given(review, "ぜんぜんちがう")
+    assert all(not f.get("given") for f in review["fix"])
+
+
+ROMAJI_PAYLOAD = {
+    "translation_prompt": "Hier, je n'ai bu que de l'eau.",
+    "target_phrase": "きのうは水だけ飲みました。",
+    "target_romaji": "kinou wa mizu dake nomimashita.",
+    "user_answer": "kinou mizudakewonondeshita",
+    "lang": "fr",
+}
+
+
+def test_a_romaji_answer_reaches_the_tutor_as_the_kana_it_spells(client, tutor):
+    calls = tutor(_weighed())
+    r = client.post("/api/translation/analyze", json=ROMAJI_PAYLOAD)
+    assert r.status_code == 200, r.text
+    sent = calls[0][0]["content"]
+    assert "<<<きのうみずだけをのんでした>>>" in sent
+    assert "kinou mizudakewonondeshita" not in sent.split("The learner's own attempt was:")[1]
+    assert "Never comment on how the attempt was typed" in sent
+    body = r.json()
+    assert body["answer_kana"] == "きのうみずだけをのんでした"
+    # The marks are drawn on that line: the corrected sentence is made
+    # against it, not against the letters.
+    assert "".join(p["text"] for p in body["review"]["better_parts"]) == "きのうはみずだけのみました"
+    assert body["review"]["fix"][0]["given"] == "のんでした"
+
+
+def test_a_japanese_answer_is_sent_as_it_was_and_has_no_kana_line(client, tutor):
+    calls = tutor(_reply())
+    r = client.post("/api/translation/analyze", json=PAYLOAD)
+    assert r.json()["answer_kana"] is None
+    assert "They typed it in romaji" not in calls[0][0]["content"]
+
+
+def test_an_answer_that_is_not_romaji_japanese_is_left_as_typed(client, tutor):
+    calls = tutor(_reply())
+    r = client.post("/api/translation/analyze", json={**ROMAJI_PAYLOAD, "user_answer": "I drank only water"})
+    assert r.json()["answer_kana"] is None
+    assert "<<<I drank only water>>>" in calls[0][0]["content"]

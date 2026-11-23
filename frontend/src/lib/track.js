@@ -105,7 +105,7 @@ export const EVENTS = {
   day_clear: ['streak', 'milestone', 'tier'],
   rest_day_used: ['days'],
   ticket_share: ['days'],
-  // Missions (plan 328): written by the server; the scope and the catalogue's id.
+  // Missions (plan 331): written by the server; the scope and the catalogue's id.
   mission_done: ['scope', 'kind'],
   mission_claimed: ['scope', 'kind'],
   // The review plan (plan 217): the comeback offer put before the

@@ -250,7 +250,7 @@ EVENTS: dict[str, frozenset[str]] = {
     "rest_day_used":  frozenset({"days"}),
     "ticket_share":   frozenset({"days"}),
 
-    # ── 任務 — missions, discoveries, achievements (plan 328) ─────────
+    # ── 任務 — missions, discoveries, achievements (plan 331) ─────────
     # Both written by the server (study/missions.py). `scope` is which
     # kind (day, week, the day's bonus, a discovery, an achievement) and
     # `kind` the catalogue's id, both closed by VALUES below: never a

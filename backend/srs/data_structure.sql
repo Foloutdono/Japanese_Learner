@@ -854,6 +854,20 @@ ALTER TABLE rest_tickets ENABLE ROW LEVEL SECURITY;
 CREATE INDEX idx_rest_tickets_user
 ON rest_tickets(user_id);
 
+-- Owned by srs/srs.py (plan 328) -- 回送, the cards a learner set
+-- aside: served in no mode and counted in nothing owed until taken
+-- back. Keyed by the namespaced card id, as card_modes is; the
+-- schedule stays in card_modes untouched.
+CREATE TABLE card_set_aside (
+    card_id  TEXT PRIMARY KEY,
+    user_id  TEXT NOT NULL,
+    set_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE card_set_aside ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_card_set_aside_user
+ON card_set_aside(user_id, set_at);
+
 -- Owned by core/credits.py (plan 069) -- the credit ledger, append-only
 -- like xp_ledger: a signed row per refill ('refill', the daily +30 at
 -- the learner's midnight), fare ('review', -1 a review), grant ('grant':
@@ -1398,7 +1412,7 @@ CREATE TABLE apple_grants (
 );
 ALTER TABLE apple_grants ENABLE ROW LEVEL SECURITY;
 
--- Owned by study/missions.py (plan 328) -- 任務. A row a mission assigned to
+-- Owned by study/missions.py (plan 331) -- 任務. A row a mission assigned to
 -- a learner for a local day or week ('bonus' is the day's three done): the
 -- goal, the credits and the XP are written on it and never change, so the
 -- goal is the one the learner's history gave when it was assigned.

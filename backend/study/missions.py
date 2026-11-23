@@ -1,5 +1,5 @@
 """
-任務 — missions, discoveries and achievements (plan 328).
+任務 — missions, discoveries and achievements (plan 331).
 
 What they are for (docs/business/strategie-monetisation.md, "Missions,
 quêtes et succès"): to make the Free plan hold (a learner who does them has

@@ -10,7 +10,7 @@ const KINDS = VALUES.mission_done.kind
 const DISCOVERIES = ['first_dictation', 'first_photo', 'first_conversation', 'first_exam', 'first_deck', 'first_friend', 'first_duel', 'arrival_date', 'first_import', 'first_video']
 const ACHIEVEMENTS = ['kana_done', 'words_100', 'words_500', 'words_1000', 'grammar_n5', 'days_7', 'days_30', 'days_100', 'exam_passed', 'ranked_win']
 
-describe('missions (plan 328): what the screens know', () => {
+describe('missions (plan 331): what the screens know', () => {
   it('hangs a plate for every achievement and inks a glyph for every discovery', () => {
     expect(Object.keys(PLATES).sort()).toEqual([...ACHIEVEMENTS].sort())
     expect(Object.keys(GLYPHS).sort()).toEqual([...DISCOVERIES].sort())
@@ -46,7 +46,7 @@ describe('missions (plan 328): what the screens know', () => {
   })
 })
 
-describe('missions (plan 328): every text in every language', () => {
+describe('missions (plan 331): every text in every language', () => {
   const day = ['due', 'new', 'practice', 'accuracy', 'write', 'all3']
   const week = ['days5', 'volume', 'new_mode', 'exam_section', 'duels5', 'write10']
   for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {

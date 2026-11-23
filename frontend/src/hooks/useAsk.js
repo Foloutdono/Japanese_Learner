@@ -16,8 +16,13 @@ import { askHistory, askResetsAt, MAX_TURNS } from '../domain/ask'
 //   thread(key)          the entries, oldest first: { id, question,
 //                        answer, state: 'pending'|'done'|'off'|'error',
 //                        error }
-//   ask(key, context, q) one question; nothing while one is out, past
-//                        MAX_TURNS for the sentence, or on a spent day
+//   ask(key, context, q, explain)
+//                        one question; nothing while one is out, past
+//                        MAX_TURNS for the sentence, or on a spent day.
+//                        `explain` (plan 330) makes it the detail of one
+//                        flagged mistake of the review -- { n, given, fix,
+//                        issue, severity } -- answered in parts, as
+//                        `detail`, on the entry that carries its `n`
 //   left                 today's questions still to ask, once known
 //   spent                the day's are spent: { at } (when they come
 //                        back, ISO, or null)
@@ -42,17 +47,23 @@ export function useAsk(session, mode) {
 
   const thread = useCallback(key => threads[key] ?? [], [threads])
 
-  const ask = useCallback((key, context, question) => {
+  const ask = useCallback((key, context, question, explain = null) => {
     const q = question.trim()
     const current = threads[key] ?? []
     if (!q || busy.current || spent || current.length >= MAX_TURNS) return false
     const id = ++counter.current
     busy.current = true
     countUse('ask', 'send')   // 足跡 (plan 218): asked, never the question
-    setThreads(all => ({ ...all, [key]: [...(all[key] ?? []), { id, question: q, answer: null, state: 'pending' }] }))
+    setThreads(all => ({
+      ...all,
+      [key]: [...(all[key] ?? []), { id, question: q, answer: null, state: 'pending', ...(explain ? { fixN: explain.n } : {}) }],
+    }))
     apiFetch('/api/ask', session, {
       method: 'POST',
-      body: JSON.stringify({ mode, ...context, history: askHistory(current), question: q, lang }),
+      body: JSON.stringify({
+        mode, ...context, history: askHistory(current), question: q, lang,
+        ...(explain ? { explain: { given: explain.given, fix: explain.fix, issue: explain.issue, severity: explain.severity } } : {}),
+      }),
     })
       .then(async r => {
         const body = await r.json().catch(() => ({}))
@@ -68,7 +79,7 @@ export function useAsk(session, mode) {
         }
         if (typeof body.left === 'number') setLeft(body.left)
         if (body.off_topic) patch(key, id, { state: 'off' })
-        else patch(key, id, { state: 'done', answer: body.answer })
+        else patch(key, id, { state: 'done', answer: body.answer, ...(body.detail ? { detail: body.detail } : {}) })
       })
       .catch(() => patch(key, id, { state: 'error', error: 'failed' }))
       .finally(() => { busy.current = false })
