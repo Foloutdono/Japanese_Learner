@@ -1546,6 +1546,20 @@ const translationMode = {
   reviewIncorrect:       'À revoir',
   reviewGood:            'Ce qui marche',
   reviewFix:             'À corriger',
+  // Les poids de la correction et son Détail (plan 330) : une vraie erreur et
+  // une ligne juste qu’un natif dirait autrement, et le bouton qui demande
+  // à la question l’explication plus longue de l’une d’elles.
+  reviewNatural:         'Plus naturel',
+  reviewDetail:          'Détail',
+  reviewExplain:         'Expliquer en détail',
+  reviewInChat:          'Dans le chat',
+  // La question que le bouton pose, dans la voix de l’apprenant.
+  reviewAsk: (n, given, fix) => (given && fix
+    ? `Explique-moi le point ${n} : «${given}» → «${fix}»`
+    : given ? `Explique-moi le point ${n} : pourquoi «${given}» disparaît` : `Explique-moi le point ${n} : pourquoi ajouter «${fix}»`),
+  askDetailWhat:         'Ce qui s’est passé',
+  askDetailRule:         'La règle',
+  askDetailExamples:     'Exemples',
   reviewGrammarUsed:     'utilisé',
   reviewGrammarMissed:   'non utilisé',
   analyzingTranslation:  'Analyse de ta traduction…',

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **330**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **331**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -209,6 +209,32 @@ runtime purpose.
   お〜になる, since the detector reads お祝いした as お〜する. A change to
   these rules bumps `LOCAL_REV` and is pinned with the sentence it reads
   and the one it must not.
+- **A translation's review reads the answer as Japanese, and weighs what
+  it flags (plan 330, the owner's pick C).** A romaji answer is the
+  learner's to choose, so it is read as the kana it spells
+  (`romaji.kana_of`, `translation.read_answer`) before the tutor sees it
+  and the review never remarks on the script; the reply carries that
+  `answer_kana`, the line the marks are drawn on, and the typed letters
+  stay under it, quiet and unmarked. The reference is judged against
+  nothing the answer did not say: a form only the reference has is never
+  praised. Each fix names `given` (the learner's own text, copied exactly,
+  dropped by `tutor_review.keep_given` where it is not in the answer),
+  `fix`, `issue` and a `severity`, `error` (the Japanese is wrong) or
+  `natural` (right, and a native would say it otherwise: an optional
+  particle, a dropped topic marker), the errors first and numbered first.
+  The screen marks them on the learner's line (`correctionFixes`: an error
+  struck with the right word over it, a natural one in the near ink and
+  never struck, a word left out at a caret), never on the reference, and
+  leads with the errors as cards, the natural ones a line each
+  (`TutorReview`). A final mark the learner did not write is not a word
+  left out (`tutor_review.corrected`). A review whose fixes carry no
+  severity (composition's) keeps its rows. Détail is one more question
+  of the asking: `explain` on `/api/ask` answers it in parts
+  (`explain_fix`, `AskDetail`: what happened, the forms, examples, a line
+  to remember), counted, refunded and language-checked as any question is,
+  on the desk in the lines panel's thread and on a phone in the asking's
+  page, which the button raises (`AskEntry`'s `control`); the asking opens
+  once the review is in, since the reference already stands on the card.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider, useLang } from '../../LangContext'
 import { TutorReview, TutorVerdict } from './TutorReview'
@@ -15,9 +15,9 @@ import { PointTag, CorrectedInPlace } from './PracticeCard'
 // point was used is the point's tag's (PracticeCard's PointTag). French
 // copy: the lane's locale.
 
-function Draw({ review, verdict = false }) {
+function Draw({ review, verdict = false, onDetail = null, asked = null }) {
   const { t } = useLang()
-  return <TutorReview review={review} t={t} verdict={verdict} />
+  return <TutorReview review={review} t={t} verdict={verdict} onDetail={onDetail} asked={asked} />
 }
 function Tag({ used }) {
   const { t } = useLang()
@@ -117,5 +117,81 @@ describe('the point\'s tag', () => {
     const unsaid = (await render(<LangProvider><Tag used={null} /></LangProvider>)).container
     expect(unsaid.querySelector('.pcard-tag__used')).toBeNull()
     expect(unsaid.querySelector('.sr-only')).toBeNull()
+  })
+})
+
+
+// ── Weighed (plan 330, pick C) ──
+// A translation's fixes carry a severity: a real error is a card of its
+// own, the ones that are only less natural a line each, and each has a
+// Détail that hands the caller the fix and its number.
+const WEIGHED = {
+  ...REVIEW,
+  summary: 'Compris, mais la forme du verbe est fausse.',
+  good: ['«だけ» bien utilisé'],
+  fix: [
+    { given: 'のんでした', fix: 'のみました', issue: '«でした» ne suit pas un verbe.', severity: 'error' },
+    { given: 'だけを', fix: 'だけ', issue: '«を» est facultatif.', severity: 'natural' },
+    { given: '', fix: 'は', issue: '«は» pose le thème.', severity: 'natural' },
+  ],
+}
+const drawWeighed = (props = {}) => render(
+  <LangProvider><Draw review={WEIGHED} {...props} /></LangProvider>,
+)
+
+describe('the weighed review', () => {
+  it('leads with the error as a card, the change large, then a line for each natural one', async () => {
+    const root = (await drawWeighed()).container
+    expect(root.querySelector('.rvw__fixes')).toBeNull()
+    const big = root.querySelector('.rvw-big')
+    expect(big.querySelector('.rvw__n').textContent).toBe('1')
+    expect(big.querySelector('.rvw__tag').textContent).toBe('À corriger')
+    expect(big.querySelector('s.rvw-chg__was').textContent).toBe('のんでした')
+    expect(big.querySelector('.rvw-chg__to').textContent).toBe('のみました')
+    expect(big.querySelector('.rvw-chg__to').closest('[lang]').getAttribute('lang')).toBe('ja')
+    expect(big.querySelector('.rvw-big__why').textContent).toBe('«でした» ne suit pas un verbe.')
+    const soft = [...root.querySelectorAll('.rvw-soft')]
+    expect(soft.map(r => r.querySelector('.rvw__n').textContent)).toEqual(['2', '3'])
+    // A natural word was right: shown, never struck. A word left out is +, a word taken out −.
+    expect(soft[0].querySelector('s')).toBeNull()
+    expect(soft[0].querySelector('.rvw-chg__was').textContent).toBe('だけを')
+    expect(soft[1].querySelector('.rvw-chg__to').textContent).toBe('+ は')
+    // The weight is said to a screen reader, never printed on the line.
+    expect(soft[0].querySelector('.sr-only').textContent).toContain('Plus naturel')
+    // The errors first, what worked after.
+    expect(big.compareDocumentPosition(root.querySelector('.rvw-soft')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(root.querySelector('.rvw__good').textContent).toContain('bien utilisé')
+  })
+
+  it('draws no Détail without a caller to ask', async () => {
+    const root = (await drawWeighed()).container
+    expect(root.querySelector('.rvw-btn')).toBeNull()
+  })
+
+  it('hands the caller the fix and its number, the heaviest first', async () => {
+    const onDetail = vi.fn()
+    const root = (await drawWeighed({ onDetail })).container
+    const buttons = [...root.querySelectorAll('.rvw-btn')]
+    expect(buttons.map(b => b.textContent.replace(/\s+›$/, ''))).toEqual(['Expliquer en détail', 'Détail', 'Détail'])
+    buttons[2].click()
+    expect(onDetail).toHaveBeenCalledWith(WEIGHED.fix[2], 3)
+    buttons[0].click()
+    expect(onDetail).toHaveBeenLastCalledWith(WEIGHED.fix[0], 1)
+  })
+
+  it('says a fix was asked, and does not ask twice', async () => {
+    const onDetail = vi.fn()
+    const root = (await drawWeighed({ onDetail, asked: new Set([1, 3]) })).container
+    const buttons = [...root.querySelectorAll('.rvw-btn')]
+    expect(buttons.map(b => b.disabled)).toEqual([true, false, true])
+    expect(buttons[0].textContent).toContain('Dans le chat')
+    buttons[0].click()
+    expect(onDetail).not.toHaveBeenCalled()
+  })
+
+  it('keeps the rows a review without severities always had (composition)', async () => {
+    const root = (await draw()).container
+    expect(root.querySelector('.rvw-weighed')).toBeNull()
+    expect(root.querySelectorAll('.rvw__fixes > .rvw__row')).toHaveLength(1)
   })
 })
