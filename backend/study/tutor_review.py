@@ -34,6 +34,14 @@ from study.romaji import sentence_romaji
 
 VERDICTS = ("correct", "acceptable", "partial", "incorrect")
 MAX_ITEMS = 3
+# What a fix weighs (plan 330): an `error` is Japanese that is wrong, a
+# `natural` one correct Japanese a native speaker would say otherwise (an
+# optional particle, a dropped topic marker). The screen leads with the
+# errors and draws the natural ones lighter, so the order is theirs too.
+SEVERITIES = ("error", "natural")
+# A sentence's closing marks, which a correction does not add where the
+# learner wrote none.
+END_MARKS = "。！？!?."
 
 
 def short(value, limit: int = 240) -> str:
@@ -151,9 +159,21 @@ def parse_review(content: str) -> dict | None:
     if isinstance(data.get("fix"), list):
         for item in data["fix"]:
             if isinstance(item, dict) and short(item.get("issue")):
-                fix.append({"issue": short(item.get("issue")), "fix": short(item.get("fix"))})
+                entry = {"issue": short(item.get("issue")), "fix": short(item.get("fix"))}
+                # The two keys of plan 330's shape, kept only where the
+                # model gave them, so a review written without them
+                # (composition's) reads as it always did.
+                if isinstance(item.get("given"), str):
+                    entry["given"] = short(item["given"], 120)
+                if item.get("severity") in SEVERITIES:
+                    entry["severity"] = item["severity"]
+                fix.append(entry)
             elif short(item):
                 fix.append({"issue": short(item), "fix": ""})
+    # Errors before the natural ones, each in the order the model gave,
+    # and the list cut after it: three remarks must never push an error
+    # out for a nicety.
+    fix.sort(key=lambda item: item.get("severity") == "natural")
     fix = fix[:MAX_ITEMS]
     grammar_used = data.get("grammar_used")
     return {
@@ -199,7 +219,11 @@ def changed_spans(before: str, after: str) -> list[tuple[int, int]]:
 
 def corrected(better: str, user_answer: str) -> dict:
     """`better` as parts, marked, with its romaji -- the two keys the
-    review carries beside the plain string."""
+    review carries beside the plain string. A final mark the learner did
+    not write is not drawn as a word they left out (plan 330): the line is
+    marked against what they typed, and a romaji answer has no 。."""
+    if user_answer.strip() and user_answer.strip()[-1] not in END_MARKS:
+        better = better.rstrip(END_MARKS) or better
     parts = align_sentence(better)
     # align_sentence is the tokenizer's, and the tokenizer is optional
     # (study/morphology.py's graceful degradation) -- so never trust the
@@ -216,6 +240,18 @@ def corrected(better: str, user_answer: str) -> dict:
     if sum(end - start for start, end in spans) >= len(better):
         spans = []
     return {"better_parts": mark_spans(parts, spans), "better_romaji": sentence_romaji(better)}
+
+
+def keep_given(review: dict, answer: str) -> dict:
+    """`review` with each fix's `given` kept only where it is the
+    learner's own text: copied exactly from `answer`, as the prompt asks.
+    One that is not there names nothing on the line, so it is dropped
+    rather than trusted; the correction's marks come from the diff."""
+    said = answer.strip()
+    for item in review.get("fix", []):
+        if item.get("given") and item["given"] not in said:
+            del item["given"]
+    return review
 
 
 def review_as_text(review: dict) -> str:

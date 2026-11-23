@@ -175,6 +175,45 @@ describe('SentenceBreakdown', () => {
     expect([...rows].some(r => r.textContent.includes('。'))).toBe(false)
   })
 
+  // The level of politeness the line is said in (plan 329): the server
+  // reads it off how the sentence ends; the rows print it once, as a
+  // pill under the translation, and print nothing where it is None.
+  describe('the register badge', () => {
+    const TR = { ...T, registerPlain: 'Plain form', registerPolite: 'Polite form', registerKeigo: 'Keigo' }
+    const draw = (register, extra = {}) => render(withLang(
+      <SentenceBreakdown
+        analysis={{ available: true, tokens: [tokenFixture(), particleFixture()], grammar: [], register, ...extra }}
+        t={TR} layout="rows" translation="A student." onTokenClick={() => {}}
+      />
+    ))
+
+    it.each([['plain', 'Plain form'], ['polite', 'Polite form'], ['keigo', 'Keigo']])(
+      'says %s in the learner\'s words, once, after the translation', async (register, label) => {
+        await draw(register)
+        const badges = document.querySelectorAll('.bkd__register')
+        expect(badges).toHaveLength(1)
+        expect(badges[0].textContent).toBe(label)
+        expect(before(document.querySelector('.bkd__en'), badges[0])).toBe(true)
+        expect(before(badges[0], document.querySelector('.bkd-rows'))).toBe(true)
+      },
+    )
+
+    it.each([[null], [undefined], ['mixed']])('draws nothing for a register of %s', async register => {
+      await draw(register)
+      expect(document.querySelector('.bkd__register')).toBeNull()
+    })
+
+    it('draws nothing where the analysis is unavailable, or the string is missing', async () => {
+      await draw('polite', { available: false, tokens: [] })
+      expect(document.querySelector('.bkd__register')).toBeNull()
+      await render(withLang(
+        <SentenceBreakdown analysis={{ available: true, tokens: [tokenFixture()], grammar: [], register: 'polite' }}
+          t={T} layout="rows" onTokenClick={() => {}} />
+      ))
+      expect(document.body.textContent).not.toContain('undefined')
+    })
+  })
+
   it('a glossed run is one row, read as the word it is, with the gloss the model gave', () => {
     const rows = rowsOf(runFixture())
     expect(rows).toHaveLength(1)

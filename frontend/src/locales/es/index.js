@@ -1304,6 +1304,11 @@ const phraseAnalyzer = {
   grammarSpotted:      'Gramática detectada',
   explainSentence:     'Explicar',
   explainAgain:        'Explicar de nuevo',
+  // El nivel de cortesía de una línea (plan 329), leído en cómo termina: la
+  // insignia bajo la traducción de una frase.
+  registerPlain:       'Forma corta',
+  registerPolite:      'Forma cortés',
+  registerKeigo:       'Keigo',
   // 骨組み (plan 311): la estructura de la línea -- qué hace cada
   // parte, los roles de study/frame.ROLES, y lo que la línea calla.
   frameLabel:          'Cómo está construida la línea',
@@ -1583,6 +1588,20 @@ const translationMode = {
   reviewIncorrect:       'Incorrecto',
   reviewGood:            'Lo que funcionó',
   reviewFix:             'Por corregir',
+  // Los pesos de la corrección y su Detalle (plan 330): un error de verdad y
+  // una línea correcta que un nativo diría de otra forma, y el botón que le
+  // pide a la pregunta la explicación más larga de uno de ellos.
+  reviewNatural:         'Más natural',
+  reviewDetail:          'Detalle',
+  reviewExplain:         'Explicar en detalle',
+  reviewInChat:          'En el chat',
+  // La pregunta que el botón hace, con la voz del estudiante.
+  reviewAsk: (n, given, fix) => (given && fix
+    ? `Explícame el punto ${n}: «${given}» → «${fix}»`
+    : given ? `Explícame el punto ${n}: por qué sobra «${given}»` : `Explícame el punto ${n}: por qué se añade «${fix}»`),
+  askDetailWhat:         'Qué pasó',
+  askDetailRule:         'La regla',
+  askDetailExamples:     'Ejemplos',
   reviewGrammarUsed:     'usado',
   reviewGrammarMissed:   'no usado',
   analyzingTranslation:  'Analizando tu traducción…',

@@ -3,14 +3,19 @@ The same ending in the other register (plan 241): what Construire also
 takes where its hole closes the sentence, and where it takes nothing
 else -- each rule pinned with the sentence it reads both ways and the
 one it must not. Then では said in full or contracted (plan 295), the
-same way.
+same way. Then the register a whole line is said in (plan 329), which
+the breakdown prints.
 """
 import pytest
 
 from study.furigana import align_sentence
 from study.grammar_ladder import _reading, _slice
 from study.morphology import MORPHOLOGY_AVAILABLE
-from study.plain_polite import CONTRACTED, FULL, PLAIN, POLITE, contracted, other_register
+from content.grammar_points_data import find
+from study.analysis import analyze_local
+from study.plain_polite import (
+    CONTRACTED, FULL, KEIGO, KEIGO_POINTS, PLAIN, POLITE, contracted, other_register,
+)
 
 pytestmark = pytest.mark.skipif(not MORPHOLOGY_AVAILABLE, reason="needs the tokenizer")
 
@@ -140,3 +145,92 @@ def test_de_wa_before_a_negative_is_read_in_full_and_contracted(jp, hole, said):
 ])
 def test_no_other_de_wa_is_read_the_other_way(jp, hole, why):
     assert _swap(jp, hole) is None, why
+
+
+# ── The register a line is said in (plan 329) ─────────────────
+
+def _register(text: str) -> str | None:
+    return analyze_local(text)["register"]
+
+
+@pytest.mark.parametrize("text, register", [
+    # The ending decides: です／ます anywhere in the closing run of
+    # endings, however the sentence is shaped.
+    ("私は学生です。", POLITE), ("私は学生だ。", PLAIN),
+    ("毎日学校に行きます。", POLITE), ("毎日学校に行く。", PLAIN),
+    ("きのうは雨でした。", POLITE), ("きのうは雨だった。", PLAIN),
+    ("行きませんでした。", POLITE), ("行かなかった。", PLAIN),
+    ("高くないです。", POLITE), ("高くない。", PLAIN),
+    ("行きましょう。", POLITE), ("行こう。", PLAIN),
+    ("早く行ってください。", POLITE),
+    ("行かなきゃ。", PLAIN), ("食べなさい。", PLAIN),
+    # A final particle, a question mark and a bare cut change nothing.
+    ("いい天気ですね。", POLITE), ("いい天気だね。", PLAIN),
+    ("本当ですか？", POLITE), ("本当？", None),
+    ("行きますか", POLITE), ("行くの？", PLAIN),
+    # A clause left open keeps the register of its predicate.
+    ("行きますが", POLITE), ("行くけどね", PLAIN),
+    # The main verb is the sentence's, not what a quote holds, and a
+    # quote said alone is read as it is said.
+    ("「行きます」と言った。", PLAIN), ("「行く」と言いました。", POLITE),
+    ("「行きます。」", POLITE),
+    ("先生が来たので、行く。", PLAIN), ("先生が来たので、行きます。", POLITE),
+    # Set phrases that are polite by their ending.
+    ("ありがとうございます。", POLITE), ("すみません。", POLITE), ("お願いします。", POLITE),
+])
+def test_a_line_is_polite_or_plain_by_how_it_closes(text, register):
+    assert _register(text) == register
+
+
+@pytest.mark.parametrize("text, why", [
+    ("ありがとう。", "an interjection closes on no predicate"),
+    ("おはよう", "a greeting is no register to teach"),
+    ("学生", "a noun alone"),
+    ("静か", "a な-adjective's stem, with no だ or です"),
+    ("駅から", "から after a noun opens nothing"),
+    ("行って", "a て-form is no finished predicate, polite or plain"),
+    ("行くのが", "a clause cut short on a noun-ish が"),
+    ("学生です。行く。", "two sentences, two registers"),
+    ("", "nothing to read"),
+])
+def test_a_line_that_says_nothing_or_two_things_is_none(text, why):
+    assert _register(text) is None, why
+
+
+def test_a_line_polite_in_one_sentence_and_silent_in_another_is_polite():
+    assert _register("学生です。ありがとう。") == POLITE
+    assert _register("パンをください。それから、ぎゅうにゅうも。") == POLITE
+
+
+@pytest.mark.parametrize("text", [
+    "お客様がいらっしゃいます。", "先生にお会いしました。", "こちらでございます。",
+    "私がまいります。", "本を読んでいただきました。", "お待ちください。",
+    "このしょるいを見ていただけませんか。", "会議に出席させていただきます。",
+    "先生は本を読んでいらっしゃいますか。", "先生がいらっしゃる。", "先生がお帰りになった。",
+])
+def test_a_line_that_closes_on_a_keigo_point_is_keigo(text):
+    assert _register(text) == KEIGO
+
+
+@pytest.mark.parametrize("text, register, why", [
+    ("先生がいらっしゃるので、私は行きます。", POLITE, "the keigo point is in the clause before"),
+    ("駅まで送ってくださって、ありがとうございます。", POLITE, "ございます is polite, and the point is a clause back"),
+    ("ありがとうございます。", POLITE, "polite, not the keigo of the point"),
+    ("町中がお祝いした。", PLAIN, "お祝い + した is no humble お〜する"),
+    ("私がお持ちする。", PLAIN, "a plain ending lowers nobody"),
+    ("少し待ってください。", POLITE, "ください is the polite request, not くださる"),
+    ("その件については、お答えしかねます。", POLITE, "humble, but かね stands between the point and ます"),
+])
+def test_keigo_is_the_closing_predicates_alone(text, register, why):
+    assert _register(text) == register, why
+
+
+def test_every_keigo_point_is_in_the_catalogue():
+    """A pattern is a card id: a rename that leaves the set behind would
+    silently turn every keigo line polite."""
+    assert [p for p in sorted(KEIGO_POINTS) if find(p) is None] == []
+
+
+def test_an_unavailable_analysis_has_no_register():
+    # The key is always there, so a screen never reads a missing one.
+    assert "register" in analyze_local("")
