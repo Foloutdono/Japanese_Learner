@@ -287,3 +287,20 @@ FROM credit_ledger
 WHERE reason = 'mission' AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1 ORDER BY 1;
+
+-- ==== question
+-- title: Parrainage, du choix à la conversion
+-- display: bar
+-- size: 12x8
+-- description: Par semaine (plan 332), les apprenants qui ont nommé un parrain (referral_asked), les parrains qui ont accepté (referral_linked), les filleuls convertis par trois jours d'étude (referral_converted), les récompenses récoltées (referral_claimed) et les places libérées (referral_released). Qui a parrainé qui ne se lit qu'avec scripts/read_referrals, jamais ici.
+SELECT date_trunc('week', at AT TIME ZONE 'Europe/Paris')::date AS "Semaine",
+       count(DISTINCT user_id) FILTER (WHERE name = 'referral_asked') AS "Parrain nommé",
+       count(DISTINCT user_id) FILTER (WHERE name = 'referral_linked') AS "Accepté",
+       count(DISTINCT user_id) FILTER (WHERE name = 'referral_converted') AS "Converti",
+       count(*) FILTER (WHERE name = 'referral_claimed') AS "Récompenses récoltées",
+       count(*) FILTER (WHERE name = 'referral_released') AS "Places libérées"
+FROM event_log
+WHERE name IN ('referral_asked', 'referral_linked', 'referral_converted', 'referral_claimed', 'referral_released')
+  AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 1;

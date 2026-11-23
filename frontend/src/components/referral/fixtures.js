@@ -1,44 +1,48 @@
-// A learner in each of the referral's states, in the shape the server will
-// answer (plan 332), for /dev/referral. French literals while this is a
-// drawing; the built feature takes its texts from the locales.
-//
-// `me.sponsor`: the learner's own parrain, or null; `me.daysLeft`: days left
-// to choose one (the first three days of an account), 0 when the time has
-// gone. `sponsoring`: the learner as a parrain: three places, their filleuls,
-// the link. Rewards (plan 332, option B): 100 at the conversion, 25 a week
-// the filleul is active, 8 weeks, a cap of 500 a month.
-export const LINK = 'tsuji.app/?src=referral&ref=Aiko'
+// A learner in each of the referral's states, in GET /api/referral's
+// shape (study/referral.view), for /dev/referral and the tests (plan 332).
+// Rewards are the owner's option B: 300 for the filleul, 100 for the
+// parrain at the conversion, 25 an active week for 8 weeks, 500 a month.
+export const HANDLE = 'Aiko'
+export const SUGGESTED = 'Mei'
 
-const filleuls = [
-  { username: 'Kenji', state: 'active', weekDays: 2, weekOf: 3, weeksPaid: 3, weeks: 8, owed: 25 },
-  { username: 'Sora', state: 'pending', studyDays: 1, studyOf: 3, windowDay: 5, window: 14 },
-]
-
-export function referralFixture({ role = 'new', plan = 'free', step = 0 } = {}) {
+function base(plan) {
   const max = plan === 'max'
   const gift = n => (max ? { credits: 0, xp: n } : { credits: n, xp: 0 })
-  const base = { plan, link: LINK, rewards: { conversion: gift(100), week: gift(25), filleul: 300 } }
+  return {
+    handle: HANDLE,
+    link: `https://tsuji.app/?src=referral&ref=${HANDLE}`,
+    unit: max ? 'xp' : 'credits',
+    rewards: { conversion: gift(100), week: gift(25), filleul: 300, weeks: 8, cap: 500 },
+  }
+}
+
+const NOBODY = { slots: 3, filleuls: [], requests: [], owed: 0 }
+
+/**
+ * role: new (may name a parrain, 2 days left) | filleul (on the way to
+ * the reward; step 2, paid and not yet told) | parrain (two filleuls and
+ * a request; step 2, the week collected).
+ */
+export function referralFixture({ role = 'new', plan = 'free', step = 0 } = {}) {
+  const b = base(plan)
   if (role === 'new') {
-    return { ...base, variant: null, me: { sponsor: null, daysLeft: 2, preset: 'Mei' }, sponsoring: { slots: 3, filleuls: [] } }
+    return { ...b, me: { sponsor: null, canChoose: true, daysLeft: 2, welcome: false }, sponsoring: NOBODY }
   }
   if (role === 'filleul') {
     const paid = step === 2
-    return {
-      ...base, variant: null,
-      me: {
-        sponsor: { username: 'Mei', state: paid ? 'converted' : 'pending', studyDays: paid ? 3 : 2, studyOf: 3, windowDay: 5, window: 14 },
-        daysLeft: 0, preset: null, welcome: paid,
-      },
-      sponsoring: { slots: 3, filleuls: [] },
-    }
+    const sponsor = paid
+      ? { username: SUGGESTED, state: 'converted' }
+      : { username: SUGGESTED, state: 'accepted', studyDays: 2, studyOf: 3, windowDay: 5, window: 14 }
+    return { ...b, me: { sponsor, canChoose: false, daysLeft: 0, welcome: paid }, sponsoring: NOBODY }
   }
+  const owed = step === 2 ? 0 : 25
+  const filleuls = [
+    { username: 'Kenji', state: 'active', owed, canRelease: false, weekDays: 2, weekOf: 3, weeksPaid: step === 2 ? 4 : 3, weeks: 8 },
+    { username: 'Sora', state: 'pending', owed: 0, canRelease: false, studyDays: 1, studyOf: 3, windowDay: 5, window: 14 },
+  ]
   return {
-    ...base, variant: null,
-    me: { sponsor: null, daysLeft: 0, preset: null },
-    sponsoring: {
-      slots: 3,
-      owed: 25,
-      filleuls: filleuls.map(f => (step === 2 && f.username === 'Kenji' ? { ...f, owed: 0, weeksPaid: 4 } : f)),
-    },
+    ...b,
+    me: { sponsor: null, canChoose: false, daysLeft: 0, welcome: false },
+    sponsoring: { slots: 3, filleuls, requests: step === 2 ? [] : [{ username: 'Yuki' }], owed },
   }
 }

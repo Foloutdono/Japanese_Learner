@@ -8,6 +8,7 @@ import { forgetCredits } from './credits'
 import { forgetDuels } from './duels'
 import { forgetForecast } from './forecast'
 import { forgetMissions } from './missions'
+import { forgetReferral } from './referral'
 import { forgetShown } from './guide'
 import { forgetJourney } from './journey'
 import { forgetPracticeRecord } from './practiceRecord'
@@ -62,6 +63,7 @@ export function forgetAccount() {
   forgetCredits()
   forgetDuels()
   forgetMissions()
+  forgetReferral()
   forgetToday()
   forgetModes()
   forgetCardContents()

@@ -132,7 +132,13 @@ DAY_CLEAR_SOURCE = "day_clear"
 # What a mission pays in XP (plan 331, study/missions.py): a bonus, like
 # the day's clear, so neither is a day studied nor a practice answer.
 MISSION_SOURCE = "mission"
-NOT_STUDY_SOURCES = [DAY_CLEAR_SOURCE, MISSION_SOURCE]
+# What a referral pays a learner on the pass in XP (plan 332, study/referral.py):
+# a bonus too, and more: it counts for the level and never on the 番付 (the
+# owner's rule, "the referral gives no ranking XP"), so the board's sums read
+# the ledger without it (BOARD_LEDGER).
+REFERRAL_SOURCE = "referral"
+NOT_STUDY_SOURCES = [DAY_CLEAR_SOURCE, MISSION_SOURCE, REFERRAL_SOURCE]
+BOARD_LEDGER = f"(SELECT user_id, xp, awarded_at FROM xp_ledger WHERE source <> '{REFERRAL_SOURCE}') AS board_ledger"
 
 # The week row's day names, Monday first (date.weekday()).
 WEEKDAY_KANJI = "月火水木金土日"
@@ -1915,7 +1921,7 @@ class SRSEngine:
                         UNION ALL
                         SELECT user_id, xp FROM review_daily{daily_where}
                         UNION ALL
-                        SELECT user_id, xp FROM xp_ledger{ledger_where}
+                        SELECT user_id, xp FROM {BOARD_LEDGER}{ledger_where}
                     ) all_xp
                     GROUP BY user_id
                     ORDER BY xp DESC
@@ -1952,7 +1958,7 @@ class SRSEngine:
                         UNION ALL
                         SELECT user_id, xp FROM review_daily{clause(daily_where)}
                         UNION ALL
-                        SELECT user_id, xp FROM xp_ledger{clause(ledger_where)}
+                        SELECT user_id, xp FROM {BOARD_LEDGER}{clause(ledger_where)}
                     ) all_xp
                     GROUP BY user_id
                 """
@@ -1977,7 +1983,7 @@ class SRSEngine:
                             UNION ALL
                             SELECT user_id, xp FROM review_daily{daily_where}
                             UNION ALL
-                            SELECT user_id, xp FROM xp_ledger{ledger_where}
+                            SELECT user_id, xp FROM {BOARD_LEDGER}{ledger_where}
                         ) all_xp
                         GROUP BY user_id
                     )

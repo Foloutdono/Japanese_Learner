@@ -1449,3 +1449,43 @@ CREATE TABLE mission_marks (
     PRIMARY KEY (user_id, key)
 );
 ALTER TABLE mission_marks ENABLE ROW LEVEL SECURITY;
+
+-- Owned by study/referral.py (plan 332) -- 縁. A row per filleul: the parrain
+-- they named, when it was asked, accepted or refused, when the account was
+-- found to have an address, when the filleul converted (three days of study
+-- in the first fourteen), when the parrain let them go, when they were told.
+-- Erased with either learner's account.
+CREATE TABLE referrals (
+    filleul_id   TEXT PRIMARY KEY,
+    sponsor_id   TEXT NOT NULL,
+    asked_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    accepted_at  TIMESTAMPTZ,
+    refused_at   TIMESTAMPTZ,
+    verified_at  TIMESTAMPTZ,
+    converted_at TIMESTAMPTZ,
+    released_at  TIMESTAMPTZ,
+    told_at      TIMESTAMPTZ
+);
+ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_referrals_sponsor
+ON referrals(sponsor_id);
+
+-- Owned by study/referral.py, beside it: a reward a parrain earned through a
+-- filleul (the conversion, an active week, a week of the pass), stamped when
+-- paid, with what the month's cap left of it.
+CREATE TABLE referral_rewards (
+    sponsor_id   TEXT NOT NULL,
+    filleul_id   TEXT NOT NULL,
+    kind         TEXT NOT NULL,
+    period       DATE NOT NULL,
+    credits      SMALLINT NOT NULL,
+    done_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    paid_at      TIMESTAMPTZ,
+    paid         SMALLINT,
+    PRIMARY KEY (filleul_id, kind, period)
+);
+ALTER TABLE referral_rewards ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_referral_rewards_sponsor
+ON referral_rewards(sponsor_id);

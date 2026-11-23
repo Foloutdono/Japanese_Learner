@@ -531,6 +531,11 @@ def missions_news_open(user_id: str, guided) -> bool:
     return row is not None and row[0] is None
 
 
+def _referral_notice(user_id: str) -> bool:
+    from study import referral
+    return referral.notice_open(user_id)
+
+
 def _ui_lang(user_id: str) -> str | None:
     """The interface language the learner chose, or None if never. Read
     apart from _profile_row, whose tuple half the server unpacks."""
@@ -1032,6 +1037,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # the duels' key stands beside its gate (duels_news_open).
         "duelsNews": duels_news_open(user_id, guided),
         "missionsNews": missions_news_open(user_id, guided),
+        # 縁 (plan 332): whether Today's gate says a word of the referral,
+        # so a learner it has nothing to say to asks /api/referral nothing.
+        "referralNotice": _referral_notice(user_id),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.
