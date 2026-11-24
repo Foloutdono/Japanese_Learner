@@ -40,7 +40,8 @@
 //   --feature ID      a practice feature's video (plan 270, feature.js): the app
 //                     itself, recorded doing one exercise (record.mjs), 9:16:
 //                     reading, comprehension, dictation, translation, composition,
-//                     conversation or exam
+//                     conversation or exam; or a highlight's scene (plan 331,
+//                     scenes.js): kana, tour, video, photo, song, transfer, account
 //   --app URL         ... record the app already running there (npm run dev),
 //                     rather than starting Vite here
 //   --beats 3-4       ... only those beats of it (0-based, as feature.js lists
@@ -345,7 +346,11 @@ if (args.challenge) {
   log(`recording ${plan.name} (${lang}) in the app at ${app.url}`)
   let shots
   try {
-    shots = await record(browser, { url: app.url, steps: featureSteps(plan, said || 2.5), mocks: plan.data.mocks, lang, audio: plan.cues.length ? dur.file(plan.cues[0]) : null, dir: shotDir, log })
+    shots = await record(browser, {
+      url: app.url, steps: featureSteps(plan, said || 2.5), mocks: plan.data.mocks, lang, audio: plan.cues.length ? dur.file(plan.cues[0]) : null, dir: shotDir, log,
+      // A scene's account and its video's pictures (plan 331, scenes.js).
+      user: plan.data.user || null, youtube: plan.data.frames ? { frames: plan.data.frames, title: plan.data.title } : null,
+    })
   } finally { await app.close() }
   const whole = featureTimeline(plan, shots, dur)
   // A highlight's clip (plan 331): those beats alone, on their own clock,
@@ -492,7 +497,10 @@ for (const key of keys) {
   const b64 = await page.evaluate(async key => {
     const snd = await import('/carousel/sound.js')
     await snd.loadVoices('/')
-    const mix = await snd.eventAudio(key)
+    // A kana's own recorded clip (plan 331, `kana-<sound>`), as the app plays it.
+    const kana = key.match(/^kana-([a-z]+)$/)
+    const clip = kana && await snd.decoded(`/sounds/kanas/${kana[1]}.mp3`).catch(() => null)
+    const mix = clip ? [clip.getChannelData(0), clip.getChannelData(Math.min(1, clip.numberOfChannels - 1))] : await snd.eventAudio(key)
     if (!mix) return null
     const bytes = new Uint8Array(snd.wav(mix))
     let s = ''

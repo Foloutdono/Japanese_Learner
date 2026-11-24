@@ -132,5 +132,215 @@
   },
   "conversation": {
     "scenario": "konbini-lunch"
+  },
+  "scenes": {
+    "_": "Plan 331: the highlights' recordings of the screens the Practice tab does not hold. Each is answered by the backend's own functions (scripts/carousel_bank.py, PROMO_SCENES); what is written here by hand is what a learner brings (a link, a photo, a song, an Anki file) and what a model would say of it (a line's translation, a song's timing), in the shape the route returns.",
+    "kana": {
+      "level": "N5",
+      "kana": "あ",
+      "set": "hiragana_basic"
+    },
+    "tour": {
+      "level": "N5",
+      "point": "〜たいです"
+    },
+    "video": {
+      "level": "N5",
+      "scenario": "first-class",
+      "turns": 3,
+      "id": "tsujiScene1",
+      "title": {
+        "en": "First day in class",
+        "fr": "Premier jour en classe"
+      },
+      "seconds": 2.8,
+      "cut": {
+        "はじめまして。": {
+          "en": "Hi, nice to meet you.",
+          "fr": "Salut, enchanté."
+        },
+        "田中です。お名前は？": {
+          "en": "I'm Tanaka. What's your name?",
+          "fr": "Moi, c'est Tanaka. Et toi, tu t'appelles comment ?"
+        },
+        "アレックスさんは、": {
+          "en": "And you, Alex,",
+          "fr": "Et toi, Alex,"
+        },
+        "どこから来ましたか。": {
+          "en": "where are you from?",
+          "fr": "tu viens d'où ?"
+        }
+      }
+    },
+    "photo": {
+      "level": "N5",
+      "name": "note.jpg",
+      "text": "駅の前に新しいパン屋があります。\n朝七時から開いています。"
+    },
+    "song": {
+      "level": "N5",
+      "name": "haru-no-asa.wav",
+      "seconds": 14,
+      "lines": [
+        {
+          "start": 0.6,
+          "end": 3.4,
+          "text": "春の朝、駅まで歩く",
+          "en": "A spring morning, I walk to the station",
+          "fr": "Un matin de printemps, je marche jusqu’à la gare"
+        },
+        {
+          "start": 3.8,
+          "end": 6.6,
+          "text": "青い空の下で",
+          "en": "Under the blue sky",
+          "fr": "Sous le ciel bleu"
+        },
+        {
+          "start": 7.0,
+          "end": 9.8,
+          "text": "あなたに会いたい",
+          "en": "I want to see you",
+          "fr": "J’ai envie de te voir"
+        },
+        {
+          "start": 10.2,
+          "end": 13.4,
+          "text": "また明日、また明日",
+          "en": "See you tomorrow, see you tomorrow",
+          "fr": "À demain, à demain"
+        }
+      ]
+    },
+    "transfer": {
+      "level": "N5",
+      "name": "core.apkg",
+      "decks": [
+        "Japanese::Core",
+        "Kanji"
+      ],
+      "notes": [
+        {
+          "fields": [
+            "食べる",
+            "たべる"
+          ],
+          "deck": 0,
+          "interval": 30,
+          "due": 4,
+          "model": 0
+        },
+        {
+          "fields": [
+            "学校",
+            "がっこう"
+          ],
+          "deck": 0,
+          "interval": 21,
+          "due": -2,
+          "model": 0
+        },
+        {
+          "fields": [
+            "友だち",
+            "ともだち"
+          ],
+          "deck": 0,
+          "interval": 45,
+          "due": 9,
+          "model": 0
+        },
+        {
+          "fields": [
+            "電車",
+            "でんしゃ"
+          ],
+          "deck": 0,
+          "interval": 12,
+          "due": 1,
+          "model": 0
+        },
+        {
+          "fields": [
+            "新しい",
+            "あたらしい"
+          ],
+          "deck": 0,
+          "interval": 60,
+          "due": 20,
+          "model": 0
+        },
+        {
+          "fields": [
+            "勉強",
+            "べんきょう"
+          ],
+          "deck": 0,
+          "interval": 8,
+          "due": 0,
+          "model": 0
+        },
+        {
+          "fields": [
+            "蜃気楼",
+            "しんきろう"
+          ],
+          "deck": 0,
+          "interval": 5,
+          "due": 3,
+          "model": 0
+        },
+        {
+          "fields": [
+            "日",
+            "day, sun"
+          ],
+          "deck": 1,
+          "interval": 90,
+          "due": 15,
+          "model": 1
+        },
+        {
+          "fields": [
+            "山",
+            "mountain"
+          ],
+          "deck": 1,
+          "interval": 40,
+          "due": -1,
+          "model": 1
+        },
+        {
+          "fields": [
+            "水",
+            "water"
+          ],
+          "deck": 1,
+          "interval": 25,
+          "due": 6,
+          "model": 1
+        }
+      ],
+      "models": [
+        {
+          "name": "Core",
+          "fields": [
+            "Expression",
+            "Reading"
+          ]
+        },
+        {
+          "name": "Kanji",
+          "fields": [
+            "Kanji",
+            "Meaning"
+          ]
+        }
+      ]
+    },
+    "account": {
+      "level": "N5"
+    }
   }
 }

@@ -2101,12 +2101,279 @@ def _promo_conversation(spec: dict, lang: str) -> dict:
     }
 
 
+# ── The highlights' scenes (plan 331) ──────────────────────────────
+# The screens a highlight films that the Practice tab does not hold: a
+# new kana and a new rule as they are met, the analyzer fed a link, a
+# photo and a song, the transfer from another app and the account's data.
+# Answered as the feature videos are, by the functions the routes call;
+# what a learner brings (the link, the photo, the song, the Anki file) and
+# what a model would say of it (a line's translation, a song's timing)
+# are written by hand in content/promo.json's `scenes`.
+PROMO_VIDEO_SESSION = 7
+PROMO_SONG_SESSION = 9
+
+
+def _no_db():
+    """study.glyph_tour opens its table on import; a module that refuses
+    in core.db's place, so it never connects (its _ensure_schema logs
+    the refusal and goes on)."""
+    import logging
+    import types
+
+    if "core.db" not in sys.modules:
+        mod = types.ModuleType("core.db")
+
+        def refuse(*_a, **_k):
+            raise RuntimeError("the carousel bank opens no database")
+
+        mod.db_conn = refuse
+        sys.modules["core.db"] = mod
+    logging.getLogger("study.glyph_tour").disabled = True
+
+
+def _scene_kana(spec: dict, lang: str) -> dict:
+    """A new kana as KanaRun meets it: one card, new, its glyph tour due
+    (routes/kana._build_kana_card's fields, study/glyph_tour.mark_glyph_tours'
+    two), in the drawing mode the tour boards."""
+    _no_db()
+    from content.kana_data import KANA_SETS, kana_to_id, sound_of
+    from study.glyph_tour import tour_payload
+
+    entry = next((k for k in KANA_SETS[spec["set"]] if k["kana"] == spec["kana"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {spec['kana']} is no kana of {spec['set']}")
+    tour = tour_payload(kana_to_id(entry), lang)
+    if tour is None:
+        raise SystemExit(f"content/promo.json: {spec['kana']} has no glyph tour")
+    mode = "kana.write_kana"
+    card = {
+        "card_id": kana_to_id(entry), "mode": mode, "direction": None, "kana": entry["kana"], "romaji": entry["romaji"],
+        "sound": sound_of(entry), "stage": "new", "review_preview": None, "hints": {}, "progress": 0,
+        "tutorial": True, "glyph_tour": tour,
+    }
+    return {
+        "level": spec["level"], "line": entry["kana"], "set": spec["set"], "mode": mode, "strokes": tour["strokes"],
+        # The kana's own clip (frontend/public/sounds/kanas/<sound>.mp3), heard as the tour says it.
+        "clip": f"kana-{sound_of(entry)}",
+        "mocks": {
+            "GET /api/kana/cards": {"cards": [card]},
+            "POST /api/glyph/tour": {"recorded": True},
+        },
+    }
+
+
+def _scene_tour(spec: dict, lang: str) -> dict:
+    """A new rule as GrammarRun meets it: one card, new, its lesson and
+    tour carried (routes/grammar._build_grammar_card's fields), the tour
+    without its quiz, as composition's sheet serves it (its deal differs
+    from one process to the next)."""
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_to_id
+    from study.grammar_examples import pattern_furigana, structure_furigana, structure_text
+    from study.grammar_lesson import lesson_payload
+    from study.grammar_tour import tour_payload
+
+    level = spec["level"]
+    entry = next((e for e in GRAMMAR_POINTS_BY_LEVEL[level] if e["pattern"] == spec["point"]), None)
+    if entry is None:
+        raise SystemExit(f"content/promo.json: {spec['point']} is no {level} point")
+    raw_id = grammar_to_id(entry, level)
+    tour = {**tour_payload(level, entry, lang), "quiz": []}
+    mode = "grammar.flashcard.f2b"
+    card = {
+        "card_id": raw_id, "raw_id": raw_id, "mode": mode, "direction": "f2b", "grammar": entry["pattern"],
+        "grammar_furigana": pattern_furigana(entry["pattern"], entry.get("reading")),
+        "structure": structure_text(entry, lang), "structure_furigana": structure_furigana(entry, lang),
+        "meaning": gloss(entry, lang), "register": entry.get("register"), "stage": "new", "review_preview": None,
+        "hints": {}, "tutorial": True, "lesson": {**lesson_payload(level, entry, lang), "tour": tour},
+    }
+    return {
+        "level": level, "line": entry["pattern"], "mode": mode, "point": entry["pattern"],
+        # The right guess and the right reading of the first twist, which the video picks.
+        "guess": next(i for i, g in enumerate(tour["guesses"]) if g.get("correct")),
+        "twist": next(i for i, c in enumerate(tour["twists"][0]["choices"]) if c.get("correct")) if tour.get("twists") else None,
+        "mocks": {
+            "GET /api/grammar/cards": {"cards": [card]},
+            "POST /api/grammar/tour": {"recorded": True},
+        },
+    }
+
+
+def _scene_lines(cues: list[dict]) -> list[dict]:
+    """A session's lines as routes/video._materialize stores them: each
+    cue a line (or the pieces line_cut cuts it into), analysed by the
+    local tier in the context of its Japanese neighbours."""
+    from study.analysis import LOCAL_REV, attach_user_state
+    from study.cue_sentences import sentences_from_cues
+    from study.line_cut import CUT_REV
+
+    kept = sentences_from_cues(cues, None, None)
+    out = []
+    for k, s in enumerate(kept):
+        near = lambda j: kept[j]["text"] if 0 <= j < len(kept) and kept[j]["japanese"] else ""
+        line = analyze_local(s["text"], before=near(k - 1), after=near(k + 1))
+        line.update({"cue_start": s["cue_start"], "cue_end": s["cue_end"], "local_rev": LOCAL_REV, "cut_rev": CUT_REV})
+        out.append(attach_user_state(line, {}, "promo"))
+    return out
+
+
+def _scene_session(sentences: list[dict], **about) -> dict:
+    """GET /api/video/session/{id}, ready (routes/video.get_video_session)."""
+    return {"status": "ready", "windowStart": None, "windowEnd": None, "windowCapped": False, "truncated": 0, **about, "sentences": sentences}
+
+
+def _scene_video(spec: dict, lang: str) -> dict:
+    """A YouTube link, line by line. The video is a 会話 scene the owner
+    pictured (frontend/carousel/content/pictures/scenes/), its lines the
+    scene's own, a picture to each, said one after another; the link's
+    id stands for it (record.mjs plays the pictures in YouTube's place)."""
+    from study import conversation
+
+    payload = conversation.scenario_payload(spec["scenario"], conversation.bank_lang(lang))
+    if payload is None:
+        raise SystemExit(f"content/promo.json: {spec['scenario']} is no scenario of the 会話 bank")
+    said, frames, cues = [], [], []
+    at = 0.4
+    for n, turn in enumerate(payload["turns"][: spec["turns"]], start=1):
+        me = next(c for c in turn["choices"] if c.get("right"))
+        for who, line in (("ask", turn["them"]), ("answer", me)):
+            cues.append({"start": round(at, 2), "end": round(at + spec["seconds"], 2), "text": line["jp"]})
+            frames.append({"start": round(at - 0.4, 2), "picture": f"scenes/{spec['scenario']}-{n}-{who}.webp"})
+            said.append(line["translation"])
+            at += spec["seconds"] + 0.2
+    sentences = _scene_lines(cues)
+    # A line wider than the screen is cut in two, as the app cuts it
+    # (study/line_cut); each piece is translated on its own, as the model
+    # translates a line (study/line_translate), by hand in `cut`.
+    whole = {c["text"]: t for c, t in zip(cues, said)}
+    lines = []
+    for s in sentences:
+        piece = whole.get(s["text"]) or spec["cut"].get(s["text"], {}).get(lang)
+        if not piece:
+            raise SystemExit(f"content/promo.json: the video's line {s['text']} has no {lang} translation in `cut`")
+        lines.append(piece)
+    sid = PROMO_VIDEO_SESSION
+    return {
+        "level": spec["level"], "line": cues[0]["text"], "id": spec["id"], "link": f"https://youtu.be/{spec['id']}",
+        "title": spec["title"][lang], "length": round(at, 2), "frames": frames,
+        "mocks": {
+            "GET /api/video/capabilities": {"linkFetch": True},
+            "GET /api/video/library": {"videos": [], "total": 0, "counts": {"all": 0, "mine": 0}, "categories": []},
+            "POST /api/video/session": {"sessionId": sid, "status": "generating", "windowCapped": False},
+            f"GET /api/video/session/{sid}": _scene_session(sentences, source="youtube", sourceRef=spec["id"], videoId=spec["id"]),
+            f"POST /api/video/session/{sid}/translations": {"start": 0, "lines": lines},
+        },
+    }
+
+
+def _scene_photo(spec: dict, lang: str) -> dict:
+    """A photo of a page: what POST /api/ocr reads in it (the text, as
+    the page says it), then the text analysed line by line as POST
+    /api/phrase/analyze analyses a passage (routes/phrase.passage_sentences,
+    lines=True), each piece in the context of its sentence."""
+    from study.analysis import attach_user_state
+    from study.cue_sentences import is_japanese
+    from study.line_cut import cut_line
+    from study.sentences import split_sentences
+
+    text = spec["text"]
+    sentences = []
+    for s in split_sentences(text):
+        if not is_japanese(s["text"]):
+            continue
+        pieces = [piece["text"] for piece in cut_line(s["text"], None, None)]
+        for k, piece in enumerate(pieces):
+            ctx = {"before": "".join(pieces[:k]), "after": "".join(pieces[k + 1:])} if len(pieces) > 1 else {}
+            sentences.append(attach_user_state(analyze_local(piece, **ctx), {}, "promo"))
+    return {
+        "level": spec["level"], "line": text.split("\n")[0], "name": spec["name"], "lines": text.split("\n"),
+        "mocks": {
+            "POST /api/ocr": {"text": text, "chars": len(text)},
+            "POST /api/phrase/analyze": {"passage": text, "sentences": sentences, "truncated": 0, "id": None, "created_at": None},
+        },
+    }
+
+
+def _scene_song(spec: dict, lang: str) -> dict:
+    """A song from the learner's own file: its lines timed as a model
+    that hears answers them, read by study/song_transcribe.cues_from,
+    then the session's lines as for any track. The song is the demo's
+    own, written in content/promo.json; record.mjs hands the page a
+    file of its length to play."""
+    from study.song_transcribe import cues_from
+
+    items = [{"start": ln["start"], "end": ln["end"], "text": ln["text"]} for ln in spec["lines"]]
+    cues = cues_from(items, spec["seconds"])
+    if [c["text"] for c in cues] != [ln["text"] for ln in spec["lines"]]:
+        raise SystemExit("content/promo.json: the song's lines do not read as a track")
+    sentences = _scene_lines(cues)
+    sid = PROMO_SONG_SESSION
+    return {
+        # `length`, not `seconds`: a script's steps are handed the voice's seconds under that name (feature.featureSteps).
+        "level": spec["level"], "line": spec["lines"][0]["text"], "name": spec["name"], "length": spec["seconds"],
+        "mocks": {
+            "GET /api/video/capabilities": {"linkFetch": True},
+            "GET /api/video/library": {"videos": [], "total": 0, "counts": {"all": 0, "mine": 0}, "categories": []},
+            "POST /api/video/song": {"sessionId": sid, "status": "generating", "windowCapped": False},
+            f"GET /api/video/session/{sid}": _scene_session(sentences, source="song", sourceRef=spec["name"], videoId=None),
+            f"POST /api/video/session/{sid}/translations": {"start": 0, "lines": [ln[lang] for ln in spec["lines"]]},
+        },
+    }
+
+
+def _scene_transfer(spec: dict, lang: str) -> dict:
+    """An Anki file brought across: the notes the device reads in it
+    (record.mjs writes them into a real .apkg), matched to the course's
+    cards by study/transfer as routes/transfer's preview and import
+    answer for a learner who has studied none of them here."""
+    from study import daily_queue, level_rule
+    from study import transfer as tr
+
+    # A note's type is its model's place in the file, as the device numbers them (lib/anki).
+    notes = [tr.Note(type=n["model"], fields=tuple(n["fields"]), interval=n["interval"], ease=2500, due=n["due"]) for n in spec["notes"]]
+    m = tr.match(notes)
+    counted = tr.counts(m)
+    line = tr.LEVELS.index(daily_queue.hold_line(spec["level"], None))
+    summary = {
+        "notes": m.notes, "cards": len(m.hits), **counted, "kept": 0,
+        "above": sum(n for lvl, n in counted["byLevel"].items() if tr.LEVELS.index(lvl) > line),
+        "write": len(m.hits), "dueNow": tr.overdue(m), "spreadWeeks": level_rule.SPREAD_WEEKS,
+        "unmatched": m.unmatched, "sample": m.sample,
+        "types": [{"type": t.type, "notes": t.notes, "field": t.field, "kind": t.kind, "reading": t.reading} for t in m.types],
+    }
+    return {
+        "level": spec["level"], "line": spec["name"], "anki": {k: spec[k] for k in ("name", "models", "decks", "notes")},
+        "mocks": {
+            "POST /api/transfer/preview": summary,
+            "POST /api/transfer/import": {**summary, "written": summary["write"], "waiting": summary["write"]},
+        },
+    }
+
+
+def _scene_account(spec: dict, lang: str) -> dict:
+    """Settings › Account: the learner's data. The export is the CSV
+    routes/profile.export_progress writes, its header and a row for each
+    card the other scenes meet (record.mjs answers it as a file); the
+    video stops at the deletion's question and never answers it."""
+    header = "card_id,mode,interval_days,next_review,total_reviews,correct_reviews"
+    rows = ["kana_あ,kana.write_kana,1,2026-10-02,1,1", "vocab_N5_食べる_たべる,vocab.flashcard.f2b,30,2026-10-31,6,5"]
+    return {
+        "level": spec["level"], "line": "",
+        # The account's sign-in is Google's, so the page offers no Google to link.
+        "user": {"app_metadata": {"provider": "google", "providers": ["google"]}},
+        "mocks": {"GET /api/profile/export": {"$file": {"contentType": "text/csv", "body": "\n".join([header, *rows]) + "\n"}}},
+    }
+
+
+PROMO_SCENES = {"kana": _scene_kana, "tour": _scene_tour, "video": _scene_video, "photo": _scene_photo, "song": _scene_song, "transfer": _scene_transfer, "account": _scene_account}
+
+
 PROMO_FEATURES = {"reading": _promo_reading, "comprehension": _promo_comprehension, "translation": _promo_translation, "dictation": _promo_dictation, "composition": _promo_composition, "exam": _promo_exam, "conversation": _promo_conversation}
 
 
 def promo() -> dict:
     """bank/promo.json: per practice feature and language, what the app's
-    API answers in its video, the shell's boot included."""
+    API answers in its video, the shell's boot included; and the same for
+    each scene a highlight films (plan 331)."""
     spec = _promo_spec()
     out = {}
     for name, make in PROMO_FEATURES.items():
@@ -2118,7 +2385,14 @@ def promo() -> dict:
             if spec[name].get("asked"):
                 f["asked"] = spec[name]["asked"][lang]
             out[name][lang] = f
-    return {"rev": REV, "features": out}
+    scenes = {}
+    for name, make in PROMO_SCENES.items():
+        scenes[name] = {}
+        for lang in ("en", "fr"):
+            f = make(spec["scenes"][name], lang)
+            f["mocks"] = {**_promo_boot(f["level"]), **f["mocks"]}
+            scenes[name][lang] = f
+    return {"rev": REV, "features": out, "scenes": scenes}
 
 
 def _count(data: dict) -> str:

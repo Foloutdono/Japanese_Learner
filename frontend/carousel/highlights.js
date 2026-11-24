@@ -16,6 +16,7 @@
 import { DARK, LIGHT } from '../landing/tokens.mjs'
 import { FS, SP, font, formatOf, frame, mark, rrect, text } from './draw.js'
 import { FEATURES } from './feature.js'
+import { SCENES } from './scenes.js'
 import { STORIES } from './promo.js'
 
 /** The shelf, left to right as the profile shows it. */
@@ -41,13 +42,34 @@ const RINGS = {
 //   { story }                 every frame of a promo story, as stills
 //   { story, keys }           those frames of it
 //   { story, clip }           the story played whole, as one clip (the duels')
-//   { feature, beats: [a, b] } the app filmed: that feature's beats a to b, as one clip
+//   { feature, beats: [a, b] } the app filmed: that feature's beats a to b, as one clip;
+//                              a feature of the Practice tab (feature.js) or, since the
+//                              highlights' own recordings, a scene (scenes.js)
 // A name is what the profile prints under the cover: ten characters at
 // most, or Instagram cuts it.
 export const HIGHLIGHTS = {
   start: { glyph: '辻', ring: ['gold'], name: { en: 'Start', fr: 'Découvrir' }, frames: [{ story: 'pitch' }] },
-  daily: { glyph: '日', ring: ['line', 'kana'], name: { en: 'Daily', fr: 'Quotidien' }, frames: [{ story: 'card' }] },
-  analyzer: { glyph: '解', ring: ['line', 'kaiseki'], name: { en: 'Analyzer', fr: 'Analyseur' }, frames: [{ story: 'analyser' }] },
+  daily: {
+    glyph: '日', ring: ['line', 'kana'], name: { en: 'Daily', fr: 'Quotidien' },
+    frames: [
+      { story: 'card', keys: ['front', 'back'] },
+      // What a day brings besides its reviews: a new kana, a new rule.
+      { feature: 'kana', beats: [0, 2] },
+      { feature: 'tour', beats: [0, 2] },
+      { story: 'card', keys: ['today', 'board'] },
+    ],
+  },
+  analyzer: {
+    glyph: '解', ring: ['line', 'kaiseki'], name: { en: 'Analyzer', fr: 'Analyseur' },
+    frames: [
+      { story: 'analyser', keys: ['paste'] },
+      // The three things it is handed beside a sentence.
+      { feature: 'video', beats: [0, 1] },
+      { feature: 'photo', beats: [0, 2] },
+      { feature: 'song', beats: [0, 1] },
+      { story: 'analyser', keys: ['board'] },
+    ],
+  },
   practice: {
     glyph: '練', ring: ['line', 'reading'], name: { en: 'Practice', fr: 'Pratique' },
     frames: [
@@ -73,7 +95,16 @@ export const HIGHLIGHTS = {
     ],
   },
   duels: { glyph: '戦', ring: ['duel'], name: { en: 'Duels', fr: 'Duels' }, frames: [{ story: 'duel', clip: 'story' }] },
-  free: { glyph: '券', ring: ['pass'], name: { en: 'Free?', fr: 'Gratuit ?' }, frames: [{ story: 'pass' }] },
+  free: {
+    glyph: '券', ring: ['pass'], name: { en: 'Free?', fr: 'Gratuit ?' },
+    frames: [
+      { story: 'pass', keys: ['pass'] },
+      // What stays the learner's: what they bring, what they take away.
+      { feature: 'transfer', beats: [0, 2] },
+      { feature: 'account', beats: [0, 1] },
+      { story: 'pass', keys: ['free'] },
+    ],
+  },
 }
 /** The longest name the profile prints whole. */
 export const NAME_MAX = 10
@@ -230,7 +261,7 @@ export function shelfProblems() {
     if (!h) { out.push(`${id}: not a highlight`); continue }
     for (const lang of ['en', 'fr']) if ([...h.name[lang]].length > NAME_MAX) out.push(`${id}: ${h.name[lang]} is over ${NAME_MAX} characters`)
     for (const f of h.frames) {
-      if (f.feature && !FEATURES[f.feature]) out.push(`${id}: no feature ${f.feature}`)
+      if (f.feature && !FEATURES[f.feature] && !SCENES[f.feature]) out.push(`${id}: no feature or scene ${f.feature}`)
       if (f.story && !STORIES.includes(f.story)) out.push(`${id}: no story ${f.story}`)
     }
     if (!h.frames.at(-1).story) out.push(`${id}: ends on no gate`)

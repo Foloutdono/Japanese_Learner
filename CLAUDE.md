@@ -1612,9 +1612,11 @@ plan 331 the Instagram profile's seven highlights (`highlights.js`, the
 owner's picks A and 3 of the canvas drawn): each cover a station's
 roundel, a paper disc ringed in the pigment of what it is, each
 highlight a still on the print, the app filmed where a recording exists
-(a feature video cut to a few beats) and the print's sun, its gate left
-bare for Instagram's link sticker, made as a folder of files numbered in
-posting order by `node carousel/long/render.mjs --highlight ID`. Since plan 248 every number a maker may set per
+(a feature video cut to a few beats, or a scene of the rest of the app
+recorded for it, `scenes.js`: a new kana and rule, the analyzer's link,
+photo and song, the transfer, the account) and the print's sun, its gate
+left bare for Instagram's link sticker, made as a folder of files
+numbered in posting order by `node carousel/long/render.mjs --highlight ID`. Since plan 248 every number a maker may set per
 post (a video's timing and pace, the export's quality) is one line of `tune.js`, set in the studio's Tune panel and
 written into the render command, so the video rendered is the one
 previewed. Since plan

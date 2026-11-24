@@ -921,8 +921,37 @@ and the feature videos' recordings cut to a few beats
 and lines on the clip's clock, no gate after them). Practice is its
 story's cover, one clip an exercise (what the learner does, then what the
 app says back) and its gate; JLPT is the question and its answer, the
-mock paper sat and handed in, and the gate. The other five are their
-stories as drawn, until their screens are recorded too.
+mock paper sat and handed in, and the gate. Daily, Analyzer and Free?
+film the screens the Practice tab does not hold (the scenes, below);
+Start and Duels are their stories as drawn.
+
+**The scenes (`scenes.js`).** Seven recordings of the rest of the app,
+scripted as a feature video is (steps in the real app, beats with their
+captions) and planned, timed and drawn by `feature.js` as its own are:
+`featurePlan` takes a scene's id, its answers under the bank's `scenes`.
+They are never in the studio's 実践 list, which is the Practice tab's.
+
+| Scene | Highlight | What it films | What the page is handed |
+| --- | --- | --- | --- |
+| kana | Daily | a new kana's tour: read (its own clip in the score), traced stroke by stroke, the words that use it | あ's card, new, its glyph tour due (`study/glyph_tour.tour_payload`) |
+| tour | Daily | a new rule's tour: its sentences, a guess, the rule found | 〜たいです's card, new, its lesson and tour |
+| video | Analyzer | a YouTube link pasted, then the video playing line by line | the owner's pictured 会話 scene (`first-class`) as the video, its own lines as the subtitles, each line's translation |
+| photo | Analyzer | a photo of a page, read, then cut word by word | a handwritten note on a desk, drawn by the recorder |
+| song | Analyzer | a song picked from the phone, its lyrics lit as it plays | a quiet tone the song's length; its lyrics, written for the demo |
+| transfer | Free? | an Anki file read on the device, the ticket printed and stamped | a real `.apkg` the recorder writes (two decks, ten notes, one with no card) |
+| account | Free? | the export, then the deletion's question, never answered | the progress CSV as a file |
+
+What the learner brings is written by hand in `content/promo.json`'s
+`scenes` (the link, the note, the song and its timing, the Anki notes,
+a line's translation where the app cuts a subtitle in two);
+`carousel_bank` answers the rest with the routes' own functions, and
+`backend/tests/test_carousel_bank.py` holds what each shows together.
+The recorder learned what these need (`long/record.mjs`): a file handed
+to an input (`file`, made by `makeFile`), a stroke drawn by a finger
+(`trace`), YouTube's player stood in for by the scene's pictures on the
+page's own clock (`youTubeStandIn`), a route that answers a file
+(`$file`), and the account's sign-in (`user`). No scene taps a button
+that deletes, resets or undoes (`src/carousel.test.js` holds it).
 
 Three things a highlight's frames do that a posted story's do not:
 
@@ -1550,6 +1579,7 @@ range and on its step, every `was` too (plan 309), and
 | `cover.js` | a reading challenge's hook in colour, on the title slip's washi: the hook's own words (`challenge.js`, `hookWords`), handed to it (plan 309) |
 | `halo.js` | the rim of paper round the scroll's words (plan 309) |
 | `highlights.js` | the Instagram highlights: the shelf, each cover's roundel, the frames a highlight holds, a clip cut from a feature's beats, the note beside its files (plan 331) |
+| `scenes.js` | the highlights' scenes: the screens outside the Practice tab a highlight films, scripted as a feature video is (plan 331) |
 | `long/render.mjs` | a long video, its short, a carousel's short or a reading challenge made: voiced, mixed, drawn and encoded (plans 233, 247); a highlight's folder, a feature's beats or a story played whole as a clip (plan 331); a feature video recorded and made (plan 270) |
 | `feature.js` | the feature videos: each feature's script (its steps in the app, its beats), their timing and camera on the shots (plan 273), each frame, their page (plan 270) |
 | `long/record.mjs` | the app served by Vite and run in a phone-sized browser, its API answered from `promo.json`, a feature's steps done and shot (plan 270) |

@@ -207,3 +207,58 @@ def test_the_feature_videos_are_answered_as_the_backend_answers():
             if name == "conversation":
                 turns = f["mocks"][f"GET /api/conversation/scenario/{f['scenario']}"]["turns"]
                 assert all(t["choices"][k]["right"] for t, k in zip(turns, f["picks"]))
+
+
+def test_the_highlights_scenes_are_answered_as_the_backend_answers():
+    """Plan 331: each scene a highlight films is answered by the routes'
+    own functions, and what it shows holds together: a new card due its
+    tour, a video's and a song's lines timed and translated one to one,
+    the photo's lines what its OCR read, the transfer's counts the
+    matcher's, and an export that is a file."""
+    scenes = json.loads(cb.dump(cb.promo()))["scenes"]
+    assert set(scenes) == {"kana", "tour", "video", "photo", "song", "transfer", "account"}
+    for name, langs in scenes.items():
+        assert set(langs) == {"en", "fr"}, name
+        for lang, f in langs.items():
+            at = (name, lang)
+            assert f["mocks"]["GET /api/profile"]["onboardedAt"], at
+            if name == "kana":
+                card = f["mocks"]["GET /api/kana/cards"]["cards"][0]
+                assert card["stage"] == "new" and card["tutorial"] and card["glyph_tour"]["strokes"] == f["strokes"], at
+                assert f["clip"] == f"kana-{card['sound']}", at
+            if name == "tour":
+                card = f["mocks"]["GET /api/grammar/cards"]["cards"][0]
+                tour = card["lesson"]["tour"]
+                assert card["stage"] == "new" and card["tutorial"], at
+                assert tour["guesses"][f["guess"]]["correct"], at
+            if name in ("video", "song"):
+                sid = cb.PROMO_VIDEO_SESSION if name == "video" else cb.PROMO_SONG_SESSION
+                session = f["mocks"][f"GET /api/video/session/{sid}"]
+                lines = session["sentences"]
+                said = f["mocks"][f"POST /api/video/session/{sid}/translations"]["lines"]
+                assert session["status"] == "ready" and len(said) == len(lines) and all(said), at
+                assert all(a["cue_end"] <= b["cue_start"] for a, b in zip(lines, lines[1:])), at
+                assert all(s["tokens"] for s in lines), at
+                assert session["source"] == ("youtube" if name == "video" else "song"), at
+            if name == "video":
+                # A picture for every turn's two lines, each a file of the owner's.
+                assert len(f["frames"]) == 2 * cb._promo_spec()["scenes"]["video"]["turns"], at
+                for frame in f["frames"]:
+                    assert (cb.CONTENT / "pictures" / frame["picture"]).exists(), (at, frame)
+            if name == "song":
+                assert lines[-1]["cue_end"] <= f["length"], at
+            if name == "photo":
+                read = f["mocks"]["POST /api/ocr"]["text"]
+                assert read.split("\n") == f["lines"], at
+                analysed = f["mocks"]["POST /api/phrase/analyze"]["sentences"]
+                assert "".join(s["text"] for s in analysed) == read.replace("\n", ""), at
+            if name == "transfer":
+                preview = f["mocks"]["POST /api/transfer/preview"]
+                assert preview["notes"] == len(f["anki"]["notes"]), at
+                assert preview["cards"] + preview["unmatched"] == preview["notes"], at
+                assert preview["bySource"]["kanji"] and preview["bySource"]["vocab"], at
+                assert f["mocks"]["POST /api/transfer/import"]["written"] == preview["write"], at
+            if name == "account":
+                exported = f["mocks"]["GET /api/profile/export"]["$file"]
+                assert exported["contentType"] == "text/csv", at
+                assert exported["body"].split("\n")[0] == "card_id,mode,interval_days,next_review,total_reviews,correct_reviews", at

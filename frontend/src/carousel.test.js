@@ -27,6 +27,7 @@ import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { SPRINT_MS, points } from './domain/duel.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
+import { EXPORT_NAME, SCENES, SCENE_IDS } from '../carousel/scenes.js'
 import { COVER, HIGHLIGHTS, NAME_MAX, SHELF, SHELF_INKS, STORY_FIT, VOICE_CREDIT, coverInks, cutBeats, drawCover, drawVoiceCredit, highlightCommand, highlightFiles, highlightNote, shelfProblems } from '../carousel/highlights.js'
 import { APP as FEATURE_APP, FEATURE_FPS, FEATURE_IDS, FEATURES as FEATURE_SCRIPTS, SHOT, camFor, drawFeature, featureCommand, featureItems, featurePage, featurePlan, featureSteps, featureTimeline, layoutOf, localeKeys } from '../carousel/feature.js'
 import { QUALITY_LABEL_KEY, scaleFor } from './domain/ratingScales.js'
@@ -3296,6 +3297,9 @@ function shotsOf(steps) {
       for (let c = st.chunk || 3, i = 0; c - (st.chunk || 3) < n; c += st.chunk || 3, i++) shots.push({ name: st.shot, i, chars: Math.min(n, c), focus: FOCUS, tap: null })
     } else if (st.play) {
       for (let at = 0, i = 0; at < st.seconds + 0.3; at += 0.15, i++) shots.push({ name: st.shot, i, at, focus: FOCUS, tap: null })
+    } else if (st.trace) {
+      // A stroke a second, six shots each (plan 331).
+      st.strokes.forEach((_, k) => { for (let j = 1; j <= 6; j++) shots.push({ name: st.shot, i: k * 6 + j - 1, at: k * 1.15 + j / 6, focus: FOCUS, tap: null }) })
     } else if (st.shot) shots.push({ name: st.shot, i: 0, focus: FOCUS, tap: st.tap ? TAP : null })
   }
   return shots
@@ -3601,10 +3605,11 @@ describe('the Instagram highlights (plan 331)', () => {
     }
     // A story taken whole brings every frame it has; the filmed ones open on a still and close on one.
     expect(highlightFiles('start', keysOf).map(f => f.key)).toEqual(keysOf('pitch'))
-    for (const id of ['practice', 'jlpt']) {
+    // Every highlight but the duels' is filmed since the scenes (plan 331).
+    for (const id of SHELF.filter(x => !['start', 'duels'].includes(x))) {
       const files = highlightFiles(id, keysOf)
       expect(files[0].kind, id).toBe('still')
-      expect(files.at(-1), id).toMatchObject({ kind: 'still', key: 'board' })
+      expect(files.at(-1), id).toMatchObject({ kind: 'still', key: id === 'free' ? 'free' : 'board' })
       expect(files.filter(f => f.kind === 'clip').length, id).toBeGreaterThan(1)
     }
     expect(highlightFiles('duels', keysOf)).toEqual([{ n: 1, kind: 'clip', story: 'duel', clip: 'story', file: '01-duel.mp4', gate: true }])
@@ -3618,8 +3623,8 @@ describe('the Instagram highlights (plan 331)', () => {
       const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
       const beats = tl.segs.filter(s => s.kind === 'beat')
       const cut = cutBeats(tl, f.beats)
-      // Past the gate and the level, which every feature opens on, and never the video's own gate.
-      expect(f.beats[0], at).toBeGreaterThanOrEqual(2)
+      // Past the gate and the level, which every feature opens on (a scene opens on its own screen), and never the video's own gate.
+      expect(f.beats[0], at).toBeGreaterThanOrEqual(SCENES[f.feature] ? 0 : 2)
       expect(f.beats[1], at).toBeLessThan(beats.length)
       expect(cut.from, at).toBe(beats[f.beats[0]].start)
       expect(cut.seconds, at).toBeCloseTo(beats.slice(f.beats[0], f.beats[1] + 1).reduce((n, b) => n + b.dur, 0), 2)
@@ -3686,5 +3691,74 @@ describe('the Instagram highlights (plan 331)', () => {
     expect(highlightNote('start', highlightFiles('start', keysOf), { lang: 'fr', site: SITE_ORIGIN })).toContain('Nom : Découvrir'.replace(' :', ':'))
     expect(highlightCommand('practice')).toBe('node carousel/long/render.mjs --highlight practice')
     expect(highlightCommand('jlpt', 'fr', 'dusk')).toBe('node carousel/long/render.mjs --highlight jlpt --lang fr --hour dusk')
+  })
+})
+
+// ── 場面, the highlights' recordings of the rest of the app (plan 331) ──
+describe('the highlights’ scenes, recorded in the app (plan 331)', () => {
+  const B = { 'promo.json': bank('promo.json') }
+  const each = fn => { for (const id of SCENE_IDS) for (const lang of ['en', 'fr']) fn(id, lang, featurePlan(B, id, { lang, fit: STORY_FIT })) }
+
+  it('films every scene the shelf names, apart from the Practice tab’s seven', () => {
+    expect(Object.keys(SCENES)).toEqual(SCENE_IDS)
+    for (const id of SCENE_IDS) expect(FEATURE_IDS, id).not.toContain(id)
+    const filmed = new Set(SHELF.flatMap(id => HIGHLIGHTS[id].frames.filter(f => f.feature && SCENES[f.feature]).map(f => f.feature)))
+    expect([...filmed].sort()).toEqual([...SCENE_IDS].sort())
+    each((id, lang, plan) => {
+      expect(plan.scene, id).toBe(true)
+      expect(plan.name, `${id} ${lang}`).toBe(weldIf(lang, SCENES[id].name[lang]))
+      // Its slip's edge: a section's line, or the pass's ink where the place is the learner's own.
+      if (SCENES[id].line) expect(palette('paper').line[SCENES[id].line], id).toBeTruthy()
+    })
+  })
+
+  it('times every beat from the shots its script takes', () => {
+    each((id, lang, plan) => {
+      const at = `${id} ${lang}`
+      const steps = featureSteps(plan)
+      const names = new Set(steps.map(st => st.shot).filter(Boolean))
+      for (const b of plan.beats) for (const p of b.parts) expect(names.has(p.shot || p.seq), `${at}: ${p.shot || p.seq}`).toBe(true)
+      const tl = featureTimeline(plan, shotsOf(steps))
+      expect(tl.segs.filter(x => x.kind === 'beat').length, at).toBe(plan.beats.length)
+      for (const sg of tl.segs.filter(x => x.kind === 'beat')) for (const t of sg.taps) {
+        expect(t.t, at).toBeGreaterThan(sg.start)
+        expect(t.t, at).toBeLessThan(sg.start + sg.dur)
+      }
+    })
+  })
+
+  it('hands each page what a learner would: an Anki deck, a sound, a photo, a link', () => {
+    each((id, lang, plan) => {
+      const files = featureSteps(plan).filter(st => st.file)
+      const kinds = files.map(st => st.make.kind)
+      expect(kinds, id).toEqual({ transfer: ['apkg'], song: ['wav'], photo: ['note'] }[id] ?? [])
+      if (id === 'transfer') expect(files[0].make.notes.length, id).toBe(plan.data.mocks['POST /api/transfer/preview'].notes)
+      // The song is handed as long as its last line ends.
+      if (id === 'song') expect(files[0].make.seconds, id).toBeGreaterThanOrEqual(plan.data.mocks['GET /api/video/session/9'].sentences.at(-1).cue_end)
+      if (id === 'photo') expect(files[0].make.lines.join('\n'), id).toBe(plan.data.mocks['POST /api/ocr'].text)
+      if (id === 'video') expect(featureSteps(plan).find(st => st.type)?.text, id).toBe(plan.data.link)
+      // A kana traced as its tour draws it, every stroke.
+      if (id === 'kana') expect(featureSteps(plan).find(st => st.trace).strokes, id).toEqual(plan.data.mocks['GET /api/kana/cards'].cards[0].glyph_tour.strokes)
+    })
+  })
+
+  it('lays a new kana’s own sound into its clip', () => {
+    const plan = featurePlan(B, 'kana', { lang: 'en' })
+    const tl = featureTimeline(plan, shotsOf(featureSteps(plan)))
+    const clip = tl.sfx.filter(s => s.key === plan.data.clip)
+    expect(clip.length).toBe(1)
+    expect(clip[0].at).toBeLessThan(tl.segs[1].start)
+    expect(existsSync(new URL(`../public/sounds/kanas/${plan.data.clip.replace(/^kana-/, '')}.mp3`, import.meta.url))).toBe(true)
+  })
+
+  it('stops at the account’s question, and never deletes it', () => {
+    each((id, lang, plan) => {
+      for (const st of featureSteps(plan)) for (const sel of [st.click, st.tap].flat().filter(Boolean)) {
+        expect(sel, `${id} ${lang}`).not.toMatch(/delete-account-confirm|reset-confirm|transfer-undo/)
+      }
+    })
+    // The export is named as the app names it.
+    expect(EXPORT_NAME.en).toBe(EN.settingsExport)
+    expect(EXPORT_NAME.fr).toBe(weldIf('fr', FR.settingsExport))
   })
 })

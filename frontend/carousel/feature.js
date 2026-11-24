@@ -22,6 +22,8 @@ import { APP_INKS, PRINT_HOURS } from './app.js'
 import { END, gateClip } from './promo.js'
 import { feedPosts } from './feeds.js'
 import { weldIf } from './strings.js'
+// The highlights' recordings of the rest of the app (plan 331), planned and drawn as these are.
+import { SCENES } from './scenes.js'
 
 // The Practice tab's platforms, in its order (src/config/tabs.js; its
 // three groups since plan 290: understand, express, the exam).
@@ -480,19 +482,23 @@ export function featureItems(lang = 'en') {
   return FEATURE_IDS.filter(id => FEATURES[id]).map(id => ({ id, jp: FEATURES[id].jp, sub: A.title[id], tag: A.tab }))
 }
 
-/** A feature's video, planned: what to record and what to say over it. */
+/** A feature's video, planned: what to record and what to say over it.
+ *  Since plan 331 `id` may name a scene too (scenes.js), a screen
+ *  outside the Practice tab that a highlight films: its name its own, its
+ *  answers under the bank's `scenes`. */
 export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', handle = '', hour = 'day' } = {}) {
-  const F = FEATURES[id]
+  const scene = !FEATURES[id] && SCENES[id]
+  const F = FEATURES[id] || SCENES[id]
   if (!F) throw new Error(`no feature video for ${id}`)
   const L = lang === 'fr' ? 'fr' : 'en'
-  const d = banks['promo.json']?.features?.[id]?.[L]
+  const d = banks['promo.json']?.[scene ? 'scenes' : 'features']?.[id]?.[L]
   if (!d) throw new Error(`bank/promo.json has no ${id} (${L}): run python -m scripts.carousel_bank --only promo.json`)
   const A = APP[L]
   return {
     kind: 'feature', id, lang: L, fit: ['instagram', 'normal'].includes(fit) ? fit : 'tiktok', handle,
     // The print of the hour the gate at the end stands on (plan 271).
     hour: PRINT_HOURS.includes(hour) ? hour : 'day',
-    jp: F.jp, line: F.line, name: weldIf(L, A.title[id]), tab: A.tab, data: d,
+    jp: F.jp, line: F.line, name: weldIf(L, scene ? F.name[L] : A.title[id]), tab: A.tab, data: d, scene: Boolean(scene),
     // The lines the video says, in the app's voices: the clip a feature plays (its first), the people who speak.
     cues: F.voice ? [].concat(F.voice(d)) : [],
     end: weldIf(L, F.end[L]), title: weldIf(L, F.title[L]),
@@ -501,7 +507,7 @@ export function featurePlan(banks, id, { lang = 'en', fit = 'tiktok', handle = '
 }
 
 /** The steps record.mjs takes, once the voice is known (its length is the clip's). */
-export const featureSteps = (plan, seconds = 2.5) => FEATURES[plan.id].steps({ ...plan.data, seconds })
+export const featureSteps = (plan, seconds = 2.5) => (FEATURES[plan.id] || SCENES[plan.id]).steps({ ...plan.data, seconds, lang: plan.lang })
 
 // ── Where things stand ────────────────────────────────────────
 /** The video's frame: the screen full-bleed at its scale, the slip at
@@ -658,6 +664,9 @@ export function featureTimeline(plan, shots, voiceDur = null) {
       const pt = { start: +from.toFixed(3), enter, cam: target, move: +move.toFixed(3) }
       if (shot) {
         frames.push({ t: from, shot: shot.idx, sy, change: true })
+        // A recorded sound the screen plays as it comes (plan 331: a new
+        // kana's clip, the scene's `clip`), as a sound of the score.
+        if (part.clip && plan.data?.clip) sfx.push({ at: +(from + HEAR).toFixed(3), key: plan.data.clip, gain: 1 })
         // A line heard as the screen comes (the other person's), then the tap once it is said.
         let heard = from
         if (part.hear != null) {
