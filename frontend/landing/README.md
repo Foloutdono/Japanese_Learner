@@ -243,9 +243,10 @@ once the file is really there.
 ## Later: going live
 
 - **The stores:** put the two listing URLs in `STORES`. A badge then links
-  instead of saying "coming soon". Google Play's is in
-  (`https://play.google.com/store/apps/details?id=app.tsuji`); the App
-  Store's needs the app's numeric id. For store-ready artwork, Apple and Google
+  instead of saying "coming soon". Both are in: Google Play's
+  (`https://play.google.com/store/apps/details?id=app.tsuji`) and the App
+  Store's (`https://apps.apple.com/app/tsuji-learn-japanese/id6830429417`,
+  without a storefront, so each visitor lands on their own country's). For store-ready artwork, Apple and Google
   publish their official badges.
 - **Contact:** set `CONTACT` to an address and the footer prints it.
 - **A custom domain:** change `SITE_ORIGIN`, then run `npm run landing` and
