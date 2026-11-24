@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **333** (331 is the missions', 332 the referral's). `git ls-tree HEAD plans/` under-reports
+  The next free number is **334** (331 is the missions', 332 the referral's, 333 the readings'). `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the

@@ -2578,7 +2578,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 51: plan 329 -- `register`, the level of politeness the line is said in
 # (plain, polite or keigo; None where it closes on no predicate or says it
 # two ways), read from how its sentences end (plain_polite.register_of).
-LOCAL_REV = 51
+# 52: plan 333 -- readings UniDic gets wrong in context: a lone 側 is そば
+# (彼の側にいる), 明後日 あさって, 一昨年 おととし, 一昨日 おととい, 法の下に
+# もと, 目下の問題 もっか, 寒気がする さむけ, 人気のない道 ひとけ.
+LOCAL_REV = 52
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
