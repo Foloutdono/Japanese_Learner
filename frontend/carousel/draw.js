@@ -152,6 +152,8 @@ export function palette(ground) {
       reading: t['--line-reading'], exam: t['--line-exam'], kana: t['--line-kana'],
       honyaku: t['--line-honyaku'], rikai: t['--line-rikai'], sakubun: t['--line-sakubun'], kakitori: t['--line-kakitori'],
       kaiwa: t['--line-kaiwa'],
+      // The analyzer's (解析), for a recording of it (plan 331).
+      kaiseki: t['--line-kaiseki'],
     },
     // The People family: what is the learner's own (their line in a scene).
     pass: t['--pass-ink'],

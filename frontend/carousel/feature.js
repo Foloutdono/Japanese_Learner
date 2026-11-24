@@ -926,7 +926,9 @@ function drawSlip(ctx, plan, L, say, ks, kc) {
   ctx.save()
   rrect(ctx, S.x, S.y, S.w, S.h, R.card)
   ctx.clip()
-  ctx.fillStyle = paper.line[plan.line]
+  // A section's line, or, for a place that is no line (the learner's own
+  // settings, plan 331), the pass's ink: the People family's.
+  ctx.fillStyle = paper.line[plan.line] ?? paper.pass
   ctx.fillRect(S.x, S.y, EDGE, S.h)
   ctx.restore()
   const x = S.x + EDGE + SLIP.pad
