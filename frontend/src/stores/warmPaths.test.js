@@ -13,7 +13,7 @@ const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('../lib/api', () => ({ apiFetch: (...a) => apiFetch(...a), apiJson: vi.fn() }))
 
 // The stores the app imports eagerly (App.jsx's screens and chrome).
-await Promise.all(['./today', './credits', './journey', './stats', './basics', './practiceRecord', './agenda', './duels']
+await Promise.all(['./today', './credits', './journey', './stats', './basics', './practiceRecord', './agenda', './duels', './missions']
   .map(m => import(m)))
 const { warmStore, peekStore } = await import('./remote')
 const { STORE_PATHS } = await import('../lib/warm')

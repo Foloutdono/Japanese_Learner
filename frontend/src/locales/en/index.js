@@ -3880,6 +3880,52 @@ const pvp = {
   pvpErrFailed:       'That did not work. Try again.',
 }
 
+const missions = {
+  // 任務 (plan 331): the day's missions, the week's, the discoveries and the
+  // plates. A mission's goal and reward come from the server; its words are here.
+  msnTitle:       'Missions',
+  msnPillLabel:   done => `Daily missions, ${done} of 3 done`,
+  msnSubDay:      done => `${done} of 3 today`,
+  msnWeek:        'This week',
+  msnCollectAll:  'Collect all',
+  msnCollect:     'Collect',
+  msnCollected:   'Collected',
+  msnFirsts:      'Discoveries',
+  msnPlates:      'Plates',
+  msnFound:       (a, b) => `${a}/${b}`,
+  msnTapCollect:  'Tap to collect',
+  msnLabel: {
+    due:          () => 'Finish your reviews',
+    new:          m => `Learn ${m.of} new cards`,
+    practice:     m => ({
+      reading: 'A reading exercise', comprehension: 'A comprehension exercise',
+      translation: 'A translation exercise', conversation: 'A conversation exercise',
+    })[m.platform] ?? 'A practice exercise',
+    accuracy:     m => `Reach ${m.goal}% over ${m.of} answers`,
+    write:        () => 'A dictation or a sentence in composition',
+    days5:        () => 'Study 5 days out of 7',
+    volume:       m => `Review ${m.of} cards`,
+    new_mode:     () => 'Try a mode, or the next level in one you know',
+    exam_section: () => 'Finish a section of a mock exam',
+    duels5:       () => 'Play 5 duels',
+    all3:         () => 'All three done',
+    write10:      () => 'Write 10 sentences in composition',
+  },
+  msnMark: {
+    first_dictation: 'First dictation', first_photo: 'First photo', first_conversation: 'First conversation',
+    first_exam: 'First mock exam', first_deck: 'First published deck', first_friend: 'First friend',
+    first_duel: 'First duel', arrival_date: 'Arrival date', first_import: 'An import', first_video: 'Video or song',
+    kana_done: 'All the kana', words_100: '100 words', words_500: '500 words', words_1000: '1,000 words',
+    grammar_n5: 'N5 grammar', days_7: '7 days', days_30: '30 days', days_100: '100 days',
+    exam_passed: 'Exam passed', ranked_win: 'Ranked win',
+  },
+  msnNewsTitle:   'Missions are on Today',
+  msnNewsLead:    'Three small goals a day, from your own pace, each paying a few credits. The pill under the legend opens them.',
+  msnNewsGo:      'See the missions',
+  msnNewsLater:   'Later',
+  msnClaimError:  'The reward could not be collected. Try again.',
+}
+
 export default {
   ...auth,
   ...landing,
@@ -3916,4 +3962,5 @@ export default {
   ...reviewPlan,
   ...transfer,
   ...pvp,
+  ...missions,
 }

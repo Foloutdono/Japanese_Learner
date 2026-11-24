@@ -128,4 +128,7 @@ export default {
   },
   // Plan 326: añadido for agregado.
   settingsCardsValue: n => `${n} añadido${n === 1 ? '' : 's'}`,
+  // 任務 (plan 331)
+  msnTapCollect: 'Pulsa para cobrar',
+  msnMark: { first_video: 'Vídeo o canción' },
 }

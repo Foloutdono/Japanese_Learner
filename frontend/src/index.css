@@ -32473,6 +32473,115 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .clrdev-share img { max-width: 100%; height: auto; box-shadow: var(--elev-board); }
 /* ── 191:primitives end ── */
 
+/* ══ 331 — 任務, the missions (plan 331) ════════════════════════════
+   The pill under Today's legend, the sheet of coupons it opens and the
+   holder's plates and discoveries: the owner's pick A of the drawings.
+   A mission is an object about the learner, so it wears the pass's
+   materials (the card's ink, the credits' metal) and never a line's
+   colour, but for the 3px rail of the line a practice coupon sends you to. */
+.msn-bar { display: block; height: 3px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
+.msn-bar i { display: block; height: 100%; background: var(--accent2); }
+.msn-fig { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; }
+.msn-fig small { font-weight: 500; color: inherit; opacity: 0.7; font-size: inherit; }
+.msn-note { margin: 0; font-size: var(--fs-caption); color: var(--danger); text-align: right; }
+.msn-sub { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); font-family: var(--font-display); font-size: var(--fs-body); color: var(--text-secondary); }
+.msn-sub b { font-weight: 700; }
+.msn-foot { display: flex; align-items: center; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: transparent; color: var(--text-secondary); font: inherit; font-size: var(--fs-sm); cursor: pointer; }
+.msn-foot:hover, .msn-foot:focus-visible { border-color: var(--text-secondary); filter: none; }
+.msn-foot__what { flex: 1; text-align: left; }
+.msn-pop { position: absolute; right: var(--sp-4); top: var(--sp-1); z-index: 1; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--surface); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; opacity: 0; pointer-events: none; }
+.msn-sheet { gap: var(--sp-4); }
+
+/* The pill under the gate's legend: three lamps, the count, the day's sum.
+   The gate's own glass, as the legend's keys and the services' door wear it. */
+.msn-pill { position: relative; display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 32px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: color-mix(in srgb, var(--bg-panel) 82%, transparent); color: var(--text-on-panel-soft); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; white-space: nowrap; cursor: pointer; }
+.msn-pill:hover, .msn-pill:focus-visible { border-color: var(--text-on-panel-soft); filter: none; }
+.msn-pill--still { cursor: default; }
+.msn-pill__n { font-variant-numeric: tabular-nums; }
+.msn-pill__n b { color: var(--text-on-panel); }
+.msn-pill__sum { color: var(--gate-gold-lit); font-weight: 700; }
+.msn-pill__dots { display: inline-flex; gap: var(--sp-1); }
+.msn-pill__dots i { width: 8px; height: 8px; border: 1.5px solid currentcolor; border-radius: var(--r-pill); opacity: 0.6; }
+.msn-pill__dots i.on { border-color: var(--gate-gold-lit); background: var(--gate-gold-lit); opacity: 1; }
+/* A reward waits to be collected: a gold lamp on the pill's corner. */
+.msn-pill__flag { position: absolute; top: -2px; right: var(--sp-1); width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--gate-gold-lit); box-shadow: 0 0 0 2px var(--bg-panel); }
+
+/* The book: the day's missions in one panel, each a row whose stub is
+   torn off to collect it; one perforation runs down the stubs' edge. */
+.msn-book { position: relative; display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); overflow: hidden; }
+.msn-cpn { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; border-top: 1px solid var(--surface-line); border-left: 3px solid var(--line-color, transparent); }
+.msn-cpn:first-child { border-top: 0; }
+.msn-cpn__btn { display: contents; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.msn-cpn__body { display: flex; flex-direction: column; justify-content: center; gap: var(--sp-2); min-width: 0; min-height: 56px; padding: var(--sp-3) var(--sp-4); }
+.msn-cpn__label { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
+.msn-cpn__prog { display: flex; align-items: center; gap: var(--sp-3); }
+.msn-cpn__prog .msn-bar { flex: 1; }
+.msn-cpn__stub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); width: 84px; padding: var(--sp-3); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease; }
+.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.msn-cpn__tap { font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-on-fill); }
+.msn-cpn--ready .msn-cpn__stub { background: var(--metal); border-left-color: var(--gate-gold-deep); }
+.msn-cpn--ready .msn-cpn__take { color: var(--text-on-fill); }
+.msn-cpn--ready .msn-cpn__label { color: var(--text-primary); }
+.msn-cpn--torn .msn-cpn__label { color: var(--text-secondary); font-weight: 500; }
+.msn-cpn__paid { font-size: var(--fs-lead); color: var(--success); }
+/* The bonus is a footnote to the three, not a fourth mission. */
+.msn-cpn--quiet .msn-cpn__body { min-height: 44px; }
+.msn-cpn--quiet .msn-cpn__label { font-size: var(--fs-sm); font-weight: 500; }
+.msn-cpn--quiet .msn-cpn__take { font-size: var(--fs-body); }
+/* Collect everything that is done, in one touch. */
+.msn-all { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-5); border: 0; border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; box-shadow: var(--elev-action); cursor: pointer; }
+.msn-all b { font-variant-numeric: tabular-nums; }
+
+/* The holder's insert (the profile): the plates, then the discoveries. */
+.msn-ins { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); }
+.msn-ins__head { display: flex; align-items: center; gap: var(--sp-4); }
+.msn-ins__names { flex: 1; min-width: 0; }
+.msn-ins__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+.msn-lattice { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--surface-line); border-radius: var(--r-flat); }
+.msn-lattice__cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); border: 0; border-radius: var(--r-flat); background: var(--surface); color: var(--text-secondary); font: inherit; }
+.msn-lattice__cell b { font-family: var(--font-jp); font-size: var(--fs-lead); opacity: 0.35; }
+.msn-lattice__cell small { font-size: var(--fs-caption-xs); line-height: 1.15; text-align: center; }
+.msn-lattice__cell.on { color: var(--text-primary); }
+.msn-lattice__cell.on b { opacity: 1; color: var(--accent); }
+.msn-lattice__cell--ready { cursor: pointer; background: var(--sel-wash); }
+.msn-lattice__cell--ready small { font-weight: 700; color: var(--sel-ink); }
+.msn-lattice__cell:not(:nth-child(5n)) { border-right: 1px solid var(--surface-line); }
+.msn-lattice__cell:nth-child(-n+5) { border-bottom: 1px solid var(--surface-line); }
+
+/* The plates: a station's name board, hung. */
+.msn-plates { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); }
+.msn-plate { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-3) var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-plate); background: var(--surface); box-shadow: var(--elev-hang); color: inherit; font: inherit; text-align: center; }
+.msn-plate::after { content: ""; position: absolute; inset: auto 0 0; height: 3px; background: var(--accent); }
+.msn-plate__code { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); }
+.msn-plate__jp { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 700; line-height: 1.1; }
+.msn-plate__kana { font-size: var(--fs-caption); color: var(--text-secondary); }
+.msn-plate__en { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; }
+.msn-plate__foot { margin-top: var(--sp-1); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; color: var(--success); font-variant-numeric: tabular-nums; }
+.msn-plate__foot small { color: var(--text-secondary); font-weight: 500; }
+.msn-plate--off { box-shadow: none; }
+.msn-plate--off .msn-plate__jp, .msn-plate--off .msn-plate__kana { opacity: 0.4; }
+.msn-plate--off::after { background: var(--surface-line); }
+.msn-plate--max { background: linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 14%, var(--surface)) 0%, var(--surface) 100%); }
+.msn-plate--ready { cursor: pointer; border-color: var(--sel-line); }
+.msn-plate--ready .msn-plate__foot { color: var(--sel-ink); }
+
+/* The announcement (MissionsNewsSheet). */
+.msn-news__art { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.msn-news__title { margin: 0; text-wrap: balance; }
+.msn-news__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.msn-news__acts { display: flex; flex-direction: column; gap: var(--sp-4); }
+.msn-news .msn-pill { background: var(--bg-panel); }
+
+/* The reward, once: a stub's flash, the sum rising off it. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes msn-flash { from { background: color-mix(in srgb, var(--gate-gold-lit) 28%, transparent); } to { background: transparent; } }
+  @keyframes msn-rise { 0% { opacity: 0; transform: translateY(var(--sp-3)); } 25% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(calc(-1 * var(--sp-6))); } }
+  .msn-cpn--torn.msn-just .msn-cpn__stub { animation: msn-flash 1s ease-out; }
+  .msn-just > .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
+}
+/* ── 331:end ── */
+
 
 /* ══ 247 — 乗車, the card is the form ══════════════════════════════
    The owner's pick C of the boarding's canvas: the card's back, filled

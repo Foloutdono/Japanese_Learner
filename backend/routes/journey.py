@@ -30,6 +30,7 @@ from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL
 from core.lines import lines_or_all
 from routes.onboarding import DEPARTURES, DEPART_TIMES, VOLUMES
 from routes.profile import ensure_profile_row
+from study import missions
 
 router = APIRouter()
 
@@ -273,6 +274,9 @@ def journey_reprint(payload: ReprintPayload, user_id: str = Depends(get_user_id)
         conn.commit()
     finally:
         conn.close()
+    # 発見 (plan 331): an arrival date fixed is a discovery, once.
+    if payload.goalTargetDate is not None:
+        missions.note(user_id, "arrival_date")
     # The fresh facts, so the pass back can redraw without a second
     # round trip — and the front's gold 有効期限 with it.
     return _status_payload(user_id)
@@ -371,6 +375,9 @@ def journey_goal(payload: GoalPayload, user_id: str = Depends(get_user_id)):
         conn.commit()
     finally:
         conn.close()
+    # 発見 (plan 331): a destination with its date is an arrival date fixed.
+    if payload.goalTargetDate is not None:
+        missions.note(user_id, "arrival_date")
     return _status_payload(user_id)
 
 

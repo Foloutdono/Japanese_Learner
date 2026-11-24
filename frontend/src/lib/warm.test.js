@@ -29,6 +29,7 @@ vi.mock('./cachedJson', () => ({
 const NAMES = {
   '/api/today': 'today', '/api/credits': 'credits', '/api/journey/status': 'journey', '/api/stats': 'stats',
   '/api/basics': 'basics', '/api/practice/record': 'record', '/api/agenda': 'agenda', '/api/pvp': 'duels',
+  '/api/missions/book': 'missionsBook',
 }
 vi.mock('../stores/remote', () => ({ warmStore: path => stores[NAMES[path]]() }))
 vi.mock('../stores/stationSamples', () => ({ warmStationSamples: source => stores.samples(source) }))
@@ -50,7 +51,7 @@ async function answerAll() {
 beforeEach(() => {
   calls.length = 0
   pending.length = 0
-  for (const name of ['today', 'credits', 'journey', 'stats', 'basics', 'record', 'agenda', 'duels', 'print']) stores[name] = warm(name)
+  for (const name of ['today', 'credits', 'journey', 'stats', 'basics', 'record', 'agenda', 'duels', 'missionsBook', 'print']) stores[name] = warm(name)
   stores.samples = vi.fn(source => warm(`samples:${source}`)())
   stores.cachedJson = vi.fn((path, _s, ttlMs) => warm(`${path} ${ttlMs}`)())
   forgetWarm()
@@ -95,6 +96,7 @@ describe('warmGates', () => {
       `${GATE_PATHS.week} 0`,
       'agenda',
       'duels',
+      'missionsBook',
     ])
   })
 

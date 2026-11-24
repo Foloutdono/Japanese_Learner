@@ -25,6 +25,7 @@ import SoundPalette from './screens/SoundPalette'
 import OffersPreview from './screens/OffersPreview'
 import DayClearPreview from './screens/DayClearPreview'
 import RatingPreview from './screens/RatingPreview'
+import MissionsPreview from './screens/MissionsPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
@@ -643,6 +644,9 @@ export default function App({ front = NO_FRONT }) {
               <Route path="/dev/dayclear" element={<DayClearPreview />} />
               {/* The early-access sheet, the web's and Android's (plan 307). */}
               <Route path="/dev/rating" element={<RatingPreview />} />
+              {/* The missions, in the real gate and the real holder, three
+                  ways (plan 331): ?v=A|B|C&screen=today|sheet|profile. */}
+              <Route path="/dev/missions" element={<MissionsPreview />} />
             </Route>
           </Routes>
           {/* The workbench replays the real boarding, so it needs the

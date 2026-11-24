@@ -3881,6 +3881,52 @@ const pvp = {
   pvpErrFailed:       'No funcionó. Inténtalo de nuevo.',
 }
 
+const missions = {
+  // 任務 (plan 331): the day's missions, the week's, the discoveries and the
+  // plates. A mission's goal and reward come from the server; its words are here.
+  msnTitle:       'Misiones',
+  msnPillLabel:   done => `Misiones del día, ${done} de 3 hechas`,
+  msnSubDay:      done => `${done} de 3 hoy`,
+  msnWeek:        'Esta semana',
+  msnCollectAll:  'Cobrar todo',
+  msnCollect:     'Cobrar',
+  msnCollected:   'Cobrada',
+  msnFirsts:      'Descubrimientos',
+  msnPlates:      'Placas',
+  msnFound:       (a, b) => `${a}/${b}`,
+  msnTapCollect:  'Toca para cobrar',
+  msnLabel: {
+    due:          () => 'Terminar tus repasos',
+    new:          m => `Aprender ${m.of} tarjetas nuevas`,
+    practice:     m => ({
+      reading: 'Un ejercicio de lectura', comprehension: 'Un ejercicio de comprensión',
+      translation: 'Un ejercicio de traducción', conversation: 'Un ejercicio de conversación',
+    })[m.platform] ?? 'Un ejercicio de práctica',
+    accuracy:     m => `Llegar al ${m.goal} % en ${m.of} respuestas`,
+    write:        () => 'Un dictado o una oración en composición',
+    days5:        () => 'Estudiar 5 días de 7',
+    volume:       m => `Repasar ${m.of} tarjetas`,
+    new_mode:     () => 'Probar un modo, o el nivel siguiente en uno que ya conoces',
+    exam_section: () => 'Terminar una sección de examen de práctica',
+    duels5:       () => 'Jugar 5 duelos',
+    all3:         () => 'Las tres hechas',
+    write10:      () => 'Escribir 10 oraciones en composición',
+  },
+  msnMark: {
+    first_dictation: 'Primer dictado', first_photo: 'Primera foto', first_conversation: 'Primera conversación',
+    first_exam: 'Primer examen de práctica', first_deck: 'Primer mazo publicado', first_friend: 'Primer amigo',
+    first_duel: 'Primer duelo', arrival_date: 'Fecha de llegada', first_import: 'Una importación', first_video: 'Video o canción',
+    kana_done: 'Todos los kana', words_100: '100 palabras', words_500: '500 palabras', words_1000: '1,000 palabras',
+    grammar_n5: 'Gramática N5', days_7: '7 días', days_30: '30 días', days_100: '100 días',
+    exam_passed: 'Examen aprobado', ranked_win: 'Victoria clasificada',
+  },
+  msnNewsTitle:   'Las misiones llegan a Hoy',
+  msnNewsLead:    'Tres metas pequeñas al día, a tu ritmo, que dan algunos créditos. La pastilla bajo la leyenda las abre.',
+  msnNewsGo:      'Ver las misiones',
+  msnNewsLater:   'Más tarde',
+  msnClaimError:  'No se pudo cobrar la recompensa. Inténtalo de nuevo.',
+}
+
 export default {
   ...auth,
   ...landing,
@@ -3917,4 +3963,5 @@ export default {
   ...reviewPlan,
   ...transfer,
   ...pvp,
+  ...missions,
 }

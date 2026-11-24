@@ -250,6 +250,16 @@ EVENTS: dict[str, frozenset[str]] = {
     "rest_day_used":  frozenset({"days"}),
     "ticket_share":   frozenset({"days"}),
 
+    # ── 任務 — missions, discoveries, achievements (plan 331) ─────────
+    # Both written by the server (study/missions.py). `scope` is which
+    # kind (day, week, the day's bonus, a discovery, an achievement) and
+    # `kind` the catalogue's id, both closed by VALUES below: never a
+    # count, never anything the learner typed. mission_done is the first
+    # time a mission's progress reached its goal, mission_claimed the
+    # reward collected.
+    "mission_done":    frozenset({"scope", "kind"}),
+    "mission_claimed": frozenset({"scope", "kind"}),
+
     # ── 回復運転 — the review plan (plan 217) ─────────────────────
     # catchup_offer is the client's, once a visit: the comeback offer
     # put before the learner -- the sheet the gate opened on, the notice
@@ -349,6 +359,18 @@ _AI_FEATURES = frozenset({"ask", "composition", "translation_review", "deep_anal
                           "conversation_talk", "conversation_review", "lyrics_sort",
                           "video_category", "ocr", "comprehension"})
 
+# The catalogue's ids (study/missions.py holds the figures; a test holds
+# the two equal): the daily and weekly missions, the day's bonus, the
+# discoveries and the achievements.
+_MISSION_KINDS = frozenset({
+    "due", "new", "practice", "accuracy", "write",
+    "days5", "volume", "new_mode", "exam_section", "duels5", "write10", "all3",
+    "first_dictation", "first_photo", "first_conversation", "first_exam", "first_deck",
+    "first_friend", "first_duel", "arrival_date", "first_import", "first_video",
+    "kana_done", "words_100", "words_500", "words_1000", "grammar_n5",
+    "days_7", "days_30", "days_100", "exam_passed", "ranked_win",
+})
+
 VALUES: dict[str, dict[str, frozenset[str]]] = {
     # Why the gate's first request failed (plan 312): its 45 s ran out,
     # the server answered 5xx (a restart answers 502), or no answer came.
@@ -394,10 +416,13 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
                               "dictionary", "export", "level_fit", "conversation",
                               "comeback", "readings", "duels_key", "duels_board",
-                              "duels_news"}),
+                              "duels_news", "missions", "missions_news"}),
         "action":  frozenset({"play", "text", "photo", "video", "song", "scan", "send",
                               "open", "search", "progress", "move", "stay", "hide"}),
     },
+    "mission_done":    {"scope": frozenset({"day", "week", "bonus", "discovery", "achievement"}),
+                        "kind": _MISSION_KINDS},
+    "mission_claimed": {"scope": frozenset({"day", "week", "bonus", "mark"}), "kind": _MISSION_KINDS},
     "transfer_import": {"source": frozenset({"anki", "wanikani", "renshuu"})},
     "transfer_offer":  {"choice": frozenset({"go", "later"})},
     "setting_change": {

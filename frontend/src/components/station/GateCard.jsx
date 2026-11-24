@@ -38,6 +38,7 @@ import { DuelKey } from '../pvp/DuelKey'
 import { DuelBoard } from '../pvp/DuelRow'
 import { TodayPrint, PrintTitle } from './TodayPrint'
 import { BELOW, PRINT, at, printHour, printName, printVars, usePrintFrame, preloadPrint } from './print/usePrint'
+import { MissionsGate } from '../missions/Missions'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
 // The day's reviews, first thing on Today, and the run's picker: each
@@ -572,6 +573,8 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
               ? fin.at('KEY') && <ThreadKey done={thread.rides} left={thread.total - thread.rides} t={t} className="clrk-fade" />
               : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
         </div>
+        {/* 任務 (plan 331): the day's missions, one small pill under the legend. */}
+        {!fin && <MissionsGate session={session} style={at(frame.cx, frame.cy + frame.fare + BELOW.keys + 30)} />}
       </section>
       <span className="tdy__air" aria-hidden="true" />
 
@@ -652,6 +655,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         <div className="tdy-desk__keys tpr-at tpr-at--top" style={at(frame.cx, frame.cy + frame.fare + 62)}>
           <LineKeys mix={mix} titles={titlesOf(t)} named label={t.todayLines} />
         </div>
+        {!fin && <MissionsGate session={session} style={at(frame.cx, frame.cy + frame.fare + (short ? 168 : 128))} />}
         {short && (
           <div className="tpr-at" style={at(frame.cx, frame.cy + frame.fare + 128)}>
             <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />

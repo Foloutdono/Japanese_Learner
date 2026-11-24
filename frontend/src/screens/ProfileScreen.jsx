@@ -17,6 +17,7 @@ import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
 import { useAgenda } from '../stores/agenda'
 import { DuelsInsert } from '../components/pvp/DuelsInsert'
+import { MissionsInsert } from '../components/missions/Missions'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
@@ -202,6 +203,8 @@ export default function ProfileScreen({ session }) {
     // 対戦 (plan 279): the door to the duels under the holder's own
     // (E1), the Elo laid out under it once there is one (L1).
     duels: <DuelsInsert t={t} lang={lang} navigate={navigate} />,
+    // 任務 (plan 331): the plates and the discoveries.
+    missions: <MissionsInsert session={session} />,
   }
 
   return (
@@ -226,6 +229,7 @@ export default function ProfileScreen({ session }) {
               {inserts.pass}
               {inserts.holderDoors}
               {inserts.stamps}
+              {inserts.missions}
             </div>
             <div className="desk-profile__col">
               {inserts.records}
@@ -241,6 +245,7 @@ export default function ProfileScreen({ session }) {
           {inserts.doors}
           {inserts.duels}
           {inserts.stamps}
+          {inserts.missions}
           {inserts.tickets}
           {inserts.agenda}
           {inserts.records}
