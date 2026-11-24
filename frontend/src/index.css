@@ -32516,8 +32516,8 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-cpn__label { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
 .msn-cpn__prog { display: flex; align-items: center; gap: var(--sp-3); }
 .msn-cpn__prog .msn-bar { flex: 1; }
-.msn-cpn__stub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); width: 84px; padding: var(--sp-3); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease; }
-.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.msn-cpn__stub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 84px; padding: var(--sp-3); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease; }
+.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text-secondary); }
 .msn-cpn__tap { font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-on-fill); }
 .msn-cpn--ready .msn-cpn__stub { background: var(--metal); border-left-color: var(--gate-gold-deep); }
 .msn-cpn--ready .msn-cpn__take { color: var(--text-on-fill); }
@@ -32581,6 +32581,66 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   .msn-just > .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
 }
 /* ── 331:end ── */
+/* ══ 332 — 縁, the referral (plan 332) ═════════════════════════════
+   The owner's pick B: a slip at Today's foot while the referral has a word
+   to say, one door in the holder under the duels', one sheet behind it.
+   The filleuls are the missions' book of tickets (.msn-book, .msn-cpn): a
+   row each, its stub the reward, metal once there is something to collect.
+   The invitation is a ticket of its own: three fares, the link, the share. */
+.ref-sheet { gap: var(--sp-4); }
+.ref-sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.ref-prog { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+.ref-dots { display: inline-flex; flex: none; gap: var(--sp-1); }
+.ref-dots i { width: 8px; height: 8px; border: 1.5px solid var(--text-secondary); border-radius: var(--r-pill); }
+.ref-dots i.on { border-color: var(--accent2); background: var(--accent2); }
+.ref-free { border-left-style: dashed; }
+.ref-free .msn-cpn__label { color: var(--text-secondary); font-weight: 500; }
+.ref-choose__days { flex: none; font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); font-variant-numeric: tabular-nums; }
+.ref-ask { flex-wrap: wrap; }
+.ref-ask__acts { display: flex; flex: 1 0 100%; gap: var(--sp-3); }
+.ref-ask__btn { flex: 1; min-height: 36px; }
+.ref-release { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); }
+.ref-release__go { align-self: flex-start; padding: 0; border: 0; background: none; font: inherit; font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.ref-release__go:hover,
+.ref-release__go:focus-visible { color: var(--text-primary); filter: none; }
+.ref-release__go--no { text-decoration: none; }
+.ref-note { margin: 0; font-size: var(--fs-caption); color: var(--text-secondary); text-align: center; }
+.ref-acts { gap: var(--sp-3); }
+/* The invitation: three fares across a perforated ticket, then the link. */
+.ref-invite { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.ref-fare { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.ref-fare__cell { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-3); }
+.ref-fare__cell + .ref-fare__cell { border-left: 1px dashed var(--surface-line); }
+.ref-fare__sum { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1; color: var(--text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ref-fare__cell:first-child .ref-fare__sum { color: var(--sel-ink); }
+.ref-fare__say { font-size: var(--fs-caption-xs); line-height: 1.35; color: var(--text-secondary); text-wrap: pretty; }
+.ref-link { display: flex; align-items: center; gap: var(--sp-3); min-height: 44px; padding: 0 var(--sp-2) 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--bg-main); }
+.ref-link__url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-sm); color: var(--text-secondary); user-select: all; }
+.ref-link__go { flex: none; min-height: 32px; padding-inline: var(--sp-4); }
+/* Naming a parrain: what it pays, then the one name, for good. */
+.ref-person { padding-inline: 0; }
+.ref-gift { display: flex; align-items: center; gap: var(--sp-3); margin: 0; }
+.ref-gift__sum { flex: none; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; box-shadow: var(--elev-action); }
+.ref-gift__say { font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); }
+.ref-sure { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); text-align: center; }
+.ref-sure__seal { display: grid; place-items: center; width: 64px; height: 64px; border: 2px solid var(--pass-ink); border-radius: var(--r-pill); font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; color: var(--pass-ink); }
+.ref-sure__name { font-family: var(--font-display); font-size: var(--fs-heading); line-height: 1.1; }
+.ref-sure__say { max-width: 32ch; }
+.ref-sure .ref-acts { align-self: stretch; }
+/* Today's slip: the foot's door, its seal in the pass's ink. */
+.ref-slip__seal { flex: none; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; color: var(--pass-ink); }
+.ref-slip .ref-dots { margin-left: auto; }
+.ref-slip__sum { font-variant-numeric: tabular-nums; color: var(--sel-ink); }
+.ref-slip--paid { border-color: var(--gate-gold); }
+.ref-slip--paid .tdy-door__what b { color: var(--gate-gold-lit); }
+/* The reward paid: a ticket of the metal, once. */
+.ref-welcome__art { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.ref-welcome__ticket { display: inline-flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-4) var(--sp-7); border-radius: var(--r-card); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); box-shadow: var(--elev-action); }
+.ref-welcome__sum { font-size: var(--fs-heading); line-height: 1; font-variant-numeric: tabular-nums; }
+.ref-welcome__unit { font-size: var(--fs-sm); font-weight: 700; }
+.ref-welcome__title { margin: 0; text-wrap: balance; }
+.ref-welcome__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+/* ── 332:end ── */
 
 
 /* ══ 247 — 乗車, the card is the form ══════════════════════════════

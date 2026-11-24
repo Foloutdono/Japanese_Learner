@@ -308,6 +308,25 @@ runtime purpose.
   `events._MISSION_KINDS`, `track.js`'s `VALUES`, the route's `Kind`, the
   three locales' `msnLabel` or `msnMark`, and `domain/missions.js`
   (`PLATES`, `GLYPHS`), all held equal by tests.
+- **A referral pays study, never a place (plan 332).** `study/referral.py`
+  holds the owner's option B and `tests/test_referral.py` pins it: a
+  learner names a parrain by username, once, in their first three days,
+  and the parrain accepts (three places, a quiet filleul let go for good);
+  three days of study in the first fourteen, on an account with an
+  address, convert, paying the filleul 300 and the parrain 100, then 25
+  each week the filleul studies three days and the parrain one, for eight
+  weeks, the parrain's credits capped at 500 a month (clipped, not
+  carried). A filleul's first payment gives a week of the pass
+  (`grant_max_week`, for the payment's webhook), four a year. Credits go
+  through the ledger (reason `referral`); on the pass the same number is
+  XP of source `referral`, which `srs.BOARD_LEDGER` keeps off every 番付
+  sum and `NOT_STUDY_SOURCES` off the days studied: a new reader of
+  `xp_ledger` that ranks reads `BOARD_LEDGER`. Nothing runs in the
+  background (`settle()` on every read), no device is fingerprinted (ADR
+  0022): the guards are study, the address, the cap and a person reading
+  `scripts/read_referrals`, never a dashboard. Today says a word only
+  while `/api/profile`'s `referralNotice` does, so a learner it has
+  nothing for asks `/api/referral` nothing.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.

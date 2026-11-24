@@ -156,7 +156,7 @@ export function MissionsGate({ style, session = null }) {
 }
 
 // ── the holder's insert: the plates and the discoveries ───────────
-function InsertHead({ glyph, name, fig }) {
+export function InsertHead({ glyph, name, fig }) {
   return (
     <span className="msn-ins__head">
       <span className="pf-line__roundel" aria-hidden="true" lang="ja">{glyph}</span>

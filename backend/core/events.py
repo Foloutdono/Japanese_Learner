@@ -260,6 +260,17 @@ EVENTS: dict[str, frozenset[str]] = {
     "mission_done":    frozenset({"scope", "kind"}),
     "mission_claimed": frozenset({"scope", "kind"}),
 
+    # ── 縁 — the referral (plan 332) ───────────────────────────────
+    # All written by the server (study/referral.py), never a username:
+    # a parrain named (asked), a request accepted (linked), a filleul's
+    # three days of study reached (converted), a filleul let go
+    # (released), a reward collected (claimed, its kind).
+    "referral_asked":     frozenset(),
+    "referral_linked":    frozenset(),
+    "referral_converted": frozenset(),
+    "referral_released":  frozenset(),
+    "referral_claimed":   frozenset({"kind"}),
+
     # ── 回復運転 — the review plan (plan 217) ─────────────────────
     # catchup_offer is the client's, once a visit: the comeback offer
     # put before the learner -- the sheet the gate opened on, the notice
@@ -392,7 +403,8 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # The door the learner came in by (plan 313, lib/arrival.js): the
         # link's ?src=, else the class of the page that sent them, else
         # the store (the native app), else nothing known.
-        "source":    frozenset({"tiktok", "instagram", "youtube", "reddit", "search", "store", "other", "direct"}),
+        "source":    frozenset({"tiktok", "instagram", "youtube", "reddit", "search", "store", "other", "direct",
+                                "referral"}),
     },
     "run_start":    {"where": _RUN_DOORS},
     "run_complete": {"where": _RUN_DOORS},
@@ -412,17 +424,20 @@ VALUES: dict[str, dict[str, frozenset[str]]] = {
         # duels_key: the duels' key beside Today's gate opened, and
         # duels_board their row on a day done's board (plan 287);
         # duels_news: the sheet announcing them, the hall opened from it
-        # or the sheet put away.
+        # or the sheet put away. referral (plan 332): the holder's door
+        # opened, the gate's slip tapped, the link shared, a parrain named.
         "feature": frozenset({"speech", "analyzer", "ocr", "ask", "explain",
                               "dictionary", "export", "level_fit", "conversation",
                               "comeback", "readings", "duels_key", "duels_board",
-                              "duels_news", "missions", "missions_news"}),
+                              "duels_news", "missions", "missions_news", "referral"}),
         "action":  frozenset({"play", "text", "photo", "video", "song", "scan", "send",
-                              "open", "search", "progress", "move", "stay", "hide"}),
+                              "open", "search", "progress", "move", "stay", "hide",
+                              "notice", "share", "choose"}),
     },
     "mission_done":    {"scope": frozenset({"day", "week", "bonus", "discovery", "achievement"}),
                         "kind": _MISSION_KINDS},
     "mission_claimed": {"scope": frozenset({"day", "week", "bonus", "mark"}), "kind": _MISSION_KINDS},
+    "referral_claimed": {"kind": frozenset({"conversion", "week", "max_week"})},
     "transfer_import": {"source": frozenset({"anki", "wanikani", "renshuu"})},
     "transfer_offer":  {"choice": frozenset({"go", "later"})},
     "setting_change": {
@@ -502,6 +517,8 @@ KEEP_LONG = frozenset({
     # Once or twice an account: "did the learners who came from another
     # app stay" is one too, and the sheet over Today is asked once.
     "transfer_import", "transfer_undo", "transfer_offer",
+    # A referral is made once an account: did the sponsored stay?
+    "referral_linked", "referral_converted",
 })
 
 # A session id is the client's random token for one visit

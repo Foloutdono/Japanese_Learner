@@ -131,6 +131,10 @@ PLAN = [
     ("apple_grants",        "user_id = %(user)s",       "the Sign in with Apple grant, kept to revoke it here (plan 321)"),
     ("missions",            "user_id = %(user)s",       "the day's and the week's missions, their goals and what they paid (plan 331)"),
     ("mission_marks",       "user_id = %(user)s",       "the discoveries and the achievements reached (plan 331)"),
+    ("referral_rewards",    "sponsor_id = %(user)s OR filleul_id = %(user)s",
+                                                        "the referral's rewards, earned by or through this learner (plan 332)"),
+    ("referrals",           "filleul_id = %(user)s OR sponsor_id = %(user)s",
+                                                        "who named whom as parrain, both ways (plan 332)"),
     # 対戦 (plan 279). A duel whose only real player is this learner goes
     # whole (the cascade takes its rows, a ghost's copy with them), read
     # off pvp_entries, so it comes first; a duel shared with another

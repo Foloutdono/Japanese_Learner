@@ -26,6 +26,7 @@ import OffersPreview from './screens/OffersPreview'
 import DayClearPreview from './screens/DayClearPreview'
 import RatingPreview from './screens/RatingPreview'
 import MissionsPreview from './screens/MissionsPreview'
+import ReferralPreview from './screens/ReferralPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
@@ -647,6 +648,9 @@ export default function App({ front = NO_FRONT }) {
               {/* The missions, in the real gate and the real holder, three
                   ways (plan 331): ?v=A|B|C&screen=today|sheet|profile. */}
               <Route path="/dev/missions" element={<MissionsPreview />} />
+              {/* The referral, in the real gate and the real holder, two ways
+                  (plan 332): ?v=A|B&screen=today|choose|profile|manage|reward. */}
+              <Route path="/dev/referral" element={<ReferralPreview />} />
             </Route>
           </Routes>
           {/* The workbench replays the real boarding, so it needs the
