@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { guardDom } from './lib/domGuard'
 // ── The faces, shipped with the app (plan 065) ──
 // Space Grotesk carries every Latin string, Noto Serif JP the names and
 // headings (--font-serif), Noto Sans JP the readings and specimens
@@ -37,6 +38,10 @@ import { noteArrival } from './lib/arrival'
 // this module is running at all is the proof it worked, and clearing it
 // lets a later stale load in the same tab get its one retry too.
 try { sessionStorage.removeItem('jp-bundle-reload') } catch { /* private mode */ }
+
+// Before the first render: a page a translator or an extension rewrote
+// must not take the whole app down on the next change of text.
+guardDom()
 
 // 入口 (plan 313): a link straight into the app notes where it came from,
 // as the landing page does for everyone it forwards (lib/arrival.js).
