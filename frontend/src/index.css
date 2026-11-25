@@ -32493,7 +32493,10 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .msn-sheet { gap: var(--sp-4); }
 
 /* The pill under the gate's legend: three lamps, the count, the day's sum.
-   The gate's own glass, as the legend's keys and the services' door wear it. */
+   The gate's own glass, as the legend's keys and the services' door wear it.
+   It stands on the print's layer, which lets every tap through to the
+   page under it (.tdy-hero--print): the pill takes its own back. */
+.msn-at { pointer-events: auto; }
 .msn-pill { position: relative; display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 32px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: color-mix(in srgb, var(--bg-panel) 82%, transparent); color: var(--text-on-panel-soft); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; white-space: nowrap; cursor: pointer; }
 .msn-pill:hover, .msn-pill:focus-visible { border-color: var(--text-on-panel-soft); filter: none; }
 .msn-pill--still { cursor: default; }
@@ -45324,5 +45327,44 @@ button.pvp-console__end { padding: 0; border: 0; background: none; font: inherit
   .sheet.ss-sheet { width: min(760px, calc(100vw - 2 * var(--sp-8))); }
   .ss-paper,
   .ss-stage .gt-board { width: min(100%, 640px, max(280px, calc(100dvh - 300px))); }
+}
+@media (min-width: 1100px) {
+  /* ── 任務 — the missions' pill on the desk (plan 331) ──
+     The window has the room the phone has not: the pill names itself,
+     draws each mission's progress as a short rail (gold once done),
+     and reads as a door, at the services' size, not a caption. */
+  .msn-pill--desk {
+    gap: var(--sp-4);
+    min-height: 44px;
+    padding: 0 var(--sp-4) 0 var(--sp-2);
+    border-color: color-mix(in srgb, var(--text-on-panel-soft) 40%, transparent);
+    background: color-mix(in srgb, var(--bg-panel) 90%, transparent);
+    font-size: var(--fs-sm);
+    box-shadow: var(--elev-hang);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .msn-pill--desk:hover,
+  .msn-pill--desk:focus-visible { border-color: var(--gate-gold-lit); transform: translateY(-1px); }
+  .msn-pill--waiting { border-color: var(--gate-gold-lit); }
+  .msn-pill__glyph {
+    display: inline-grid;
+    place-items: center;
+    width: calc(var(--sp-8) - var(--sp-4));
+    height: calc(var(--sp-8) - var(--sp-4));
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--gate-gold-lit) 18%, transparent);
+    color: var(--gate-gold-lit);
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .msn-pill__what { color: var(--text-on-panel); font-weight: 700; }
+  .msn-pill__bars { display: inline-flex; gap: var(--sp-1); }
+  .msn-pill__bars i { display: block; width: var(--sp-6); height: 3px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--text-on-panel-soft) 30%, transparent); overflow: hidden; }
+  .msn-pill__bars i b { display: block; height: 100%; background: var(--text-on-panel-soft); }
+  .msn-pill__bars i.on b { background: var(--gate-gold-lit); }
+  .msn-pill--desk .msn-pill__sum { font-size: var(--fs-sm); }
+  .msn-pill__go { color: var(--text-on-panel-soft); }
+  .msn-pill--desk .msn-pill__flag { top: -1px; right: var(--sp-2); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

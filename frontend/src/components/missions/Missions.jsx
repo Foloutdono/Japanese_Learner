@@ -6,6 +6,7 @@ import { countUse } from '../../lib/screenTrail'
 import { playClick } from '../../lib/audio'
 import { GLYPHS, PLATES, PLATFORM_LINE, daySum, doneCount, rewardText, sumOf } from '../../domain/missions'
 import { Sheet } from '../chrome/Sheet'
+import { useDesk } from '../../hooks/useDesk'
 import { CalendarIcon, ChevronIcon } from '../ui/Icons'
 
 // ── 任務 — the missions, in the gate and the holder (plan 331) ────
@@ -104,6 +105,7 @@ function useCollect(session) {
 export function MissionsGate({ style, session = null }) {
   const { t } = useLang()
   const navigate = useNavigate()
+  const desk = useDesk()
   const d = useMissions()
   const [open, setOpen] = useState(() => takeMissionsOpen())
   const { collect, collectMany, popped, failed } = useCollect(session)
@@ -121,14 +123,32 @@ export function MissionsGate({ style, session = null }) {
   return (
     <>
       <div className="tpr-at msn-at" style={style}>
-        <button type="button" className="msn-pill" data-action="missions-open" aria-haspopup="dialog" aria-label={t.msnPillLabel(done)} onClick={show}>
-          <span className="msn-pill__dots" aria-hidden="true">
-            {unlit.map((on, i) => <i key={i} className={on ? 'on' : ''} />)}
-          </span>
-          <span className="msn-pill__n"><b>{done}</b>/3</span>
-          <span className="msn-pill__sum">{daySum(d.day)}</span>
-          {d.waiting > 0 && <span className="msn-pill__flag" aria-hidden="true" />}
-        </button>
+        {desk ? (
+          // The desk's pill: the room the window gives it, so it names
+          // itself and draws each mission's progress, not only its lamp.
+          <button type="button" className={`msn-pill msn-pill--desk${d.waiting > 0 ? ' msn-pill--waiting' : ''}`} data-action="missions-open" aria-haspopup="dialog" aria-label={t.msnPillLabel(done)} onClick={show}>
+            <span className="msn-pill__glyph" aria-hidden="true" lang="ja">任</span>
+            <span className="msn-pill__what" aria-hidden="true">{t.msnTitle}</span>
+            <span className="msn-pill__bars" aria-hidden="true">
+              {d.day.missions.map(m => (
+                <i key={m.kind} className={m.done ? 'on' : ''}><b style={{ width: `${Math.min(100, (100 * m.have) / (m.of || 1))}%` }} /></i>
+              ))}
+            </span>
+            <span className="msn-pill__n" aria-hidden="true"><b>{done}</b>/3</span>
+            <span className="msn-pill__sum" aria-hidden="true">{daySum(d.day)}</span>
+            <ChevronIcon direction="right" size={15} className="msn-pill__go" />
+            {d.waiting > 0 && <span className="msn-pill__flag" aria-hidden="true" />}
+          </button>
+        ) : (
+          <button type="button" className="msn-pill" data-action="missions-open" aria-haspopup="dialog" aria-label={t.msnPillLabel(done)} onClick={show}>
+            <span className="msn-pill__dots" aria-hidden="true">
+              {unlit.map((on, i) => <i key={i} className={on ? 'on' : ''} />)}
+            </span>
+            <span className="msn-pill__n"><b>{done}</b>/3</span>
+            <span className="msn-pill__sum">{daySum(d.day)}</span>
+            {d.waiting > 0 && <span className="msn-pill__flag" aria-hidden="true" />}
+          </button>
+        )}
       </div>
       <Sheet open={open} onClose={() => setOpen(false)} title={t.msnTitle} sub={t.msnSubDay(done)} icon={CalendarIcon} label={t.msnTitle} className="tdy-sheet msn-sheet">
         {ready.length > 1 && (
