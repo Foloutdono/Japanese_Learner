@@ -837,6 +837,13 @@ runtime purpose.
   unseen places of the same size (`useScreenfulFirst`).
   Measure a switch on the production build at phone width with the
   CPU slowed 4×, before and after.
+- **No browser translates the app (2026-11-25).** `index.html` carries
+  `translate="no"` and Google's `notranslate`: a translated page swaps
+  React's text nodes for `<font>`, and the next change of text threw
+  `removeChild` and blanked the whole app on every card turned.
+  `lib/domGuard.js`, run before the first render, keeps React standing
+  when an extension rewrites the page anyway; `src/notranslate.test.js`
+  holds both. A new document that mounts React carries the same.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s

@@ -1,7 +1,17 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" translate="no">
   <head>
     <meta charset="UTF-8" />
+    <!-- No browser translates the app (2026-11-25). Chrome offered an
+         English learner to translate a page full of Japanese; translated,
+         every text node is swapped for <font> elements React never made,
+         and the next change of text (a card turned, a duel's end) threw
+         removeChild and took the whole app down to a blank page, reload
+         after reload. A machine translation of a Japanese course's answers
+         is wrong in any case. src/lib/domGuard.js keeps the app standing
+         if an extension rewrites the page all the same;
+         src/notranslate.test.js holds both. -->
+    <meta name="google" content="notranslate" />
     <!-- A pinch zooms no screen of the app, on any platform. The store
          apps' WebViews have no pinch: Capacitor's zoomEnabled is off in
          both shells (capacitor.config.json). The web's screens are this
