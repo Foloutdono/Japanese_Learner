@@ -61,3 +61,8 @@ KANJI_FR: dict[str, str] = _db.meanings_for(DECK_BY_CHAR, "fr")
 # is folded into the database over those by scripts/build_kanji_db.py, as
 # the French is.
 KANJI_ES: dict[str, str] = _db.meanings_for(DECK_BY_CHAR, "es")
+
+# And Indonesian (plan 312): KANJIDIC2 has none, so every deck character's
+# meaning is the app's own (datas/kanji/kanji_meanings_id.json), folded in
+# as a column of its own by `python -m scripts.build_kanji_db --lang id`.
+KANJI_ID: dict[str, str] = _db.meanings_for(DECK_BY_CHAR, "id")

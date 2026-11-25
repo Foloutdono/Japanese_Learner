@@ -1,7 +1,7 @@
 // Small readings the offers print (plan 172). Pure, so the screens
 // stay drawings and these stay testable.
 
-import { intlLocale } from '../../lib/locale'
+import { firstOfMonth, intlLocale } from '../../lib/locale'
 
 /** "14:32" / "2:32 PM": when the refill lands its next credit. */
 export function clockTime(iso, lang) {
@@ -16,9 +16,7 @@ export function clockTime(iso, lang) {
  *  come back. */
 export function firstOfNextMonth(lang, now = new Date()) {
   const first = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-  const month = new Intl.DateTimeFormat(intlLocale(lang), { month: 'long' }).format(first)
-  if (lang === 'fr') return `1er ${month}`
-  return lang === 'es' ? `1 de ${month}` : `${month} 1`
+  return firstOfMonth(lang, new Intl.DateTimeFormat(intlLocale(lang), { month: 'long' }).format(first))
 }
 
 /** A day's one-letter name: "L", "M" … / "M", "T" …, from its ISO date. */

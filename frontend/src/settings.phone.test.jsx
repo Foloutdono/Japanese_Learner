@@ -169,8 +169,9 @@ describe('Settings at phone width', () => {
   it('stands the languages one per row, each on one line', async () => {
     await mount('/profile/settings/display')
     const picks = [...document.querySelectorAll('.lang-pick')]
-    // French, English, and Spanish twice: Latin America's and Spain's (plan 303).
-    expect(picks).toHaveLength(4)
+    // French, English, Spanish twice (Latin America's and Spain's, plan
+    // 303) and Indonesian (plan 312).
+    expect(picks).toHaveLength(5)
     const page = box(document.querySelector('.lang-picks'))
     picks.forEach((pick, i) => {
       const [whole, name, words] = [pick, pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')].map(box)
@@ -190,6 +191,28 @@ describe('Settings at phone width', () => {
     expect(new Set(samples).size, samples.join(' / ')).toBe(picks.length)
   })
 
+  // Indonesian (plan 312), offered to every account since it left its
+  // preview: fifth, its flag, its name and its sample on one line beside
+  // the others.
+  it('offers Bahasa Indonesia, on one line, to every account', async () => {
+    try {
+      // At 360px, the narrowest phone that keeps the samples (below).
+      await page.viewport(360, 740)
+      await mount('/profile/settings/display')
+      const picks = [...document.querySelectorAll('.lang-pick')]
+      expect(picks).toHaveLength(5)
+      const indonesian = picks.find(pick => pick.getAttribute('lang') === 'id')
+      expect(indonesian?.textContent).toContain('Bahasa Indonesia')
+      const [name, words] = [indonesian.querySelector('.lang-pick__name'), indonesian.querySelector('.lang-pick__sample')]
+      expect(indonesian.querySelector('.lang-pick__name > svg.lang-flag')).not.toBeNull()
+      expect(box(name).height).toBeLessThan(box(picks[0].querySelector('.lang-pick__name')).height * 1.5)
+      expect(words.scrollWidth, words.textContent).toBeLessThanOrEqual(words.clientWidth)
+      expect(box(words).left).toBeGreaterThan(box(name).right)
+    } finally {
+      await page.viewport(390, 844)
+    }
+  })
+
   // A container query, which a mid-test resize does reach (the lane's
   // note is about matchMedia). Español (Latinoamérica) and Agregar need
   // about 286px (plan 303), which a 360px phone's row holds: every
@@ -199,7 +222,7 @@ describe('Settings at phone width', () => {
     try {
       await mount('/profile/settings/display')
       const picks = [...document.querySelectorAll('.lang-pick')]
-      expect(picks).toHaveLength(4)
+      expect(picks).toHaveLength(5)
       for (const pick of picks) {
         const [name, words] = [pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')]
         expect(getComputedStyle(words).display, name.textContent).not.toBe('none')
@@ -218,7 +241,7 @@ describe('Settings at phone width', () => {
     try {
       await mount('/profile/settings/display')
       const picks = [...document.querySelectorAll('.lang-pick')]
-      expect(picks).toHaveLength(4)
+      expect(picks).toHaveLength(5)
       const one = box(picks[0].querySelector('.lang-pick__name')).height
       for (const pick of picks) {
         const name = pick.querySelector('.lang-pick__name')

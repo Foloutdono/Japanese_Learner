@@ -25,18 +25,18 @@ accumulated -- are read.
 
 ── Shape ─────────────────────────────────────────────────────
 One JSON list per level, one object per exercise, the Japanese written
-ONCE and every learner-facing string carried in each of LANGS, {en, fr, es}
-(Spanish since plan 302):
+ONCE and every learner-facing string carried in each of LANGS, {en, fr, es,
+id} (Spanish since plan 302, Indonesian since plan 312e):
 
     {"id": "n5-01", "level": "N5", "title": "...",
      "grammar": ["<pattern>", ...],           the catalogue points it uses
      "text": "...",                           220-280 characters
-     "questions": [{"type", "question": {en, fr, es}, "options": {en, fr, es}, "correct",
+     "questions": [{"type", "question": {en, fr, es, id}, "options": {en, fr, es, id}, "correct",
                     "at": [i, ...],                the breakdown sentence(s) it rests on
-                    "why": {en, fr, es}}],             one line on why the right option is
+                    "why": {en, fr, es, id}}],             one line on why the right option is
                                                    (plan 301b)
-     "breakdown": [{"jp", "translation": {en, fr, es}, "note": {en, fr, es},
-                    "words": [{"surface", "meaning": {en, fr, es}}]}]}
+     "breakdown": [{"jp", "translation": {en, fr, es, id}, "note": {en, fr, es, id},
+                    "words": [{"surface", "meaning": {en, fr, es, id}}]}]}
 
 render() flattens one language out of that into exactly the dict
 routes/reading._call_llm_comprehension returns for a model answer --
@@ -83,11 +83,12 @@ _BASE_DIR = os.path.join(os.path.dirname(__file__), "comprehension")
 LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 
 # The languages the app's UI ships (frontend/src/locales), and so the
-# ones every seed carries: Spanish since plan 302, so a Spanish learner's
-# first exercises are the seeds too, not model calls. routes/reading.
+# ones every seed carries: Spanish since plan 302 and Indonesian since
+# plan 312e, so their learners' first exercises are the seeds too, not
+# model calls. routes/reading.
 # LANG_NAMES accepts more; a learner on another language is generated
 # for, as before.
-LANGS: tuple[str, ...] = ("en", "fr", "es")
+LANGS: tuple[str, ...] = ("en", "fr", "es", "id")
 
 # The smallest number of exercises each level's file may carry. A first
 # request at a level needs one; thirty (plan 259, from ten in plan 258,

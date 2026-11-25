@@ -33,10 +33,9 @@ from content.kanji_data import DECK_BY_CHAR, KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
 import content.kanji_pool_data as kanji_db
 from content.radical_data import info_for as radical_info
-from translations import get_meaning
+from translations import get_meaning, spoken
 from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 
-LANGS = ("en", "fr", "es")
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 # The strip holds a few rows, never a page: the dictionary has the rest.
 MAX_MEANINGS = 2
@@ -49,8 +48,10 @@ _PAIRS_FILE = Path(__file__).resolve().parent.parent / "datas" / "vocab" / "verb
 
 
 def lang_of(value) -> str:
+    # The app's languages (translations.SPOKEN, plan 312): a part not yet
+    # written in one reads its English, line by line, never French.
     code = str(value or "").strip().lower().replace("_", "-").split("-")[0]
-    return code if code in LANGS else "en"
+    return spoken(code)
 
 
 @lru_cache(maxsize=1)

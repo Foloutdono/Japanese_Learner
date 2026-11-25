@@ -16,6 +16,7 @@ import unittest
 from pathlib import Path
 
 from study import analysis, morphology, particle_glosses
+from translations import WRITTEN
 
 _FR_DB = Path(__file__).resolve().parent.parent / "datas" / "vocab" / "jmdict_fr.sqlite3"
 _KANJI = re.compile(r"[一-鿿々]")
@@ -133,7 +134,7 @@ class OddInputTests(unittest.TestCase):
 class GlossTableTests(unittest.TestCase):
     """Every line the breakdown can print for a part, in every language."""
 
-    def test_every_gloss_has_its_french_and_spanish(self) -> None:
+    def test_every_gloss_has_its_french_and_every_later_language(self) -> None:
         tables = {"particle_glosses": particle_glosses._GLOSSES, "prefix": analysis._PREFIX_GLOSSES,
                   "suffix": analysis._SUFFIX_GLOSSES, "affix": analysis._AFFIX_SENSES,
                   "span": analysis._SPAN_COUNTERS, "name": analysis._NAME_GLOSS,
@@ -141,21 +142,26 @@ class GlossTableTests(unittest.TestCase):
         for name, table in tables.items():
             for key, gloss in table.items():
                 with self.subTest(table=name, key=key):
-                    for lang in ("en", "fr", "es"):
+                    for lang in ("en", "fr", *WRITTEN["breakdown"]):
                         self.assertTrue((gloss.get(lang) or "").strip(), lang)
 
-    def test_every_row_of_a_tuple_table_has_its_spanish(self) -> None:
-        # (reading,) English, French, Spanish: the Spanish last (plan 302).
+    def test_every_row_of_a_tuple_table_has_every_later_language(self) -> None:
+        # (reading,) English, French, then each later language in
+        # translations.WRITTEN's order: the Spanish last since plan 302,
+        # before the language a wave adds (plan 312).
         from study.reading_context import LATIN_UNITS
-        tables = {"units": (LATIN_UNITS, 4), "sizes": (analysis._SIZES, 4), "latin": (analysis._LATIN_WORDS, 4),
-                  "adverbs": (particle_glosses._ADVERBS, 3), "ordinal": (analysis._ORDINAL_SENSE, 3)}
-        for name, (table, width) in tables.items():
+        later = WRITTEN["breakdown"]
+        tables = {"units": (LATIN_UNITS, 3), "sizes": (analysis._SIZES, 3), "latin": (analysis._LATIN_WORDS, 3),
+                  "adverbs": (particle_glosses._ADVERBS, 2), "ordinal": (analysis._ORDINAL_SENSE, 2)}
+        for name, (table, head) in tables.items():
             for key, row in table.items():
                 with self.subTest(table=name, key=key):
-                    self.assertEqual(len(row), width)
-                    self.assertEqual(bool(row[-1].strip()), bool(row[-3].strip()))
+                    self.assertEqual(len(row), head + len(later))
+                    english = row[head - 2]
+                    for i, lang in enumerate(later):
+                        self.assertEqual(bool(row[head + i].strip()), bool(english.strip()), lang)
 
-    def test_every_gloss_a_breakdown_prints_has_its_spanish(self) -> None:
+    def test_every_gloss_a_breakdown_prints_has_every_later_language(self) -> None:
         # The tables and the glosses made on the spot: a figure, a time,
         # a score, a fraction, an age, a date, an ordinal, a unit, a size,
         # a JLPT level, an adverb made with に (plan 302).
@@ -167,7 +173,8 @@ class GlossTableTests(unittest.TestCase):
             for token in analysis.analyze_local(s)["tokens"]:
                 if token.get("gloss"):
                     with self.subTest(text=s[:20], part=token["surface"]):
-                        self.assertTrue((token["gloss"].get("es") or "").strip(), token["gloss"])
+                        for lang in WRITTEN["breakdown"]:
+                            self.assertTrue((token["gloss"].get(lang) or "").strip(), token["gloss"])
 
     def test_every_key_the_rules_name_is_in_the_table(self) -> None:
         source = Path(particle_glosses.__file__).read_text(encoding="utf-8")

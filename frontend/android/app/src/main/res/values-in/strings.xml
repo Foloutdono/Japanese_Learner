@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <!-- 発車案内 — widget seperti yang ditampilkan pemilih (plans 156, 312).
+         Indonesian's resources are values-in, the code Android's runtime
+         reads for it (java.util.Locale's legacy "in"); everywhere else it is id. -->
+    <string name="widget_label">Keretamu hari ini</string>
+    <string name="widget_description">Kartu hari ini, waktu yang dibutuhkan, dan satu kata yang kamu kenal.</string>
+</resources>

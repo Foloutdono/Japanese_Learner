@@ -2,6 +2,7 @@ import unittest
 
 from study.analysis import analyze_local, attach_user_state, merge_deep, analyze_with_glosses
 from study import morphology
+from translations import WRITTEN
 
 
 class AnalyzeLocalTests(unittest.TestCase):
@@ -255,10 +256,11 @@ class AnalyzeLocalTests(unittest.TestCase):
         carries is the same one, so a particle's row can print it too."""
         r = analyze_local("今日は学校へ行きません。")
         wa = next(g for g in r["grammar"] if g["pattern"] == "は")
-        self.assertEqual(set(wa["meaning"]), {"en", "fr", "es"})
-        self.assertTrue(wa["meaning"]["en"] and wa["meaning"]["fr"] and wa["meaning"]["es"])
+        langs = ("en", "fr", *WRITTEN["grammar.gloss"])
+        self.assertEqual(set(wa["meaning"]), set(langs))
+        self.assertTrue(all(wa["meaning"][lang] for lang in langs))
         self.assertTrue(wa["structure"])
-        self.assertTrue(wa["structure_es"])
+        self.assertTrue(all(wa[f"structure_{lang}"] for lang in WRITTEN["grammar.gloss"]))
         on_token = next(g for t in r["tokens"] for g in t["grammar"] if g["raw_id"] == wa["raw_id"])
         self.assertEqual(on_token["meaning"], wa["meaning"])
         self.assertEqual(on_token["structure"], wa["structure"])

@@ -55,7 +55,13 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 29  # 29: plan 319 -- what translating the catalogue found in its
+TOUR_REV = 30  # 30: plan 334 -- what the corrected source still said
+#   (plan 312's findings §9): asks that presupposed their answer and
+#   notions that named it made neutral, the French and Spanish given
+#   no sex the Japanese does not give, the Spanish readings evened as
+#   the English was, contrast marks and `same` decided on the point's
+#   own sentences, wrong whys and slips; the Indonesian with them.
+# 29: plan 319 -- what translating the catalogue found in its
 #   source (plan 312's notes): whys that named a shuffled choice by its
 #   place, form questions that doubled a word once filled, whys and
 #   translations that taught a rival's sense, a 〜たら／〜なら asked from
@@ -88,13 +94,13 @@ GUESS_COUNT = 4
 # already is, each drawn as a station plate with its plain-language caption
 # (a place is what gets a pair, DESIGN.md). A scene's `place` is one key.
 SCENE_PLACES: dict[str, dict] = {
-    "窓口":   {"reading": "まどぐち",     "en": "Ticket window",           "fr": "Guichet",         "es": "Ventanilla"},
-    "売店":   {"reading": "ばいてん",     "en": "Kiosk",                   "fr": "Kiosque",         "es": "Quiosco"},
-    "ホーム": {"reading": None,          "en": "Platform",                "fr": "Quai",            "es": "Andén"},
-    "車内":   {"reading": "しゃない",     "en": "On the train",            "fr": "Dans le train",   "es": "En el tren"},
-    "改札":   {"reading": "かいさつ",     "en": "Ticket gates",            "fr": "Portillons",      "es": "Torniquetes"},
-    "待合室": {"reading": "まちあいしつ", "en": "Waiting room",            "fr": "Salle d'attente", "es": "Sala de espera"},
-    "駅前":   {"reading": "えきまえ",     "en": "In front of the station", "fr": "Devant la gare",  "es": "Frente a la estación"},
+    "窓口":   {"reading": "まどぐち",     "en": "Ticket window",           "fr": "Guichet",         "es": "Ventanilla",           "id": "Loket tiket"},
+    "売店":   {"reading": "ばいてん",     "en": "Kiosk",                   "fr": "Kiosque",         "es": "Quiosco",              "id": "Kios"},
+    "ホーム": {"reading": None,          "en": "Platform",                "fr": "Quai",            "es": "Andén",                "id": "Peron"},
+    "車内":   {"reading": "しゃない",     "en": "On the train",            "fr": "Dans le train",   "es": "En el tren",           "id": "Di dalam kereta"},
+    "改札":   {"reading": "かいさつ",     "en": "Ticket gates",            "fr": "Portillons",      "es": "Torniquetes",          "id": "Gerbang tiket"},
+    "待合室": {"reading": "まちあいしつ", "en": "Waiting room",            "fr": "Salle d'attente", "es": "Sala de espera",       "id": "Ruang tunggu"},
+    "駅前":   {"reading": "えきまえ",     "en": "In front of the station", "fr": "Devant la gare",  "es": "Frente a la estación", "id": "Di depan stasiun"},
 }
 # The two voices of a scene: the other person, whom the scene names
 # (`them`: the agent, the vendor, a traveller), and the learner.

@@ -32,6 +32,7 @@ from core.auth import get_user_id, prefixed, unprefixed
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
+import translations
 from translations import get_meaning
 from translations.course import VOCAB_GLOSSES
 from study.modes import VOCAB, Mode, eligible_for, require_mode
@@ -65,7 +66,7 @@ def _entry_meaning(entry: dict, lang: str) -> str:
     to fall back to JMdict's English. A row without the learner's gloss
     keeps the old rule: the deck's translation for a deck word, the
     English otherwise."""
-    if lang in ("fr", "es") and entry.get(f"meaning_{lang}"):
+    if lang != "en" and lang in translations.SPOKEN and entry.get(f"meaning_{lang}"):
         return entry[f"meaning_{lang}"]
     if entry["domain"] == "vocab":
         return get_meaning(entry, lang, GLOSSES)

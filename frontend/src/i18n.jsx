@@ -1,6 +1,7 @@
 import fr from './locales/fr'
 import en from './locales/en'
 import es from './locales/es'
+import id from './locales/id'
 import esES from './locales/es-ES'
 
 // Spain's Spanish is the Spanish table with the entries Spain says
@@ -15,7 +16,7 @@ function over(base, own) {
     return out
 }
 
-export const translations = { fr, en, es, 'es-ES': over(es, esES) }
+export const translations = { fr, en, es, id, 'es-ES': over(es, esES) }
 
 // A language's flag is drawn from components/ui/flags.js by its code
 // (plan 302, the owner's choice "for clarity"), never as an emoji: Windows
@@ -26,4 +27,7 @@ export const LANGUAGES = [
     { code: 'en', label: 'English' },
     { code: 'es', label: 'Español (Latinoamérica)' },
     { code: 'es-ES', label: 'Español (España)' },
+    // In preview (plan 312): offered only to the accounts the server
+    // lists for it (lib/locale.js, offeredLocales).
+    { code: 'id', label: 'Bahasa Indonesia' },
 ]

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from study.duel_paper import (CHOICES, ITEMS, LADDER, LEVELS, MIX_MIN, NOVICE, OWN_FLOOR, PAPER_REV, blend,
+from study.duel_paper import (CHOICE_LANGS, CHOICES, ITEMS, LADDER, LEVELS, MIX_MIN, NOVICE, OWN_FLOOR, PAPER_REV, blend,
                               build_paper, level_of, mix_of, served, shares)
 from study.exam_seed import LENGTH_TELL, LIKENESS_TELL, ROTATION_TELL
 from study.exam_tells import centre, outlier
@@ -51,7 +51,7 @@ def test_every_item_has_three_distinct_choices_and_one_key(papers):
     for built in papers.values():
         for paper in built:
             for item in paper["items"]:
-                for lang in (("fr", "en", "es") if item["kind"] == "word" else ("fr",)):
+                for lang in (CHOICE_LANGS if item["kind"] == "word" else ("fr",)):
                     texts = _texts(item, lang)
                     assert len(texts) == 3 and len(set(texts)) == 3, item
                 assert 0 <= item["answer"] < 3
@@ -124,7 +124,7 @@ def test_length_says_nothing(papers, level):
     low, high = LENGTH
     items = [item for paper in papers[level] for item in paper["items"]]
     words = [item for item in items if item["kind"] == "word"]
-    for lang in ("fr", "en", "es"):
+    for lang in CHOICE_LANGS:
         longest, shortest = _rates(words, lang)
         assert low <= longest <= high and low <= shortest <= high, (level, lang, longest, shortest)
     kanji = [item for item in items if item["kind"] != "word"]
@@ -228,7 +228,7 @@ def test_a_mixed_paper_keeps_the_guards(mixed):
     for name, (rate, n) in _look_rates(items).items():
         assert 2 * BLIND - LIKENESS <= rate <= LIKENESS, (name, rate, n)
     words = [item for item in items if item["kind"] == "word"]
-    for lang in ("fr", "en", "es"):
+    for lang in CHOICE_LANGS:
         longest, shortest = _rates(words, lang)
         assert low <= longest <= high and low <= shortest <= high, (lang, longest, shortest)
     steps = on = 0

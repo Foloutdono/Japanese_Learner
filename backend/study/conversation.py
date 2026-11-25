@@ -38,8 +38,9 @@ from study.dictation import bank_words, measure_forms
 from study.furigana import align_deck, align_sentence
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-# Every text around the Japanese is written in each: Spanish since plan 302.
-LANGS = ("en", "fr", "es")
+# Every text around the Japanese is written in each: Spanish since plan 302,
+# Indonesian since plan 312f.
+LANGS = ("en", "fr", "es", "id")
 MODES = ("choose", "translate", "free")
 REGISTERS = ("casual", "polite", "formal")
 
@@ -136,7 +137,7 @@ def text(pair: dict | None, lang: str) -> str:
 
 def _pair_problems(pair, where: str, *, japanese: bool = True) -> list[str]:
     if not isinstance(pair, dict):
-        return [f"{where}: missing (an {{en, fr, es}} pair)"]
+        return [f"{where}: missing (an {{{', '.join(LANGS)}}} text)"]
     out = []
     for lang in LANGS:
         value = pair.get(lang)

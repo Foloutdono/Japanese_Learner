@@ -1837,6 +1837,10 @@ class RealLineWordTests(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 gloss = token_of(sentence, surface)["gloss"]
                 self.assertTrue(gloss["en"].startswith(start) and gloss["fr"])
+        # (a は between a verb's stem and しない is a point since plan 324,
+        # 〜はしない／〜もしない, once this particle's gloss)
+        self.assertIn("〜はしない／〜もしない",
+                      [g["pattern"] for g in token_of("誰にも止められはしない", "は").get("grammar") or []])
 
     def test_a_verbs_stem_and_shinai_is_the_point_since_324(self) -> None:
         # は and も between a verb's stem and しない said what they did by
@@ -2698,6 +2702,10 @@ class SeventhReviewWordTests(unittest.TestCase):
                                          ("ほんまに？それめっちゃおもろいやん。", "ほんまに", "(Kansai) really")):
             with self.subTest(sentence=sentence, surface=surface):
                 self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
+        # (も between a verb's stem and しない, "not even", is 〜はしない／〜もしない
+        # since plan 324, once this particle's gloss)
+        self.assertIn("〜はしない／〜もしない",
+                      [g["pattern"] for g in token_of("満員電車で足を踏まれたのに、相手は謝りもしなかった。", "も").get("grammar") or []])
         self.assertIsNotNone(token_of("あれは何ですか。", "あれ").get("vocab_match"))
 
 

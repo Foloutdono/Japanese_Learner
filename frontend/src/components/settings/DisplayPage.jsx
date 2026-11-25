@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { LANGUAGES, translations } from '../../i18n'
+import { offeredLocales } from '../../lib/locale'
+import { useProfileSummary } from '../../stores/profileSummary'
 import { playClick, playToggle } from '../../lib/audio'
 import { useThemeChoice } from '../../stores/theme'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -25,6 +27,11 @@ import { SettingsPage, Slip, SlipRow } from './SettingsPage'
 export function DisplayPage() {
   // The picker picks a locale: Spain's Spanish is one (plan 303).
   const { t, locale, switchLang } = useLang()
+  // A language in preview is offered to the accounts the server lists for
+  // it alone (plan 312).
+  const summary = useProfileSummary()
+  const offered = offeredLocales(summary?.previewLangs, locale)
+  const languages = LANGUAGES.filter(l => offered.includes(l.code))
   const [choice, setChoice] = useThemeChoice()
   // One tab stop a group on the desk, walked with the arrows (plan 123).
   const desk = useDesk()
@@ -70,7 +77,7 @@ export function DisplayPage() {
         </Slip>
         <Slip label={t.language}>
           <div className="lang-picks" role="radiogroup" aria-label={t.language} onKeyDown={onWalk}>
-            {LANGUAGES.map((l, i) => {
+            {languages.map((l, i) => {
               const own = translations[l.code] ?? {}
               return (
                 <button
@@ -78,7 +85,7 @@ export function DisplayPage() {
                   type="button"
                   role="radio"
                   aria-checked={locale === l.code}
-                  tabIndex={radioTab(desk, i, LANGUAGES.findIndex(o => o.code === locale))}
+                  tabIndex={radioTab(desk, i, languages.findIndex(o => o.code === locale))}
                   lang={l.code}
                   className={`lang-pick${locale === l.code ? ' lang-pick--on' : ''}`}
                   onClick={() => { if (locale !== l.code) { switchLang(l.code); playClick() } }}

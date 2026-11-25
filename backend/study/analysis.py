@@ -43,7 +43,10 @@ from study.furigana import align_deck
 from translations import fr_gloss
 from translations.fr.vocab_fr import VOCAB_FR
 from translations.es.vocab_es import VOCAB_ES
+from translations.course import VOCAB_GLOSSES
+from content.grammar_points_data import TEXT_LANGS
 from study import difficulty
+from study import figures
 from study import grammar_detect
 from study import particle_glosses
 from study import plain_polite
@@ -58,6 +61,20 @@ logger = logging.getLogger(__name__)
 _CONTENT_POS = frozenset({"noun", "verb", "adjective", "adverb"})
 # The public name, for study/level_mix.py -- one definition, not three.
 CONTENT_POS = _CONTENT_POS
+
+
+# A grammar point's formation line in each language beside the English
+# (structure_fr, structure_es, structure_id), carried whole by every point
+# a breakdown names.
+_STRUCTURES = tuple(f"structure_{lang}" for lang in TEXT_LANGS if lang != "en")
+
+# What a name read as one says before the word's own gloss, by language
+# (a place's, a person's).
+_NAME_OR = {
+    "fr": ("un nom de lieu, ou : ", "un nom de personne, ou : "),
+    "es": ("un nombre de lugar, o: ", "un nombre de persona, o: "),
+    "id": ("nama tempat, atau: ", "nama orang, atau: "),
+}
 
 
 def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
@@ -117,12 +134,11 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
             # able to edit the catalogue through it.
             "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
             "structure": entry.get("structure", ""),
-            # The formation line in French (plan 215) and Spanish (plan
-            # 302), beside the English, as `meaning` carries them all: the
-            # analysis is shared across learners and the screen reads its
-            # own.
-            "structure_fr": entry.get("structure_fr", ""),
-            "structure_es": entry.get("structure_es", ""),
+            # The formation line in French (plan 215), Spanish (plan 302)
+            # and Indonesian (plan 312), beside the English, as `meaning`
+            # carries them all: the analysis is shared across learners and
+            # the screen reads its own.
+            **{key: entry.get(key, "") for key in _STRUCTURES},
         })
     return out
 
@@ -151,7 +167,7 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
             # line above -- the same point twice in a sentence is two
             # lights, not one (frontend grammarSpans.js).
             {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure",
-                               "structure_fr", "structure_es", "start", "end", "segments")}
+                               *_STRUCTURES, "start", "end", "segments")}
             for g in grammar
             if any(s < end and start < e for s, e in g["segments"])
         ]
@@ -356,15 +372,14 @@ def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
     as a grammar point carries its {en, fr}; the screen reads its own
     (frontend tokens.js's wordGloss). The French is the card's own line
     (plan 107's per-card key, then the form's), and absent where the
-    card has none, so a screen falls back to the English. The Spanish
-    (plan 302) rides the same way, as `meaning_es`."""
+    card has none, so a screen falls back to the English. Every other
+    language with a deck map rides the same way (`meaning_es`, plan 302;
+    `meaning_id`, plan 312)."""
     out = {"level": level, "raw_id": raw_id, "entry": serializable_entry(entry)}
-    french = fr_gloss(entry, VOCAB_FR)
-    if french:
-        out["entry"]["meaning_fr"] = french
-    spanish = fr_gloss(entry, VOCAB_ES)
-    if spanish:
-        out["entry"]["meaning_es"] = spanish
+    for lang, glosses in VOCAB_GLOSSES.items():
+        line = fr_gloss(entry, glosses)
+        if line:
+            out["entry"][f"meaning_{lang}"] = line
     return out
 
 
@@ -513,7 +528,7 @@ def _number_dict(run: list, value: int) -> dict:
             for char, lvl, e, rid in find_kanji_matches(surface)
         ],
         "number": value,
-        "gloss": {"en": f"{value:,}", "fr": f"{value:,}".replace(",", " "), "es": _es_figure(value)},
+        "gloss": {lang: figures.figure(value, lang) for lang in ("en", "fr", "es")},
     }
 
 
@@ -588,17 +603,6 @@ def _glued_ordinal(m) -> bool:
     return len(m.surface) == 2 and m.surface[1] == "目" and m.surface[0] in _COUNTING and m.surface != "品目"
 
 
-def _ordinal(value: int, lang: str) -> str:
-    if lang == "fr":
-        return "1er" if value == 1 else f"{value:,}".replace(",", " ") + "e"
-    if lang == "es":
-        # (n.º 3, "number 3": 3.º and 3.ª would give the counted noun a
-        # gender, plan 302)
-        return f"n.º {_es_figure(value)}"
-    suffix = "th" if 10 <= value % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(value % 10, "th")
-    return f"{value:,}{suffix}"
-
-
 def _counted_dict(run: list, numerals: int, printed=None) -> dict | None:
     """One token for a number and its counter where the two are one word
     on the page (plan 272), or None -- a number and its counter are two
@@ -633,9 +637,9 @@ def _counted_dict(run: list, numerals: int, printed=None) -> dict | None:
         if counted.surface[0] not in _ORDINAL_SENSE:
             english, french, spanish = (english or counted.surface[0], french or english or counted.surface[0],
                                         spanish or english or counted.surface[0])
-        token["gloss"] = {"en": " · ".join(filter(None, (_ordinal(value, "en"), english))),
-                          "fr": " · ".join(filter(None, (_ordinal(value, "fr"), french))),
-                          "es": " · ".join(filter(None, (_ordinal(value, "es"), spanish)))}
+        token["gloss"] = {"en": " · ".join(filter(None, (figures.ordinal(value, "en"), english))),
+                          "fr": " · ".join(filter(None, (figures.ordinal(value, "fr"), french))),
+                          "es": " · ".join(filter(None, (figures.ordinal(value, "es"), spanish)))}
     elif value is not None and 1 <= value <= 10 and not any(c in _KANJI_DIGITS for c in surface):
         written = _KANJI_DIGITS[value - 1] + "".join(m.surface for m in run[numerals:])
         hit = resolve_lemma(written, reading, written)
@@ -895,21 +899,10 @@ _MYRIADS = {"万": "まん", "億": "おく", "兆": "ちょう"}
 _MYRIAD_VALUE = {"万": 10 ** 4, "億": 10 ** 8, "兆": 10 ** 12}
 
 
-def _es_figure(value, fraction: str = "") -> str:
-    """A figure as Latin-American Spanish writes it (plan 302, the owner's
-    choice of variety): a comma between thousands (2,000; 10,000), a point
-    before the decimals (3.5) -- what Intl's es-419 prints on the screens
-    (lib/locale.js), so the breakdown and the app agree."""
-    if isinstance(value, float):
-        whole, _, decimals = repr(value).partition(".")
-        return _es_figure(int(whole), "" if decimals == "0" else decimals)
-    digits = f"{value:,}"
-    return f"{digits}.{fraction}" if fraction else digits
-
-
 def _figure(printed: str) -> dict:
-    """A number's gloss, its figure as each language writes it: 1,500,
-    1 500 and 1500, 3.5 and 3,5, １００万 1,000,000."""
+    """A number's gloss, its figure as each language writes it
+    (study/figures.py): 1,500, 1 500 and 1,500, 3.5 and 3,5, １００万
+    1,000,000."""
     text = printed.translate(_FULLWIDTH_DIGITS).replace("，", ",").replace("．", ".")
     unit = _MYRIAD_VALUE.get(text[-1:], 1)
     if unit > 1:
@@ -917,12 +910,13 @@ def _figure(printed: str) -> dict:
     whole, dot, fraction = text.replace(",", "").partition(".")
     if unit > 1:
         value = int(float(f"{whole}.{fraction or 0}") * unit)
-        return {"en": f"{value:,}", "fr": f"{value:,}".replace(",", "\u202f"), "es": _es_figure(value)}
-    en, fr = f"{int(whole):,}", f"{int(whole):,}".replace(",", "\u202f")
-    es = _es_figure(int(whole), fraction if dot else "")
-    if dot:
-        en, fr = f"{en}.{fraction}", f"{fr},{fraction}"
-    return {"en": en, "fr": fr, "es": es}
+        return {lang: figures.figure(value, lang) for lang in ("en", "fr", "es")}
+    gloss = {lang: figures.figure(int(whole), lang, fraction) for lang in ("en", "fr", "es")}
+    if dot and not fraction:
+        # "3." printed: English and French keep its mark, as they always
+        # have; Spanish never wrote it.
+        gloss.update({lang: gloss[lang] + figures.point(lang) for lang in ("en", "fr")})
+    return gloss
 
 
 def _digits_dict(run: list, printed: str, reading: str) -> dict:
@@ -1282,7 +1276,7 @@ def _ordinal_dict(run: list, numbers: dict, start: int) -> dict:
         en, fr, es = _WHICH["en"], _WHICH["fr"], _WHICH["es"]
     else:
         token["number"] = value
-        en, fr, es = _ordinal(value, "en"), _ordinal(value, "fr"), _ordinal(value, "es")
+        en, fr, es = (figures.ordinal(value, lang) for lang in ("en", "fr", "es"))
     token["gloss"] = {"en": f"{en} · {english}" if english else en, "fr": f"{fr} · {french or english}" if english else fr,
                       "es": f"{es} · {spanish or english}" if english else es}
     token["furigana"] = _printed_furigana(run, len(head), numbers.get(start), token["reading"])
@@ -1634,10 +1628,9 @@ def _name_or_word(token: dict, m, row: dict, called: bool = False) -> None:
     # (A place UniDic names that JMdict holds as a word, as either one:
     # 築地で食べ歩き is Tsukiji, its row "reclaimed land", plan 272.)
     entry["meaning"] = ("a place name, or: " if place else "a person's name, or: ") + entry.get("meaning", "")
-    if entry.get("meaning_fr"):
-        entry["meaning_fr"] = ("un nom de lieu, ou : " if place else "un nom de personne, ou : ") + entry["meaning_fr"]
-    if entry.get("meaning_es"):
-        entry["meaning_es"] = ("un nombre de lugar, o: " if place else "un nombre de persona, o: ") + entry["meaning_es"]
+    for lang, (a_place, a_person) in _NAME_OR.items():
+        if entry.get(f"meaning_{lang}"):
+            entry[f"meaning_{lang}"] = (a_place if place else a_person) + entry[f"meaning_{lang}"]
 
 
 def _called_to(morphemes: list, i: int) -> bool:
@@ -2581,7 +2574,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 52: plan 333 -- readings UniDic gets wrong in context: a lone 側 is そば
 # (彼の側にいる), 明後日 あさって, 一昨年 おととし, 一昨日 おととい, 法の下に
 # もと, 目下の問題 もっか, 寒気がする さむけ, 人気のない道 ひとけ.
-LOCAL_REV = 52
+# 53: plan 312b, on main's 52 (it was this branch's 49, then 51) -- a grammar
+# point carries its `structure_id` and a deck card's match its `meaning_id`,
+# Indonesian beside the Spanish, and a name read as one says so in
+# Indonesian too.
+LOCAL_REV = 53
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pickInitialLang, intlLocale, contentLang, setInterfaceLocale } from './locale'
+import { pickInitialLang, intlLocale, contentLang, setInterfaceLocale, firstOfMonth, offeredLocales, PREVIEW_LANGS } from './locale'
 
 describe('pickInitialLang', () => {
   it('honours a saved choice over the device', () => {
@@ -63,5 +63,38 @@ describe('intlLocale', () => {
     expect(intlLocale('es')).toBe('es-419')
     expect((12000).toLocaleString(intlLocale('es'))).toBe('12,000')
     expect(intlLocale('fr')).toBe('fr-FR')
+  })
+})
+
+describe('firstOfMonth', () => {
+  it('says the first of a month as each language does', () => {
+    expect(firstOfMonth('fr', 'novembre')).toBe('1er novembre')
+    expect(firstOfMonth('es', 'noviembre')).toBe('1 de noviembre')
+    expect(firstOfMonth('en', 'November')).toBe('November 1')
+  })
+  it('says it the English way in a language with no line, never the French (plan 312)', () => {
+    expect(firstOfMonth('de', 'November')).toBe('November 1')
+  })
+})
+
+// Indonesian left its preview for everyone (plan 312, the owner's call):
+// an Indonesian device starts in it and every account is offered it. The
+// preview's rule holds for the next language put in PREVIEW_LANGS.
+describe('Indonesian, spoken to everyone', () => {
+  it('is the language an Indonesian device starts in, and is kept when chosen', () => {
+    expect(PREVIEW_LANGS).not.toContain('id')
+    expect(pickInitialLang(null, 'id-ID')).toBe('id')
+    expect(pickInitialLang(null, 'in-ID')).toBe('id')
+    expect(pickInitialLang('id', 'en-US')).toBe('id')
+    expect(contentLang('id')).toBe('id')
+  })
+  it('is offered to every account', () => {
+    expect(offeredLocales([], 'fr')).toContain('id')
+    expect(offeredLocales(undefined, 'fr')).toContain('id')
+    expect(offeredLocales([], 'fr')).toEqual(['fr', 'en', 'es', 'id', 'es-ES'])
+  })
+  it('writes its figures as Indonesia does', () => {
+    expect(intlLocale('id')).toBe('id-ID')
+    expect((1234.5).toLocaleString(intlLocale('id'))).toBe('1.234,5')
   })
 })

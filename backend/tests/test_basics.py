@@ -13,6 +13,7 @@ from content.reading_sentences import N5 as READING_N5
 from study import basics, card_index, morphology
 from study.level_rule import primary_mode
 from study.modes import GRAMMAR, KANJI, VOCAB
+from translations import WRITTEN
 
 def _raw_units() -> list[dict]:
     with open(basics.COURSE_PATH, encoding="utf-8") as f:
@@ -42,7 +43,7 @@ def test_every_unit_is_named_in_every_language_and_teaches_words():
     ids = [u["id"] for u in _raw_units()]
     assert len(ids) == len(set(ids)) == 14
     for unit in basics.units():
-        assert unit["jp"] and all(unit["title"].get(lang) for lang in ("en", "fr", "es")), unit["id"]
+        assert unit["jp"] and all(unit["title"].get(lang) for lang in ("en", "fr", *WRITTEN["basics"])), unit["id"]
         assert unit["cards"][VOCAB], unit["id"]
         assert unit["sentences"], unit["id"]
 

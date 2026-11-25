@@ -20,6 +20,7 @@
 		<string>fr</string>
 		<string>en</string>
 		<string>es</string>
+		<string>id</string>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>

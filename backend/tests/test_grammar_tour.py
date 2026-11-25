@@ -332,7 +332,7 @@ def test_the_naive_quiz_is_gone():
 # Points, one a level, whose quiz tops a gap's choices up with same-level
 # fillers (a rival's lesson names fewer than three rivals): the draw that
 # went through the module's random before TOUR_REV 14.
-FILLED = (("N5", "〜あとで"), ("N4", "〜すぎる"), ("N3", "〜せいで"), ("N2", "〜かねない"), ("N1", "〜がてら"))
+FILLED = (("N5", "〜あとで"), ("N4", "〜すぎる"), ("N3", "〜せいで"), ("N2", "〜かねない"), ("N1", "〜まみれ"))
 
 
 def test_the_quiz_is_the_same_in_every_process():

@@ -75,6 +75,7 @@
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		A8B1C8031BB0480185AE9A0E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F2CF38688AD35692A2E27658 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A7D3C51E90B24F6E8C1D0312 /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B62DF1466C67B48441D61D97 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DB4FA5EA118E6B3F0669BB21 /* TsujiWidgetPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TsujiWidgetPlugin.swift; sourceTree = "<group>"; };
 		0438F29D9651B9325701F480 /* TsujiAppleSignInPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TsujiAppleSignInPlugin.swift; sourceTree = "<group>"; };
@@ -239,6 +240,7 @@
 				en,
 				fr,
 				es,
+				id,
 				Base,
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
@@ -336,6 +338,7 @@
 				A8B1C8031BB0480185AE9A0E /* en */,
 				16679ABFC9CAA5D94C2FE0E4 /* fr */,
 				F2CF38688AD35692A2E27658 /* es */,
+				A7D3C51E90B24F6E8C1D0312 /* id */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

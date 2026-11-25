@@ -170,6 +170,7 @@ LANG_NAMES = {
     "en": "English",
     "fr": "French",
     "es": "Spanish",
+    "id": "Indonesian",
     "de": "German",
     "ja": "Japanese",
     "it": "Italian",

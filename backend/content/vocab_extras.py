@@ -66,7 +66,7 @@ import os
 import re
 from functools import lru_cache
 
-from study import morphology
+from study import figures, morphology
 from study.furigana import align_deck
 from content.vocab_data import VOCAB_BY_LEVEL
 
@@ -546,13 +546,18 @@ def _tooltip(code: str, info: dict, lang: str) -> str:
     return english
 
 
+# A rank written otherwise than the language's figures (study/figures.py):
+# Spanish's keeps the RAE's rule it was written with, a narrow no-break
+# space between thousands and none in four digits (2000, 12 000), where its
+# figures elsewhere are es-419's (2,000, plan 302).
+_RANKS = {"es": lambda value: str(value) if value < 10_000 else f"{value:,}".replace(",", "\u202f")}
+
+
 def _figure(value: int, lang: str) -> str:
     """A rank as each language writes it: French puts a narrow no-break
-    space between thousands (12 000), Spanish the same but never in four
-    digits (2000, the RAE's rule)."""
-    if lang == "es" and value < 10_000:
-        return str(value)
-    return f"{value:,}".replace(",", "\u202f")
+    space between thousands (12 000), as its figures do."""
+    rank = _RANKS.get(lang)
+    return rank(value) if rank else figures.figure(value, lang)
 
 
 def _build_tag(code: str, is_term_tag: bool, lang: str) -> dict:

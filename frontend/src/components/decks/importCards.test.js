@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import fr from '../../locales/fr/index.js'
 import es from '../../locales/es/index.js'
+import id from '../../locales/id/index.js'
 import { columnsFor, exampleText, pairRows, readCards, readHeader, splitRows } from './importCards'
 
 // The grammar structure as GET /api/decks/structures describes it.
@@ -149,6 +150,24 @@ describe('the example', () => {
     expect(own.ignored).toEqual([])
     expect(own.cards[0].fields).toMatchObject({ rule: '〜ても', meaning: 'aunque',
       sentences: [{ jp: '雨でも行く。', tr: 'Iré aunque llueva.' }] })
+  })
+
+  // Indonesian (plan 312): the headers its import hint names are read,
+  // and the interface's own field labels; never a bare `id` column, which
+  // a spreadsheet uses for its rows' identifiers.
+  it('reads Indonesian headers, the hint\'s and the labels\'', () => {
+    const hint = readCards('Aturan\tArti\tContoh\tTerjemahan\n〜ても\tmeskipun\t雨でも行く。\tAku tetap pergi meskipun hujan.',
+      '\t', '\n', GRAMMAR, id)
+    expect(hint.header).toBe(true)
+    expect(hint.ignored).toEqual([])
+    expect(hint.cards[0].fields).toMatchObject({ rule: '〜ても', meaning: 'meskipun',
+      sentences: [{ jp: '雨でも行く。', tr: 'Aku tetap pergi meskipun hujan.' }] })
+    const labels = readCards(`${id.field_rule}\t${id.field_meaning}\t${id.field_sentences_jp}\t${id.field_sentences_tr}\n〜ても\tmeskipun\t雨でも行く。\tAku tetap pergi.`,
+      '\t', '\n', GRAMMAR, id)
+    expect(labels.ignored).toEqual([])
+    expect(labels.cards[0].fields.rule).toBe('〜ても')
+    const bare = readCards('Aturan\tArti\tid\n〜ても\tmeskipun\t42', '\t', '\n', GRAMMAR, id)
+    expect(bare.ignored).toEqual(['id'])
   })
 })
 

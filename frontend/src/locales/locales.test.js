@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import fr from './fr/index.js'
 import en from './en/index.js'
 import es from './es/index.js'
+import id from './id/index.js'
 import esES from './es-ES/index.js'
 import { translations } from '../i18n.jsx'
 
@@ -30,7 +31,7 @@ function groupKeys(lang) {
 }
 
 describe('locale keys (each table)', () => {
-  for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {
+  for (const [lang, table] of [['fr', fr], ['en', en], ['es', es], ['id', id]]) {
     it(`defines every ${lang} key once`, () => {
       const keys = groupKeys(lang)
       expect([...new Set(keys.map(k => k.key))].sort(), `${lang}/index.js: a key the reader cannot see (indented off the group's two spaces?)`)
@@ -82,6 +83,19 @@ describe('locale parity (fr <-> en)', () => {
     expect(mismatched, `type mismatch: ${mismatched.join(', ')}`).toEqual([])
   })
 
+  // Indonesian (plan 312) is held to the same parity, from its first
+  // table: a key it lacks would print nothing to an Indonesian reader.
+  it('has every English key present in Indonesian, and no other', () => {
+    const missing = Object.keys(en).filter(k => !(k in id))
+    const extra = Object.keys(id).filter(k => !(k in en))
+    expect(missing, `missing in id/index.js: ${missing.join(', ')}`).toEqual([])
+    expect(extra, `in id/index.js but not en/index.js: ${extra.join(', ')}`).toEqual([])
+    const mismatched = Object.keys(en)
+      .filter(k => k in id && typeof en[k] !== typeof id[k])
+      .map(k => `${k} (en: ${typeof en[k]}, id: ${typeof id[k]})`)
+    expect(mismatched, `type mismatch: ${mismatched.join(', ')}`).toEqual([])
+  })
+
   // ── **…** ────────────────────────────────────────────────────
   // The emphasis marker (components/ui/Emphasized.jsx) is the one
   // piece of markup the string tables carry, and an unclosed run is
@@ -90,7 +104,7 @@ describe('locale parity (fr <-> en)', () => {
   // catch here, in both tables at once.
   it('closes every emphasis run it opens', () => {
     const unbalanced = []
-    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {
+    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es], ['id', id]]) {
       for (const [key, value] of Object.entries(table)) {
         // Interpolated copy is a function; the arguments only have to
         // be enough to build the string, not to be right.
@@ -119,7 +133,7 @@ describe('locale parity (fr <-> en)', () => {
     // Every table: French because the space is its own, English and
     // Spanish because a guillemet that strays in brings the same break
     // with it (Spanish quotes «…» tight, as the RAE writes them).
-    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) walk(table, lang, loose)
+    for (const [lang, table] of [['fr', fr], ['en', en], ['es', es], ['id', id]]) walk(table, lang, loose)
     expect(loose, `breakable space before : ; ! ? » (or after «) in: ${loose.join(', ')}`).toEqual([])
   })
 })
@@ -167,7 +181,7 @@ function shape(value) {
 const OWN_BY_LANGUAGE = new Set(['nyuSoundsLike'])
 
 describe('locale tables (nested)', () => {
-  for (const [lang, table] of [['fr', fr], ['es', es]]) {
+  for (const [lang, table] of [['fr', fr], ['es', es], ['id', id]]) {
     it(`gives ${lang} every nested key and list English has`, () => {
       const nested = Object.keys(en).filter(k => en[k] && typeof en[k] === 'object' && !OWN_BY_LANGUAGE.has(k))
       for (const key of nested) expect(shape(table[key]), `${lang}: ${key}`).toEqual(shape(en[key]))

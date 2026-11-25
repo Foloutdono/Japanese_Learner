@@ -15,6 +15,7 @@ from pathlib import Path
 import pytest
 
 from core.content_filter import card_refused, refused
+from translations import SPOKEN
 
 BACKEND = Path(__file__).resolve().parent.parent
 
@@ -210,15 +211,17 @@ def _strings(value):
 
 def _taught() -> dict[str, list[str]]:
     """Every text the app teaches, by where it comes from: the decks and
-    their translations, the catalogue, the banks and the seeds, and the
-    French and Spanish layers' senses and sentences."""
+    their translations in every language the app speaks, the catalogue,
+    the banks and the seeds, and each language's layer over JMdict, its
+    senses and sentences."""
     files = [
-        "datas/vocab/vocab_deck.json", "datas/vocab/vocab_fr.json", "datas/vocab/vocab_es.json",
-        "datas/kanji/kanji_deck.json", "datas/kanji/kanji_meanings_fr.json",
-        "datas/kanji/kanji_meanings_es.json", "datas/vocab/example_fixes.json",
-        "datas/vocab/example_added.json", "datas/vocab/example_senses.json",
-        "datas/vocab/theme_words.json", "content/basics.json",
+        "datas/vocab/vocab_deck.json", "datas/kanji/kanji_deck.json",
+        "datas/vocab/example_fixes.json", "datas/vocab/example_added.json",
+        "datas/vocab/example_senses.json", "datas/vocab/theme_words.json", "content/basics.json",
     ]
+    files += [f for lang in SPOKEN
+              for f in (f"datas/vocab/vocab_{lang}.json", f"datas/kanji/kanji_meanings_{lang}.json")
+              if (BACKEND / f).exists()]
     for pattern in ("content/grammar/N*.json", "content/comprehension/*.json",
                     "content/conversation/*.json", "content/exam_seed/*.json"):
         files += sorted(str(Path(p).relative_to(BACKEND)) for p in glob.glob(str(BACKEND / pattern)))
@@ -228,7 +231,8 @@ def _taught() -> dict[str, list[str]]:
         s for name in dir(reading_sentences) if name.isupper()
         for s in _strings(getattr(reading_sentences, name))
     ]
-    for layer in ("jmdict_fr", "jmdict_es"):
+    for layer in (f"jmdict_{lang}" for lang in SPOKEN
+                  if (BACKEND / "datas" / "vocab" / f"jmdict_{lang}.sqlite3").exists()):
         db = sqlite3.connect(BACKEND / "datas" / "vocab" / f"{layer}.sqlite3")
         try:
             taught[layer] = [s for table in ("sense", "example", "pool_line")
@@ -241,7 +245,8 @@ def _taught() -> dict[str, list[str]]:
 
 def test_nothing_the_app_teaches_is_refused_on_a_card():
     """A learner copies what the app says into a card: none of it, over
-    a million strings in three languages and Japanese, is refused there."""
+    a million strings in the languages the app speaks and Japanese, is
+    refused there."""
     taught = _taught()
     assert sum(len(v) for v in taught.values()) > 500_000
     # Each text once, under the first place that says it.

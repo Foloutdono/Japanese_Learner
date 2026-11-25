@@ -25,6 +25,7 @@ from study import banzuke, card_contents, level_fit, level_rule, main_modes
 from study import modes as study_modes
 from routes import feedback as feedback_routes
 from routes import transfer as transfer_routes
+from translations import SPOKEN, preview_langs
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -658,10 +659,10 @@ READING_PACES = ("standard", "relaxed", "slow", "untimed")
 DEFAULT_READING_PACE = "standard"
 
 
-# The interface languages (frontend/src/lib/locale.js SUPPORTED_LANGS).
-# The interface locales: es-ES is Spain's Spanish, an interface over the
-# Spanish content (plan 303).
-UI_LANGS = ("fr", "en", "es", "es-ES")
+# The interface locales: the languages the app speaks (translations.SPOKEN,
+# plan 312), and es-ES, Spain's Spanish, an interface over the Spanish
+# content (plan 303).
+UI_LANGS = (*SPOKEN, "es-ES")
 
 
 class LearningPayload(BaseModel):
@@ -1051,6 +1052,10 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # The interface language the learner chose, null if never: the
         # app copies it onto the device on boot (lib/langChoice.js).
         "uiLang": _ui_lang(user_id),
+        # The languages in preview the picker offers this account (plan
+        # 312): a language in translations.PREVIEW, to the accounts
+        # PREVIEW_LANG_USERS names (none since Indonesian left it).
+        "previewLangs": list(preview_langs(user_id)),
         # 前回 (plan 291): the last ride a Learn station boarded,
         # {path, at}, or null; the phone's Learn gate offers it again.
         "learnRide": _learn_ride(user_id),
