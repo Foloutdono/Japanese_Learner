@@ -67,6 +67,19 @@ describe('the gate\'s pill', () => {
     expect(screen.container.querySelector('.msn-pill__sum').textContent).toBe('+50 XP')
   })
 
+  it('opens on a real tap where the gate places it, over the print\'s tap-through layer', async () => {
+    // The gate places the pill on .tdy-hero--print, which lets taps
+    // through to the page (pointer-events: none): the pill was drawn and
+    // never answered a click.
+    seedMissions(missionsFixture())
+    const screen = await shell(<section className="tdy-hero tdy-hero--print" style={{ position: 'relative', inset: 0 }}><MissionsGate /></section>)
+    const pill = screen.container.querySelector('.msn-pill')
+    expect(getComputedStyle(pill).pointerEvents).toBe('auto')
+    await userEvent.click(pill)
+    await settle()
+    expect(document.querySelector('.msn-sheet')).not.toBeNull()
+  })
+
   it('opens the sheet of coupons, the day then the week, and counts the opening', async () => {
     seedMissions(missionsFixture())
     const screen = await shell(<MissionsGate />)
