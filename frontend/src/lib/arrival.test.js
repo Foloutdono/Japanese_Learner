@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { ARRIVAL_KEY, SOURCES, arrivalSource, classify, noteArrival } from './arrival'
-import { arrivalScript, ARRIVAL_KEY as LANDING_KEY } from '../../landing/page.mjs'
+import { ARRIVAL_KEY, REFERRAL_KEY, SOURCES, arrivalSource, classify, noteArrival, noteReferral, referralSuggestion } from './arrival'
+import { arrivalScript, ARRIVAL_KEY as LANDING_KEY, REFERRAL_KEY as LANDING_REFERRAL_KEY } from '../../landing/page.mjs'
 
 // 入口 (plan 313): the door a learner came in by, as one closed class.
 
@@ -93,5 +93,34 @@ describe('the landing page’s note', () => {
     const seed = { [ARRIVAL_KEY]: JSON.stringify({ src: 'tiktok', ref: null }) }
     expect(arrivalSource({ storage: run({ referrer: 'https://www.google.com/', seed }) })).toBe('tiktok')
     expect(run({ referrer: 'https://www.tsuji.app/en' }).getItem(ARRIVAL_KEY)).toBeNull()
+  })
+
+  it('keeps the username of a referral link for the app to suggest, and nothing else (plan 332)', () => {
+    expect(LANDING_REFERRAL_KEY).toBe(REFERRAL_KEY)
+    const storage = run({ search: '?src=referral&ref=Mei_2' })
+    expect(referralSuggestion({ storage })).toBe('Mei_2')
+    expect(arrivalSource({ storage })).toBe('referral')
+    expect(run({ search: '?src=referral&ref=<b>x</b>' }).getItem(REFERRAL_KEY)).toBeNull()
+    expect(run({ search: '?src=tiktok&ref=Mei' }).getItem(REFERRAL_KEY)).toBeNull()
+  })
+})
+
+describe('noteReferral', () => {
+  const memory2 = () => { const m = new Map(); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, String(v)) } }
+
+  it('notes the username of the first link only, and only a username', () => {
+    const storage = memory2()
+    noteReferral({ search: '?src=referral&ref=Aiko', storage })
+    noteReferral({ search: '?src=referral&ref=Kenji', storage })
+    expect(referralSuggestion({ storage })).toBe('Aiko')
+    const other = memory2()
+    noteReferral({ search: '?src=referral&ref=a', storage: other })
+    noteReferral({ search: '?ref=Aiko', storage: other })
+    expect(referralSuggestion({ storage: other })).toBeNull()
+  })
+
+  it('reads the referral as an arrival of its own', () => {
+    expect(SOURCES).toContain('referral')
+    expect(classify({ src: 'referral' })).toBe('referral')
   })
 })

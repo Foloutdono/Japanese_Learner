@@ -118,3 +118,15 @@ def test_a_reply_that_reads_as_reasoning_or_cut_off_is_refused(reply):
 def test_a_short_review_in_prose_is_still_served(reply):
     assert tutor_review.usable_prose(reply)
     assert tutor_review.acceptable_reply(reply)
+
+
+# ── The corrected line is marked against what the learner typed (plan 330) ──
+
+def test_a_final_mark_the_learner_did_not_write_is_not_a_word_left_out():
+    got = tutor_review.corrected("きのうはみずだけのみました。", "きのうみずだけをのんでした")
+    assert "".join(p["text"] for p in got["better_parts"]) == "きのうはみずだけのみました"
+
+
+def test_a_final_mark_the_learner_wrote_stays():
+    got = tutor_review.corrected("きのうはみずだけのみました。", "きのうみずだけをのんでした。")
+    assert "".join(p["text"] for p in got["better_parts"]).endswith("。")

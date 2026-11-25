@@ -25,6 +25,8 @@ import SoundPalette from './screens/SoundPalette'
 import OffersPreview from './screens/OffersPreview'
 import DayClearPreview from './screens/DayClearPreview'
 import RatingPreview from './screens/RatingPreview'
+import MissionsPreview from './screens/MissionsPreview'
+import ReferralPreview from './screens/ReferralPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
@@ -93,6 +95,7 @@ import ExamResult from './screens/ExamResult'
 import TranslationRun from './screens/TranslationRun'
 import AppLoading from './screens/AppLoading'
 import { FeedbackHost } from './components/feedback/FeedbackSheet'
+import { SetAsideHost } from './components/study/SetAside'
 
 // Renders nothing — keeps <html lang> and document.title in step with
 // the current route and language. Beside <Routes/> rather than inside
@@ -642,6 +645,12 @@ export default function App({ front = NO_FRONT }) {
               <Route path="/dev/dayclear" element={<DayClearPreview />} />
               {/* The early-access sheet, the web's and Android's (plan 307). */}
               <Route path="/dev/rating" element={<RatingPreview />} />
+              {/* The missions, in the real gate and the real holder, three
+                  ways (plan 331): ?v=A|B|C&screen=today|sheet|profile. */}
+              <Route path="/dev/missions" element={<MissionsPreview />} />
+              {/* The referral, in the real gate and the real holder, two ways
+                  (plan 332): ?v=A|B&screen=today|choose|profile|manage|reward. */}
+              <Route path="/dev/referral" element={<ReferralPreview />} />
             </Route>
           </Routes>
           {/* The workbench replays the real boarding, so it needs the
@@ -941,6 +950,7 @@ export default function App({ front = NO_FRONT }) {
             link and a card's flag. Here for RunOutSheet's reason -- the
             run's own retry unmounts the failure that raised it. */}
         <FeedbackHost session={session} />
+        <SetAsideHost session={session} />
         <OfferScreen />
         {/* 補充 — what the refill landed while the app was closed,
             charged onto the card on arrival (plans 141, 278). Held

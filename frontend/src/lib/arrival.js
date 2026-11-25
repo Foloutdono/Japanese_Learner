@@ -15,9 +15,9 @@
 
 export const ARRIVAL_KEY = 'tsuji.arrival'
 
-export const SOURCES = ['tiktok', 'instagram', 'youtube', 'reddit', 'search', 'store', 'other', 'direct']
+export const SOURCES = ['tiktok', 'instagram', 'youtube', 'reddit', 'search', 'store', 'other', 'direct', 'referral']
 
-const SRC = { tiktok: 'tiktok', tt: 'tiktok', instagram: 'instagram', ig: 'instagram', youtube: 'youtube', yt: 'youtube', reddit: 'reddit' }
+const SRC = { tiktok: 'tiktok', tt: 'tiktok', instagram: 'instagram', ig: 'instagram', youtube: 'youtube', yt: 'youtube', reddit: 'reddit', referral: 'referral' }
 
 const HOSTS = [
   [/(^|\.)tiktok\.com$/, 'tiktok'],
@@ -74,4 +74,33 @@ export function noteArrival({ search = '', referrer = '', storage = globalThis.l
 /** The class `boarding_done` carries. */
 export function arrivalSource({ storage = globalThis.localStorage, native = false } = {}) {
   return classify(storage ? read(storage) : null, native)
+}
+
+// ── 縁 — a referral link's parrain, as a suggestion (plan 332) ──────────
+// /?src=referral&ref=<username> names who invited the learner. The name is
+// kept on this device alone, as a suggestion the sheet that asks for a
+// parrain fills in, and leaves it only if the learner chooses that parrain
+// (POST /api/referral/choose). The first link wins, as the arrival does.
+export const REFERRAL_KEY = 'tsuji.referral'
+const HANDLE = /^[A-Za-z0-9_]{3,20}$/
+
+/** Note a referral link's username, unless one is noted already. */
+export function noteReferral({ search = '', storage = globalThis.localStorage } = {}) {
+  if (!storage) return
+  let q
+  try { q = new URLSearchParams(search) } catch { return }
+  if (q.get('src')?.toLowerCase() !== 'referral') return
+  const name = q.get('ref')
+  if (!name || !HANDLE.test(name)) return
+  try { if (!storage.getItem(REFERRAL_KEY)) storage.setItem(REFERRAL_KEY, name) } catch { /* private mode */ }
+}
+
+/** The username a referral link suggested, or null. */
+export function referralSuggestion({ storage = globalThis.localStorage } = {}) {
+  try {
+    const name = storage?.getItem(REFERRAL_KEY)
+    return name && HANDLE.test(name) ? name : null
+  } catch {
+    return null
+  }
 }

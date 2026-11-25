@@ -10,7 +10,7 @@ from core.db import db_conn
 from core.rls import enable_rls
 from core.auth import get_user_id
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
-from study import tutor_review
+from study import romaji, tutor_review
 from study.llm_shared import llm_configured
 
 # A pass feature (plan 069): every route here refuses a free learner
@@ -198,25 +198,27 @@ A reference Japanese translation is:
 <<<{target_phrase}>>> (<<<{target_romaji}>>>)
 
 The learner's own attempt was:
-<<<{user_answer}>>>
+<<<{user_answer}>>>{read_note}
 {grammar_note}
 Respond with ONLY a JSON object (no markdown fences, no commentary, no reasoning written out) matching exactly this schema. Your reply starts with the character {{ and ends with }}:
 {{
   "verdict": "correct",
   "summary": "...",
   "good": ["..."],
-  "fix": [{{"issue": "...", "fix": "..."}}],
+  "fix": [{{"given": "...", "fix": "...", "issue": "...", "severity": "error"}}],
   "grammar_used": null,
   "better": ""
 }}
 
 Rules:
-- "verdict" is exactly one of: "correct" (the meaning is right and the Japanese is natural -- a phrasing that differs from the reference but is still correct, natural Japanese is "correct", never a mistake), "acceptable" (the meaning is right and a native speaker would understand it, but something is slightly unnatural), "partial" (understood, but with a real error: a wrong particle, a wrong verb form, a wrong word or kanji), "incorrect" (the meaning is lost or changed).
+- The attempt is judged as the Japanese it is, as written. The reference is only one good translation: never assume the attempt says what the reference says. Read the attempt's own forms one by one: a wrong verb form (「飲んでした」 for 「飲みました」), particle, word or politeness is a fix even though the reference has the right one, and something only the reference has is never praised in "good".
+- Never comment on how the attempt was typed: romaji, kana or kanji, spaces, a long vowel, は written wa. It is no fix, no praise and not in the summary. Judge only the Japanese.
+- "verdict" is exactly one of: "correct" (the meaning is right and the Japanese is natural -- a phrasing that differs from the reference but is still correct, natural Japanese is "correct", never a mistake), "acceptable" (the meaning is right and a native speaker would understand it, with only "natural" items to fix), "partial" (understood, but with a real error: a wrong particle, a wrong verb form, a wrong word or kanji), "incorrect" (the meaning is lost or changed).
 - "summary" is ONE short {lang_name} sentence saying why that verdict. No greeting, no "your translation", no restating the sentence.
 - "good" lists what the attempt got right: at most {max_items} items, each a short {lang_name} phrase that NAMES the Japanese it praises in 「 」 (for example: 「を」 marks the object correctly). May be empty.
-- "fix" lists what is wrong: at most {max_items} items, the most important first. Each has "issue" (a short {lang_name} phrase naming the Japanese in 「 」 and what is wrong with it) and "fix" (what to write instead, the Japanese in 「 」). A phrasing that merely differs from the reference is NOT an issue. Empty means nothing to fix.
+- "fix" lists what to change: at most {max_items} items, errors first. Each has "given" (the learner's own text this is about, copied EXACTLY from the attempt, a few characters to one phrase; the empty string when something is missing from the attempt), "fix" (what to write there instead, plain Japanese with no brackets; the empty string when the text simply goes), "issue" (a short {lang_name} phrase naming the Japanese in 「 」 and why) and "severity": "error" when the Japanese is wrong (a wrong form, particle or word, or one that changes the meaning), "natural" when it is correct but a native speaker would say it another way (an optional particle, a dropped topic marker). Never list a phrasing that is just different from the reference and equally natural. Empty means nothing to fix.
 - "grammar_used": {grammar_used_rule}
-- "better" is the learner's OWN sentence with the fixes applied, in Japanese, when "fix" is not empty; the empty string when it is. Keep their wording wherever it was fine: this is their sentence corrected, not the reference copied.
+- "better" is the learner's OWN sentence with EVERY fix applied (the "natural" ones too), when "fix" is not empty; the empty string when it is. Write it in the same script as the attempt, so kana stays kana and kanji stays kanji. Keep their wording wherever it was fine: this is their sentence corrected, not the reference copied.
 - Every value is a plain JSON string, list, boolean or null, and a string opens with the " character and closes with it. Quote Japanese INSIDE a value with 「 」 only, never with quotes.
 - Short over complete. The learner should see the verdict, the good items and the fix items and know in three seconds where they stand."""
 
@@ -232,6 +234,16 @@ _parse_review = tutor_review.parse_review
 _changed_spans = tutor_review.changed_spans
 _corrected = tutor_review.corrected
 _review_as_text = tutor_review.review_as_text
+
+
+def read_answer(answer: str) -> tuple[str, str | None]:
+    """(the answer as the tutor reads it, its kana when it was romaji).
+    A romaji answer is read as the kana it spells; one that does not
+    read whole (an English sentence, a name) is left as typed."""
+    kana = romaji.kana_of(answer.strip())
+    if kana and not any("a" <= c.lower() <= "z" for c in kana):
+        return kana, kana
+    return answer, None
 
 
 @router.post("/api/translation/analyze")
@@ -282,13 +294,21 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     else:
         grammar_note = ""
         grammar_used_rule = "always null: no grammar point was named for this sentence."
+    # A learner may type in romaji, and that is theirs to choose: the
+    # tutor reads the Japanese it spells and never the alphabet (plan 330).
+    reviewed, kana = read_answer(payload.user_answer)
+    read_note = (
+        "\n(They typed it in romaji. It is shown here as the Japanese it spells: judge that Japanese.)"
+        if kana else ""
+    )
     prompt = ANALYSIS_PROMPT_TEMPLATE.format(
         lang_name=lang_name,
         prompt_lang_name=prompt_lang_name,
         translation_prompt=_fenced(payload.translation_prompt),
         target_phrase=_fenced(payload.target_phrase),
         target_romaji=_fenced(payload.target_romaji),
-        user_answer=_fenced(payload.user_answer),
+        user_answer=_fenced(reviewed),
+        read_note=read_note,
         grammar_note=grammar_note,
         grammar_used_rule=grammar_used_rule,
         max_items=_MAX_ITEMS,
@@ -326,9 +346,12 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
         logger.warning("translation review was not the shape; served as prose")
         return {"review": None, "analysis": cleaned}
     review.pop("japanese", None)  # composition's key; the prompt here never asks for it
+    tutor_review.keep_given(review, reviewed)
     if review["better"]:
-        review.update(_corrected(review["better"], payload.user_answer))
-    return {"review": review, "analysis": _review_as_text(review)}
+        review.update(_corrected(review["better"], reviewed))
+    # `answer_kana`: the line the review's marks are drawn on, when the
+    # learner typed romaji (None when they wrote Japanese).
+    return {"review": review, "analysis": _review_as_text(review), "answer_kana": kana}
 
 
 # ── Scheduling ───────────────────────────────────────────────────────

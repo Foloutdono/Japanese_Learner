@@ -13969,6 +13969,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   line-height: 1.5;
 }
+/* The line's register (plan 329): the app's outlined pill, shrunk to its
+   word in the column rather than stretched across it. */
+.bkd__register { align-self: flex-start; }
 /* The rows: word | reading | meaning | level, one line each where the
    column is wide enough, and on a phone the meaning drops under the
    word so a long gloss wraps in the room the word left rather than
@@ -14324,6 +14327,167 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .rvw__verdict--partial { --badge-color: var(--warning); }
 .rvw__verdict--incorrect { --badge-color: var(--danger); }
 
+/* The weighed review (plan 330, the owner's pick C of the canvas
+   "Translation review"): a real error is a card of its own with the
+   change set large, the ones that are only less natural one quiet line
+   each, in the near ink, so the weight is read before a word is. Each
+   has a Détail button that asks the asking (AskPanel, AskDetail). A
+   card's edge is the miss ink, the family's rule for what went wrong
+   (DESIGN.md, colour); the near ink is the wave and the roundel the
+   sentence already wears (.pcard-pin--near). */
+.rvw-weighed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rvw-big {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--surface-line));
+  border-radius: var(--r-panel);
+  /* A paper ground, as the answer's well is: its inks are the theme's, so
+     the struck word and the reason read in both (Guard 5). */
+  background: var(--surface);
+}
+.rvw-big__top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.rvw__tag--error { --badge-color: var(--danger); }
+.rvw__n--near {
+  border-color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.rvw-big__chg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-3);
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.rvw-chg__was { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); font-weight: 500; }
+s.rvw-chg__was { text-decoration-thickness: 2px; }
+.rvw-chg__arrow { font-size: var(--fs-lead); color: var(--text-secondary); }
+.rvw-chg__to { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.rvw-big__why {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.rvw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  padding-inline: var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.rvw-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.rvw-btn:disabled { color: var(--text-secondary); cursor: default; }
+.rvw-btn:hover:not(:disabled) { background: var(--bg-card-hover); }
+.rvw-btn--big {
+  border-color: color-mix(in srgb, var(--warning) 70%, var(--surface-line));
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.rvw-btn--big:disabled { border-color: var(--surface-line); color: var(--text-secondary); }
+.rvw-soft {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--sp-1) var(--sp-3);
+  align-items: center;
+  padding-block: var(--sp-3);
+  border-top: 1px solid var(--surface-line);
+}
+.rvw-soft__text {
+  min-width: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.rvw-soft__chg {
+  margin-inline-end: var(--sp-2);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.rvw-soft .rvw-chg__was,
+.rvw-soft .rvw-chg__to { color: inherit; font-weight: inherit; }
+.rvw-soft .rvw-chg__arrow { margin-inline: var(--sp-2); font-size: inherit; }
+
+/* The detail of one flagged mistake, in the asking's thread (plan 330,
+   AskDetail): parts, not a paragraph. Shared by the desk's panel and the
+   phone's page, so it stands outside both's own names. */
+.ask-detail {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+.ask-detail__part { display: flex; flex-direction: column; gap: var(--sp-1); }
+.ask-detail__head {
+  margin: 0;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.ask-detail__what { margin: 0; overflow-wrap: anywhere; }
+.ask-detail__rule {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-1) var(--sp-4);
+  margin: 0;
+}
+.ask-detail__rule dt { color: var(--text-secondary); }
+.ask-detail__rule dd { margin: 0; font-family: var(--font-jp); overflow-wrap: anywhere; }
+.ask-detail__examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ask-detail__examples b {
+  display: block;
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.ask-detail__examples span { color: var(--text-secondary); }
+.ask-detail__memo {
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+
 /* ── 見本 — the practice card (plan 185) ──
    The owner's pick A of the canvas "Tsuji — the practice cards", for
    reading, translation, dictation and composition
@@ -14514,6 +14678,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    end, and a bar along the well's foot, as long as the share matched --
    the card band's bar (.card-band), in the measure's quiet ink: it is
    the server's measure, not a verdict. */
+/* What was typed, under the Japanese it was read as (plan 330): the
+   learner's own romaji, quiet, never marked. */
+.pcard-well__typed {
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
 .pcard-well__fig {
   flex: none;
   line-height: 1;
@@ -14618,6 +14789,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-indent: 0;
   vertical-align: super;
   font-variant-numeric: tabular-nums;
+}
+/* A fix that is only less natural (plan 330): the learner's word was
+   right, so it is not struck. Its number and its mark stand in the near
+   ink, the wave .pcard-miss--near draws. */
+.pcard-pin--near {
+  border-color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.pcard-del--near {
+  text-decoration: underline wavy color-mix(in srgb, var(--warning) 70%, transparent);
+  text-underline-offset: 4px;
 }
 /* The words missed, under the well (A2.2): each the word, its reading
    and its meaning, the miss ink as its edge. Stacked, not side by side
@@ -32291,6 +32473,175 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
 .clrdev-share img { max-width: 100%; height: auto; box-shadow: var(--elev-board); }
 /* ── 191:primitives end ── */
 
+/* ══ 331 — 任務, the missions (plan 331) ════════════════════════════
+   The pill under Today's legend, the sheet of coupons it opens and the
+   holder's plates and discoveries: the owner's pick A of the drawings.
+   A mission is an object about the learner, so it wears the pass's
+   materials (the card's ink, the credits' metal) and never a line's
+   colour, but for the 3px rail of the line a practice coupon sends you to. */
+.msn-bar { display: block; height: 3px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
+.msn-bar i { display: block; height: 100%; background: var(--accent2); }
+.msn-fig { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; }
+.msn-fig small { font-weight: 500; color: inherit; opacity: 0.7; font-size: inherit; }
+.msn-note { margin: 0; font-size: var(--fs-caption); color: var(--danger); text-align: right; }
+.msn-sub { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); font-family: var(--font-display); font-size: var(--fs-body); color: var(--text-secondary); }
+.msn-sub b { font-weight: 700; }
+.msn-foot { display: flex; align-items: center; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: transparent; color: var(--text-secondary); font: inherit; font-size: var(--fs-sm); cursor: pointer; }
+.msn-foot:hover, .msn-foot:focus-visible { border-color: var(--text-secondary); filter: none; }
+.msn-foot__what { flex: 1; text-align: left; }
+.msn-pop { position: absolute; right: var(--sp-4); top: var(--sp-1); z-index: 1; padding: var(--sp-1) var(--sp-4); border: 1px solid var(--sel-line); border-radius: var(--r-pill); background: var(--surface); color: var(--sel-ink); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; opacity: 0; pointer-events: none; }
+.msn-sheet { gap: var(--sp-4); }
+
+/* The pill under the gate's legend: three lamps, the count, the day's sum.
+   The gate's own glass, as the legend's keys and the services' door wear it. */
+.msn-pill { position: relative; display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 32px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: color-mix(in srgb, var(--bg-panel) 82%, transparent); color: var(--text-on-panel-soft); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; white-space: nowrap; cursor: pointer; }
+.msn-pill:hover, .msn-pill:focus-visible { border-color: var(--text-on-panel-soft); filter: none; }
+.msn-pill--still { cursor: default; }
+.msn-pill__n { font-variant-numeric: tabular-nums; }
+.msn-pill__n b { color: var(--text-on-panel); }
+.msn-pill__sum { color: var(--gate-gold-lit); font-weight: 700; }
+.msn-pill__dots { display: inline-flex; gap: var(--sp-1); }
+.msn-pill__dots i { width: 8px; height: 8px; border: 1.5px solid currentcolor; border-radius: var(--r-pill); opacity: 0.6; }
+.msn-pill__dots i.on { border-color: var(--gate-gold-lit); background: var(--gate-gold-lit); opacity: 1; }
+/* A reward waits to be collected: a gold lamp on the pill's corner. */
+.msn-pill__flag { position: absolute; top: -2px; right: var(--sp-1); width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--gate-gold-lit); box-shadow: 0 0 0 2px var(--bg-panel); }
+
+/* The book: the day's missions in one panel, each a row whose stub is
+   torn off to collect it; one perforation runs down the stubs' edge. */
+.msn-book { position: relative; display: flex; flex-direction: column; border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); overflow: hidden; }
+.msn-cpn { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; border-top: 1px solid var(--surface-line); border-left: 3px solid var(--line-color, transparent); }
+.msn-cpn:first-child { border-top: 0; }
+.msn-cpn__btn { display: contents; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.msn-cpn__body { display: flex; flex-direction: column; justify-content: center; gap: var(--sp-2); min-width: 0; min-height: 56px; padding: var(--sp-3) var(--sp-4); }
+.msn-cpn__label { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
+.msn-cpn__prog { display: flex; align-items: center; gap: var(--sp-3); }
+.msn-cpn__prog .msn-bar { flex: 1; }
+.msn-cpn__stub { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 84px; padding: var(--sp-3); border-left: 2px dashed var(--surface-line); transition: background 0.3s ease; }
+.msn-cpn__take { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text-secondary); }
+.msn-cpn__tap { font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-on-fill); }
+.msn-cpn--ready .msn-cpn__stub { background: var(--metal); border-left-color: var(--gate-gold-deep); }
+.msn-cpn--ready .msn-cpn__take { color: var(--text-on-fill); }
+.msn-cpn--ready .msn-cpn__label { color: var(--text-primary); }
+.msn-cpn--torn .msn-cpn__label { color: var(--text-secondary); font-weight: 500; }
+.msn-cpn__paid { font-size: var(--fs-lead); color: var(--success); }
+/* The bonus is a footnote to the three, not a fourth mission. */
+.msn-cpn--quiet .msn-cpn__body { min-height: 44px; }
+.msn-cpn--quiet .msn-cpn__label { font-size: var(--fs-sm); font-weight: 500; }
+.msn-cpn--quiet .msn-cpn__take { font-size: var(--fs-body); }
+/* Collect everything that is done, in one touch. */
+.msn-all { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); min-height: 44px; padding: 0 var(--sp-5); border: 0; border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; box-shadow: var(--elev-action); cursor: pointer; }
+.msn-all b { font-variant-numeric: tabular-nums; }
+
+/* The holder's insert (the profile): the plates, then the discoveries. */
+.msn-ins { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); }
+.msn-ins__head { display: flex; align-items: center; gap: var(--sp-4); }
+.msn-ins__names { flex: 1; min-width: 0; }
+.msn-ins__fig { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+
+.msn-lattice { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--surface-line); border-radius: var(--r-flat); }
+.msn-lattice__cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); border: 0; border-radius: var(--r-flat); background: var(--surface); color: var(--text-secondary); font: inherit; }
+.msn-lattice__cell b { font-family: var(--font-jp); font-size: var(--fs-lead); opacity: 0.35; }
+.msn-lattice__cell small { font-size: var(--fs-caption-xs); line-height: 1.15; text-align: center; }
+.msn-lattice__cell.on { color: var(--text-primary); }
+.msn-lattice__cell.on b { opacity: 1; color: var(--accent); }
+.msn-lattice__cell--ready { cursor: pointer; background: var(--sel-wash); }
+.msn-lattice__cell--ready small { font-weight: 700; color: var(--sel-ink); }
+.msn-lattice__cell:not(:nth-child(5n)) { border-right: 1px solid var(--surface-line); }
+.msn-lattice__cell:nth-child(-n+5) { border-bottom: 1px solid var(--surface-line); }
+
+/* The plates: a station's name board, hung. */
+.msn-plates { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); }
+.msn-plate { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-4) var(--sp-3) var(--sp-3); border: 1px solid var(--surface-line); border-radius: var(--r-plate); background: var(--surface); box-shadow: var(--elev-hang); color: inherit; font: inherit; text-align: center; }
+.msn-plate::after { content: ""; position: absolute; inset: auto 0 0; height: 3px; background: var(--accent); }
+.msn-plate__code { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); }
+.msn-plate__jp { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 700; line-height: 1.1; }
+.msn-plate__kana { font-size: var(--fs-caption); color: var(--text-secondary); }
+.msn-plate__en { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 600; }
+.msn-plate__foot { margin-top: var(--sp-1); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; color: var(--success); font-variant-numeric: tabular-nums; }
+.msn-plate__foot small { color: var(--text-secondary); font-weight: 500; }
+.msn-plate--off { box-shadow: none; }
+.msn-plate--off .msn-plate__jp, .msn-plate--off .msn-plate__kana { opacity: 0.4; }
+.msn-plate--off::after { background: var(--surface-line); }
+.msn-plate--max { background: linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 14%, var(--surface)) 0%, var(--surface) 100%); }
+.msn-plate--ready { cursor: pointer; border-color: var(--sel-line); }
+.msn-plate--ready .msn-plate__foot { color: var(--sel-ink); }
+
+/* The announcement (MissionsNewsSheet). */
+.msn-news__art { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.msn-news__title { margin: 0; text-wrap: balance; }
+.msn-news__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.msn-news__acts { display: flex; flex-direction: column; gap: var(--sp-4); }
+.msn-news .msn-pill { background: var(--bg-panel); }
+
+/* The reward, once: a stub's flash, the sum rising off it. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes msn-flash { from { background: color-mix(in srgb, var(--gate-gold-lit) 28%, transparent); } to { background: transparent; } }
+  @keyframes msn-rise { 0% { opacity: 0; transform: translateY(var(--sp-3)); } 25% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(calc(-1 * var(--sp-6))); } }
+  .msn-cpn--torn.msn-just .msn-cpn__stub { animation: msn-flash 1s ease-out; }
+  .msn-just > .msn-pop { animation: msn-rise 2.2s ease-out 0.1s both; }
+}
+/* ── 331:end ── */
+/* ══ 332 — 縁, the referral (plan 332) ═════════════════════════════
+   The owner's pick B: a slip at Today's foot while the referral has a word
+   to say, one door in the holder under the duels', one sheet behind it.
+   The filleuls are the missions' book of tickets (.msn-book, .msn-cpn): a
+   row each, its stub the reward, metal once there is something to collect.
+   The invitation is a ticket of its own: three fares, the link, the share. */
+.ref-sheet { gap: var(--sp-4); }
+.ref-sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.ref-prog { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+.ref-dots { display: inline-flex; flex: none; gap: var(--sp-1); }
+.ref-dots i { width: 8px; height: 8px; border: 1.5px solid var(--text-secondary); border-radius: var(--r-pill); }
+.ref-dots i.on { border-color: var(--accent2); background: var(--accent2); }
+.ref-free { border-left-style: dashed; }
+.ref-free .msn-cpn__label { color: var(--text-secondary); font-weight: 500; }
+.ref-choose__days { flex: none; font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); font-variant-numeric: tabular-nums; }
+.ref-ask { flex-wrap: wrap; }
+.ref-ask__acts { display: flex; flex: 1 0 100%; gap: var(--sp-3); }
+.ref-ask__btn { flex: 1; min-height: 36px; }
+.ref-release { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); }
+.ref-release__go { align-self: flex-start; padding: 0; border: 0; background: none; font: inherit; font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.ref-release__go:hover,
+.ref-release__go:focus-visible { color: var(--text-primary); filter: none; }
+.ref-release__go--no { text-decoration: none; }
+.ref-note { margin: 0; font-size: var(--fs-caption); color: var(--text-secondary); text-align: center; }
+.ref-acts { gap: var(--sp-3); }
+/* The invitation: three fares across a perforated ticket, then the link. */
+.ref-invite { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); }
+.ref-fare { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.ref-fare__cell { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-3); }
+.ref-fare__cell + .ref-fare__cell { border-left: 1px dashed var(--surface-line); }
+.ref-fare__sum { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1; color: var(--text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ref-fare__cell:first-child .ref-fare__sum { color: var(--sel-ink); }
+.ref-fare__say { font-size: var(--fs-caption-xs); line-height: 1.35; color: var(--text-secondary); text-wrap: pretty; }
+.ref-link { display: flex; align-items: center; gap: var(--sp-3); min-height: 44px; padding: 0 var(--sp-2) 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--bg-main); }
+.ref-link__url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-sm); color: var(--text-secondary); user-select: all; }
+.ref-link__go { flex: none; min-height: 32px; padding-inline: var(--sp-4); }
+/* Naming a parrain: what it pays, then the one name, for good. */
+.ref-person { padding-inline: 0; }
+.ref-gift { display: flex; align-items: center; gap: var(--sp-3); margin: 0; }
+.ref-gift__sum { flex: none; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; box-shadow: var(--elev-action); }
+.ref-gift__say { font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); }
+.ref-sure { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); text-align: center; }
+.ref-sure__seal { display: grid; place-items: center; width: 64px; height: 64px; border: 2px solid var(--pass-ink); border-radius: var(--r-pill); font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; color: var(--pass-ink); }
+.ref-sure__name { font-family: var(--font-display); font-size: var(--fs-heading); line-height: 1.1; }
+.ref-sure__say { max-width: 32ch; }
+.ref-sure .ref-acts { align-self: stretch; }
+/* Today's slip: the foot's door, its seal in the pass's ink. */
+.ref-slip__seal { flex: none; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; color: var(--pass-ink); }
+.ref-slip .ref-dots { margin-left: auto; }
+.ref-slip__sum { font-variant-numeric: tabular-nums; color: var(--sel-ink); }
+.ref-slip--paid { border-color: var(--gate-gold); }
+.ref-slip--paid .tdy-door__what b { color: var(--gate-gold-lit); }
+/* The reward paid: a ticket of the metal, once. */
+.ref-welcome__art { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.ref-welcome__ticket { display: inline-flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-4) var(--sp-7); border-radius: var(--r-card); background: var(--metal); color: var(--text-on-fill); font-family: var(--font-display); box-shadow: var(--elev-action); }
+.ref-welcome__sum { font-size: var(--fs-heading); line-height: 1; font-variant-numeric: tabular-nums; }
+.ref-welcome__unit { font-size: var(--fs-sm); font-weight: 700; }
+.ref-welcome__title { margin: 0; text-wrap: balance; }
+.ref-welcome__lead { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+/* ── 332:end ── */
+
 
 /* ══ 247 — 乗車, the card is the form ══════════════════════════════
    The owner's pick C of the boarding's canvas: the card's back, filled
@@ -34366,6 +34717,11 @@ button.anl-frame__pt:focus-visible { color: var(--text-primary); }
   cursor: pointer;
 }
 .fb-flag::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-3)); }
+
+/* 回送 — Settings › Set aside (plan 328): the cards set aside, each the
+   flag sheet's card with its way back at the end of the row. */
+.aside-list { display: flex; flex-direction: column; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.aside-row__back { flex: none; }
 .fb-flag:hover,
 .fb-flag:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
 

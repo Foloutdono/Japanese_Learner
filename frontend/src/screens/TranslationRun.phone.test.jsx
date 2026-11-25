@@ -142,7 +142,7 @@ describe('the translation page at 390×844', () => {
     pageIsNotWider()
   })
 
-  it('corrects the answer in place, the right words small over the struck ones, and numbers the fix on the reference', async () => {
+  it('corrects the answer in place, the right words small over the struck ones, and numbers the fix on the learner\'s own words', async () => {
     const root = await answered(await run(), 'おじさんは毎日、新聞をよます。')
     const well = root.querySelector('.pcard-well')
     // A1.1: each change written over what it replaces, so the line keeps
@@ -156,10 +156,12 @@ describe('the translation page at 390×844', () => {
     // A correction is ink, never a fill (DESIGN.md, Colour).
     const bg = getComputedStyle(well.querySelector('.pcard-miss ins')).backgroundColor
     expect(['rgba(0, 0, 0, 0)', 'transparent']).toContain(bg)
-    // A1.3: the fix's number on the reference's words it is about.
+    // The fix's number stands on what the learner wrote (plan 330, pick C);
+    // the reference is left clean.
+    expect([...well.querySelectorAll('.pcard-pin')].map(p => p.textContent)).toEqual(['1'])
     const lead = root.querySelector('.pcard-lead__jp')
-    expect(lead.querySelector('.pcard-hit').textContent).toBe('父')
-    expect(lead.querySelector('.pcard-pin').textContent).toBe('1')
+    expect(lead.querySelector('.pcard-hit')).toBeNull()
+    expect(lead.querySelector('.pcard-pin')).toBeNull()
     // A1.4: the fix leads with what to write.
     expect(root.querySelector('.rvw__row .rvw__to').textContent).toBe('「父」')
     pageIsNotWider()
@@ -179,5 +181,67 @@ describe('the translation page at 390×844', () => {
     const above = line.top - box.top
     const below = box.bottom - line.bottom
     expect(Math.abs(above - below)).toBeLessThan(line.height)
+  })
+})
+
+// ── The weighed review (plan 330, pick C) at 390 ──
+const WEIGHED = {
+  verdict: 'partial',
+  summary: 'Compris, mais la forme du verbe est fausse.',
+  good: [],
+  fix: [
+    { given: 'よます', fix: 'よみます', issue: '「よます」 n’existe pas : le verbe se conjugue 「読みます」.', severity: 'error' },
+    { given: 'は', fix: '', issue: '「は」 est facultatif ici, et rend la phrase plus appuyée.', severity: 'natural' },
+  ],
+  grammar_used: null,
+  better: 'おじさん毎日、新聞をよみます。',
+  better_parts: [{ text: 'おじさん毎日、新聞をよみます。' }],
+}
+const DETAIL = {
+  what: 'Tu as écrit 「よます」, qui n’existe pas : un verbe en う se conjugue en changeant sa dernière syllabe.',
+  rule: [{ label: 'Verbe', text: '読む → 読みます → 読みました' }, { label: 'Radical', text: '読み + ます' }],
+  examples: [{ jp: 'パンを食べます。', tr: 'Je mange du pain.' }],
+  memo: 'Verbe → radical en い + ます.',
+}
+
+describe('the weighed review at 390×844', () => {
+  beforeEach(() => {
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/translation/batch')) return ok({ phrases: PHRASES })
+      if (u === '/api/translation/analyze') return ok({ review: WEIGHED, analysis: 'x', answer_kana: 'おじさんは毎日、新聞をよます。' })
+      if (u === '/api/phrase/analyze') return ok({ text: PHRASES[0].phrase, available: false, grammar: [], tokens: [] })
+      if (u === '/api/ask') return ok({ answer: DETAIL.what, detail: DETAIL, off_topic: false, left: 39 })
+      return ok({})
+    })
+  })
+
+  it('keeps the error card, the soft line and the typed answer inside the card', async () => {
+    const root = await answered(await run(), 'ojisan wa mainichi, shinbun wo yomasu.')
+    const card = root.querySelector('.prompt-card--footed')
+    for (const el of root.querySelectorAll('.rvw-big, .rvw-soft, .pcard-well__typed, .rvw-btn')) {
+      expect(el.getBoundingClientRect().right).toBeLessThanOrEqual(card.getBoundingClientRect().right + 0.5)
+    }
+    pageIsNotWider()
+  })
+
+  it('makes each Détail a hit target', async () => {
+    const root = await answered(await run(), 'ojisan wa mainichi, shinbun wo yomasu.')
+    const buttons = [...root.querySelectorAll('.rvw-btn')]
+    expect(buttons).toHaveLength(2)
+    for (const b of buttons) expect(b.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+  })
+
+  it('answers a Détail in the asking\'s page, over the run, without leaving the window', async () => {
+    const root = await answered(await run(), 'ojisan wa mainichi, shinbun wo yomasu.')
+    root.querySelector('.rvw-big .rvw-btn').click()
+    await settle(250)
+    const page = document.querySelector('.ask-layer')
+    expect(page).not.toBeNull()
+    const detail = page.querySelector('.ask__a .ask-detail')
+    expect(detail.querySelector('.ask-detail__what').textContent).toBe(DETAIL.what)
+    expect(detail.querySelectorAll('.ask-detail__rule dt')).toHaveLength(2)
+    expect(detail.getBoundingClientRect().right).toBeLessThanOrEqual(window.innerWidth)
+    pageIsNotWider()
   })
 })

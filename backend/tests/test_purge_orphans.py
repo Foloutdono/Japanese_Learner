@@ -110,8 +110,11 @@ def test_discovery_covers_every_shape_of_scoping_in_the_plan():
     ]
     # video_session_jobs and pvp_duels are the subquery-scoped entries,
     # and neither can hold a user its own table does not: a job's parent
-    # video_sessions, a duel's players in pvp_entries (plan 279).
-    assert unhandled == ["video_session_jobs", "pvp_duels"], unhandled
+    # video_sessions, a duel's players in pvp_entries (plan 279). The
+    # referral's two tables name a parrain and a filleul, never a user_id;
+    # both had a user_profiles row to be named (study/referral.choose), so
+    # the profile is how an orphan among them is found (plan 332).
+    assert unhandled == ["video_session_jobs", "referral_rewards", "referrals", "pvp_duels"], unhandled
 
 
 # ── The refusals ─────────────────────────────────────────────────

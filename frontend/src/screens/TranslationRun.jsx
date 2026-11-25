@@ -18,7 +18,7 @@ import { useRevealSpeech } from '../hooks/useRevealSpeech'
 // The tutor's review, drawn by the component 作文 shares (plan 125).
 import { TutorReview, TutorVerdict } from '../components/study/TutorReview'
 import { PointTag, SentenceLead, AnswerWell, CorrectedInPlace } from '../components/study/PracticeCard'
-import { isRomajiAnswer, fixMarks, mostlyKept } from '../domain/answerDiff'
+import { isRomajiAnswer, mostlyKept } from '../domain/answerDiff'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
@@ -27,6 +27,8 @@ import { RunLines } from '../components/study/RunLines'
 import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
 import { useAsk } from '../hooks/useAsk'
+import { useAskPage } from '../hooks/useAskPage'
+import { MAX_QUESTION } from '../domain/ask'
 import { AskPanel } from '../components/study/AskPanel'
 import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
@@ -265,7 +267,9 @@ export default function TranslationRun({ session }) {
       sentence: data.phrase,
       level: source === 'level' ? level : '',
       translation: data.translation,
-      answer: answer.trim(),
+      // The Japanese the romaji spells, once the review has read it
+      // (plan 330): a question is about that, not about the letters.
+      answer: (analysis?.answer_kana || answer).trim(),
       point: data.grammar ?? '',
       review: analysis?.analysis ?? '',
     }
@@ -494,9 +498,28 @@ function SessionView({
   // The asking's thread: a reopened line's, else the sentence on the
   // stage's, open once it is graded (plan 131). Its words are the
   // reference's breakdown.
+  // Open once the tutor's review is in, and not only once the sentence
+  // is graded (plan 330): the reference stands on the card from the
+  // moment the answer is sent, so there is no key to keep from the
+  // learner, and a review's Détail asks it.
   const target = askTarget(lines.opened, {
-    key: data?._uiKey, base: askBase(), analysis: breakdown, open: stage === 'feedback' && feedback?.correct != null,
+    key: data?._uiKey, base: askBase(), analysis: breakdown,
+    open: stage === 'feedback' && (feedback?.correct != null || Boolean(analysis?.review)),
   })
+  // A review's Détail button asks the asking about one flagged mistake
+  // (plan 330): on the desk the answer lands in the lines panel, on a
+  // phone the asking's page rises over the run to show it.
+  const askPage = useAskPage()
+  const asked = new Set(
+    asking.thread(target.key).filter(x => x.fixN != null && x.state !== 'error').map(x => x.fixN),
+  )
+  function askDetail(item, n) {
+    if (!desk) askPage.show()
+    asking.ask(
+      target.key, target.context, t.reviewAsk(n, item.given, item.fix).slice(0, MAX_QUESTION),
+      { n, given: item.given ?? '', fix: item.fix ?? '', issue: item.issue ?? '', severity: item.severity ?? 'error' },
+    )
+  }
   // A door in a breakdown -- the reference on the stage's, or a line
   // reopened from the run's lines -- opens in the column (plan 115).
   const doors = {
@@ -622,6 +645,12 @@ function SessionView({
               away (its rows print the sentence and its translation) and
               keeps the answer and the tutor's reading of it, which are
               the point of this mode. */}
+          {/* The asking's page, mounted here and not with its button: the
+              review's Détail asks before the sentence is graded (plan 330). */}
+          <AskEntry
+            ask={asking} askKey={target.key} context={target.context} open={target.open}
+            title={t.translationTitle} control={askPage} launch={false}
+          />
           <PromptCard page prose>
             {!showBreakdown && (
               <PointTag
@@ -638,26 +667,34 @@ function SessionView({
                   askLang={data.translation_lang}
                   parts={data.furigana}
                   text={data.phrase}
-                  marks={!analysisLoading && analysis?.review ? fixMarks(data.phrase, analysis.review.fix) : null}
                   romaji={data.romaji}
                 />
               )}
               <AnswerWell aside={!analysisLoading && analysis?.review ? <TutorVerdict review={analysis.review} t={t} /> : null}>
                 {(() => {
-                  const better = !analysisLoading ? analysis?.review?.better : null
-                  if (isRomajiAnswer(answer)) return <span>{answer}</span>
+                  // The line the review marks: the learner's Japanese,
+                  // or, for a romaji answer, the kana it spells (plan
+                  // 330) -- the letters themselves are never marked,
+                  // and the answer typed stays under it, quiet.
+                  const kana = !analysisLoading ? analysis?.answer_kana : null
+                  const line = kana || answer
+                  const review = !analysisLoading ? analysis?.review : null
+                  const marked = review?.better && mostlyKept(line, review.better)
                   return (
-                    <span lang="ja" className="pcard-answer">
-                      {better && mostlyKept(answer, better)
-                        ? <CorrectedInPlace given={answer} parts={analysis.review.better_parts} />
-                        : answer}
-                    </span>
+                    <>
+                      <span lang={kana || !isRomajiAnswer(answer) ? 'ja' : undefined} className="pcard-answer">
+                        {marked ? <CorrectedInPlace given={line} parts={review.better_parts} fixes={review.fix} /> : line}
+                      </span>
+                      {kana && <span className="pcard-well__typed">{answer}</span>}
+                    </>
                   )
                 })()}
               </AnswerWell>
               <div className="pcard-notes">
               {analysisLoading && <Loading inline copy={t.analyzingTranslation} />}
-              {!analysisLoading && analysis?.review && <TutorReview review={analysis.review} t={t} />}
+              {!analysisLoading && analysis?.review && (
+                <TutorReview review={analysis.review} t={t} onDetail={askDetail} asked={asked} />
+              )}
               {!analysisLoading && analysis && !analysis.review && (
                 <span className="prose__ai">{analysis.analysis}</span>
               )}
@@ -699,7 +736,7 @@ function SessionView({
                     explainError={explainError}
                   />
                 )}
-                <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.translationTitle} />
+                <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.translationTitle} control={askPage} layer={false} />
               </div>
             )}
           </PromptCard>

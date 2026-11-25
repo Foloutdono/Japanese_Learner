@@ -182,7 +182,14 @@ function OverMark({ given, right, near = false, n = null }) {
     </ruby>
   )
   if (n == null) return mark
-  return <span className="pcard-pinned">{mark}<sup className="pcard-pin">{n}</sup></span>
+  return <span className="pcard-pinned">{mark}<Pin n={n} near={near} /></span>
+}
+
+// The number a fix carries on the words it is about (the row's roundel,
+// a rung smaller), in the near ink for a fix that is only less natural
+// (plan 330).
+function Pin({ n, near = false }) {
+  return <sup className={near ? 'pcard-pin pcard-pin--near' : 'pcard-pin'}>{n}</sup>
 }
 
 /** A romaji answer with its misses marked against the sentence's romaji
@@ -230,11 +237,16 @@ export function CorrectedInPlace({ given, parts, fixes }) {
         const run = piece.fix
         const right = run.ins.map(p => p.text).join('')
         if (!right) {
-          const struck = <s className="pcard-del">{run.del}</s>
+          // A word taken out: struck for an error, but only underlined
+          // in the near ink where the learner's word was right and just
+          // less natural (を after だけ).
+          const struck = run.near
+            ? <span className="pcard-del pcard-del--near">{run.del}</span>
+            : <s className="pcard-del">{run.del}</s>
           if (run.n == null) return <Fragment key={i}>{struck}</Fragment>
-          return <span key={i} className="pcard-pinned">{struck}<sup className="pcard-pin">{run.n}</sup></span>
+          return <span key={i} className="pcard-pinned">{struck}<Pin n={run.n} near={run.near} /></span>
         }
-        return <OverMark key={i} given={run.del} right={right} n={run.n} />
+        return <OverMark key={i} given={run.del} right={right} near={run.near} n={run.n} />
       })}
     </span>
   ))

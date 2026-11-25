@@ -59,6 +59,9 @@ def test_every_step_scopes_and_explains_itself():
             assert "%(prefix)s" in clause, table
         elif table == "video_session_jobs":
             assert "session_id IN" in clause, table
+        elif table in ("referrals", "referral_rewards"):
+            # A referral names two learners and has no user_id: both sides go.
+            assert "sponsor_id = %(user)s" in clause and "filleul_id = %(user)s" in clause, table
         else:
             assert "user_id = %(user)s" in clause, table
 

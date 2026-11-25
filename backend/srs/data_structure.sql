@@ -854,6 +854,20 @@ ALTER TABLE rest_tickets ENABLE ROW LEVEL SECURITY;
 CREATE INDEX idx_rest_tickets_user
 ON rest_tickets(user_id);
 
+-- Owned by srs/srs.py (plan 328) -- 回送, the cards a learner set
+-- aside: served in no mode and counted in nothing owed until taken
+-- back. Keyed by the namespaced card id, as card_modes is; the
+-- schedule stays in card_modes untouched.
+CREATE TABLE card_set_aside (
+    card_id  TEXT PRIMARY KEY,
+    user_id  TEXT NOT NULL,
+    set_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE card_set_aside ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_card_set_aside_user
+ON card_set_aside(user_id, set_at);
+
 -- Owned by core/credits.py (plan 069) -- the credit ledger, append-only
 -- like xp_ledger: a signed row per refill ('refill', the daily +30 at
 -- the learner's midnight), fare ('review', -1 a review), grant ('grant':
@@ -1397,3 +1411,81 @@ CREATE TABLE apple_grants (
     kept_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE apple_grants ENABLE ROW LEVEL SECURITY;
+
+-- Owned by study/missions.py (plan 331) -- 任務. A row a mission assigned to
+-- a learner for a local day or week ('bonus' is the day's three done): the
+-- goal, the credits and the XP are written on it and never change, so the
+-- goal is the one the learner's history gave when it was assigned.
+-- Progress is never stored, only `done_at` (the logs say the rest) and
+-- `paid_at` (the conditional UPDATE that sets it is what pays once).
+CREATE TABLE missions (
+    user_id  TEXT NOT NULL,
+    scope    TEXT NOT NULL,
+    period   DATE NOT NULL,
+    kind     TEXT NOT NULL,
+    slot     SMALLINT NOT NULL,
+    target   INTEGER NOT NULL,
+    baseline INTEGER,
+    credits  SMALLINT NOT NULL,
+    xp       SMALLINT NOT NULL,
+    platform TEXT,
+    done_at  TIMESTAMPTZ,
+    paid_at  TIMESTAMPTZ,
+    PRIMARY KEY (user_id, scope, period, kind)
+);
+ALTER TABLE missions ENABLE ROW LEVEL SECURITY;
+
+-- Owned by study/missions.py, beside it: a discovery (a feature seen once)
+-- or an achievement (a milestone), once a learner, ever. A station's plate
+-- is this row.
+CREATE TABLE mission_marks (
+    user_id    TEXT NOT NULL,
+    key        TEXT NOT NULL,
+    class      TEXT NOT NULL,
+    credits    SMALLINT NOT NULL,
+    xp         SMALLINT NOT NULL,
+    reached_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    paid_at    TIMESTAMPTZ,
+    PRIMARY KEY (user_id, key)
+);
+ALTER TABLE mission_marks ENABLE ROW LEVEL SECURITY;
+
+-- Owned by study/referral.py (plan 332) -- 縁. A row per filleul: the parrain
+-- they named, when it was asked, accepted or refused, when the account was
+-- found to have an address, when the filleul converted (three days of study
+-- in the first fourteen), when the parrain let them go, when they were told.
+-- Erased with either learner's account.
+CREATE TABLE referrals (
+    filleul_id   TEXT PRIMARY KEY,
+    sponsor_id   TEXT NOT NULL,
+    asked_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    accepted_at  TIMESTAMPTZ,
+    refused_at   TIMESTAMPTZ,
+    verified_at  TIMESTAMPTZ,
+    converted_at TIMESTAMPTZ,
+    released_at  TIMESTAMPTZ,
+    told_at      TIMESTAMPTZ
+);
+ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_referrals_sponsor
+ON referrals(sponsor_id);
+
+-- Owned by study/referral.py, beside it: a reward a parrain earned through a
+-- filleul (the conversion, an active week, a week of the pass), stamped when
+-- paid, with what the month's cap left of it.
+CREATE TABLE referral_rewards (
+    sponsor_id   TEXT NOT NULL,
+    filleul_id   TEXT NOT NULL,
+    kind         TEXT NOT NULL,
+    period       DATE NOT NULL,
+    credits      SMALLINT NOT NULL,
+    done_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    paid_at      TIMESTAMPTZ,
+    paid         SMALLINT,
+    PRIMARY KEY (filleul_id, kind, period)
+);
+ALTER TABLE referral_rewards ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX idx_referral_rewards_sponsor
+ON referral_rewards(sponsor_id);

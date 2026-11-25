@@ -830,6 +830,118 @@ class SentenceReadingTests(unittest.TestCase):
                          [("大", "おお"), ("きい", None)])
 
 
+class WordsUniDicReadsOtherwiseTests(unittest.TestCase):
+    """Plan 333: the readings UniDic gives a word in the one shape it knows,
+    where the sentence says another. Each rule on hand-made tokens (where it
+    fires and where it must not), then whole sentences through the
+    tokenizer, the counter-case beside each."""
+
+    @staticmethod
+    def _verb(surface, lemma):
+        return {"surface": surface, "reading": surface, "pos": "verb", "lemma": lemma, "tags": ("動詞",)}
+
+    def test_a_lone_side_beside_a_place_is_soba(self) -> None:
+        gawa = _tok("側", "がわ")
+        # 彼の側にいる / ずっと側にいて / 側にある
+        self.assertEqual(_read(_tok("彼", "かれ", pos="pronoun"), _particle("の"), gawa, _particle("に"),
+                               self._verb("いる", "居る"))[2], "そば")
+        self.assertEqual(_read(_tok("ずっと", "ずっと", pos="adverb"), gawa, _particle("に"),
+                               self._verb("いて", "居る"))[1], "そば")
+        self.assertEqual(_read(gawa, _particle("に"), self._verb("ある", "有る"))[0], "そば")
+
+    def test_a_side_stays_a_side(self) -> None:
+        gawa = _tok("側", "がわ")
+        # 会社側は, 見る側が: a noun or a verb before it
+        self.assertEqual(_read(_tok("会社", "かいしゃ"), gawa, _particle("は"))[1], "がわ")
+        self.assertEqual(_read(self._verb("見る", "見る"), gawa, _particle("が"))[1], "がわ")
+        # こちらの側にいる, 相手の側に立つ, 私の側から見る
+        self.assertEqual(_read(_tok("こちら", "こちら", pos="pronoun"), _particle("の"), gawa, _particle("に"),
+                               self._verb("いる", "居る"))[2], "がわ")
+        self.assertEqual(_read(_tok("相手", "あいて"), _particle("の"), gawa, _particle("に"),
+                               self._verb("立つ", "立つ"))[2], "がわ")
+        self.assertEqual(_read(_tok("私", "わたし", pos="pronoun"), _particle("の"), gawa, _particle("から"),
+                               self._verb("見る", "見る"))[2], "がわ")
+        # 私の側に責任がある: the being is an abstract subject's, a side
+        self.assertEqual(_read(_tok("私", "わたし", pos="pronoun"), _particle("の"), gawa, _particle("に"),
+                               _tok("責任", "せきにん"), _particle("が"), self._verb("ある", "有る"))[2], "がわ")
+
+    def test_under_a_rule_is_moto(self) -> None:
+        shita = _tok("下", "した")
+        self.assertEqual(_read(_tok("法", "ほう"), _particle("の"), shita, _particle("に"))[2], "もと")
+        self.assertEqual(_read(_tok("机", "つくえ"), _particle("の"), shita, _particle("に"))[2], "した")
+
+    def test_the_day_after_tomorrow_and_the_day_before_yesterday(self) -> None:
+        self.assertEqual(_read(_tok("明後日", "みょうごにち"))[0], "あさって")
+        self.assertEqual(_read(_tok("一昨", "いっさく"), _tok("日", "び"))[:2], ["おとと", "い"])
+        self.assertEqual(_read(_tok("一昨", "いっさく"), _tok("年", "ねん"))[:2], ["おとと", "し"])
+        # 一昨々日 is another word
+        self.assertEqual(_read(_tok("一昨", "いっさく"), _tok("々", ""), _tok("日", "にち"))[0], "いっさく")
+
+    def test_at_present_and_the_inferior(self) -> None:
+        self.assertEqual(_read(_tok("目下", "めした"), _particle("の"), _tok("問題", "もんだい"))[0], "もっか")
+        self.assertEqual(_read(_tok("目下", "めした"), _particle("の"), _tok("人", "ひと"))[0], "めした")
+        self.assertEqual(_read(_tok("目上", "めうえ"), _particle("と"), _tok("目下", "めした"))[2], "めした")
+
+    def test_a_chill_and_the_cold_air(self) -> None:
+        self.assertEqual(_read(_tok("寒気", "かんき"), _particle("が"), self._verb("する", "為る"))[0], "さむけ")
+        self.assertEqual(_read(_tok("寒気", "かんき"), _particle("が"), self._verb("入る", "入る"))[0], "かんき")
+        self.assertEqual(_read(_tok("寒気", "かんき"))[0], "かんき")
+
+    def test_nobody_about_and_popular(self) -> None:
+        ninki = _tok("人気", "にんき")
+        no = _particle("の")
+        nai = {"surface": "ない", "reading": "ない", "pos": "adjective", "lemma": "無い", "tags": ("形容詞",)}
+        self.assertEqual(_read(ninki, no, nai, _tok("道", "みち"))[0], "ひとけ")
+        self.assertEqual(_read(ninki, no, nai, _tok("商品", "しょうひん"))[0], "にんき")
+        self.assertEqual(_read(ninki, _particle("が"), nai)[0], "にんき")
+
+    CASES = {
+        "あんなに側にいたのに": "側[そば]",
+        "彼の側に座った。": "彼[かれ] 側[そば] 座[すわ]",
+        "ずっと側にいて": "側[そば]",
+        "お母さんの側にいる。": "母[かあ] 側[そば]",
+        "電話の側に置く。": "電[でん]話[わ] 側[そば] 置[お]",
+        # 立つ and つく are ambiguous (彼の側に立つ takes his side): left a side
+        "窓の側に立つ。": "窓[まど] 側[がわ] 立[た]",
+        "川の側を歩く。": "川[かわ] 側[そば] 歩[ある]",
+        # a side
+        "私の側から見ると変だ。": "私[わたし] 側[がわ] 見[み] 変[へん]",
+        "会社側は否定した。": "会[かい]社[しゃ] 側[がわ] 否[ひ]定[てい]",
+        "敵の側につく。": "敵[てき] 側[がわ]",
+        "見る側と見られる側": "見[み] 側[がわ] 見[み] 側[がわ]",
+        "道の右側を歩く。": "道[みち] 右[みぎ]側[がわ] 歩[ある]",
+        "私の側にも責任がある。": "私[わたし] 側[がわ] 責[せき]任[にん]",
+        "明後日会いましょう。": "明後日[あさって] 会[あ]",
+        "一昨年に結婚した。": "一昨[おとと] 年[し] 結[けっ]婚[こん]",
+        "一昨日は雨だった。": "一昨[おとと] 日[い] 雨[あめ]",
+        "法の下に平等だ。": "法[ほう] 下[もと] 平[びょう]等[どう]",
+        "机の下にある。": "机[つくえ] 下[した]",
+        "目下の問題だ。": "目[もっ]下[か] 問[もん]題[だい]",
+        "目上と目下の人": "目[め]上[うえ] 目[め]下[した] 人[ひと]",
+        "寒気がする。": "寒[さむ]気[け]",
+        "寒気団が来る。": "寒[かん]気[き] 団[だん] 来[く]",
+        "人気のない道を歩く。": "人[ひと]気[け] 道[みち] 歩[ある]",
+        "人気のない商品": "人[にん]気[き] 商[しょう]品[ひん]",
+        "このお店は人気がある。": "店[みせ] 人[にん]気[き]",
+    }
+
+    @NEEDS_TOKENIZER
+    def test_sentences(self) -> None:
+        for sentence, expected in self.CASES.items():
+            with self.subTest(sentence):
+                self.assertEqual(_ruby(sentence), expected)
+
+    @NEEDS_TOKENIZER
+    def test_the_breakdown_prints_the_same_reading(self) -> None:
+        from study.analysis import analyze_local
+
+        for sentence, word, reading in (("あんなに側にいたのに", "側", "そば"),
+                                        ("会社側は否定した。", "側", "がわ")):
+            with self.subTest(sentence):
+                tokens = [t for t in analyze_local(sentence)["tokens"] if t["surface"].endswith(word)]
+                self.assertEqual(tokens[0]["reading"], reading)
+
+
 class AlignEdgeTests(unittest.TestCase):
     """align() is given readings from many places; none of them may make
     it print a wrong one."""

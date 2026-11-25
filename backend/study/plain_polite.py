@@ -323,3 +323,129 @@ def contracted(jp: str, start: int, end: int, reading: str) -> tuple | None:
             return None
         return said, old, new
     return None
+
+
+# ── The register a sentence is said in (plan 329) ─────────────
+
+KEIGO = "keigo"
+
+# The catalogue's keigo points (a pattern is a card id: a rename moves
+# it here too, which tests/test_plain_polite.py holds). A sentence that
+# closes on one of them is honorific or humble, whichever of です／ます
+# or the plain form it ends in; every other polite ending is POLITE.
+KEIGO_POINTS = frozenset((
+    "お〜になる／お〜する",
+    "いらっしゃる／おっしゃる／なさる",
+    "まいる／もうす／いたす",
+    "〜てくださる／〜ていただく",
+    "お〜ください",
+    "〜ていただけませんか",
+    "〜させていただく",
+    "〜ていらっしゃる",
+    "〜でございます",
+))
+
+_OPENERS = "「『（([［【〈《“"
+_CLOSERS = "」』）)]］】〉》”"
+_STOPS = "。！？!?…‥"
+# What may follow a sentence's last predicate without changing its
+# register: final particles, then at most one conjunction that leaves
+# the clause open (行きますが, 行くけど).
+_FINAL_PARTICLES = frozenset(("よ", "ね", "ねえ", "な", "なあ", "ぞ", "ぜ", "わ", "さ", "の", "か", "かな", "かしら"))
+_OPEN_CLAUSE = frozenset(("が", "けど", "けれど", "けれども", "から", "ので", "のに", "し"))
+_CLOSING_FORMS = ("終止形", "連体形", "意志推量形", "命令形", "仮定形-融合")
+
+
+def _mark(t) -> bool:
+    return t.pos in ("symbol", "punctuation") or not t.surface.strip()
+
+
+def _closing(t) -> bool:
+    """Whether the token can be the last of a finished predicate: a verb,
+    an adjective or an ending in a form that closes a sentence, never a
+    stem (行き) or a continuative (行って)."""
+    return t.pos in ("verb", "adjective", "auxiliary") and t.cform.startswith(_CLOSING_FORMS)
+
+
+def _clause_register(tokens: list) -> tuple | None:
+    """(register, chain start, end) of one sentence's tokens (end: where its
+    last word and the particles after it stop), or None when it does not
+    close on a predicate: 〜です／〜ます anywhere in the run of
+    endings the predicate closes with is POLITE (行きませんでした, 高くない
+    です), a bare predicate PLAIN. A noun, an interjection, a particle
+    or a continuative (行って) closes nothing."""
+    k = len(tokens)
+    while k and _mark(tokens[k - 1]):
+        k -= 1
+    m = k                                     # the last word, final particles with it
+    while k and tokens[k - 1].pos == "particle" and tokens[k - 1].surface in _FINAL_PARTICLES:
+        k -= 1
+    if k and tokens[k - 1].pos == "particle" and tokens[k - 1].surface in _OPEN_CLAUSE:
+        k -= 1
+    if not k or not _closing(tokens[k - 1]):
+        return None
+    last = tokens[k - 1]
+    first = k - 1
+    while first and tokens[first - 1].pos == "auxiliary":
+        first -= 1
+    chain = tokens[first:k]
+    if any(t.pos == "auxiliary" and t.lemma in ("です", "ます") for t in chain) \
+            or (last.lemma == "下さる" and last.cform.startswith("命令形")):  # ください
+        register = POLITE
+    else:
+        register = PLAIN
+    return register, chain[0].start, tokens[m - 1].end
+
+
+def _keigo_here(sentence: list, register: str, pattern: str, start: int, end: int) -> bool:
+    """Whether a keigo point found at [start, end) is keigo in this
+    sentence. お〜する is read off any お and する after a noun (町中が
+    お祝いした: a town celebrating, no humility), and a plain ending
+    lowers nobody: it counts there only as お〜になる, raising the
+    other person (先生がお帰りになった)."""
+    if register == PLAIN and pattern == "お〜になる／お〜する":
+        run = [t for t in sentence if start <= t.start and t.end <= end]
+        return any(t.lemma == "成る" and i and run[i - 1].surface == "に" for i, t in enumerate(run))
+    return True
+
+
+def register_of(tokens: list, grammar: list) -> str | None:
+    """POLITE, PLAIN or KEIGO: the register a line is said in, read from
+    how each of its sentences closes (`tokens` are the tokenizer's, `grammar`
+    the analysis's own entries). None where a line says nothing about it
+    (a noun, a greeting, a bare cut) or says it two ways (学生です。行く。)
+    -- never a guess.
+
+    A sentence is cut at its stops outside brackets, so 「行きます。」と
+    言った is one sentence, and plain, as its main verb is. KEIGO is a
+    sentence whose closing run of words is written on one of the
+    catalogue's keigo points (KEIGO_POINTS), a polite sentence or a
+    plain one, and wins over POLITE across the line's sentences."""
+    sentences, run, depth = [], [], 0
+    for t in tokens or []:
+        run.append(t)
+        if t.surface and t.surface in _OPENERS:
+            depth += 1
+        elif t.surface and t.surface in _CLOSERS:
+            depth = max(0, depth - 1)
+        elif depth == 0 and t.pos in ("symbol", "punctuation") and t.surface and t.surface[-1] in _STOPS:
+            sentences.append(run)
+            run = []
+    if run:
+        sentences.append(run)
+    keigo = [(g["pattern"], g["start"], g["end"]) for g in grammar or [] if g.get("pattern") in KEIGO_POINTS]
+    found = []
+    for sentence in sentences:
+        got = _clause_register(sentence)
+        if got is None:
+            continue
+        register, chain_start, end = got
+        if any(chain_start <= e <= end and s < end and _keigo_here(sentence, register, p, s, e)
+               for p, s, e in keigo):
+            register = KEIGO
+        found.append(register)
+    if not found:
+        return None
+    if set(found) <= {POLITE, KEIGO}:
+        return KEIGO if KEIGO in found else POLITE
+    return PLAIN if set(found) == {PLAIN} else None

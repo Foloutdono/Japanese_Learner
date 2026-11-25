@@ -534,6 +534,9 @@ _WHOLE = {
     # かみて / しもて are the stage's sides; the words taught are じょうず, へた.
     "上手": ("かみて", "じょうず"),
     "下手": ("しもて", "へた"),
+    # The day after tomorrow, as it is said: UniDic gives the formal
+    # みょうごにち, which nobody says in a song or a conversation (plan 333).
+    "明後日": ("みょうごにち", "あさって"),
 }
 
 # A spelling UniDic's lighter dictionary gets wrong at the head of an
@@ -833,6 +836,75 @@ def _prefix_reading(prefix: str, lemma: str, said: str) -> str | None:
     return None
 
 
+# 側 alone is そば, "beside", and 〜側 after a word is がわ, "the side of":
+# UniDic has only the second (plan 333). A 側 that is its own word is
+# read そば where it is said of a place, by what stands before it (a
+# bare adverb or particle, or a noun's の) and what it is said with: a
+# case particle, and for 〜の側, a verb of being, staying or going near.
+# Never 見る側, こちらの側, 相手の側に立つ: those are a side.
+_NEAR_VERBS = frozenset({
+    "居る", "いる", "有る", "ある", "座る", "坐る", "置く", "寄る", "寄り添う", "近づく", "近付く",
+    "付き添う", "控える", "眠る", "寝る", "待つ", "見守る", "離れる", "来る", "行く", "住む", "暮らす",
+    "泣く", "歩く", "通る", "走る", "並ぶ", "咲く", "建つ", "止まる", "停まる", "腰掛ける", "寄せる",
+    "引き寄せる", "呼ぶ", "眠れる", "立ち寄る", "通りかかる", "もたれる", "寄りかかる", "転がる",
+})
+_NEAR_CASES = frozenset({"に", "で", "を", "へ", "には", "にも", "にも", "から", "まで"})
+_NEAR_BARE_CASES = frozenset({"に", "で", "を", "へ", "には", "にも", "まで"})
+# the word before の that makes 〜の側 a side, not a place
+_A_SIDE_OF = frozenset({
+    "こちら", "そちら", "あちら", "どちら", "此方", "其方", "彼方", "何方", "こっち", "そっち", "あっち",
+    "どっち", "相手", "敵", "味方", "反対", "向こう", "片", "両", "表", "裏", "内", "外", "右", "左",
+    "自分", "自国", "相手方", "被害者", "加害者", "男", "女", "親", "子", "客", "店", "会社", "政府",
+    "国", "貴方", "あなた方",
+})
+# where an empty place is said, 人気のない道: ひとけ, nobody there
+_EMPTY_PLACES = frozenset({
+    "道", "通り", "街", "町", "路地", "駅", "建物", "部屋", "家", "場所", "廊下", "公園", "山", "浜",
+    "海岸", "夜道", "校舎", "病院", "森", "倉庫", "山道", "街角", "所", "ところ", "場", "ホーム",
+    "ビル", "店", "教室", "階段", "港", "海", "島", "村", "裏道", "裏通り", "商店街", "地下道", "トンネル",
+    "ロビー", "境内", "浜辺", "砂浜", "湖畔", "屋上", "広場", "校庭", "住宅街", "繁華街", "田舎道",
+})
+# 法の下に, 指導の下で: もと, "under" a rule, a guidance, a name (plan 333)
+# -- never 机の下 or a thing that has an underside.
+_UNDER_OF = frozenset({
+    "法", "法律", "憲法", "指導", "監督", "責任", "管理", "支配", "保護", "影響", "約束", "契約", "名",
+    "旗", "命令", "教え", "条件", "統制", "制度", "指揮", "庇護", "統治", "管轄", "体制", "原則", "方針",
+    "合意", "同意", "監視", "保証", "協力", "援助", "支援", "指示", "圧力", "名義", "名目", "看護",
+    "教育", "訓練", "治療", "加護", "導き", "計画", "意思", "意志", "決定", "判断",
+})
+# 寒気がする: さむけ, a chill -- かんき is the cold air (寒気団, 寒気が入る)
+# 私の側に責任がある, 君の側にも問題が: the verb of being has an abstract
+# subject, which is a side, がわ -- a place's ある is a thing standing there.
+_ABSTRACT_SUBJECTS = frozenset({
+    "責任", "問題", "原因", "非", "落ち度", "理由", "義務", "罪", "過失", "責め", "権利", "事情", "都合",
+    "利点", "欠点", "余地", "必要", "可能性", "意味", "意見", "考え", "言い分", "失敗", "誤り", "間違い",
+    "ミス", "悪い", "悪さ", "責", "自由", "資格", "権限", "力", "意図", "目的", "メリット", "デメリット",
+})
+_AFTER_A_PERSON = frozenset({"さん", "ちゃん", "くん", "君", "様", "さま", "たち", "達", "ら"})
+_CHILL_VERBS = frozenset({"する", "為る", "感じる", "覚える", "走る"})
+
+
+def _near_clause(tokens: list[dict], j: int) -> bool:
+    """Whether a verb of being or going near is said in the clause that
+    begins at token `j` (the clause ends at a stop)."""
+    for t in tokens[j:j + 8]:
+        if t["surface"] in ("。", "！", "？", "!", "?", "、", "，", "…"):
+            return False
+        if t.get("pos") in ("verb", "adjective") and t.get("lemma") in _NEAR_VERBS:
+            if t["lemma"] in ("有る", "ある") and any(u["surface"] in _ABSTRACT_SUBJECTS for u in tokens):
+                return False
+            return True
+    return False
+
+
+def _chill(tokens: list[dict], j: int) -> bool:
+    """寒気 at token `j` is said with the verb of feeling it."""
+    k = j + 1
+    if k >= len(tokens) or tokens[k]["surface"] not in ("が", "を", "も", "に", "は"):
+        return False
+    return any(t.get("lemma") in _CHILL_VERBS for t in tokens[k + 1:k + 5])
+
+
 def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list[str]:
     """The readings of `tokens`, each put right where its context says.
 
@@ -938,6 +1010,62 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                 or (nxt(i) == "が" and i + 2 < n and tokens[i + 2]["lemma"] in ("広い", "狭い"))
                 or any(u in ("キス", "汗", "熱", "撫でる", "なでる") or u.startswith(("撫で", "なで")) for u in surf)):
             out[i] = "ひたい"
+            continue
+        # 彼の側にいたい, あんなに側にいたのに, ずっと側にいて: そば, beside --
+        # UniDic reads every lone 側 がわ, the side (plan 333). Only where
+        # nothing before it makes it 〜側 (a noun, a verb's plain form, an
+        # adjective, こちら, 相手) and a case particle follows: 〜の側 then
+        # needs a verb of being or going near in its clause (私の側から見る,
+        # 彼の側に立つ, 敵の側につく stay がわ).
+        if s == "側" and r == "がわ" and t.get("pos") == "noun" and nxt(i) in _NEAR_CASES:
+            p1 = tokens[i - 1] if i > 0 else None
+            bare = p1 is None or p1.get("pos") in ("particle", "adverb", "conjunction", "symbol") \
+                or prev(i) in ("に", "と", "、", "「", "（", "(")
+            if bare and p1 is not None and p1.get("pos") == "particle" and prev(i) == "の":
+                bare = False
+            if bare and nxt(i) in _NEAR_BARE_CASES:
+                out[i] = "そば"
+                continue
+            if prev(i) == "の" and i >= 2 and (tokens[i - 2].get("pos") in ("noun", "pronoun")
+                                          or (tokens[i - 2].get("pos") == "suffix" and surf[i - 2] in _AFTER_A_PERSON)) \
+                    and surf[i - 2] not in _A_SIDE_OF and not surf[i - 2].endswith(("側", "方")) \
+                    and _near_clause(tokens, i + 1):
+                out[i] = "そば"
+                continue
+        # 法の下に平等だ, 先生の下で: もと, "under" a rule or a guidance --
+        # UniDic reads した after 法 (plan 333). Only after the nouns that
+        # hold something under them (机の下 is した).
+        if s == "下" and r == "した" and prev(i) == "の" and i >= 2 and surf[i - 2] in _UNDER_OF \
+                and nxt(i) in ("に", "で", "は", "も", "の", "を", "、", ""):
+            out[i] = "もと"
+            continue
+        # 一昨年, 一昨日: おととし, おととい -- UniDic cuts each 一昨 + 年 or 日,
+        # and reads the formal いっさくねん, and いっさくび once 日 follows a
+        # noun (plan 333). 一昨々日 (さきおととい) is left alone.
+        if s == "一昨" and r == "いっさく" and nxt(i) in ("年", "日") and i + 1 < n:
+            out[i], out[i + 1] = "おとと", ("し" if nxt(i) == "年" else "い")
+            continue
+        # 目下の問題, 目下検討中: もっか, "at present" -- めした, one's
+        # inferior, only beside 目上 or a person (目下の人, plan 333).
+        if s == "目下" and r == "めした" and "目上" not in surf \
+                and not (nxt(i) == "の" and i + 2 < n and surf[i + 2] in ("人", "者", "もの", "方", "人たち")):
+            out[i] = "もっか"
+            continue
+        # 寒気がする, 寒気を感じる: さむけ, a chill (plan 333) -- 寒気団,
+        # 寒気が入る, 寒気が流れ込む are the cold air, かんき.
+        if s == "寒気" and r == "かんき" and _chill(tokens, i):
+            out[i] = "さむけ"
+            continue
+        # 人気のない道, 人気のない夜の街: ひとけ, nobody about (plan 333)
+        # -- 人気のない商品 is the popularity, にんき, and so is a bare
+        # 人気がない.
+        if s == "人気" and r == "にんき" and nxt(i) == "の" and i + 3 < n and surf[i + 2] in ("ない", "無い") \
+                and surf[i + 3] in _EMPTY_PLACES:
+            out[i] = "ひとけ"
+            continue
+        if s == "人気" and r == "にんき" and nxt(i) in ("を", "が") and i + 2 < n \
+                and tokens[i + 2].get("lemma") in ("感じる", "感ずる"):
+            out[i] = "ひとけ"
             continue
         # 見かけた方は, 参加される方は: かた, a person said politely, after
         # what they did -- 食べた方がいい is ほう (plan 272).

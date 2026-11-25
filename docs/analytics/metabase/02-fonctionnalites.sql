@@ -262,3 +262,45 @@ FROM event_log
 WHERE name IN ('transfer_import', 'transfer_undo', 'transfer_offer') AND at >= now() - ({{days}} || ' days')::interval
   AND user_id NOT IN {{snippet: internal_users}}
 GROUP BY 1 ORDER BY 1;
+
+-- ==== question
+-- title: Missions faites et récoltées
+-- display: bar
+-- size: 12x8
+-- description: Pour chaque mission du catalogue (plan 331), les apprenants qui l'ont terminée (mission_done) et ceux qui ont récolté sa récompense (mission_claimed). Un écart durable entre les deux dit une récompense que personne ne prend.
+SELECT props->>'kind' AS "Mission",
+       count(DISTINCT user_id) FILTER (WHERE name = 'mission_done') AS "Terminée",
+       count(DISTINCT user_id) FILTER (WHERE name = 'mission_claimed') AS "Récoltée"
+FROM event_log
+WHERE name IN ('mission_done', 'mission_claimed') AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 2 DESC;
+
+-- ==== question
+-- title: Crédits de missions par apprenant et par jour
+-- display: line
+-- size: 12x6
+-- description: La moyenne de crédits versés par les missions (raison mission du registre) à chaque apprenant qui en a reçu, par jour, contre la cible de la stratégie : 35 par jour pour qui fait tout (30 de journalières et de bonus, 5 d'hebdomadaires).
+SELECT (at AT TIME ZONE 'Europe/Paris')::date AS "Jour",
+       round(sum(delta)::numeric / count(DISTINCT user_id), 1) AS "Crédits par apprenant"
+FROM credit_ledger
+WHERE reason = 'mission' AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 1;
+
+-- ==== question
+-- title: Parrainage, du choix à la conversion
+-- display: bar
+-- size: 12x8
+-- description: Par semaine (plan 332), les apprenants qui ont nommé un parrain (referral_asked), les parrains qui ont accepté (referral_linked), les filleuls convertis par trois jours d'étude (referral_converted), les récompenses récoltées (referral_claimed) et les places libérées (referral_released). Qui a parrainé qui ne se lit qu'avec scripts/read_referrals, jamais ici.
+SELECT date_trunc('week', at AT TIME ZONE 'Europe/Paris')::date AS "Semaine",
+       count(DISTINCT user_id) FILTER (WHERE name = 'referral_asked') AS "Parrain nommé",
+       count(DISTINCT user_id) FILTER (WHERE name = 'referral_linked') AS "Accepté",
+       count(DISTINCT user_id) FILTER (WHERE name = 'referral_converted') AS "Converti",
+       count(*) FILTER (WHERE name = 'referral_claimed') AS "Récompenses récoltées",
+       count(*) FILTER (WHERE name = 'referral_released') AS "Places libérées"
+FROM event_log
+WHERE name IN ('referral_asked', 'referral_linked', 'referral_converted', 'referral_claimed', 'referral_released')
+  AND at >= now() - ({{days}} || ' days')::interval
+  AND user_id NOT IN {{snippet: internal_users}}
+GROUP BY 1 ORDER BY 1;

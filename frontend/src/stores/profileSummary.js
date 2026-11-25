@@ -28,6 +28,15 @@ let generation = 0
 // otherwise hold three dots forever over controls that still work.
 let failed = false
 const TTL_MS = 30_000
+// The highest level whose 進級 this session has already announced. A
+// review's POST is fire-and-forget, so a real fetch can land with the
+// server's figures from before the gains still in flight and put the cache
+// back under the threshold it had just crossed; the next gain then crosses
+// it again, and the level-up played twice in a row for the same level.
+// A level is told once: only a level above this one is a level-up.
+// Cleared where the XP itself is wiped (resetCelebrated) or the account
+// changes (forgetSummary).
+let celebratedLevel = 0
 // The TTL's fetch in flight, shared by every hook that mounts while it
 // is out: a screen's first paint mounts several (the HUD, the stage,
 // the guide), and each asked again -- four /api/profile at once on a
@@ -94,7 +103,14 @@ export function peekSummary() {
 // fetch, so it never resets the TTL clock — the next consumer with a
 // session still fetches the truth.
 export function seedSummary(data) {
+  celebratedLevel = 0
   setCache(data)
+}
+
+/** The learner's XP was wiped (Réglages › reset): their levels are earned
+ *  again, and told again. */
+export function resetCelebrated() {
+  celebratedLevel = 0
 }
 
 /**
@@ -111,6 +127,7 @@ export function forgetSummary() {
   cache = null
   cacheAt = 0
   failed = false
+  celebratedLevel = 0
   notify()
 }
 
@@ -175,6 +192,14 @@ export function applyXpGain({ amount }) {
     xpPrevLevel = xpForNext
     xpForNext = xpThreshold(level + 1)
     leveledUp = true
+  }
+
+  // The bar still moves to the new level, but a level already announced
+  // (the cache was put back by a stale fetch and crossed it again) is not
+  // announced twice.
+  if (leveledUp) {
+    if (level > celebratedLevel) celebratedLevel = level
+    else leveledUp = false
   }
 
   setCache({ ...cache, xp, level, xpPrevLevel, xpForNext })

@@ -214,3 +214,25 @@ describe('useCardSession and the trail', () => {
     ])
   })
 })
+
+// ── 回送 — a card set aside leaves the run (plan 328) ──────────────
+describe('useCardSession and a card set aside', () => {
+  it('drops the card in every mode it holds, unanswered, and keeps it out of a batch on its way', async () => {
+    const { cardSetAside } = await import('../stores/setAside')
+    const key = freshKey()
+    // A mixed-mode queue, as Today's is (no session mode).
+    save(key, [card('a', 'm1'), card('b'), card('a', 'm2'), card('c')])
+    const batch = deferred()
+    const fetchBatch = vi.fn(() => batch.promise)
+    await render(<Probe storageKey={key} fetchBatch={fetchBatch} cardKey={c => `${c.card_id}|${c.mode}`} />)
+    expect(api.current?.card_id).toBe('a')
+
+    cardSetAside('a')
+    await vi.waitFor(() => expect(api.current?.card_id).toBe('b'))
+    expect(saved(key)).toEqual(['b', 'c'])
+
+    // The batch asked for before the card was set aside still names it.
+    batch.resolve([card('a', 'm3'), card('d')])
+    await vi.waitFor(() => expect(saved(key)).toEqual(['b', 'c', 'd']))
+  })
+})
