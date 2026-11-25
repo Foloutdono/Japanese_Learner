@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pickInitialLang, intlLocale, contentLang, setInterfaceLocale, firstOfMonth, offeredLocales } from './locale'
+import { pickInitialLang, intlLocale, contentLang, setInterfaceLocale, firstOfMonth, offeredLocales, PREVIEW_LANGS } from './locale'
 
 describe('pickInitialLang', () => {
   it('honours a saved choice over the device', () => {
@@ -77,22 +77,21 @@ describe('firstOfMonth', () => {
   })
 })
 
-// Indonesian is in preview (plan 312, the owner's pick D3): spoken, but
-// offered to the accounts the server lists for it alone, and never the
-// language a device starts in.
-describe('a language in preview', () => {
-  it('is never picked from the device, and is kept when the learner chose it', () => {
-    expect(pickInitialLang(null, 'id-ID')).toBe('en')
-    expect(pickInitialLang(null, 'id')).toBe('en')
+// Indonesian left its preview for everyone (plan 312, the owner's call):
+// an Indonesian device starts in it and every account is offered it. The
+// preview's rule holds for the next language put in PREVIEW_LANGS.
+describe('Indonesian, spoken to everyone', () => {
+  it('is the language an Indonesian device starts in, and is kept when chosen', () => {
+    expect(PREVIEW_LANGS).not.toContain('id')
+    expect(pickInitialLang(null, 'id-ID')).toBe('id')
+    expect(pickInitialLang(null, 'in-ID')).toBe('id')
     expect(pickInitialLang('id', 'en-US')).toBe('id')
     expect(contentLang('id')).toBe('id')
   })
-  it('is offered only to an account listed for it, or while it is in use', () => {
-    expect(offeredLocales([], 'fr')).not.toContain('id')
-    expect(offeredLocales(undefined, 'fr')).not.toContain('id')
-    expect(offeredLocales(['id'], 'fr')).toContain('id')
-    expect(offeredLocales([], 'id')).toContain('id')
-    expect(offeredLocales([], 'fr')).toEqual(['fr', 'en', 'es', 'es-ES'])
+  it('is offered to every account', () => {
+    expect(offeredLocales([], 'fr')).toContain('id')
+    expect(offeredLocales(undefined, 'fr')).toContain('id')
+    expect(offeredLocales([], 'fr')).toEqual(['fr', 'en', 'es', 'id', 'es-ES'])
   })
   it('writes its figures as Indonesia does', () => {
     expect(intlLocale('id')).toBe('id-ID')

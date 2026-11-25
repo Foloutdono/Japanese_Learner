@@ -469,7 +469,11 @@ def stand_in(client):
         assert client.patch("/api/profile/learning", json={"cardContents": {
             "vocab": ["furigana", "sentence", "example", "kanji", "meanings", "pair", "verb"],
             "kanji": ["words", "radical", "strokes"]}}).status_code == 200
+        # a word, a kanji and a point set aside (plan 328), each named in the language
+        for raw in (vocab_to_id(VOCAB_BY_LEVEL["N5"][1], "N5"), kanji_to_id(KANJI_BY_LEVEL["N5"][1], "N5"), point):
+            assert client.post("/api/cards/set-aside", json={"cardId": raw}).status_code == 200
     cases = {
+        "/api/cards/set-aside": "/api/cards/set-aside",
         "/api/card-extras": "/api/card-extras?ids=" + quote("vocab_N4_届ける_とどける,kanji_N4_送"),
         "/api/basics/{unit_id}": f"/api/basics/{basics.units()[0]['id']}",
         "/api/composition/batch": "/api/composition/batch?level=N5",

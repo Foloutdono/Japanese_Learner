@@ -1053,7 +1053,8 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # app copies it onto the device on boot (lib/langChoice.js).
         "uiLang": _ui_lang(user_id),
         # The languages in preview the picker offers this account (plan
-        # 312): Indonesian, to the accounts PREVIEW_LANG_USERS names.
+        # 312): a language in translations.PREVIEW, to the accounts
+        # PREVIEW_LANG_USERS names (none since Indonesian left it).
         "previewLangs": list(preview_langs(user_id)),
         # 前回 (plan 291): the last ride a Learn station boarded,
         # {path, at}, or null; the phone's Learn gate offers it again.

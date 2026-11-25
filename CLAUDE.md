@@ -731,7 +731,12 @@ runtime purpose.
   server (`/api/profile`'s `previewLangs`), no device starts in it, a
   choice of it is kept, and the store shells declare it only the day it
   leaves the list (`native.shells.test.js`'s `DECLARED`), since a store
-  prints what a shell declares. Indonesian is in preview, and whole since
+  prints what a shell declares. Indonesian left the preview for everyone
+  (plan 312, the owner's call: its unwritten parts, the card sentences,
+  the dictionary layer, the basics' titles and the breakdown's own
+  glosses, read English until they are written), declared in both shells
+  (Android's `values-in`, the code its runtime keeps; an `in-ID` device
+  is read as `id`, `lib/locale.js`'s `LEGACY_CODES`). It is whole since
   plan 312b in the interface, the decks, the kanji and the grammar
   points' glosses and formations, since 312c in their lessons, since 312d
   in their tours and own Choisir questions (`WRITTEN`, `locales.test.js`),

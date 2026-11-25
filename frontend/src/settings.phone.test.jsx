@@ -169,8 +169,9 @@ describe('Settings at phone width', () => {
   it('stands the languages one per row, each on one line', async () => {
     await mount('/profile/settings/display')
     const picks = [...document.querySelectorAll('.lang-pick')]
-    // French, English, and Spanish twice: Latin America's and Spain's (plan 303).
-    expect(picks).toHaveLength(4)
+    // French, English, Spanish twice (Latin America's and Spain's, plan
+    // 303) and Indonesian (plan 312).
+    expect(picks).toHaveLength(5)
     const page = box(document.querySelector('.lang-picks'))
     picks.forEach((pick, i) => {
       const [whole, name, words] = [pick, pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')].map(box)
@@ -190,14 +191,10 @@ describe('Settings at phone width', () => {
     expect(new Set(samples).size, samples.join(' / ')).toBe(picks.length)
   })
 
-  // A language in preview (plan 312): an account the server lists for it
-  // finds it fifth, its flag, its name and its sample on one line beside
-  // the others; no other account sees it (the four above).
-  it('offers Bahasa Indonesia, on one line, to an account listed for it', async () => {
-    const { forgetSummary } = await import('./stores/profileSummary')
-    const before = ANSWERS['/api/profile']
-    ANSWERS['/api/profile'] = { ...before, previewLangs: ['id'] }
-    forgetSummary()
+  // Indonesian (plan 312), offered to every account since it left its
+  // preview: fifth, its flag, its name and its sample on one line beside
+  // the others.
+  it('offers Bahasa Indonesia, on one line, to every account', async () => {
     try {
       // At 360px, the narrowest phone that keeps the samples (below).
       await page.viewport(360, 740)
@@ -212,8 +209,6 @@ describe('Settings at phone width', () => {
       expect(words.scrollWidth, words.textContent).toBeLessThanOrEqual(words.clientWidth)
       expect(box(words).left).toBeGreaterThan(box(name).right)
     } finally {
-      ANSWERS['/api/profile'] = before
-      forgetSummary()
       await page.viewport(390, 844)
     }
   })
@@ -227,7 +222,7 @@ describe('Settings at phone width', () => {
     try {
       await mount('/profile/settings/display')
       const picks = [...document.querySelectorAll('.lang-pick')]
-      expect(picks).toHaveLength(4)
+      expect(picks).toHaveLength(5)
       for (const pick of picks) {
         const [name, words] = [pick.querySelector('.lang-pick__name'), pick.querySelector('.lang-pick__sample')]
         expect(getComputedStyle(words).display, name.textContent).not.toBe('none')
@@ -246,7 +241,7 @@ describe('Settings at phone width', () => {
     try {
       await mount('/profile/settings/display')
       const picks = [...document.querySelectorAll('.lang-pick')]
-      expect(picks).toHaveLength(4)
+      expect(picks).toHaveLength(5)
       const one = box(picks[0].querySelector('.lang-pick__name')).height
       for (const pick of picks) {
         const name = pick.querySelector('.lang-pick__name')

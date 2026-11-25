@@ -1,0 +1,4 @@
+/* The two system prompts the analyzer's photo intake raises, in Indonesian
+   (plan 312); en.lproj has the English, fr.lproj the French, es.lproj the Spanish. */
+"NSCameraUsageDescription" = "Ambil foto teks bahasa Jepang agar penganalisis membacanya.";
+"NSPhotoLibraryUsageDescription" = "Pilih foto teks bahasa Jepang agar penganalisis membacanya.";

@@ -32,8 +32,9 @@ SPOKEN: tuple[str, ...] = ("en", "fr", "es", "id")
 # accounts PREVIEW_LANG_USERS names (a comma-separated list of user ids, set
 # on the server) and to no one else, and no device starts in it
 # (lib/locale.js's PREVIEW_LANGS is the client's copy). A language leaves
-# this list the day it is offered to everyone.
-PREVIEW: tuple[str, ...] = ("id",)
+# this list the day it is offered to everyone: Indonesian left it in plan
+# 312 (the owner's call), its unwritten parts reading English.
+PREVIEW: tuple[str, ...] = ()
 
 WRITTEN: dict[str, tuple[str, ...]] = {
     # A deck card's own line, "{kanji}::{kana}" (datas/vocab/vocab_{lang}.json).

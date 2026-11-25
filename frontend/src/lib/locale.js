@@ -17,7 +17,9 @@ export const SUPPORTED_LANGS = ['fr', 'en', 'es', 'id']
 // (the profile's previewLangs, backend translations PREVIEW_LANG_USERS).
 // A saved choice of one is honoured, since only the learner's click
 // writes it. backend translations PREVIEW is the server's copy.
-export const PREVIEW_LANGS = ['id']
+// Indonesian left it for everyone (plan 312, the owner's call): empty
+// until the next language is written.
+export const PREVIEW_LANGS = []
 
 // The interface's locales: the languages the app speaks, and Spain's Spanish
 // (plan 303), an interface over the one Spanish content (`es`): the
@@ -32,13 +34,17 @@ export function contentLang(locale) {
   return UI_LOCALES.includes(locale) ? locale.slice(0, 2) : 'en'
 }
 
+// The codes an older device still reports a language by: an Android
+// WebView whose Java locale keeps Indonesian's legacy `in` says in-ID.
+const LEGACY_CODES = { in: 'id' }
+
 /** The locale a first launch speaks: the saved choice, else the
  *  device's, Spain's Spanish on a device set to Spain. */
 export function pickInitialLang(saved, deviceLang) {
   if (UI_LOCALES.includes(saved)) return saved
   const device = String(deviceLang || '').toLowerCase()
   if (device.startsWith('es-es')) return 'es-ES'
-  const base = device.slice(0, 2)
+  const base = LEGACY_CODES[device.slice(0, 2)] ?? device.slice(0, 2)
   return SUPPORTED_LANGS.includes(base) && !PREVIEW_LANGS.includes(base) ? base : 'en'
 }
 

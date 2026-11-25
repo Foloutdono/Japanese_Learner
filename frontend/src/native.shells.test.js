@@ -18,6 +18,10 @@ const read = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'
 // it to everyone; until then its device opens on the fallback, which is
 // what lib/locale.js starts that device in anyway.
 const DECLARED = SUPPORTED_LANGS.filter(lang => !PREVIEW_LANGS.includes(lang))
+// The resource qualifier Android's runtime reads for a language whose
+// legacy code it keeps: Indonesian is `in` there (java.util.Locale), `id`
+// everywhere else.
+const ANDROID_RES = { id: 'in' }
 const manifest = read('android/app/src/main/AndroidManifest.xml')
 
 describe('the Android shell', () => {
@@ -50,7 +54,7 @@ describe('the Android shell', () => {
   // The widget as the picker lists it, in each language the app speaks.
   it('names its widget in every language the app speaks', () => {
     for (const lang of DECLARED) {
-      const strings = read(`android/app/src/main/res/values${lang === 'en' ? '' : `-${lang}`}/strings.xml`)
+      const strings = read(`android/app/src/main/res/values${lang === 'en' ? '' : `-${ANDROID_RES[lang] ?? lang}`}/strings.xml`)
       expect(strings, lang).toContain('name="widget_label"')
       expect(strings, lang).toContain('name="widget_description"')
     }
