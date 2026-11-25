@@ -54,6 +54,7 @@ from core.db import db_conn
 from core.srs_instance import srs
 from study import daily_queue, level_rule, transfer
 from study.difficulty import LEVELS
+from study import missions
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -216,6 +217,8 @@ def post_transfer_import(payload: TransferPayload, user_id: str = Depends(get_us
         "source": payload.source, "notes": m.notes, "cards": len(m.hits),
         "written": written, "kept": summary["kept"],
     })
+    # 発見 (plan 331): an import is a discovery, once.
+    missions.note(user_id, "first_import")
     logger.info("transfer import user_id=%s source=%s notes=%d cards=%d written=%d kept=%d",
                 user_id, payload.source, m.notes, len(m.hits), written, summary["kept"])
     return {**summary, "written": written, "waiting": srs.count_imported(user_id)}

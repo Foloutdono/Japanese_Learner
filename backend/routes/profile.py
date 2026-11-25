@@ -188,6 +188,9 @@ def _init_db() -> None:
                 # in it. NULL is not told yet; routes/onboarding.py
                 # writes it, duels_news_open below reads it.
                 ("duels_news_at", "TIMESTAMPTZ"),
+                # 新しい (plan 331): the same for the missions' pill on
+                # Today's gate; missions_news_open reads it.
+                ("missions_news_at", "TIMESTAMPTZ"),
                 # 主 — the mode each line is ridden in, {line: mode},
                 # and the modes added to Today beside it, {line: [mode]}
                 # (plan 273, study/main_modes.py). NULL is never chosen:
@@ -511,6 +514,27 @@ def duels_news_open(user_id: str, guided) -> bool:
     finally:
         conn.close()
     return row is not None and row[0] is None
+
+
+def missions_news_open(user_id: str, guided) -> bool:
+    """Whether Today tells this learner, once, that the day's missions now
+    stand under its legend (plan 331): GET /api/profile's `missionsNews`.
+    As the duels' news: a learner whose Today guide has ended, until told."""
+    if "today" not in (guided or {}):
+        return False
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT missions_news_at FROM user_profiles WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    return row is not None and row[0] is None
+
+
+def _referral_notice(user_id: str) -> bool:
+    from study import referral
+    return referral.notice_open(user_id)
 
 
 def _ui_lang(user_id: str) -> str | None:
@@ -1013,6 +1037,10 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # 新しい (plan 287): whether Today tells the learner, once, that
         # the duels' key stands beside its gate (duels_news_open).
         "duelsNews": duels_news_open(user_id, guided),
+        "missionsNews": missions_news_open(user_id, guided),
+        # 縁 (plan 332): whether Today's gate says a word of the referral,
+        # so a learner it has nothing to say to asks /api/referral nothing.
+        "referralNotice": _referral_notice(user_id),
         # 足跡を残さない (plan 218): the account's answer, which App.jsx
         # copies onto this device's flag on boot so an opt-out made on
         # the phone also stops the desk.

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **329**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **335** (331 is the missions', 332 the referral's, 333 the readings', 334 the Indonesian branch's source fixes). `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -196,6 +196,45 @@ runtime purpose.
   `grammar_ladder._variants`, plan 319), and a twist or a scene line is
   cut only where the detector reads the point: a tour sets the point
   against its rivals, and the stems' match cut the rival's sentence.
+- **A line's register is read off how it ends (plan 329).** The analysis
+  carries `register`, `plain`, `polite`, `keigo` or `None`
+  (`plain_polite.register_of`), and the breakdown prints it once, as a
+  pill under the translation. です／ます in the closing run of endings
+  makes a sentence polite, a bare finite predicate plain; a noun, a
+  greeting, a て-form or a line that says it two ways is `None`, never a
+  guess. Keigo is not a second word list: it is a sentence whose closing
+  predicate is written on one of the catalogue's keigo points
+  (`KEIGO_POINTS`, held to the catalogue by `tests/test_plain_polite.py`,
+  so a rename of one is made there too), and a plain ending counts only
+  お〜になる, since the detector reads お祝いした as お〜する. A change to
+  these rules bumps `LOCAL_REV` and is pinned with the sentence it reads
+  and the one it must not.
+- **A translation's review reads the answer as Japanese, and weighs what
+  it flags (plan 330, the owner's pick C).** A romaji answer is the
+  learner's to choose, so it is read as the kana it spells
+  (`romaji.kana_of`, `translation.read_answer`) before the tutor sees it
+  and the review never remarks on the script; the reply carries that
+  `answer_kana`, the line the marks are drawn on, and the typed letters
+  stay under it, quiet and unmarked. The reference is judged against
+  nothing the answer did not say: a form only the reference has is never
+  praised. Each fix names `given` (the learner's own text, copied exactly,
+  dropped by `tutor_review.keep_given` where it is not in the answer),
+  `fix`, `issue` and a `severity`, `error` (the Japanese is wrong) or
+  `natural` (right, and a native would say it otherwise: an optional
+  particle, a dropped topic marker), the errors first and numbered first.
+  The screen marks them on the learner's line (`correctionFixes`: an error
+  struck with the right word over it, a natural one in the near ink and
+  never struck, a word left out at a caret), never on the reference, and
+  leads with the errors as cards, the natural ones a line each
+  (`TutorReview`). A final mark the learner did not write is not a word
+  left out (`tutor_review.corrected`). A review whose fixes carry no
+  severity (composition's) keeps its rows. Détail is one more question
+  of the asking: `explain` on `/api/ask` answers it in parts
+  (`explain_fix`, `AskDetail`: what happened, the forms, examples, a line
+  to remember), counted, refunded and language-checked as any question is,
+  on the desk in the lines panel's thread and on a phone in the asking's
+  page, which the button raises (`AskEntry`'s `control`); the asking opens
+  once the review is in, since the reference already stands on the card.
 - **Every part of a breakdown says what it is (plan 266).** A word row
   carries its card's meaning, a particle or an ending the point written
   on it, a number its figure and a name the word "name" (the token's
@@ -240,6 +279,54 @@ runtime purpose.
   write (三社とも is no 社共), nor cutting a commoner word its last noun
   makes with what follows (最終 + 報告書, where 原材料 + 費 keeps 原材料).
   `DeckNounCompoundTests` holds both sides.
+- **A mission pays study, once, and is neither study nor chance (plan 331).**
+  `study/missions.py` holds the figures, and `tests/test_missions.py` pins
+  them: a free learner who does their missions earns about 35 credits a day
+  (3 × 8 and a bonus of 6 a day, 3 × 12 a week), which is what the refill's
+  90 was sized beside. A goal that asks a learner to beat themselves is
+  computed from their own history, capped (`NEW_MAX`, the day's ration,
+  `ACCURACY_MAX`, `VOLUME_MAX_GAIN`) and frozen on the row when assigned:
+  studying earlier in the day never raises it, and a change of the figures
+  never touches a mission already assigned. Progress is never stored,
+  only `done_at` and `paid_at`: it is read again from the logs. The reward
+  is credits through the ledger (`credits.award`, reason `mission`) and XP
+  through `award_xp` (source `mission`, written in the transaction whose
+  conditional `UPDATE ... paid_at` is what pays once), and on the pass,
+  which has no use for credits, the same number as XP. Nothing is paid to an
+  account that has not studied. `mission` is in `srs.NOT_STUDY_SOURCES`:
+  it is neither a day studied nor a practice answer, so a new reader of
+  `xp_ledger` that counts rows as practice excludes it as it does
+  `day_clear`. The repeatable XP counts on the 番付 up to `XP_DAY_CAP` a
+  local day, clipped when written; discoveries and achievements are bounded
+  by the catalogue. The choice of the day's missions is a rotation of the
+  date: nothing is random, nothing rewards a post. A discovery read off a
+  table counts only what was done after `SINCE`; the three that leave no
+  trace (a photo, an arrival date, an import) are `missions.note()`d at the
+  act. The practice modes cost no credit yet: `missions.waives()` is the seam
+  their fare will read, so a practice the day's mission asks stays free.
+  A new mission, discovery or achievement is a new id in `missions.KINDS`,
+  `events._MISSION_KINDS`, `track.js`'s `VALUES`, the route's `Kind`, the
+  three locales' `msnLabel` or `msnMark`, and `domain/missions.js`
+  (`PLATES`, `GLYPHS`), all held equal by tests.
+- **A referral pays study, never a place (plan 332).** `study/referral.py`
+  holds the owner's option B and `tests/test_referral.py` pins it: a
+  learner names a parrain by username, once, in their first three days,
+  and the parrain accepts (three places, a quiet filleul let go for good);
+  three days of study in the first fourteen, on an account with an
+  address, convert, paying the filleul 300 and the parrain 100, then 25
+  each week the filleul studies three days and the parrain one, for eight
+  weeks, the parrain's credits capped at 500 a month (clipped, not
+  carried). A filleul's first payment gives a week of the pass
+  (`grant_max_week`, for the payment's webhook), four a year. Credits go
+  through the ledger (reason `referral`); on the pass the same number is
+  XP of source `referral`, which `srs.BOARD_LEDGER` keeps off every 番付
+  sum and `NOT_STUDY_SOURCES` off the days studied: a new reader of
+  `xp_ledger` that ranks reads `BOARD_LEDGER`. Nothing runs in the
+  background (`settle()` on every read), no device is fingerprinted (ADR
+  0022): the guards are study, the address, the cap and a person reading
+  `scripts/read_referrals`, never a dashboard. Today says a word only
+  while `/api/profile`'s `referralNotice` does, so a learner it has
+  nothing for asks `/api/referral` nothing.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
@@ -456,6 +543,18 @@ runtime purpose.
   run changes the choice in a panel over the card (`CardContentsSheet`,
   plan 327), never by leaving the queue, and the strip's sentence opens
   its breakdown only once the card is turned.
+- **A card set aside is gone from every queue, and only from the
+  queues (plan 328).** A learner sets a card aside from a run (the eye
+  beside an answered card's flag) and takes it back in Réglages › De
+  côté: `card_set_aside`, one row per namespaced card id, all its modes.
+  The engine excludes it (`srs._not_set_aside`) in every reader that
+  serves a card or counts what is owed (due rows, new picks, a mode's
+  taught cards, the forecast, the next due, the settled words), so
+  Today, a section run and the gate agree without knowing it; a new
+  reader of that kind splices it too. Setting aside is not an answer:
+  the schedule and `review_log` stay as they were, and the card taken
+  back resumes where it stood. The run drops it in every mode it holds
+  (`stores/setAside`, read by `useCardSession`), unanswered.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -794,6 +893,13 @@ runtime purpose.
   unseen places of the same size (`useScreenfulFirst`).
   Measure a switch on the production build at phone width with the
   CPU slowed 4×, before and after.
+- **No browser translates the app (2026-11-25).** `index.html` carries
+  `translate="no"` and Google's `notranslate`: a translated page swaps
+  React's text nodes for `<font>`, and the next change of text threw
+  `removeChild` and blanked the whole app on every card turned.
+  `lib/domGuard.js`, run before the first render, keeps React standing
+  when an extension rewrites the page anyway; `src/notranslate.test.js`
+  holds both. A new document that mounts React carries the same.
 - **Nothing moves by top or left (2026-10-18).** A highlight or a note
   that glides between anchors is placed by a transform (`guide/Spot.jsx`),
   and one that moves to a new anchor is a new element (`guide/Callout.jsx`'s

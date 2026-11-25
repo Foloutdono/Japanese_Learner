@@ -49,6 +49,7 @@ from study import difficulty
 from study import figures
 from study import grammar_detect
 from study import particle_glosses
+from study import plain_polite
 from study import card_lookup
 
 logger = logging.getLogger(__name__)
@@ -2567,11 +2568,17 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 50: plan 324 -- 〜はしない／〜もしない, the emphatic negative (ありはしない,
 # 見もしなかった): a catalogue point of its own, N3, whose は or も is no longer
 # read as the topic marker.
-# 51: plan 312b, on main's 50 (it was this branch's 49) -- a grammar point
-# carries its `structure_id` and a deck card's match its `meaning_id`,
+# 51: plan 329 -- `register`, the level of politeness the line is said in
+# (plain, polite or keigo; None where it closes on no predicate or says it
+# two ways), read from how its sentences end (plain_polite.register_of).
+# 52: plan 333 -- readings UniDic gets wrong in context: a lone 側 is そば
+# (彼の側にいる), 明後日 あさって, 一昨年 おととし, 一昨日 おととい, 法の下に
+# もと, 目下の問題 もっか, 寒気がする さむけ, 人気のない道 ひとけ.
+# 53: plan 312b, on main's 52 (it was this branch's 49, then 51) -- a grammar
+# point carries its `structure_id` and a deck card's match its `meaning_id`,
 # Indonesian beside the Spanish, and a name read as one says so in
 # Indonesian too.
-LOCAL_REV = 51
+LOCAL_REV = 53
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
@@ -2596,7 +2603,7 @@ def analyze_local(text: str, level: str | None = None, before: str = "", after: 
         # silently degraded one.
         return {
             "text": text, "tokens": [], "grammar": [],
-            "level": None, "grade": None, "available": False,
+            "level": None, "grade": None, "register": None, "available": False,
         }
 
     grammar = _grammar_entries(text, morphemes)
@@ -2616,6 +2623,7 @@ def analyze_local(text: str, level: str | None = None, before: str = "", after: 
         "grammar": grammar,
         "level": estimated,
         "grade": difficulty.report(text, grade_level, segments),
+        "register": plain_polite.register_of(morphemes, grammar),
         "available": True,
     }
 

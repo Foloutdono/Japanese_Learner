@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { apiFetch, apiJson } from '../../lib/api'
 import { saveBlob } from '../../lib/platform'
 import { playClick } from '../../lib/audio'
-import { refreshSummary } from '../../stores/profileSummary'
+import { refreshSummary, resetCelebrated } from '../../stores/profileSummary'
 import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
 import { countUse } from '../../lib/screenTrail'
 import { forgetOnboarded } from '../../stores/onboarded'
@@ -75,7 +75,7 @@ export function DataSlips({ session }) {
     setResetting(true)
     setResetState(null)
     apiJson('/api/stats/reset', session, { method: 'DELETE' })
-      .then(() => { setResetState('done'); refreshSummary() })
+      .then(() => { setResetState('done'); resetCelebrated(); refreshSummary() })
       .catch(() => setResetState('failed'))
       .finally(() => { setResetting(false); setArming(false) })
   }

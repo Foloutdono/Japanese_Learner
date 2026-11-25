@@ -129,6 +129,16 @@ def personal_pace(times, recent=None) -> int | None:
 # The xp_ledger source the day's bonus is paid under. Not a day studied
 # (_studied_days) nor a practice answer (get_daily_practice_counts).
 DAY_CLEAR_SOURCE = "day_clear"
+# What a mission pays in XP (plan 331, study/missions.py): a bonus, like
+# the day's clear, so neither is a day studied nor a practice answer.
+MISSION_SOURCE = "mission"
+# What a referral pays a learner on the pass in XP (plan 332, study/referral.py):
+# a bonus too, and more: it counts for the level and never on the 番付 (the
+# owner's rule, "the referral gives no ranking XP"), so the board's sums read
+# the ledger without it (BOARD_LEDGER).
+REFERRAL_SOURCE = "referral"
+NOT_STUDY_SOURCES = [DAY_CLEAR_SOURCE, MISSION_SOURCE, REFERRAL_SOURCE]
+BOARD_LEDGER = f"(SELECT user_id, xp, awarded_at FROM xp_ledger WHERE source <> '{REFERRAL_SOURCE}') AS board_ledger"
 
 # The week row's day names, Monday first (date.weekday()).
 WEEKDAY_KANJI = "月火水木金土日"
@@ -160,6 +170,16 @@ def streak_of(studied: set, rested: set, today) -> dict[str, int]:
         longest = max(longest, run)
         prev = day
     return {"current": current, "longest": longest}
+
+
+def _not_set_aside(column: str) -> str:
+    """SQL: the card in `column` (a namespaced id) is not set aside
+    (card_set_aside, plan 328). Spliced into every reader that serves a
+    card or counts what is owed -- due, new, the forecast, the next due
+    -- so a card set aside is gone from the gate, the run, every section
+    session and tomorrow alike, and back in all of them once taken back.
+    `column` is always a literal of this module, never input."""
+    return f"NOT EXISTS (SELECT 1 FROM card_set_aside sa WHERE sa.card_id = {column})"
 
 
 class SRSEngine:
@@ -614,6 +634,29 @@ class SRSEngine:
                 self._log_sql("create_rest_tickets_index", sql)
                 cur.execute(sql)
 
+                # 回送 — the cards a learner set aside (plan 328): a
+                # word they do not want to learn (テープレコーダー, old
+                # tech), never served again in any mode until they take
+                # it back. Keyed by the namespaced card id, as card_modes
+                # is, so every reader below excludes it on the primary
+                # key; user_id is beside it for the listing and the
+                # account's deletion. The schedule is not touched: taken
+                # back, a card resumes where it stood.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS card_set_aside (
+                        card_id TEXT PRIMARY KEY,
+                        user_id TEXT NOT NULL,
+                        set_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                """
+                self._log_sql("create_card_set_aside_table", sql)
+                cur.execute(sql)
+                enable_rls(cur, "card_set_aside")
+
+                sql = "CREATE INDEX IF NOT EXISTS idx_card_set_aside_user ON card_set_aside(user_id, set_at)"
+                self._log_sql("create_card_set_aside_index", sql)
+                cur.execute(sql)
+
 
     def _ensure_card(self, card_id: str) -> None:
         with self.storage.cursor() as cur:
@@ -1040,12 +1083,13 @@ class SRSEngine:
         now = datetime.now(timezone.utc)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                sql = f"""
                     SELECT card_id
                     FROM card_modes
                     WHERE mode = %s
                       AND total_reviews > 0
                       AND next_review <= %s
+                      AND {_not_set_aside("card_modes.card_id")}
                 """
                 params: list[Any] = [mode, now]
                 if card_ids:
@@ -1113,16 +1157,18 @@ class SRSEngine:
                               AND cm.mode = %s
                               AND cm.total_reviews > 0
                         )
+                          AND {_not_set_aside("ids.id")}
                         ORDER BY {"ids.ord" if ordered else "random()"}
                     """
                     params: list[Any] = [card_ids, mode]
                 else:
-                    sql = """
+                    sql = f"""
                         SELECT c.id
                         FROM cards c
                         LEFT JOIN card_modes cm
                           ON cm.card_id = c.id AND cm.mode = %s
                         WHERE (cm.card_id IS NULL OR cm.total_reviews = 0)
+                          AND {_not_set_aside("c.id")}
                         ORDER BY random()
                     """
                     params = [mode]
@@ -1477,20 +1523,20 @@ class SRSEngine:
         whose word is in the deck) is paid by that review and has no
         ledger row, so it is counted by the review side, not here.
 
-        The day's clear (plan 191) is a ledger row too, and no answer:
-        left out by its source."""
+        The day's clear (plan 191) and a mission's reward (plan 331) are
+        ledger rows too, and no answer: left out by their sources."""
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """
                     SELECT date_trunc('day', awarded_at)::date AS day, COUNT(*)
                     FROM xp_ledger
                     WHERE user_id = %s
-                      AND source <> %s
+                      AND source <> ALL(%s)
                       AND awarded_at >= NOW() - (%s || ' days')::interval
                     GROUP BY 1
                     ORDER BY 1 ASC
                 """
-                params = (user_id, DAY_CLEAR_SOURCE, days)
+                params = (user_id, NOT_STUDY_SOURCES, days)
                 self._log_sql("get_daily_practice_counts", sql, params)
                 cur.execute(sql, params)
                 rows = cur.fetchall()
@@ -1529,9 +1575,9 @@ class SRSEngine:
             UNION
             SELECT DISTINCT date_trunc('day', awarded_at)::date AS day
             FROM xp_ledger
-            WHERE user_id = %s AND source <> %s
+            WHERE user_id = %s AND source <> ALL(%s)
         """
-        params = (pattern, user_id, user_id, DAY_CLEAR_SOURCE)
+        params = (pattern, user_id, user_id, NOT_STUDY_SOURCES)
         self._log_sql("studied_days", sql, params)
         cur.execute(sql, params)
         return {row[0] for row in cur.fetchall()}
@@ -1821,6 +1867,7 @@ class SRSEngine:
                         WHERE card_id LIKE %s
                           AND total_reviews > 0
                           AND next_review <= NOW() + (%s || ' days')::interval{mode_sql}
+                          AND {_not_set_aside("card_modes.card_id")}
                         GROUP BY 1
                     )
                     SELECT day_range.day_offset, COALESCE(due.cnt, 0)
@@ -1874,7 +1921,7 @@ class SRSEngine:
                         UNION ALL
                         SELECT user_id, xp FROM review_daily{daily_where}
                         UNION ALL
-                        SELECT user_id, xp FROM xp_ledger{ledger_where}
+                        SELECT user_id, xp FROM {BOARD_LEDGER}{ledger_where}
                     ) all_xp
                     GROUP BY user_id
                     ORDER BY xp DESC
@@ -1911,7 +1958,7 @@ class SRSEngine:
                         UNION ALL
                         SELECT user_id, xp FROM review_daily{clause(daily_where)}
                         UNION ALL
-                        SELECT user_id, xp FROM xp_ledger{clause(ledger_where)}
+                        SELECT user_id, xp FROM {BOARD_LEDGER}{clause(ledger_where)}
                     ) all_xp
                     GROUP BY user_id
                 """
@@ -1936,7 +1983,7 @@ class SRSEngine:
                             UNION ALL
                             SELECT user_id, xp FROM review_daily{daily_where}
                             UNION ALL
-                            SELECT user_id, xp FROM xp_ledger{ledger_where}
+                            SELECT user_id, xp FROM {BOARD_LEDGER}{ledger_where}
                         ) all_xp
                         GROUP BY user_id
                     )
@@ -2000,6 +2047,7 @@ class SRSEngine:
                     WHERE card_id LIKE %s
                       AND total_reviews > 0
                       AND next_review <= %s{mode_sql}
+                      AND {_not_set_aside("card_modes.card_id")}
                     ORDER BY next_review ASC
                 """
                 params: list[Any] = [pattern, now, *mode_params]
@@ -2075,6 +2123,7 @@ class SRSEngine:
                     WHERE card_id LIKE %s
                       AND total_reviews > 0
                       AND next_review > %s{mode_sql}
+                      AND {_not_set_aside("card_modes.card_id")}
                 """
                 self._log_sql("get_next_due_at", sql, (pattern, now) + mode_params)
                 cur.execute(sql, (pattern, now) + mode_params)
@@ -2128,6 +2177,7 @@ class SRSEngine:
                     FROM card_modes
                     WHERE card_id LIKE ANY(%s)
                       AND total_reviews > 0{mode_sql}
+                      AND {_not_set_aside("card_modes.card_id")}
                     GROUP BY card_id
                     HAVING MIN(next_review) > %s
                     ORDER BY md5(card_id || %s)
@@ -2588,13 +2638,14 @@ class SRSEngine:
             return []
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = """
+                sql = f"""
                     SELECT ids.id
                     FROM unnest(%s::text[]) WITH ORDINALITY AS ids(id, ord)
                     WHERE NOT EXISTS (
                         SELECT 1 FROM card_modes cm
                         WHERE cm.card_id = ids.id AND cm.mode = %s AND cm.total_reviews > 0
                     )
+                    AND {_not_set_aside("ids.id")}
                     AND EXISTS (
                         SELECT 1 FROM card_modes cm
                         WHERE cm.card_id = ids.id AND cm.mode = %s
@@ -2606,6 +2657,50 @@ class SRSEngine:
                 self._log_sql("get_taught_new", sql, (mode, taught, len(card_ids), limit))
                 cur.execute(sql, (list(card_ids), mode, taught, limit))
                 return [row[0] for row in cur.fetchall()]
+
+    # -- 回送 — cards set aside (plan 328) ----------------------
+    #
+    # A card the learner does not want to learn (the tape recorder,
+    # old tech). Set aside, it is served in no mode and counted in
+    # nothing owed (_not_set_aside); its schedule and its history stay
+    # as they were, so taken back it resumes where it stood, and no
+    # figure summed over review_log moves.
+    SET_ASIDE_MAX = 2000
+
+    def set_aside(self, user_id: str, raw_id: str) -> bool:
+        """Set one card aside. False when the learner already holds
+        SET_ASIDE_MAX, a bound so the list a page reads stays a page."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM card_set_aside WHERE user_id = %s", (user_id,))
+                if cur.fetchone()[0] >= self.SET_ASIDE_MAX:
+                    return False
+                cur.execute(
+                    "INSERT INTO card_set_aside (card_id, user_id) VALUES (%s, %s) ON CONFLICT (card_id) DO NOTHING",
+                    (f"{user_id}:{raw_id}", user_id),
+                )
+        return True
+
+    def take_back(self, user_id: str, raw_id: str) -> bool:
+        """Serve a card set aside again. False when it was not set aside."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM card_set_aside WHERE card_id = %s AND user_id = %s",
+                            (f"{user_id}:{raw_id}", user_id))
+                gone = cur.rowcount > 0
+        return gone
+
+    def get_set_aside(self, user_id: str, limit: int = SET_ASIDE_MAX) -> list[tuple[str, datetime]]:
+        """(raw id, when) for every card this learner set aside, the
+        latest first."""
+        prefix = len(user_id) + 1
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT card_id, set_at FROM card_set_aside WHERE user_id = %s ORDER BY set_at DESC, card_id LIMIT %s",
+                    (user_id, limit),
+                )
+                return [(card_id[prefix:], set_at) for card_id, set_at in cur.fetchall()]
 
     def get_reviewed_today(self, user_id: str) -> tuple[set, set]:
         """

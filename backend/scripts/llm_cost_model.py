@@ -116,6 +116,10 @@ FEATURES = {
         "breakdown's words. max_tokens 400, answered in three sentences, "
         "reasoning off; an answer in the wrong language is asked for once "
         "more, which is rare enough to leave out of the count. "
+        "A translation review's Détail button (plan 330) is one of these "
+        "questions, answered in parts: max_tokens 700 and about 300 tokens "
+        "out, a few a session at most, so the row's 120 out understates "
+        "them. "
         "ASK_DAILY_LIMIT caps it at 40/day, which bounds the abuse row.",
     ),
     "phrase_analysis": (

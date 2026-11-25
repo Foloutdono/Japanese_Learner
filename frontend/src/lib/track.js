@@ -105,6 +105,15 @@ export const EVENTS = {
   day_clear: ['streak', 'milestone', 'tier'],
   rest_day_used: ['days'],
   ticket_share: ['days'],
+  // Missions (plan 331): written by the server; the scope and the catalogue's id.
+  mission_done: ['scope', 'kind'],
+  mission_claimed: ['scope', 'kind'],
+  // The referral (plan 332): written by the server, never a username.
+  referral_asked: [],
+  referral_linked: [],
+  referral_converted: [],
+  referral_released: [],
+  referral_claimed: ['kind'],
   // The review plan (plan 217): the comeback offer put before the
   // learner (ours, once a visit: the notice on the gate since plan 254);
   // its answer, a catch-up's end, the ceiling and an absence set in
@@ -165,15 +174,18 @@ export const VALUES = {
     level_how: ['pick', 'test'],
     placed: ['N5', 'N4', 'N3', 'N2', 'N1'],
     kept: ['google', 'apple', 'password', 'link', 'already', 'none'],
-    source: ['tiktok', 'instagram', 'youtube', 'reddit', 'search', 'store', 'other', 'direct'],
+    source: ['tiktok', 'instagram', 'youtube', 'reddit', 'search', 'store', 'other', 'direct', 'referral'],
   },
   run_start: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_complete: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   run_abandon: { where: ['today', 'learn', 'practice', 'deck', 'ride', 'exam', 'other'] },
   feature_use: {
-    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback', 'readings', 'duels_key', 'duels_board', 'duels_news'],
-    action: ['play', 'text', 'photo', 'video', 'song', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide'],
+    feature: ['speech', 'analyzer', 'ocr', 'ask', 'explain', 'dictionary', 'export', 'level_fit', 'conversation', 'comeback', 'readings', 'duels_key', 'duels_board', 'duels_news', 'missions', 'missions_news', 'referral'],
+    action: ['play', 'text', 'photo', 'video', 'song', 'scan', 'send', 'open', 'search', 'progress', 'move', 'stay', 'hide', 'notice', 'share', 'choose'],
   },
+  mission_done: { scope: ['day', 'week', 'bonus', 'discovery', 'achievement'], kind: ['due', 'new', 'practice', 'accuracy', 'write', 'days5', 'volume', 'new_mode', 'exam_section', 'duels5', 'write10', 'all3', 'first_dictation', 'first_photo', 'first_conversation', 'first_exam', 'first_deck', 'first_friend', 'first_duel', 'arrival_date', 'first_import', 'first_video', 'kana_done', 'words_100', 'words_500', 'words_1000', 'grammar_n5', 'days_7', 'days_30', 'days_100', 'exam_passed', 'ranked_win'] },
+  mission_claimed: { scope: ['day', 'week', 'bonus', 'mark'], kind: ['due', 'new', 'practice', 'accuracy', 'write', 'days5', 'volume', 'new_mode', 'exam_section', 'duels5', 'write10', 'all3', 'first_dictation', 'first_photo', 'first_conversation', 'first_exam', 'first_deck', 'first_friend', 'first_duel', 'arrival_date', 'first_import', 'first_video', 'kana_done', 'words_100', 'words_500', 'words_1000', 'grammar_n5', 'days_7', 'days_30', 'days_100', 'exam_passed', 'ranked_win'] },
+  referral_claimed: { kind: ['conversion', 'week', 'max_week'] },
   transfer_import: { source: ['anki', 'wanikani', 'renshuu'] },
   transfer_offer: { choice: ['go', 'later'] },
   setting_change: {

@@ -740,30 +740,40 @@ export function fixMarks(sentence, fixes) {
 
 /**
  * correctionParts' runs, the struck and the written grouped: [{ kind:
- * 'same', parts } | { kind: 'fix', del, ins, n }], `del` the text the
- * learner wrote that went (or ''), `ins` the parts the tutor put in (or
- * []), `n` the number of the fix that names it -- the fix whose quotes
- * hold what went in or what was taken out -- or null.
+ * 'same', parts } | { kind: 'fix', del, ins, n, near }], `del` the text
+ * the learner wrote that went (or ''), `ins` the parts the tutor put in
+ * (or []), `n` the number of the fix that names it, or null, and `near`
+ * whether that fix is one of the natural ones (plan 330): Japanese that
+ * was right, drawn in the near ink and never struck as an error is.
+ *
+ * A fix names its run by what the run holds. What went in is found in
+ * the fix's own text (`fix`, plain, or quoted in 「 」) and what was
+ * taken out in what the learner wrote (`given`, or the issue's quotes),
+ * the exact one before one that merely contains it.
  */
 export function correctionFixes(given, parts, fixes) {
   const out = []
   for (const run of correctionParts(given, parts)) {
     const last = out[out.length - 1]
     if (run.kind === 'same') { out.push({ kind: 'same', parts: run.parts }); continue }
-    const fix = last?.kind === 'fix' ? last : { kind: 'fix', del: '', ins: [], n: null }
+    const fix = last?.kind === 'fix' ? last : { kind: 'fix', del: '', ins: [], n: null, near: false }
     if (fix !== last) out.push(fix)
     if (run.kind === 'del') fix.del += run.parts.map(p => p.text).join('')
     else fix.ins.push(...run.parts)
   }
+  const notes = fixes ?? []
+  const wrote = note => [...quoted(note.issue), note.given].filter(Boolean)
+  const wants = note => [...quoted(note.fix), note.fix].filter(Boolean)
   const used = new Set()
+  const find = (ok) => notes.findIndex((note, k) => !used.has(k) && ok(note))
   for (const f of out) {
     if (f.kind !== 'fix') continue
     const ins = f.ins.map(p => p.text).join('')
-    const i = (fixes ?? []).findIndex((note, k) => !used.has(k) && (
-      (ins && quoted(note.fix).some(q => q.includes(ins)))
-      || (f.del && quoted(note.issue).some(q => q.includes(f.del)))
+    const exact = find(note => (ins && wants(note).includes(ins)) || (f.del && wrote(note).includes(f.del)))
+    const i = exact >= 0 ? exact : find(note => (
+      (ins && wants(note).some(q => q.includes(ins))) || (f.del && wrote(note).some(q => q.includes(f.del)))
     ))
-    if (i >= 0) { used.add(i); f.n = i + 1 }
+    if (i >= 0) { used.add(i); f.n = i + 1; f.near = notes[i].severity === 'natural' }
   }
   return out
 }

@@ -38,6 +38,9 @@ export const STORE_PATHS = {
   record: '/api/practice/record',
   agenda: '/api/agenda',
   duels: '/api/pvp',
+  // 任務 (plan 331): the plates and discoveries the holder hangs. The day's
+  // own (/api/missions) is asked by the pill on Today's gate itself.
+  missionsBook: '/api/missions/book',
 }
 
 /** The paths a gate asks for itself, one spelling for the gate and its
@@ -77,7 +80,7 @@ const AT_ONCE = 2
  * the basics' units while the course rides), Practice (the record, and
  * on the desk each platform's specimen), the Dictionary (its opening
  * page and the radical index) and Profile (the two boards, the agenda,
- * the duels). `basics` is whether Today rides the basics.
+ * the duels, the plates). `basics` is whether Today rides the basics.
  */
 export function warmGates({ session, desk = false, lang, basics = false }) {
   const user = session?.user?.id
@@ -96,6 +99,7 @@ export function warmGates({ session, desk = false, lang, basics = false }) {
     ask(GATE_PATHS.week),
     store(STORE_PATHS.agenda),
     store(STORE_PATHS.duels),
+    store(STORE_PATHS.missionsBook),
     ...(desk ? SPECIMENS.map(source => () => warmStationSamples(source, lang)) : []),
   ].filter(Boolean)
   whenIdle(() => {

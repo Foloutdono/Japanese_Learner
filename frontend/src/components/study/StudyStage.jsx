@@ -10,6 +10,7 @@ import { RunPanelsContext, RunConsoleContext } from './runPanels'
 import { RunPanel } from './RunPanel'
 import { RunFloor } from './RunConsole'
 import { CardFlag } from '../feedback/FeedbackSheet'
+import { CardSetAside } from './SetAside'
 
 // ── The run's frame (plan 070) ────────────────────────────────
 // The canvas's <main class="stage">: both bars have left, the head
@@ -68,7 +69,9 @@ import { CardFlag } from '../feedback/FeedbackSheet'
 // the head draws the card's flag after the screen's own aside
 // (components/feedback/FeedbackSheet.jsx, CardFlag); null before the
 // answer and after the rating, so the flag is there only while the
-// card's answer is. Its sheet is App's (FeedbackHost).
+// card's answer is. Its sheet is App's (FeedbackHost). Beside it the
+// eye that sets the card aside (plan 328, ./SetAside.jsx), whose sheet
+// is App's too (SetAsideHost).
 // `tally` is what the run counts beside its place (RunStreak): the head
 // prints it under the name, with the sub and the remaining pill
 // (StageHead, 両端); `aside` is for what the learner presses.
@@ -106,7 +109,7 @@ export function StudyStage({
             onLeave={onLeave} leaveLabel={leaveLabel} leaveWord={leaveWord}
             where={where} sub={sub} tally={tally} remaining={panels ? undefined : remaining}
             pass={pass} onPass={openBalance} keys={!panels} help={panels}
-            aside={report ? <>{aside}<CardFlag card={report.card} /></> : aside}
+            aside={report ? <>{aside}<CardSetAside card={report.card} /><CardFlag card={report.card} /></> : aside}
           />
           {runConsole && meter !== true && meter}
           {children}

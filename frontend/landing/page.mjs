@@ -765,9 +765,15 @@ const STAY = 'tsuji-landing'
 // (src/lib/arrival.js reads it and sends only its class). Its own try:
 // a storage that refuses must not keep a sign-in's return from going on.
 export const ARRIVAL_KEY = 'tsuji.arrival'
+// The app's lib/arrival.REFERRAL_KEY: a referral link's username (plan 332).
+export const REFERRAL_KEY = 'tsuji.referral'
 
 export function arrivalScript() {
-  return '(function(){try{if(localStorage.getItem(\'' + ARRIVAL_KEY + '\'))return;'
+  // A referral link's username, as the app's lib/arrival.noteReferral keeps it (plan 332).
+  return '(function(){try{var q=new URLSearchParams(location.search),n=q.get(\'ref\');'
+    + 'if((q.get(\'src\')||\'\').toLowerCase()===\'referral\'&&n&&/^[A-Za-z0-9_]{3,20}$/.test(n)&&!localStorage.getItem(\'' + REFERRAL_KEY + '\'))'
+    + 'localStorage.setItem(\'' + REFERRAL_KEY + '\',n)}catch(e){}})();'
+    + '(function(){try{if(localStorage.getItem(\'' + ARRIVAL_KEY + '\'))return;'
     + 'var s=new URLSearchParams(location.search).get(\'src\'),r=null;'
     + 'if(s)s=s.toLowerCase();if(s&&!/^[a-z0-9_-]{1,20}$/.test(s))s=null;'
     + 'try{r=document.referrer?new URL(document.referrer).hostname:null}catch(e){}'

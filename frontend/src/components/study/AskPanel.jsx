@@ -3,6 +3,7 @@ import { useLang } from '../../LangContext'
 import { refillClock } from '../../domain/credits'
 import { askSuggestions, MAX_QUESTION, MAX_TURNS } from '../../domain/ask'
 import { Dots } from '../ui/Loading'
+import { AskDetail } from './AskDetail'
 import { ChevronIcon } from '../ui/Icons'
 
 // ── 机 — 問, the asking (plan 131) ────────────────────────────────────
@@ -92,25 +93,32 @@ export function AskPanel({ ask, askKey, context, open, text = false, page = fals
     <section className={`${c}${open ? '' : ` ${c}--sealed`}`} aria-label={t.askTitle}>
       {thread.length > 0 ? (
         <ol ref={threadRef} className={`${c}__thread`} aria-live="polite">
-          {thread.map(x => (
+          {thread.map(x => {
+            // A flagged mistake's detail (plan 330) is parts, not a
+            // sentence: a block holds them, a paragraph cannot.
+            const Answer = x.detail ? 'div' : 'p'
+            return (
             <li key={x.id} className={`${c}__turn`}>
               <p className={`${c}__q`}>
                 <span className={`${c}__mark`} lang="ja" aria-hidden="true">問</span>
                 <span className={`${c}__text`}>{x.question}</span>
               </p>
-              <p className={`${c}__a${x.state === 'done' ? '' : ` ${c}__a--note`}`}>
+              <Answer className={`${c}__a${x.state === 'done' ? '' : ` ${c}__a--note`}`}>
                 <span className={`${c}__mark`} lang="ja" aria-hidden="true">答</span>
                 {x.state === 'pending' ? (
                   <span className={`${c}__text`}>
                     <Dots />
                     <span className="sr-only">{t.askThinking}</span>
                   </span>
+                ) : x.state === 'done' && x.detail ? (
+                  <AskDetail detail={x.detail} />
                 ) : (
                   <span className={`${c}__text`}>{x.state === 'done' ? x.answer : ask.message(x)}</span>
                 )}
-              </p>
+              </Answer>
             </li>
-          ))}
+            )
+          })}
         </ol>
       ) : (
         <p className={`${c}__hint`}>{open ? hint ?? t.askHint : sealed ?? (text ? t.askSealedText : t.askSealed)}</p>

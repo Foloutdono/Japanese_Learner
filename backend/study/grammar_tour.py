@@ -55,7 +55,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 30  # 30: plan 328 -- what the corrected source still said
+TOUR_REV = 30  # 30: plan 334 -- what the corrected source still said
 #   (plan 312's findings §9): asks that presupposed their answer and
 #   notions that named it made neutral, the French and Spanish given
 #   no sex the Japanese does not give, the Spanish readings evened as

@@ -20,7 +20,7 @@ import { SOURCES } from '../../domain/paywall'
 import {
   ChevronIcon, MonitorIcon, SpeakerIcon, BellIcon, StarIcon, HourglassIcon,
   InfoIcon, UserIcon, BooksIcon, CalendarIcon, CardIcon, MessageIcon, ImportIcon, SlidersIcon,
-  PageIcon,
+  PageIcon, EyeOffIcon,
 } from '../ui/Icons'
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
@@ -41,6 +41,7 @@ import { intlLocale } from '../../lib/locale'
 //
 //   the app     display, sound, reminders (a shell's only)
 //   the study   the agenda, the reviews, the main modes (plan 273),
+//               the card contents, the cards set aside (plan 328),
 //               the rating bar, the reading pace, help
 //   the learner the account, what Anki taught them (plan 243), the
 //               credits
@@ -87,6 +88,7 @@ function useGroups(session) {
       { id: 'reviews', Icon: CardIcon, label: t.settingsReviews, value: reviewsValue(review, t, lang) },
       { id: 'modes', Icon: SlidersIcon, label: t.settingsModes, value: t.settingsModesValue },
       { id: 'cards', Icon: PageIcon, label: t.settingsCards, value: cardsValue(cards, t) },
+      { id: 'aside', Icon: EyeOffIcon, label: t.settingsAside, value: t.settingsAsideValue },
       { id: 'rating', Icon: StarIcon, iconProps: { filled: false }, label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
       { id: 'reading', Icon: HourglassIcon, label: t.settingsReadingPace, value: t.readingPaceOption[pace], spec: <PaceLine factor={paceFactor(pace)} /> },
       { id: 'help', Icon: InfoIcon, label: t.settingsHelp, value: t.settingsHelpValue },
