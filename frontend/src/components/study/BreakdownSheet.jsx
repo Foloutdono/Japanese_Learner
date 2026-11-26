@@ -13,8 +13,10 @@ import { DictionaryLookupSheet } from '../dictionary/DictionaryDetail'
 // (free, no model call, `save: false` keeps it off the analyser's
 // shelf), and asked when the sheet opens, never for a card nobody
 // opened it on. A word or a point in it is a door, as in every
-// breakdown: its dictionary entry, in a sheet over this one (`over`
-// keeps an Escape there from closing both).
+// breakdown: its dictionary entry, in a sheet over this one (`onSheet`
+// puts it on this sheet's own layer, mounted after, so it covers the
+// breakdown instead of rising under it, and keeps an Escape there from
+// closing both).
 export function BreakdownSheet({ sentence, translation, session, onClose }) {
   const { t, lang } = useLang()
   // undefined while it is asked, null when it could not be had.
@@ -44,7 +46,7 @@ export function BreakdownSheet({ sentence, translation, session, onClose }) {
         )
         : <p className="hint" role="status">{analysis === undefined ? t.preparingBreakdown : t.breakdownUnavailable}</p>}
       {lookup && (
-        <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} over />
+        <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} onSheet />
       )}
     </Sheet>
   )
