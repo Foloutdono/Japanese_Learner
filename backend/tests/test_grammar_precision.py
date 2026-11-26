@@ -547,6 +547,12 @@ EMBEDDED = [
 # same letters where they are another word: を持って is "holding", に渡って
 # "crossing to", 時 read じ, 駅に止まらず a train not stopping.
 SPELLED = [
+    # (plan 335: よう in kanji; 同様, 仕様 and 様子 are words of their own)
+    ("夢の様な時間を過ごした。", "〜ような", True),
+    ("雪の様に白い道を歩いた。", "〜ような", True),
+    ("毎日走る様にしている。", "〜ようにする", True),
+    ("同様の問題が起きた。", "〜ような", False),
+    ("様子を見ましょう。", "〜ような", False),
     # (plan 272: 初めて in kanji after the て form)
     ("健康は失って初めてその価値がわかる。", "〜てはじめて", True),
     # (plan 272: in kana, as a picture book writes it; 前 in kanji)
@@ -4299,3 +4305,158 @@ class EmphaticNegationTests(unittest.TestCase):
         self.assertEqual(found_in("私も行きます。").get("も"), "も")
         self.assertEqual(found_in("私は行く。").get("は"), "は")
         self.assertEqual(found_in("電話はしない。").get("は"), "は")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class PhraseBreakTests(unittest.TestCase):
+    """Plan 335: a lyric or a subtitle sets its phrases apart with a space,
+    and a space closes the phrase before it. 何をしていたの　何を見ていたの
+    asks twice, and the first の was read as the nominaliser 〜の while the
+    second, at the end of the line, was the explaining の: the same two
+    words got two readings."""
+
+    N = "〜の"
+
+    def test_a_final_no_before_a_space_explains(self) -> None:
+        for sentence in ("何をしていたの　何を見ていたの", "何をしていたの 何を見ていたの", "どこへ行くの　誰と会うの",
+                         "何をしていたの"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(self.N, found_in(sentence))
+
+    def test_a_no_inside_a_phrase_is_still_the_nominaliser(self) -> None:
+        self.assertIn("〜のが好きです", found_in("歌うのが好きです。"))
+        self.assertIn("の", found_in("私の　本"))     # (a noun's の, not an explaining one)
+        self.assertNotIn(self.N, found_in("私の　本"))
+
+    def test_its_gloss_is_the_same_on_both(self) -> None:
+        from study import analysis
+        for sentence in ("何をしていたの　何を見ていたの", "何をしていたの 何を見ていたの"):
+            tokens = [t for t in analysis.analyze_local(sentence)["tokens"] if t["surface"] == "の"]
+            self.assertEqual(len(tokens), 2, sentence)
+            for token in tokens:
+                self.assertTrue((token["gloss"] or {}).get("en", "").startswith("(at the end) explains"), sentence)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class LikenessInKanjiTests(unittest.TestCase):
+    """Plan 335: よう, "the way things look", is 様 on a page as often as it
+    is kana: わたしと同じ様な was a 様 and a な saying nothing, beside the
+    同じような the same sentence in kana reads."""
+
+    def test_its_points_written_with_the_kanji(self) -> None:
+        for sentence, point, text in (("わたしと同じ様な", "〜ような", "様な"),
+                                      ("夢の様な時間", "〜ような", "様な"),
+                                      ("雪の様に白い", "〜ような", "様に"),
+                                      ("走る様に歩く", "〜ように", "様に"),
+                                      ("泣いている様です", "〜ようです", "様です"),
+                                      ("知らない様だ", "〜ようです", "様だ"),
+                                      ("分かる様になる", "〜ようになる", "様になる"),
+                                      ("毎日食べる様にする", "〜ようにする", "様にする"),
+                                      ("忘れるかの様だ", "〜かのようだ", "かの様だ"),
+                                      ("彼が来る様なら", "〜ようなら", "様なら"),
+                                      ("来てくれる様に言う", "〜ように言う", "様に言う")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(point), text)
+
+    def test_a_line_may_stop_on_the_modifier(self) -> None:
+        """ような waits for its noun on the next line of a song; it is no
+        ようだ only where の, ので or のに follows."""
+        for sentence in ("わたしと同じようなこと", "わたしと同じ様な", "夢のような"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ような", found_in(sentence))
+        self.assertNotIn("〜ような", found_in("熱があるようなので、早く帰ります。"))
+
+    def test_a_word_that_has_the_kanji_is_not_the_point(self) -> None:
+        for sentence in ("同様の問題がある。", "仕様がない。", "様子を見る。", "お客様が来た。", "山田様にお渡しします。",
+                         "三月から五月にかけて、この丘では様々な花が咲く。"):
+            with self.subTest(sentence=sentence):
+                self.assertFalse({"〜ような", "〜ように", "〜ようです", "〜ようになる", "〜ようにする"} & set(found_in(sentence)))
+
+    def test_a_wide_point_is_not_refused_for_a_kanji_inside_it(self) -> None:
+        """The 様々 of the sentence is no business of 〜は〜が, which reaches over it."""
+        self.assertIn("〜は〜が", found_in("三月から五月にかけて、この丘では様々な花が咲く。"))
+        self.assertIn("〜のは〜だ", found_in("特に心に残っているのは、私たちのプランがお客様に断られた日のことです。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ExtentAndComparisonTests(unittest.TestCase):
+    """Plan 335: ほど and より had no point, though a song and half the
+    sentences the app teaches say them. 〜ほど is a degree, 〜ほど〜ない a
+    comparison that falls short, 〜より the thing compared against."""
+
+    HODO, HODO_NAI, YORI = "〜ほど", "〜ほど〜ない", "〜より"
+
+    def test_hodo_as_a_degree(self) -> None:
+        for sentence, text in (("そんなことを心から願うほどに", "ほどに"), ("死ぬほど好き", "ほど"),
+                               ("泣きたいほど嬉しい", "ほど"), ("涙が出るほど笑った", "ほど"),
+                               ("歩けないほど疲れた", "ほど"), ("三時間ほど待った", "ほど"),
+                               ("二週間ほど、お時間をいただけないでしょうか。", "ほど"),
+                               ("八百円ほどかかりますので、問題ございません。", "ほど"),
+                               ("使い込むほどに手になじむ感覚は、なかなか得られない。", "ほどに"),
+                               ("これほどの損失", "ほど")):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertEqual(found.get(self.HODO), text)
+                self.assertNotIn(self.HODO_NAI, found)
+
+    def test_the_ni_of_hodoni_is_its_adverbial_not_a_particle(self) -> None:
+        self.assertNotIn("に", found_in("泣きたいほどに嬉しい"))
+        # (二十箱ほどになる is 〜になる's に)
+        self.assertIn("〜くなる／〜になる", found_in("二十箱ほどになると思います。"))
+
+    def test_hodo_nai_is_a_comparison(self) -> None:
+        for sentence in ("彼ほど速くない", "今日は昨日ほど寒くないです", "兄は父ほど背が高くありません",
+                         "思ったほど難しくなかった", "それほど高くない", "この店はそれほど高くない",
+                         "さほど難しくありません", "これほど便利なものはない"):
+            with self.subTest(sentence=sentence):
+                found = found_in(sentence)
+                self.assertIn(self.HODO_NAI, found)
+                self.assertNotIn(self.HODO, found)
+
+    def test_the_more_the_more_is_its_own_point(self) -> None:
+        found = found_in("読めば読むほど面白い")
+        self.assertIn("〜ば〜ほど", found)
+        self.assertNotIn(self.HODO, found)
+        self.assertNotIn(self.HODO_NAI, found)
+
+    def test_a_negative_that_is_not_the_hodo_s_is_no_comparison(self) -> None:
+        # (どれほど…ことか, "how much": no level that is not reached)
+        self.assertNotIn(self.HODO_NAI, found_in("どれほど眠れない夜を過ごしたことか。"))
+        self.assertNotIn(self.HODO_NAI, found_in("どれほど周到に計画を立てても、思いどおりに進むとは限りません。"))
+
+    def test_yori_after_what_is_compared_against(self) -> None:
+        for sentence, text in (("自分が思うより強い", "より"), ("彼より背が高い", "より"),
+                               ("思ったより安かったです。", "より"), ("予定より一週間ほど早く入荷できる", "より"),
+                               ("電車に乗るより早く会社に着く", "より"), ("何よりも先に仕上げます。", "より")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(self.YORI), text)
+
+    def test_yori_with_nohougaa_is_that_point_s(self) -> None:
+        found = found_in("犬より猫のほうが好き")
+        self.assertIn("〜より〜のほうが", found)
+        self.assertNotIn(self.YORI, found)
+
+    def test_yori_that_is_no_than(self) -> None:
+        for sentence in ("母より。", "ケンより", "皆様に心よりお礼申し上げます。", "田中より折り返しお電話をさしあげる。",
+                         "行くよりほかない。", "より良い方法を探す。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(self.YORI, found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class SubjectNoTests(unittest.TestCase):
+    """Plan 335: 私の知らない横顔 -- の stands for が in a clause that
+    describes a noun. The breakdown glossed it and gave it no point."""
+
+    P = "〜の（主語）"
+
+    def test_it_is_found_on_the_no(self) -> None:
+        for sentence in ("わたしの知らない横顔で", "母の作った料理は、おいしいです。", "雨の降る日は、家で本を読みます。",
+                         "彼の言うことは、いつも正しい。", "友達の多い人", "お金のない人", "海の見える部屋"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(self.P), "の")
+
+    def test_a_plain_no_is_not_it(self) -> None:
+        for sentence in ("母の料理", "日本の古い寺", "私のほしい本", "これは私のです。", "歌うのが好きです。"):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(self.P, found_in(sentence))

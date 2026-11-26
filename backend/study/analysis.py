@@ -173,6 +173,11 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
         ]
 
 
+# The particles whose deck card stands beside the point written on them
+# (plan 335): ほど and より are words of the deck and the constructions its
+# lessons teach.
+_CARD_BESIDE_POINT = frozenset({"ほど", "より"})
+
 # The tokens a set phrase or a sentence-opening conjunction was folded
 # into (_tokens): one word each, whatever letters the detector read in it.
 _ONE_WORD_POS = frozenset({"interjection", "conjunction"})
@@ -2147,10 +2152,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
                 tokens.append(token)
                 i += n
                 continue
-        if deck is None and (i not in ruled or morphemes[i].pos in ("conjunction", "adnominal")):
+        if deck is None and (i not in ruled or morphemes[i].pos in ("conjunction", "adnominal")
+                             or (morphemes[i].pos == "particle" and morphemes[i].surface in _CARD_BESIDE_POINT)):
             # (A conjunction is a word with its card beside the point that
             # is it, as しかし is: そして, its card and its point, plan 272;
-            # an adnominal too, as この is: その.)
+            # an adnominal too, as この is: その; and ほど and より, whose own
+            # points teach the construction while their N4 and N3 cards stay
+            # the word, plan 335.)
             deck = resolve_function_word(morphemes, i)
         if (morphemes[i].surface == "って" and i + 1 < len(morphemes) and morphemes[i + 1].surface == "ば"
                 and morphemes[i + 1].pos == "particle" and i + 1 not in ruled
@@ -2578,7 +2586,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # point carries its `structure_id` and a deck card's match its `meaning_id`,
 # Indonesian beside the Spanish, and a name read as one says so in
 # Indonesian too.
-LOCAL_REV = 53
+# 54: plan 335 -- what a song lyric's breakdown found missing: a space between
+# two phrases closes the first (a final の explains on both of
+# 何をしていたの　何を見ていたの); よう written 様 is the likeness points' (同じ様な);
+# and four points of their own, 〜より (N5), 〜ほど〜ない and 〜の（主語）
+# (N4, where the course's own texts already use it), 〜ほど (N3), which the
+# glosses of ほど, より and a subject の stood in for.
+LOCAL_REV = 54
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:
