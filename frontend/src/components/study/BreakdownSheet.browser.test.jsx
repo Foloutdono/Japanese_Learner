@@ -71,6 +71,14 @@ describe('the breakdown door', () => {
     expect(document.querySelectorAll('[role="dialog"]').length).toBe(2)
     expect(document.querySelector('.dict-sheet')).not.toBeNull()
     expect(apiFetch.mock.calls.some(([u]) => String(u).startsWith('/api/dictionary'))).toBe(true)
+
+    // ...and it is SEEN: the sheet's .scrim holds the breakdown at 230 as
+    // a whole, so an entry at the `over` 220 rose under it, hidden. What is
+    // painted at the entry's centre belongs to the entry.
+    const entry = document.querySelector('.dict-sheet')
+    const r = entry.getBoundingClientRect()
+    const top = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(r.height / 2, 80))
+    expect(entry.contains(top)).toBe(true)
   })
 
   it('is not offered before the answer, nor on a card that says no sentence', async () => {

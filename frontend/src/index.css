@@ -21029,6 +21029,13 @@ s.rvw-chg__was { text-decoration-thickness: 2px; }
    be the lookup sheet over a quiz (z 200) or the dock in its modal
    dress (z 201), so this scrim stands above both. */
 .dict-sheet__scrim--over { z-index: 220; }
+/* A lookup opened from a bottom sheet (the grammar breakdown's words):
+   the sheet's .scrim holds the whole panel at 230, so the entry at 220
+   rose UNDER it and was hidden. It joins the sheets' layer instead:
+   a portal mounted later stands over the earlier one at the same
+   z-index, so the entry covers the breakdown and the deck picker its ＋
+   opens (also 230, mounted after) still covers the entry. */
+.dict-sheet__scrim--on-sheet { z-index: 230; }
 /* ── The readings sheet scrolls its BODY, not itself ──
    Every other shell here scrolls as one piece with the plate sticky
    inside it. This one cannot: its reading bands stick to the top of

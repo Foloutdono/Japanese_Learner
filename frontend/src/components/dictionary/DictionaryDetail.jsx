@@ -1871,14 +1871,16 @@ function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favori
   )
 }
 
-export function DictionaryLookupSheet({ term, kana, category, id, tr, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
+// `onSheet`: opened from inside a bottom sheet (Sheet, z 230 as a whole),
+// so it stands on the sheets' layer, not under it at the `over` 220.
+export function DictionaryLookupSheet({ term, kana, category, id, tr, session, mining, favorites, onClose, over = false, onSheet = false, onRadicalClick, onReview }) {
   const { t } = useLang()
   const look = useLookupStack(session, { term, kana, category, id, tr })
   const { here, entry } = look
-  const dialogRef = useDialog(onClose, { capture: over })
+  const dialogRef = useDialog(onClose, { capture: over || onSheet })
 
   return createPortal(
-    <div onClick={onClose} className={`dict-sheet__scrim${over ? ' dict-sheet__scrim--over' : ''}`}>
+    <div onClick={onClose} className={`dict-sheet__scrim${over ? ' dict-sheet__scrim--over' : ''}${onSheet ? ' dict-sheet__scrim--on-sheet' : ''}`}>
       {/* Named by the term it was opened on; a grammar point, opened
           by id, is named by its pattern once the entry is in hand and
           by the id until then. */}
