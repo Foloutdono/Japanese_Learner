@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../../LangContext'
 import ImportCardsMenu from './ImportCardsMenu'
@@ -92,20 +92,34 @@ describe('the import dialog', () => {
       return onImport
     }
 
-    it('offers the card each row may mean and starts only an exact one on it', async () => {
+    const click = sel => { document.querySelector(sel).click() }
+    const toggleDetails = () => click('.import-match-note__act .deckdetail-form__addline')
+    beforeEach(() => { onMatch.mockClear() })
+
+    it('asks once, counting only the rows that match for certain', async () => {
       await open()
       expect(onMatch).toHaveBeenCalledOnce()
-      const groups = document.querySelectorAll('.import-match .seg')
-      expect(groups).toHaveLength(2)
-      const checked = [...groups].map(g => g.querySelector('[aria-checked="true"]').textContent)
-      expect(checked[0]).toContain('水')
-      expect(checked[1]).not.toContain('塩')
-      expect(document.querySelector('.import-match__line').textContent).toContain('water')
+      expect(document.querySelectorAll('.import-match-note')).toHaveLength(1)
+      expect(document.querySelector('.import-match-note__msg').textContent).toMatch(/\b1\b/)
+      expect(document.querySelectorAll('.import-preview-row__app')).toHaveLength(0)
     })
 
-    it('sends the app’s cards to be linked and the other rows to be written', async () => {
+    it('writes every row when the question is ignored', async () => {
       const onImport = await open()
-      document.querySelector('.import-footer__submit').click()
+      click('.import-footer .import-footer__submit')
+      await settle()
+      const [own, , apps] = onImport.mock.calls[0]
+      expect(apps).toEqual([])
+      expect(own).toHaveLength(3)
+    })
+
+    it('links the exact cards on yes and writes the rest', async () => {
+      const onImport = await open()
+      click('.import-match-note__act .import-footer__submit')
+      await settle()
+      expect(document.querySelector('.import-match-note--done')).not.toBeNull()
+      expect(document.querySelectorAll('.import-preview-row__app')).toHaveLength(1)
+      click('.import-footer .import-footer__submit')
       await settle()
       const [own, skipped, apps] = onImport.mock.calls[0]
       expect(apps).toEqual([{ source: 'vocab', level: 'N5', raw_id: 'vocab_N5_水_みず' }])
@@ -113,32 +127,55 @@ describe('the import dialog', () => {
       expect(skipped).toBe(0)
     })
 
-    it('writes every row when the learner keeps their own', async () => {
+    it('keeps every row as written on no, and Change asks again', async () => {
       const onImport = await open()
-      document.querySelector('.import-match__bar button').click()
+      click('.import-match-note__act .import-footer__cancel')
       await settle()
-      document.querySelector('.import-footer__submit').click()
+      expect(document.querySelector('.import-match-note--done')).not.toBeNull()
+      click('.import-footer .import-footer__submit')
       await settle()
       const [own, , apps] = onImport.mock.calls[0]
       expect(apps).toEqual([])
       expect(own).toHaveLength(3)
     })
 
-    it('takes a card offered as a guess once the learner picks it', async () => {
+    it('opens the details and takes a card offered as a guess once picked', async () => {
       const onImport = await open()
-      document.querySelectorAll('.import-match .seg')[1].querySelector('[role="radio"]').click()
+      toggleDetails()
       await settle()
-      document.querySelector('.import-footer__submit').click()
+      const groups = document.querySelectorAll('.import-match-note__list .seg')
+      expect(groups).toHaveLength(2)
+      groups[1].querySelector('[role="radio"]').click()
+      await settle()
+      click('.import-match-note__act .import-footer__submit')
+      await settle()
+      click('.import-footer .import-footer__submit')
       await settle()
       const [own, , apps] = onImport.mock.calls[0]
       expect(apps.map(a => a.raw_id)).toEqual(['vocab_N5_水_みず', 'vocab_N3_塩_しお'])
       expect(own.map(r => r.fields.word)).toEqual(['zzz'])
     })
 
-    it('imports as written when the ask fails', async () => {
+    it('lets the learner switch one match back to their own before saying yes', async () => {
+      const onImport = await open()
+      toggleDetails()
+      await settle()
+      const own0 = [...document.querySelectorAll('.import-match-note__list .seg')[0].querySelectorAll('[role="radio"]')].at(-1)
+      own0.click()
+      await settle()
+      click('.import-match-note__act .import-footer__submit')
+      await settle()
+      click('.import-footer .import-footer__submit')
+      await settle()
+      const [own, , apps] = onImport.mock.calls[0]
+      expect(apps).toEqual([])
+      expect(own).toHaveLength(3)
+    })
+
+    it('imports as written, with no question, when the ask fails', async () => {
       const onImport = await open({ onMatch: vi.fn(async () => { throw new Error('offline') }) })
-      expect(document.querySelectorAll('.import-match')).toHaveLength(0)
-      document.querySelector('.import-footer__submit').click()
+      expect(document.querySelectorAll('.import-match-note')).toHaveLength(0)
+      click('.import-footer__submit')
       await settle()
       const [own, , apps] = onImport.mock.calls[0]
       expect(own).toHaveLength(3)

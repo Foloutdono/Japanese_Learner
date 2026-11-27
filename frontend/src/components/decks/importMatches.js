@@ -6,9 +6,13 @@
 //
 //   * a row's choice is the index of a candidate, or OWN (-1): the
 //     learner's written card, which is what every row was before;
-//   * only an `exact` candidate is taken without being asked. A word typed
-//     in kana, two cards written alike, a reading that disagrees: offered,
-//     and left to the learner;
+//   * nothing is taken without being asked. The dialog asks once ("N cards
+//     match the app's: use them?"), and until the answer a row stays as
+//     written. Yes puts the rows whose match is `exact` on the app's card;
+//     a word typed in kana, two cards written alike or a reading that
+//     disagrees stay the learner's own unless they pick it in the details;
+//   * a choice made in the details is the learner's and outlasts the
+//     answer: Yes does not undo it, No (every row as written) does;
 //   * a chosen candidate is sent to /cards/app as {source, level, raw_id}
 //     and the row is not written; the rest go to /cards/batch as before.
 
@@ -18,7 +22,11 @@ export const OWN = -1
 // what fits a phone's width as a segmented choice.
 export const SHOWN = 3
 
-/** What a row starts on: its exact candidate (always first), else its own. */
+/** The answer to the notice: nothing yet, or yes, or no. */
+export const YES = 'yes'
+export const NO = 'no'
+
+/** What "yes" puts a row on: its exact candidate (always first), else its own. */
 export function defaultPick(candidates) {
   return candidates?.[0]?.exact ? 0 : OWN
 }
@@ -28,12 +36,12 @@ export function offered(candidates) {
   return (candidates ?? []).slice(0, SHOWN)
 }
 
-/** The choice for row `i`: the learner's, else the default. */
-export function pickOf(picks, matches, i) {
+/** The choice for row `i`: the learner's own, else what the answer gives it. */
+export function pickOf(picks, matches, i, answer = null) {
   const own = picks[i]
   const list = offered(matches?.[i])
   if (own != null && own < list.length) return own
-  return defaultPick(list)
+  return answer === YES ? defaultPick(list) : OWN
 }
 
 /** How many rows have something to choose between. */
@@ -41,34 +49,18 @@ export function matchedCount(matches) {
   return (matches ?? []).filter(c => offered(c).length > 0).length
 }
 
-/** How many rows are on an app card now. */
-export function usingCount(picks, matches) {
-  let n = 0
-  for (let i = 0; i < (matches?.length ?? 0); i++) {
-    if (pickOf(picks, matches, i) !== OWN) n++
-  }
-  return n
-}
-
-/** How many rows have a candidate the server is sure of. */
+/** How many rows have a candidate the server is sure of: the notice's figure. */
 export function exactCount(matches) {
   return (matches ?? []).filter(c => offered(c)[0]?.exact).length
 }
 
-/**
- * The choices after "use the app's cards" (every row whose match is exact
- * goes on it; a row with only a possible one is left as the learner had it)
- * or "keep mine" (every matched row back to its own).
- */
-export function pickAll(matches, picks, use) {
-  const next = { ...picks }
-  ;(matches ?? []).forEach((cands, i) => {
-    const list = offered(cands)
-    if (list.length === 0) return
-    if (!use) next[i] = OWN
-    else if (list[0].exact) next[i] = 0
-  })
-  return next
+/** How many rows are on an app card now. */
+export function usingCount(picks, matches, answer = null) {
+  let n = 0
+  for (let i = 0; i < (matches?.length ?? 0); i++) {
+    if (pickOf(picks, matches, i, answer) !== OWN) n++
+  }
+  return n
 }
 
 /**
@@ -79,13 +71,13 @@ export function pickAll(matches, picks, use) {
  * `rows` are the dialog's whole rows ({fields, notes}), `matches` the
  * server's lists in the same order.
  */
-export function splitImport(rows, matches, picks) {
+export function splitImport(rows, matches, picks, answer = null) {
   const own = []
   const apps = []
   const seen = new Set()
   let same = 0
   rows.forEach((row, i) => {
-    const at = pickOf(picks, matches, i)
+    const at = pickOf(picks, matches, i, answer)
     if (at === OWN) { own.push(row); return }
     const c = offered(matches[i])[at]
     const key = `${c.source}:${c.raw_id}`

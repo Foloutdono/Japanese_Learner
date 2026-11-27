@@ -5,12 +5,10 @@ import { CrossIcon, ChevronIcon } from '../ui/Icons'
 import { Seg } from '../chrome/Console'
 import { useDialog } from '../../hooks/useDialog'
 import { columnsFor, exampleText, readCards } from './importCards'
-import { OWN, exactCount, matchKey, matchedCount, offered, pickAll, pickOf, splitImport, usingCount } from './importMatches'
+import { NO, OWN, YES, exactCount, matchKey, offered, pickOf, splitImport, usingCount } from './importMatches'
 
-// How long a paste rests before it is asked about, and how many rows the
-// preview draws when each one carries a choice.
+// How long a paste rests before it is asked about.
 const MATCH_WAIT_MS = 400
-const MATCH_ROWS = 100
 
 const KIND_LABEL = { vocab: 'vocabType', kanji: 'kanjiType', kana: 'kanaType', grammar: 'grammarType' }
 
@@ -21,11 +19,13 @@ const KIND_LABEL = { vocab: 'vocabType', kanji: 'kanjiType', kana: 'kanaType', g
 // whole ones, as {fields, notes}.
 //
 // `onMatch`, when the deck can hold the app's own cards, asks which of them
-// the whole rows may mean (importMatches.js): a row found among them is
-// offered as that card, an exact one starts on it, and the learner's choice
-// splits the import in two -- `onImport(own, skipped, apps)`, the written
-// rows and the refs to link. Without `onMatch`, or when it finds nothing,
-// every row is written as it always was.
+// the whole rows may mean (importMatches.js, plan 335). When some match for
+// certain, one notice asks whether to use them: Yes, No, or Details, where
+// each match can be switched back to the learner's own card. Until it is
+// answered, and the details are shut, nothing changes; the answer splits
+// the import in two, `onImport(own, skipped, apps)`: the written rows and
+// the refs to link. Without `onMatch`, or when nothing matches, every row
+// is written as it always was.
 export default function ImportCardsMenu({ structure, onImport, onMatch, onClose }) {
   const { t, lang } = useLang()
   const dialogRef = useDialog(onClose)
@@ -37,6 +37,8 @@ export default function ImportCardsMenu({ structure, onImport, onMatch, onClose 
   const [importing, setImporting]   = useState(false)
   const [matches, setMatches]       = useState({ key: '', rows: [] })
   const [picks, setPicks]           = useState({})
+  const [answer, setAnswer]         = useState(null)
+  const [details, setDetails]       = useState(false)
 
   function getTermSep() {
     if (termSep === 'tab')    return '\t'
@@ -83,21 +85,25 @@ export default function ImportCardsMenu({ structure, onImport, onMatch, onClose 
     const timer = setTimeout(async () => {
       try {
         const found = await onMatch(rows)
-        if (live && found) { setMatches({ key: rowsKey, rows: found }); setPicks({}) }
+        if (live && found) { setMatches({ key: rowsKey, rows: found }); setPicks({}); setAnswer(null); setDetails(false) }
       } catch { /* the rows stay as written */ }
     }, MATCH_WAIT_MS)
     return () => { live = false; clearTimeout(timer) }
   }, [rows, rowsKey, onMatch])
 
   const found = matches.key === rowsKey ? matches.rows : []
-  const matched = matchedCount(found)
-  const using = usingCount(picks, found)
+  // The details open are the answer being worked out: its rows show what
+  // yes would do, so what is on the screen is what the import sends.
+  const live = answer ?? (details ? YES : null)
+  const sure = exactCount(found)
+  const using = usingCount(picks, found, live)
+  const pickAt = at => pickOf(picks, found, at, live)
 
   async function handleImport() {
     if (whole.length === 0 || importing) return
     setImporting(true)
     try {
-      const { own, apps } = splitImport(rows, found, picks)
+      const { own, apps } = splitImport(rows, found, picks, live)
       await onImport(own, skipped, apps)
     } finally {
       setImporting(false)
@@ -193,18 +199,19 @@ export default function ImportCardsMenu({ structure, onImport, onMatch, onClose 
             <div className="import-preview__empty">{t.noPreview}</div>
           ) : (
             <>
-              {matched > 0 && (
-                <div className="import-match__bar">
-                  <span className="import-preview__note">{t.importMatched.replace('{n}', matched)}</span>
-                  <button type="button" className="deckdetail-form__addline"
-                          onClick={() => { playClick(); setPicks(p => pickAll(found, p, using === 0 && exactCount(found) > 0)) }}
-                          disabled={using === 0 && exactCount(found) === 0}>
-                    {using > 0 ? t.importKeepOwn : t.importUseApp}
-                  </button>
-                </div>
+              {sure > 0 && (
+                <MatchNotice
+                  t={t} sure={sure} using={using} answer={answer} open={details}
+                  matches={found} rows={rows} structure={structure} pickAt={pickAt}
+                  onToggle={() => { playClick(); setDetails(d => !d) }}
+                  onYes={() => { playClick(); setAnswer(YES); setDetails(false) }}
+                  onNo={() => { playClick(); setAnswer(NO); setPicks({}); setDetails(false) }}
+                  onChange={() => { playClick(); setAnswer(null); setDetails(true) }}
+                  onPick={(at, v) => { playClick(); setPicks(p => ({ ...p, [at]: v })) }}
+                />
               )}
-              <div className={`import-preview__list${matched ? ' import-preview__list--match' : ''}`}>
-                {previewRows(read.cards, matched ? MATCH_ROWS : 20).map(({ c, at }, i) => (
+              <div className="import-preview__list">
+                {previewRows(read.cards, 20).map(({ c, at }, i) => (
                   <div key={i} className={`import-preview-row${c.missing.length ? ' import-preview-row--skipped' : ''}`}>
                     <span className="import-preview-row__front" lang="ja">{c.fields[structure.front_key]}</span>
                     <span className="import-preview-row__arrow"><ChevronIcon direction="right" size={13} /></span>
@@ -216,20 +223,14 @@ export default function ImportCardsMenu({ structure, onImport, onMatch, onClose 
                         </span>
                       )
                       : <span className="import-preview-row__meta">{extrasOf(c, structure, t)}</span>}
-                    {at >= 0 && offered(found[at]).length > 0 && (
-                      <MatchChoice
-                        t={t}
-                        word={c.fields[structure.front_key]}
-                        candidates={offered(found[at])}
-                        value={pickOf(picks, found, at)}
-                        onChange={v => { playClick(); setPicks(p => ({ ...p, [at]: v })) }}
-                      />
+                    {at >= 0 && offered(found[at]).length > 0 && pickAt(at) !== OWN && (
+                      <span className="import-preview-row__app">{t.importAppCard}</span>
                     )}
                   </div>
                 ))}
-                {read.cards.length > (matched ? MATCH_ROWS : 20) && (
+                {read.cards.length > 20 && (
                   <div className="import-preview__more">
-                    ... {t.andMore.replace('{n}', read.cards.length - (matched ? MATCH_ROWS : 20))}
+                    ... {t.andMore.replace('{n}', read.cards.length - 20)}
                   </div>
                 )}
               </div>
@@ -286,6 +287,53 @@ function previewRows(cards, limit) {
   return cards.map(c => ({ c, at: c.missing.length === 0 ? ++w : -1 })).slice(0, limit)
 }
 
+// The one question (plan 335): how many cards match the app's own, and
+// whether to use them. Yes, No, or Details, which lists every match with
+// the card it would be. Once answered it shrinks to a line and Change.
+function MatchNotice({ t, sure, using, answer, open, matches, rows, structure, pickAt, onToggle, onYes, onNo, onChange, onPick }) {
+  if (answer) {
+    return (
+      <div className="import-match-note import-match-note--done">
+        <p className="import-match-note__msg">
+          {answer === YES
+            ? t.importMatchUsing.replace('{n}', using)
+            : t.importMatchKept}
+        </p>
+        <button type="button" className="deckdetail-form__addline" onClick={onChange}>{t.importChange}</button>
+      </div>
+    )
+  }
+  return (
+    <div className="import-match-note">
+      <p className="import-match-note__msg">{t.importMatchAsk.replace('{n}', sure)}</p>
+      {open && (
+        <div className="import-match-note__list">
+          {matches.map((cands, at) => offered(cands).length > 0 && (
+            <div key={at} className="import-match-note__row">
+              <div className="import-match-note__you">
+                <span lang="ja">{rows[at].fields[structure.front_key]}</span>
+                {' · '}{rows[at].fields[structure.back_key]}
+              </div>
+              <MatchChoice t={t} word={rows[at].fields[structure.front_key]}
+                           candidates={offered(cands)} value={pickAt(at)} onChange={v => onPick(at, v)} />
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="import-match-note__act">
+        <button type="button" className="deckdetail-form__addline" onClick={onToggle} aria-expanded={open}>
+          {open ? t.importHideDetails : t.importDetails}
+        </button>
+        <span className="import-match-note__push" />
+        <button type="button" className="import-footer__cancel" onClick={onNo}>{t.importMatchNo}</button>
+        <button type="button" className="import-footer__submit import-footer__submit--active" onClick={onYes}>
+          {t.importMatchYes}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // One row's choice between the app's cards it may mean and its own: a
 // segmented pick (DESIGN.md, Controls), the app's card in the learner's
 // language under it. Japanese is content: it is the option's text, and
@@ -304,18 +352,17 @@ function MatchChoice({ t, word, candidates, value, onChange }) {
     })),
     { key: String(OWN), label: t.importOwn },
   ]
-  const chosen = value === OWN ? null : candidates[value]
+  // The card the row would be, whether or not it is the one chosen.
+  const shown = candidates[value === OWN ? 0 : value]
   return (
     <div className="import-match">
       <Seg full className="import-match__seg" label={t.importMatchLabel.replace('{word}', word)}
            options={options} value={String(value)} onChange={k => onChange(Number(k))} />
-      {chosen && (
-        <div className="import-match__line">
-          {chosen.meaning}
-          {chosen.source !== 'kana' && chosen.level ? ` · ${chosen.level}` : ''}
-          {chosen.in_deck ? ` · ${t.alreadyInDeck}` : ''}
-        </div>
-      )}
+      <div className="import-match__line">
+        {shown.meaning}
+        {shown.source !== 'kana' && shown.level ? ` · ${shown.level}` : ''}
+        {shown.in_deck ? ` · ${t.alreadyInDeck}` : ''}
+      </div>
     </div>
   )
 }
