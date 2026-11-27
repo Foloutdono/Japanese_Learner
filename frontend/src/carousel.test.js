@@ -748,7 +748,8 @@ describe('explaining a point in its own sentence', () => {
     // is written on).
     expect(glossOf('あれほど努力したのだから、彼女は試験に合格するに違いない。', 'ほど')).toBe('to the extent that, so … that; about')
     expect(glossOf('医師の説明によると、手術の後は二週間ほど入院が必要らしい。', 'ほど')).toBe('to the extent that, so … that; about')
-    expect(glossOf('医師の説明によると、手術の後は二週間ほど入院が必要らしい。', 'ほど', 'fr')).toBe('au point de, si … que ; environ')
+    // (French sets a no-break space before the semicolon.)
+    expect(glossOf('医師の説明によると、手術の後は二週間ほど入院が必要らしい。', 'ほど', 'fr')).toBe('au point de, si … que\u00a0; environ')
     // できるだけ is “as … as possible”, never “only”: one word since plan 272.
     expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'できるだけ')).toMatch(/as much as possible/)
     expect(glossOf('会社の決まりにしたがって、休暇の予定をできるだけ早く上司に伝えた。', 'だけ')).toBeUndefined()
