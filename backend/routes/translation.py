@@ -328,6 +328,10 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
             # reasoning model is paid in latency, not in quality.
             max_tokens=1000,
             task="translation-review",
+            # No reasoning pass: on a 1000-token ceiling the models spent
+            # all of it thinking and answered nothing (2026-11-27, every
+            # model in the chain: out=1000 reasoning=1000, finish=length).
+            reasoning=False,
             # A model that thinks out loud and runs out of tokens before its
             # JSON answers 200 with a monologue; the next model is asked.
             accept=tutor_review.acceptable_reply,

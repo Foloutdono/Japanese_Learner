@@ -23,11 +23,12 @@ class _Resp:
     ok = True
     text = ""
 
-    def __init__(self, content):
+    def __init__(self, content, finish=None):
         self._content = content
+        self._finish = finish
 
     def json(self):
-        return {"choices": [{"message": {"content": self._content}}]}
+        return {"choices": [{"message": {"content": self._content}, "finish_reason": self._finish}]}
 
 
 def _run(replies, **kw):
@@ -38,7 +39,8 @@ def _run(replies, **kw):
 
     def post(url, **kwargs):
         asked.append(kwargs["json"]["model"])
-        return _Resp(replies[len(asked) - 1])
+        reply = replies[len(asked) - 1]
+        return _Resp(*reply) if isinstance(reply, tuple) else _Resp(reply)
 
     with mock.patch.object(llm_shared, "PROVIDERS", [_provider(models)]), \
          mock.patch.object(llm_shared, "_DEAD_MODELS", set()), \
@@ -74,6 +76,22 @@ class AcceptTests(unittest.TestCase):
         out, asked = _run(["a", "b"], accept=boom)
         self.assertIsInstance(out, LLMUnavailable)
         self.assertEqual(asked, ["m0", "m1"])
+
+
+class CutOffTests(unittest.TestCase):
+    """2026-11-27: a reasoning pass spent the whole cap (out=1000
+    reasoning=1000, finish_reason=length) and `content` came back empty.
+    The same model under the same cap does it again, so it is not paid twice."""
+
+    def test_an_empty_reply_cut_by_the_cap_moves_on_at_once(self) -> None:
+        out, asked = _run([("", "length"), '{"ok": 1}'])
+        self.assertEqual(out, '{"ok": 1}')
+        self.assertEqual(asked, ["m0", "m1"])
+
+    def test_an_empty_reply_for_another_reason_is_tried_once_more(self) -> None:
+        out, asked = _run([("", "stop"), '{"ok": 1}'])
+        self.assertEqual(out, '{"ok": 1}')
+        self.assertEqual(asked, ["m0", "m0"])
 
 
 class StripReasoningTests(unittest.TestCase):

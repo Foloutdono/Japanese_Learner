@@ -318,3 +318,17 @@ def test_an_answer_that_is_not_romaji_japanese_is_left_as_typed(client, tutor):
     r = client.post("/api/translation/analyze", json={**ROMAJI_PAYLOAD, "user_answer": "I drank only water"})
     assert r.json()["answer_kana"] is None
     assert "<<<I drank only water>>>" in calls[0][0]["content"]
+
+
+def test_the_review_asks_for_no_reasoning_pass(client, monkeypatch):
+    # 2026-11-27: on its 1000-token cap every model in the chain spent the
+    # whole budget reasoning (out=1000 reasoning=1000) and answered nothing.
+    seen = {}
+
+    def chat(messages, *a, **kw):
+        seen.update(kw)
+        return _reply()
+    monkeypatch.setattr(translation, "llm_configured", lambda: True)
+    monkeypatch.setattr(reading, "_chat", chat)
+    assert client.post("/api/translation/analyze", json=PAYLOAD).status_code == 200
+    assert seen["reasoning"] is False

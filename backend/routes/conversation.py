@@ -282,6 +282,10 @@ def post_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
             # The shape is small: composition's, served in 1000.
             max_tokens=1000,
             task="conversation-review",
+            # No reasoning pass: on a 1000-token ceiling the models spent
+            # all of it thinking and answered nothing (2026-11-27, every
+            # model in the chain: out=1000 reasoning=1000, finish=length).
+            reasoning=False,
             accept=tutor_review.acceptable_reply,
         )
     review = tutor_review.parse_review(content)
@@ -336,6 +340,10 @@ def post_talk(payload: TalkPayload, user_id: str = Depends(get_user_id)):
             # Two short lines and the review's shape.
             max_tokens=1200,
             task="conversation-talk",
+            # No reasoning pass: on a 1000-token ceiling the models spent
+            # all of it thinking and answered nothing (2026-11-27, every
+            # model in the chain: out=1000 reasoning=1000, finish=length).
+            reasoning=False,
             accept=conversation.acceptable_talk,
         )
     parsed = conversation.parse_talk(content)
