@@ -16110,6 +16110,183 @@
     }
   },
   {
+    "pattern": "〜ほど",
+    "structure": "plain form／noun／quantity + ほど",
+    "structure_fr": "forme neutre／nom／quantité + ほど",
+    "structure_es": "forma llana／sustantivo／cantidad + ほど",
+    "structure_id": "bentuk biasa／kata benda／jumlah + ほど",
+    "meaning": {
+      "en": "to the extent that, so … that; about",
+      "fr": "au point de, si … que ; environ",
+      "es": "hasta el punto de, tan … que; más o menos",
+      "id": "sampai-sampai, sebegitu … hingga; kira-kira"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form／noun + ほど** gives the degree: « to the extent that, so … that ». 死ぬほど疲れた (tired to death), 泣きたいほど嬉しい (so happy I could cry).",
+        "fr": "**forme neutre／nom + ほど** donne le degré : « au point de, si … que ». 死ぬほど疲れた (crevé à en mourir), 泣きたいほど嬉しい (si heureux qu'on pourrait pleurer).",
+        "es": "**forma llana／sustantivo + ほど** da el grado: «hasta el punto de, tan … que». 死ぬほど疲れた (muerto de cansancio), 泣きたいほど嬉しい (tan feliz que podría llorar).",
+        "id": "**bentuk biasa／kata benda + ほど** menyatakan tingkat: “sampai-sampai, sebegitu … hingga”. 死ぬほど疲れた (capek setengah mati), 泣きたいほど嬉しい (sebahagia itu sampai ingin menangis)."
+      },
+      {
+        "kind": "use",
+        "en": "- An extreme made vivid: 涙が出るほど笑った (laughed till I cried).\n- A rough amount: 三時間ほど待った (waited about three hours).\n- The more, the better: 早いほどいい (the sooner, the better).",
+        "fr": "- Un extrême rendu vivant : 涙が出るほど笑った (rire aux larmes).\n- Une quantité approximative : 三時間ほど待った (attendre environ trois heures).\n- Plus … mieux c'est : 早いほどいい (le plus tôt sera le mieux).",
+        "es": "- Un extremo hecho vívido: 涙が出るほど笑った (reír hasta llorar).\n- Una cantidad aproximada: 三時間ほど待った (esperar unas tres horas).\n- Cuanto más, mejor: 早いほどいい (cuanto antes, mejor).",
+        "id": "- Hal ekstrem yang dibuat hidup: 涙が出るほど笑った (tertawa sampai menangis).\n- Jumlah kira-kira: 三時間ほど待った (menunggu sekitar tiga jam).\n- Makin … makin baik: 早いほどいい (makin cepat makin baik)."
+      },
+      {
+        "kind": "careful",
+        "en": "If a negative closes the clause, ほど compares instead: それほど高くない is « not that expensive » (〜ほど〜ない). Repeating a verb before it (読めば読むほど) is the « the more … the more » of 〜ば〜ほど.",
+        "fr": "Si une négation ferme la proposition, ほど compare : それほど高くない veut dire « pas si cher que ça » (〜ほど〜ない). Répéter un verbe devant (読めば読むほど), c'est le « plus … plus » de 〜ば〜ほど.",
+        "es": "Si una negación cierra la oración, ほど compara: それほど高くない significa «no es tan caro» (〜ほど〜ない). Repetir un verbo antes (読めば読むほど) es el «cuanto más … más» de 〜ば〜ほど.",
+        "id": "Kalau negasi menutup klausa, ほど justru membandingkan: それほど高くない berarti “tidak semahal itu” (〜ほど〜ない). Mengulang kata kerja sebelumnya (読めば読むほど) adalah “makin … makin” dari 〜ば〜ほど."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜くらい／〜ぐらい",
+        "en": "The same measure of degree: ほど sounds more vivid, くらい more casual.",
+        "fr": "La même mesure du degré : ほど sonne plus imagé, くらい plus familier.",
+        "es": "La misma medida de grado: ほど suena más vívido, くらい más coloquial.",
+        "id": "Ukuran tingkat yang sama: ほど terdengar lebih hidup, くらい lebih santai.",
+        "same": true
+      },
+      {
+        "pattern": "〜ば〜ほど",
+        "en": "ほど alone gives one degree; ば〜ほど sets two things rising together.",
+        "fr": "ほど seul donne un degré ; ば〜ほど fait monter deux choses ensemble.",
+        "es": "ほど solo da un grado; ば〜ほど hace que dos cosas suban juntas.",
+        "id": "ほど saja menyatakan satu tingkat; ば〜ほど membuat dua hal naik bersama."
+      },
+      {
+        "pattern": "〜ほど〜ない",
+        "en": "With a negative closing the clause ほど compares: not as … as.",
+        "fr": "Avec une négation en fin de proposition, ほど compare : pas aussi … que.",
+        "es": "Con una negación al final, ほど compara: no tan … como.",
+        "id": "Dengan negasi di akhir klausa, ほど membandingkan: tidak se… itu."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "死ぬほど疲れたので、すぐに寝ました。",
+        "en": "I was so tired I could die, so I went straight to bed.",
+        "fr": "J'étais crevé à en mourir, alors je me suis couché tout de suite.",
+        "es": "Estaba muerto de cansancio, así que me acosté enseguida.",
+        "id": "Aku capek setengah mati, jadi langsung tidur.",
+        "register": "polite"
+      },
+      {
+        "jp": "歩けないほど、足が痛いです。",
+        "en": "My leg hurts so much that I cannot walk.",
+        "fr": "J'ai si mal à la jambe que je ne peux plus marcher.",
+        "es": "Me duele tanto la pierna que no puedo caminar.",
+        "id": "Kakiku sakit sekali sampai tidak bisa berjalan.",
+        "register": "polite"
+      },
+      {
+        "jp": "友だちを三十分ほど待ちました。",
+        "en": "I waited about thirty minutes for my friend.",
+        "fr": "J'ai attendu mon ami environ trente minutes.",
+        "es": "Esperé a mi amigo unos treinta minutos.",
+        "id": "Aku menunggu temanku sekitar tiga puluh menit.",
+        "register": "polite"
+      },
+      {
+        "jp": "早いほどいいので、今すぐ出発しましょう。",
+        "en": "The sooner the better, so let's leave right now.",
+        "fr": "Plus c'est tôt, mieux c'est : partons tout de suite.",
+        "es": "Cuanto antes, mejor, así que salgamos ahora mismo.",
+        "id": "Makin cepat makin baik, jadi ayo berangkat sekarang juga.",
+        "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "きのうは、死ぬ＿＿＿いそがしかったです。",
+        "tr": {
+          "en": "Yesterday I was so busy I could have died.",
+          "fr": "Hier, j'étais occupé à en mourir.",
+          "es": "Ayer estuve ocupado a más no poder.",
+          "id": "Kemarin aku sibuk setengah mati."
+        },
+        "choices": [
+          "ほど",
+          "ように",
+          "ながら"
+        ],
+        "why": {
+          "en": "死ぬほど puts the extreme as a measure of how busy: so busy one could die. ように and ながら cannot follow 死ぬ to give that degree.",
+          "fr": "死ぬほど donne l'extrême comme mesure de l'activité : occupé à en mourir. ように et ながら ne peuvent pas suivre 死ぬ pour donner ce degré.",
+          "es": "死ぬほど pone el extremo como medida de lo ocupado que se estuvo: tanto que uno podría morir. ように y ながら no pueden seguir a 死ぬ para dar ese grado.",
+          "id": "死ぬほど menjadikan hal ekstrem itu ukuran kesibukan: sesibuk itu sampai bisa mati. ように dan ながら tidak bisa mengikuti 死ぬ untuk menyatakan tingkat itu."
+        }
+      },
+      {
+        "jp": "このかばんは、重くて持てない＿＿＿です。",
+        "tr": {
+          "en": "This bag is so heavy that I can hardly hold it.",
+          "fr": "Ce sac est si lourd que je peux à peine le porter.",
+          "es": "Esta bolsa es tan pesada que apenas puedo cargarla.",
+          "id": "Tas ini sangat berat sampai hampir tidak bisa dibawa."
+        },
+        "choices": [
+          "ほど",
+          "ずつ",
+          "でも"
+        ],
+        "why": {
+          "en": "持てないほどです gives the degree of the weight: heavy to the point of not being able to hold it. ずつ means « each » and でも « even », and neither fits after 持てない here.",
+          "fr": "持てないほどです donne le degré du poids : lourd au point de ne pas pouvoir le porter. ずつ veut dire « chacun » et でも « même », et aucun ne va après 持てない ici.",
+          "es": "持てないほどです da el grado del peso: pesado hasta el punto de no poder cargarla. ずつ significa «cada uno» y でも «incluso», y ninguno encaja tras 持てない aquí.",
+          "id": "持てないほどです menyatakan tingkat beratnya: seberat itu sampai tidak bisa dibawa. ずつ berarti “masing-masing” dan でも “bahkan”, dan keduanya tidak cocok setelah 持てない di sini."
+        }
+      },
+      {
+        "jp": "駅まで、歩いて二十分＿＿＿かかります。",
+        "tr": {
+          "en": "It takes about twenty minutes to walk to the station.",
+          "fr": "Il faut environ vingt minutes à pied pour aller à la gare.",
+          "es": "Se tardan unos veinte minutos a pie hasta la estación.",
+          "id": "Butuh sekitar dua puluh menit berjalan kaki ke stasiun."
+        },
+        "choices": [
+          "ほど",
+          "ずつ",
+          "ごと"
+        ],
+        "why": {
+          "en": "After an amount, ほど makes it approximate: 二十分ほど, about twenty minutes. ずつ means « twenty minutes each » and ごと « every twenty minutes », so neither says « about ».",
+          "fr": "Après une quantité, ほど la rend approximative : 二十分ほど, environ vingt minutes. ずつ veut dire « vingt minutes chacun » et ごと « toutes les vingt minutes », donc aucun ne dit « environ ».",
+          "es": "Tras una cantidad, ほど la vuelve aproximada: 二十分ほど, unos veinte minutos. ずつ significa «veinte minutos cada uno» y ごと «cada veinte minutos», así que ninguno dice «unos».",
+          "id": "Setelah jumlah, ほど membuatnya kira-kira: 二十分ほど, sekitar dua puluh menit. ずつ berarti “dua puluh menit masing-masing” dan ごと “setiap dua puluh menit”, jadi keduanya tidak berarti “sekitar”."
+        }
+      },
+      {
+        "jp": "お金は、多い＿＿＿いいと思います。",
+        "tr": {
+          "en": "I think the more money, the better.",
+          "fr": "Je pense que plus on a d'argent, mieux c'est.",
+          "es": "Creo que cuanto más dinero, mejor.",
+          "id": "Menurutku makin banyak uang makin baik."
+        },
+        "choices": [
+          "ほど",
+          "ばかり",
+          "のに"
+        ],
+        "why": {
+          "en": "多いほどいい is « the more, the better »: ほど links the amount to how good it is. ばかり (« nothing but ») and のに (« although ») cannot join 多い and いい this way.",
+          "fr": "多いほどいい veut dire « plus il y en a, mieux c'est » : ほど relie la quantité à la valeur. ばかり (« rien que ») et のに (« bien que ») ne peuvent pas relier 多い et いい ainsi.",
+          "es": "多いほどいい significa «cuanto más, mejor»: ほど une la cantidad con lo bueno que es. ばかり («nada más que») y のに («aunque») no pueden unir 多い e いい así.",
+          "id": "多いほどいい berarti “makin banyak makin baik”: ほど menghubungkan jumlah dengan seberapa baiknya. ばかり (“melulu”) dan のに (“padahal”) tidak bisa menghubungkan 多い dan いい seperti ini."
+        }
+      }
+    ]
+  },
+  {
     "pattern": "〜さえ",
     "structure": "noun + さえ",
     "structure_fr": "nom + さえ",

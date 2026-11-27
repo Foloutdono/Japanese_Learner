@@ -1,4 +1,4 @@
-# ── The import dialog's match to the app's own cards (plan 335) ────
+# ── The import dialog's match to the app's own cards (plan 337) ────
 # A pasted row that means a card the app teaches is offered that card
 # (study/import_match.py, POST /api/decks/{id}/import/match). Held here:
 # what counts as the same card, what is only offered, that nothing is

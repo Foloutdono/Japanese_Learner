@@ -2114,7 +2114,7 @@ class ImportMatchPayload(BaseModel):
 @router.post("/api/decks/{deck_id}/import/match")
 def match_import(deck_id: str, payload: ImportMatchPayload, user_id: str = Depends(get_user_id)):
     """
-    The app's own cards the import dialog's rows may mean (plan 335) -- the
+    The app's own cards the import dialog's rows may mean (plan 337) -- the
     step that lets a learner use the built-in 水 instead of a written copy of it.
 
     Reads only: nothing is added here, the learner chooses in the dialog

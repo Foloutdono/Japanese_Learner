@@ -376,6 +376,8 @@ _AI_FEATURES = frozenset({"ask", "composition", "translation_review", "deep_anal
 # discoveries and the achievements.
 _MISSION_KINDS = frozenset({
     "due", "new", "practice", "accuracy", "write",
+    "duel", "explain", "analyze", "comprehension", "dictation", "read", "conversation",
+    "message", "translation", "composition", "exam", "in_out", "ask",
     "days5", "volume", "new_mode", "exam_section", "duels5", "write10", "all3",
     "first_dictation", "first_photo", "first_conversation", "first_exam", "first_deck",
     "first_friend", "first_duel", "arrival_date", "first_import", "first_video",

@@ -1,4 +1,4 @@
-// ── 取込 — a pasted row against the app's own cards (plan 335) ──
+// ── 取込 — a pasted row against the app's own cards (plan 337) ──
 // The import dialog's second half, kept pure so node tests can hold it.
 // The server finds the cards a row may mean (POST /api/decks/{id}/import/
 // match, study/import_match.py: one list of candidates per row); this

@@ -18475,6 +18475,182 @@
     }
   },
   {
+    "pattern": "〜より",
+    "structure": "noun／clause + より",
+    "structure_fr": "nom／proposition + より",
+    "structure_es": "sustantivo／oración + より",
+    "structure_id": "kata benda／klausa + より",
+    "meaning": {
+      "en": "than (what you compare against)",
+      "fr": "que (ce à quoi l'on compare)",
+      "es": "que (aquello con lo que se compara)",
+      "id": "daripada (hal yang dibandingkan)"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**B + より + predicate** says that A is more … than B. より marks what you compare against, and the adjective alone carries « more »: 今日は、きのうよりあついです (Today is hotter than yesterday).",
+        "fr": "**B + より + prédicat** dit que A est plus … que B. より marque ce à quoi on compare, et l'adjectif porte à lui seul le « plus » : 今日は、きのうよりあついです (Aujourd'hui, il fait plus chaud qu'hier).",
+        "es": "**B + より + predicado** dice que A es más … que B. より marca aquello con lo que se compara, y el adjetivo por sí solo lleva el «más»: 今日は、きのうよりあついです (Hoy hace más calor que ayer).",
+        "id": "**B + より + predikat** berarti A lebih … daripada B. より menandai hal yang dibandingkan, dan kata sifatnya sendiri sudah membawa makna “lebih”: 今日は、きのうよりあついです (Hari ini lebih panas daripada kemarin)."
+      },
+      {
+        "kind": "use",
+        "en": "- Two things side by side: おとうとは、わたしより大きいです.\n- Against what one expected: おもったより、やすかったです.\n- Stressed with も: おもったよりも、やすかったです.",
+        "fr": "- Deux choses côte à côte : おとうとは、わたしより大きいです.\n- Face à ce qu'on attendait : おもったより、やすかったです.\n- Renforcé par も : おもったよりも、やすかったです.",
+        "es": "- Dos cosas lado a lado: おとうとは、わたしより大きいです.\n- Frente a lo que se esperaba: おもったより、やすかったです.\n- Reforzado con も: おもったよりも、やすかったです.",
+        "id": "- Dua hal yang dibandingkan: おとうとは、わたしより大きいです.\n- Dibanding yang diperkirakan: おもったより、やすかったです.\n- Ditegaskan dengan も: おもったよりも、やすかったです."
+      },
+      {
+        "kind": "careful",
+        "en": "The word before より is the one that falls short: おとうとよりわたしが大きい means I am bigger than my brother. To name the winner outright, use 〜より〜のほうが.",
+        "fr": "Le mot devant より est celui qui est dépassé : おとうとよりわたしが大きい veut dire que je suis plus grand que mon frère. Pour nommer le gagnant d'emblée, on emploie 〜より〜のほうが.",
+        "es": "La palabra antes de より es la que queda por debajo: おとうとよりわたしが大きい significa que soy más grande que mi hermano. Para nombrar al ganador de entrada se usa 〜より〜のほうが.",
+        "id": "Kata sebelum より adalah yang kalah: おとうとよりわたしが大きい berarti aku lebih besar daripada adikku. Untuk menyebut pemenangnya langsung, pakai 〜より〜のほうが."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜より〜のほうが",
+        "en": "より alone compares in passing; のほうが puts the winner up front, mostly to answer « which one? ».",
+        "fr": "より seul compare en passant ; のほうが met le gagnant en avant, surtout pour répondre à « lequel ? ».",
+        "es": "より solo compara de pasada; のほうが pone al ganador al frente, sobre todo para responder «¿cuál?».",
+        "id": "より saja membandingkan sambil lalu; のほうが menempatkan pemenang di depan, terutama untuk menjawab “yang mana?”."
+      },
+      {
+        "pattern": "〜ほど〜ない",
+        "en": "より: A goes beyond B; ほど〜ない: A does not reach B.",
+        "fr": "より : A dépasse B ; ほど〜ない : A n'atteint pas B.",
+        "es": "より: A supera a B; ほど〜ない: A no llega a B.",
+        "id": "より: A melampaui B; ほど〜ない: A tidak sampai ke level B."
+      },
+      {
+        "pattern": "〜と同じ",
+        "en": "より: a difference between A and B; と同じ: no difference, the same.",
+        "fr": "より : une différence entre A et B ; と同じ : aucune différence, pareil.",
+        "es": "より: hay una diferencia entre A y B; と同じ: no la hay, es igual.",
+        "id": "より: ada perbedaan antara A dan B; と同じ: tidak ada perbedaan, sama saja."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今日は、きのうよりあついです。",
+        "en": "It is hotter today than yesterday.",
+        "fr": "Aujourd'hui, il fait plus chaud qu'hier.",
+        "es": "Hoy hace más calor que ayer.",
+        "id": "Hari ini lebih panas daripada kemarin.",
+        "register": "polite"
+      },
+      {
+        "jp": "この本は、あの本より高いです。",
+        "en": "This book is more expensive than that one.",
+        "fr": "Ce livre est plus cher que celui-là.",
+        "es": "Este libro es más caro que aquel.",
+        "id": "Buku ini lebih mahal daripada buku itu.",
+        "register": "polite"
+      },
+      {
+        "jp": "おもったより、ごはんがおいしかったです。",
+        "en": "The meal was tastier than I thought.",
+        "fr": "Le repas était meilleur que je ne le pensais.",
+        "es": "La comida estuvo más rica de lo que pensaba.",
+        "id": "Makanannya lebih enak daripada yang kukira.",
+        "register": "polite"
+      },
+      {
+        "jp": "おとうとは、わたしよりよく食べます。",
+        "en": "My younger brother eats more than I do.",
+        "fr": "Mon petit frère mange plus que moi.",
+        "es": "Mi hermano menor come más que yo.",
+        "id": "Adikku makan lebih banyak daripada aku.",
+        "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "ねこは、いぬ＿＿＿小さいです。",
+        "tr": {
+          "en": "Cats are smaller than dogs.",
+          "fr": "Les chats sont plus petits que les chiens.",
+          "es": "Los gatos son más pequeños que los perros.",
+          "id": "Kucing lebih kecil daripada anjing."
+        },
+        "choices": [
+          "より",
+          "から",
+          "まで"
+        ],
+        "why": {
+          "en": "より marks what you compare against: いぬより小さい, smaller than dogs. から (from) and まで (until) tell where something starts or stops, not how two things measure up.",
+          "fr": "より marque ce à quoi on compare : いぬより小さい, plus petit que les chiens. から (depuis) et まで (jusqu'à) disent où quelque chose commence ou s'arrête, pas comment deux choses se mesurent.",
+          "es": "より marca aquello con lo que se compara: いぬより小さい, más pequeño que los perros. から (desde) y まで (hasta) dicen dónde algo empieza o termina, no cómo se miden dos cosas.",
+          "id": "より menandai hal yang dibandingkan: いぬより小さい, lebih kecil daripada anjing. から (dari) dan まで (sampai) menyebut awal atau akhir sesuatu, bukan cara dua hal dibandingkan."
+        }
+      },
+      {
+        "jp": "おもった＿＿＿、えいがはおもしろかったです。",
+        "tr": {
+          "en": "The movie was more interesting than I thought.",
+          "fr": "Le film était plus intéressant que je ne le pensais.",
+          "es": "La película fue más interesante de lo que pensaba.",
+          "id": "Filmnya lebih menarik daripada yang kukira."
+        },
+        "choices": [
+          "より",
+          "まで",
+          "に"
+        ],
+        "why": {
+          "en": "おもったより is « more than I thought »: the clause おもった is what the film is measured against. まで would say « until I thought » and に has nothing to attach to.",
+          "fr": "おもったより veut dire « plus que je ne le pensais » : la proposition おもった est ce à quoi le film est comparé. まで dirait « jusqu'à ce que je pense » et に n'a rien auquel se rattacher.",
+          "es": "おもったより significa «más de lo que pensaba»: la oración おもった es aquello con lo que se compara la película. まで diría «hasta que pensé» y に no tiene a qué unirse.",
+          "id": "おもったより berarti “lebih daripada yang kukira”: klausa おもった adalah patokan untuk membandingkan filmnya. まで berarti “sampai aku berpikir”, dan に tidak punya apa pun untuk dikaitkan."
+        }
+      },
+      {
+        "jp": "あの人は、わたし＿＿＿ずっと上手です。",
+        "tr": {
+          "en": "That person is much better at it than I am.",
+          "fr": "Cette personne est bien meilleure que moi.",
+          "es": "Esa persona es mucho mejor que yo.",
+          "id": "Orang itu jauh lebih mahir daripada aku."
+        },
+        "choices": [
+          "より",
+          "と",
+          "を"
+        ],
+        "why": {
+          "en": "より puts me on the side that falls short, and ずっと adds « much »: わたしよりずっと上手. と would make it « with me », and を does not fit before 上手.",
+          "fr": "より place « moi » du côté du plus faible, et ずっと ajoute « bien » : わたしよりずっと上手. と donnerait « avec moi », et を ne va pas devant 上手.",
+          "es": "より pone a «yo» del lado que queda por debajo, y ずっと añade «mucho»: わたしよりずっと上手. と daría «conmigo», y を no encaja antes de 上手.",
+          "id": "より menaruh “aku” di sisi yang kalah, dan ずっと menambahkan “jauh”: わたしよりずっと上手. と berarti “bersamaku”, dan を tidak cocok sebelum 上手."
+        }
+      },
+      {
+        "jp": "きょうのテストは、きのう＿＿＿むずかしいです。",
+        "tr": {
+          "en": "Today's test is harder than yesterday's.",
+          "fr": "L'examen d'aujourd'hui est plus difficile que celui d'hier.",
+          "es": "El examen de hoy es más difícil que el de ayer.",
+          "id": "Ujian hari ini lebih sulit daripada kemarin."
+        },
+        "choices": [
+          "より",
+          "ごろ",
+          "ずつ"
+        ],
+        "why": {
+          "en": "より compares today's test with yesterday's: きのうよりむずかしい. ごろ means « around » a time and ずつ « each », and neither compares.",
+          "fr": "より compare l'examen d'aujourd'hui à celui d'hier : きのうよりむずかしい. ごろ veut dire « vers » une heure et ずつ « chacun », et aucun ne compare.",
+          "es": "より compara el examen de hoy con el de ayer: きのうよりむずかしい. ごろ significa «alrededor de» una hora y ずつ «cada uno», y ninguno compara.",
+          "id": "より membandingkan ujian hari ini dengan kemarin: きのうよりむずかしい. ごろ berarti “sekitar” waktu tertentu dan ずつ “masing-masing”, dan keduanya tidak membandingkan."
+        }
+      }
+    ]
+  },
+  {
     "pattern": "〜で〜がいちばん",
     "structure": "group + で + noun + が + いちばん + adjective",
     "structure_fr": "groupe + で + nom + が + いちばん + adjectif",

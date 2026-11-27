@@ -1,5 +1,5 @@
 """
-Matching a pasted row to the app's own card (plan 335: the import dialog's
+Matching a pasted row to the app's own card (plan 337: the import dialog's
 "use the app's card" step).
 
 A learner who pastes 水 / water / みず into a vocab deck is holding, in

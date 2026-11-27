@@ -20174,7 +20174,7 @@ s.rvw-chg__was { text-decoration-thickness: 2px; }
 .import-preview-row--skipped { opacity: 0.6; }
 
 /* The notice that asks once whether to use the app's own cards for the
-   rows that match them (importMatches.js, plan 335): a rail in the
+   rows that match them (importMatches.js, plan 337): a rail in the
    selection's gold, the question, Details / No / Yes. Answered it shrinks
    to a line and Change. Details lists every match with the choice between
    the app's card and the learner's own; the chosen card's meaning is the

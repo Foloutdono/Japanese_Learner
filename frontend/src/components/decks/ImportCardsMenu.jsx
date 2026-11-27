@@ -19,7 +19,7 @@ const KIND_LABEL = { vocab: 'vocabType', kanji: 'kanjiType', kana: 'kanaType', g
 // whole ones, as {fields, notes}.
 //
 // `onMatch`, when the deck can hold the app's own cards, asks which of them
-// the whole rows may mean (importMatches.js, plan 335). When some match for
+// the whole rows may mean (importMatches.js, plan 337). When some match for
 // certain, one notice asks whether to use them: Yes, No, or Details, where
 // each match can be switched back to the learner's own card. Until it is
 // answered, and the details are shut, nothing changes; the answer splits
@@ -290,7 +290,7 @@ function previewRows(cards, limit) {
   return cards.map(c => ({ c, at: c.missing.length === 0 ? ++w : -1 })).slice(0, limit)
 }
 
-// The one question (plan 335): how many cards match the app's own, and
+// The one question (plan 337): how many cards match the app's own, and
 // whether to use them. Yes, No, or Details, which lists every match with
 // the card it would be. Once answered it shrinks to a line and Change.
 function MatchNotice({ t, sure, using, answer, open, matches, rows, structure, pickAt, onToggle, onYes, onNo, onChange, onPick }) {

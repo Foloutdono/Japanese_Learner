@@ -128,14 +128,21 @@ un bonus de 6 quand les trois sont faites (30 par jour), et des missions
 hebdomadaires d'environ 35 crédits au total (5 par jour). Ces montants sont
 à ajuster avec les données de l'early access.
 
-**Journalières** (trois par jour, choisies selon le profil) :
+**Journalières** (trois par jour, tirées dans une liste de treize par une
+rotation de la date ; le plan 336 a remplacé les cinq du plan 331, qui
+mesuraient les révisions dues, les nouvelles cartes et la précision). Chacune
+demande un objectif fixe et petit, jamais un score, et l'exercice demandé ne
+coûte rien tant que la mission est ouverte (un duel classé inclus) :
 
-- finir ses révisions dues ;
-- apprendre N nouvelles cartes, N étant sa moyenne des 7 derniers jours
-  +10 %, jamais au-delà de la ration du jour (plan 222) ;
-- un exercice de pratique, d'un mode différent chaque jour (gratuit) ;
-- faire mieux que sa précision moyenne sur une session ;
-- une dictée ou une phrase en composition.
+- un exercice de chaque plateforme : lire 5 phrases, un texte de
+  compréhension, 5 dictées, traduire 3 phrases, 2 phrases en composition,
+  4 répliques d'une conversation, une section d'examen blanc ;
+- un exercice pour comprendre et un pour s'exprimer, le même jour ;
+- décomposer une phrase dans l'analyseur ;
+- jouer un duel (demandée seulement à qui en a déjà vu) ;
+- poser une question à l'assistant, se faire expliquer une phrase ;
+- nous écrire : un problème ou une idée, d'au moins 20 caractères, une fois
+  par quinzaine au plus (la mission compte les caractères et ne lit rien).
 
 **Hebdomadaires** :
 
@@ -151,12 +158,14 @@ hebdomadaires d'environ 35 crédits au total (5 par jour). Ces montants sont
 photo analysée, la première conversation, le premier examen blanc, le
 premier deck créé puis publié, le premier ami, le premier duel, une date
 d'arrivée fixée, un import Anki/WaniKani, une première vidéo ou chanson.
-Chacune rapporte des crédits et montre une fonction.
+Chacune rapporte 40 à 80 crédits et 30 XP (le plan 336 les a multipliées
+par quatre : 560 crédits en tout) et montre une fonction.
 
 **Succès** (paliers) : kana complets, 100 / 500 / 1 000 mots, la grammaire
 N5 complète, 7 / 30 / 100 jours d'étude, premier examen blanc réussi,
-première victoire classée. Ils rapportent de l'XP et une plaque de station
-(cosmétique) ; peu de crédits.
+première victoire classée. Ils rapportent de l'XP, une plaque de station
+(cosmétique) et, depuis le plan 336, des crédits à la mesure du palier : de
+45 (7 jours) à 250 (100 jours), 1 075 en tout.
 
 **Règles anti-farming** :
 

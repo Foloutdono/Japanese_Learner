@@ -28,7 +28,8 @@ export const GLYPHS = Object.freeze({
 // The line a practice coupon sends the learner to, for its 3px rail (a
 // place: the one thing a mission may wear a pigment for).
 export const PLATFORM_LINE = Object.freeze({
-  reading: 'reading', comprehension: 'rikai', translation: 'honyaku', conversation: 'kaiwa',
+  reading: 'reading', comprehension: 'rikai', dictation: 'kakitori', translation: 'honyaku',
+  composition: 'sakubun', conversation: 'kaiwa', exam: 'exam',
 })
 
 /** `+8` for a learner paid in credits, `+13 XP` for one paid in XP. */
