@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick } from '../../lib/audio'
-import { CrossIcon, ChevronIcon } from '../ui/Icons'
+import { CrossIcon, ChevronIcon, CheckCircleIcon } from '../ui/Icons'
 import { Seg } from '../chrome/Console'
 import { useDialog } from '../../hooks/useDialog'
 import { columnsFor, exampleText, readCards } from './importCards'
@@ -224,7 +224,10 @@ export default function ImportCardsMenu({ structure, onImport, onMatch, onClose 
                       )
                       : <span className="import-preview-row__meta">{extrasOf(c, structure, t)}</span>}
                     {at >= 0 && offered(found[at]).length > 0 && pickAt(at) !== OWN && (
-                      <span className="import-preview-row__app">{t.importAppCard}</span>
+                      <span className="import-preview-row__app" title={t.importAppCard}>
+                        <CheckCircleIcon size={15} />
+                        <span className="sr-only">{t.importAppCard}</span>
+                      </span>
                     )}
                   </div>
                 ))}
@@ -295,6 +298,7 @@ function MatchNotice({ t, sure, using, answer, open, matches, rows, structure, p
     return (
       <div className="import-match-note import-match-note--done">
         <p className="import-match-note__msg">
+          {answer === YES && <CheckCircleIcon size={15} className="import-match-note__ok" />}
           {answer === YES
             ? t.importMatchUsing.replace('{n}', using)
             : t.importMatchKept}
