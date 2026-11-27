@@ -33,22 +33,50 @@ def test_a_mission_pays_through_its_own_ledger_reason():
 
 
 # ── Choosing ────────────────────────────────────────────────────────────
+ALL = {k: True for k in m.DAILY}
+
+
 def test_the_day_is_the_same_for_the_same_profile_and_date():
-    elig = {"due": True, "new": True, "practice": True, "write": True, "accuracy": True}
-    assert m.pick_day(elig, 7) == m.pick_day(elig, 7)
-    assert m.pick_day(elig, 7)[0] == "due"
-    assert len(set(m.pick_day(elig, 7))) == 3
+    assert m.pick_day(ALL, 7) == m.pick_day(ALL, 7)
+    assert len(set(m.pick_day(ALL, 7))) == m.DAYS_PER_DAY
 
 
-def test_every_kind_comes_round_over_the_days():
-    elig = {"due": True, "new": True, "practice": True, "write": True, "accuracy": True}
-    seen = {k for d in range(10) for k in m.pick_day(elig, d)}
-    assert seen == set(m.DAILY)
+def test_every_kind_of_the_pool_comes_round_and_two_days_share_none():
+    for eligible in (ALL, {**ALL, "duel": False}, {**ALL, "message": False},
+                     {**ALL, "duel": False, "message": False}):
+        n = sum(eligible.values())
+        days = [m.pick_day(eligible, d) for d in range(n)]
+        assert {k for day in days for k in day} == {k for k, ok in eligible.items() if ok}
+        for a, b in zip(days, days[1:]):
+            assert not set(a) & set(b)
 
 
-def test_a_new_learner_is_given_new_cards_a_practice_and_a_sentence():
-    elig = {"due": False, "new": True, "practice": True, "write": True, "accuracy": False}
-    assert set(m.pick_day(elig, 3)) == {"new", "practice", "write"}
+def test_an_ineligible_kind_is_never_dealt():
+    for d in range(30):
+        assert "duel" not in m.pick_day({**ALL, "duel": False}, d)
+        assert "message" not in m.pick_day({**ALL, "message": False}, d)
+
+
+def test_the_three_of_a_day_come_from_different_corners():
+    ai = {"ask", "explain", "analyze"}
+    practice = {"read", "comprehension", "dictation", "translation", "composition", "conversation", "exam", "in_out"}
+    for d in range(26):
+        day = set(m.pick_day(ALL, d))
+        assert len(day & ai) <= 1, day
+        assert len(day & practice) <= 2, day
+
+
+def test_the_old_pool_is_retired_but_still_read():
+    assert not set(m.LEGACY_DAILY) & set(m.DAILY)
+    assert set(m.LEGACY_DAILY) <= m.KINDS
+
+
+def test_every_kind_of_the_pool_has_a_goal_and_the_platform_it_waives():
+    assert set(m.DAY_TARGETS) == set(m.DAILY)
+    assert set(m.DAY_PLATFORM) <= set(m.DAILY)
+    assert set(m.DAY_PLATFORM.values()) - {"duel", "exam"} <= set(m.SKILL_LOGS)
+    assert set(m.IN_PLATFORMS) | set(m.OUT_PLATFORMS) <= set(m.SKILL_LOGS)
+    assert all(t >= 1 for t in m.DAY_TARGETS.values())
 
 
 def test_the_week_always_has_its_five_days_and_two_more():
@@ -58,31 +86,21 @@ def test_the_week_always_has_its_five_days_and_two_more():
     assert "duels5" not in m.pick_week({**elig, "duels5": False}, 47)
 
 
+# ── Rewards (plan 335, the owner: "too small") ─────────────────────────
+def test_a_discovery_and_a_plate_pay_what_a_milestone_is_worth():
+    assert sum(m.DISCOVERIES.values()) == 560 and min(m.DISCOVERIES.values()) >= 40
+    assert m.DISCOVERY_XP == 30
+    assert sum(c for c, _ in m.ACHIEVEMENTS.values()) == 615
+    assert min(c for c, _ in m.ACHIEVEMENTS.values()) >= 20
+    # A harder plate pays more than an easier one of its line.
+    assert m.ACHIEVEMENTS["words_100"] < m.ACHIEVEMENTS["words_500"] < m.ACHIEVEMENTS["words_1000"]
+    assert m.ACHIEVEMENTS["days_7"] < m.ACHIEVEMENTS["days_30"] < m.ACHIEVEMENTS["days_100"]
+
+
 # ── Goals that ask a learner to beat themselves are capped ─────────────
-def test_new_cards_are_their_average_plus_a_tenth_within_the_ration():
-    assert m.new_goal(10, None) == 11
-    assert m.new_goal(10, 8) == 8            # never past the day's ration
-    assert m.new_goal(0, None) == m.NEW_MIN
-    assert m.new_goal(500, None) == m.NEW_MAX
-    assert m.new_goal(500, 100) == m.NEW_MAX
-
-
-def test_accuracy_is_three_points_over_their_own_and_never_past_95():
-    assert m.accuracy_goal(80) == 83
-    assert m.accuracy_goal(99) == m.ACCURACY_MAX
-
-
 def test_the_volume_goal_is_a_tenth_more_and_never_150_more():
     assert m.volume_goal(100) == 110
     assert m.volume_goal(5000) == 5150
-
-
-def test_the_practice_is_the_platform_left_longest_and_never_yesterdays():
-    now = datetime.now(timezone.utc)
-    last = {"reading": now, "comprehension": now - timedelta(days=9),
-            "translation": None, "conversation": now - timedelta(days=2)}
-    assert m.practice_platform(last, None) == "translation"
-    assert m.practice_platform(last, "translation") == "comprehension"
 
 
 # ── The database ────────────────────────────────────────────────────────
@@ -94,7 +112,8 @@ def uid():
     try:
         with conn.cursor() as cur:
             for table in ("missions", "mission_marks", "xp_ledger", "credit_ledger", "day_clears",
-                          "dictation_log", "user_profiles"):
+                          "dictation_log", "composition_log", "phrase_history", "feedback",
+                          "daily_usage", "pvp_entries", "user_profiles"):
                 cur.execute(f"DELETE FROM {table} WHERE user_id = %s", (user,))
             cur.execute("DELETE FROM review_log WHERE card_id LIKE %s", (f"{user}:%",))
         conn.commit()
@@ -351,16 +370,214 @@ def test_a_dictation_before_the_launch_is_no_discovery(uid):
     assert next(d for d in m.book(uid)["discoveries"] if d["key"] == "first_dictation")["reached"] is True
 
 
-def test_waives_names_todays_practice_platform_until_it_is_done(uid):
+def _assign(user, kinds, now, platform=None):
+    """Write a day of `kinds` as ensure_day would, for a test that needs a
+    kind the rotation does not deal that day."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            tz, _ = m._profile(cur, user)
+            day, _, _ = m.day_window(tz, now)
+            cur.execute("DELETE FROM missions WHERE user_id = %s", (user,))
+            for slot, kind in enumerate(kinds):
+                m._insert_mission(cur, user, "day", day, kind, slot, m.DAY_TARGETS[kind], None,
+                                  m.DAY_CREDITS, m.DAY_XP, m.DAY_PLATFORM.get(kind))
+            m._insert_mission(cur, user, "bonus", day, m.BONUS, 3, 3, None, m.BONUS_CREDITS, m.BONUS_XP)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _insert(user, sql, params):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _of(user, now, kind):
+    return next(x for x in m.view(user, now)["day"]["missions"] if x["kind"] == kind)
+
+
+def test_the_day_is_dealt_from_the_pool_with_its_goals_and_platforms(uid):
+    _profile(uid)
+    view = m.view(uid, NOW)
+    for x in view["day"]["missions"]:
+        assert x["kind"] in m.DAILY and x["of"] == m.DAY_TARGETS[x["kind"]]
+        assert x.get("platform") == m.DAY_PLATFORM.get(x["kind"])
+    assert "duel" not in {x["kind"] for x in view["day"]["missions"]}     # no duel met yet
+
+
+def test_a_practice_platform_mission_counts_its_own_log_until_its_goal(uid):
     _profile(uid)
     now = datetime.now(timezone.utc)
+    _assign(uid, ["dictation", "translation", "composition"], now)
+    for i in range(m.DAY_TARGETS["dictation"] - 1):
+        _insert(uid, "INSERT INTO dictation_log (user_id, clip_id, phrase, answer, correct, accuracy) "
+                     "VALUES (%s,'c','p','a',TRUE,100)", (uid,))
+    d = _of(uid, now, "dictation")
+    assert (d["have"], d["of"], d["done"]) == (4, 5, False)
+    _insert(uid, "INSERT INTO dictation_log (user_id, clip_id, phrase, answer, correct, accuracy) "
+                 "VALUES (%s,'c','p','a',TRUE,100)", (uid,))
+    assert _of(uid, now, "dictation")["done"] is True
+    assert _of(uid, now, "translation")["have"] == 0          # another platform's log is not this one's
+    _insert(uid, "DELETE FROM dictation_log WHERE user_id = %s", (uid,))
+
+
+def test_in_out_wants_one_exercise_of_each_side(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    _assign(uid, ["in_out", "ask", "explain"], now)
+    _insert(uid, "INSERT INTO dictation_log (user_id, clip_id, phrase, answer, correct, accuracy) "
+                 "VALUES (%s,'c','p','a',TRUE,100)", (uid,))
+    assert (_of(uid, now, "in_out")["have"], _of(uid, now, "in_out")["done"]) == (1, False)
+    _insert(uid, "INSERT INTO composition_log (user_id, raw_id, pattern, sentence, correct, quality) "
+                 "VALUES (%s,'r','p','s',TRUE,4)", (uid,))
+    assert _of(uid, now, "in_out")["done"] is True
+    for t in ("dictation_log", "composition_log"):
+        _insert(uid, f"DELETE FROM {t} WHERE user_id = %s", (uid,))
+
+
+def test_the_asking_and_the_explanation_are_read_off_the_days_counters(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    _assign(uid, ["ask", "explain", "analyze"], now)
+    assert not _of(uid, now, "ask")["done"] and not _of(uid, now, "explain")["done"]
+    from core import daily_limit
+    daily_limit.claim(uid, "ask", 40)
+    m.tick(uid, "explain")
+    m.tick(uid, "analyze")                    # not a tick: nothing is written
+    assert _of(uid, now, "ask")["done"] and _of(uid, now, "explain")["done"]
+    assert not _of(uid, now, "analyze")["done"]
+    _insert(uid, "DELETE FROM daily_usage WHERE user_id = %s", (uid,))
+
+
+def test_a_line_broken_down_counts_but_not_a_scrap(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    _assign(uid, ["analyze", "ask", "explain"], now)
+    _insert(uid, "INSERT INTO phrase_history (user_id, phrase) VALUES (%s, 'あ')", (uid,))
+    assert not _of(uid, now, "analyze")["done"]
+    _insert(uid, "INSERT INTO phrase_history (user_id, phrase) VALUES (%s, '猫が好きです')", (uid,))
+    assert _of(uid, now, "analyze")["done"]
+    _insert(uid, "DELETE FROM phrase_history WHERE user_id = %s", (uid,))
+
+
+def test_a_message_counts_when_it_says_something_and_is_one_a_learner_writes(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    _assign(uid, ["message", "ask", "explain"], now)
+    add = lambda kind, body: _insert(uid, "INSERT INTO feedback (user_id, kind, body) VALUES (%s,%s,%s)", (uid, kind, body))
+    add("idea", "trop court")                                   # under MESSAGE_MIN_CHARS
+    add("card", "x" * 60)                                       # a card's flag is no message
+    add("rating", "x" * 60)
+    assert not _of(uid, now, "message")["done"]
+    add("idea", "x" * m.MESSAGE_MIN_CHARS)
+    assert _of(uid, now, "message")["done"]
+    _insert(uid, "DELETE FROM feedback WHERE user_id = %s", (uid,))
+
+
+def test_the_message_is_offered_at_most_once_a_fortnight(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    _assign(uid, ["message", "ask", "explain"], now - timedelta(days=m.MESSAGE_EVERY_DAYS - 1))
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            day = m.credits_mod.local_today(0, now)
+            assert m.message_offered_lately(cur, uid, day) is True
+            assert m.message_offered_lately(cur, uid, day + timedelta(days=2)) is False
+    finally:
+        conn.close()
+
+
+def test_a_mission_retired_by_plan_335_is_still_read_and_paid(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            tz, _ = m._profile(cur, uid)
+            day, _, _ = m.day_window(tz, now)
+            for slot, kind in enumerate(["new", "practice", "write"]):
+                m._insert_mission(cur, uid, "day", day, kind, slot, 1, None, m.DAY_CREDITS, m.DAY_XP,
+                                  "reading" if kind == "practice" else None)
+        conn.commit()
+    finally:
+        conn.close()
     view = m.view(uid, now)
-    practice = next((x for x in view["day"]["missions"] if x["kind"] == "practice"), None)
-    if practice is None:
-        pytest.skip("today's three do not include the practice")
-    assert m.waives(uid, practice["platform"], now) is True
-    other = next(p for p in m.PLATFORMS if p != practice["platform"])
-    assert m.waives(uid, other, now) is False
+    assert [x["kind"] for x in view["day"]["missions"]] == ["new", "practice", "write"]
+    _review(uid, 1)
+    assert m.view(uid, now)["day"]["missions"][0]["done"] is True       # a new card, met today
+    _insert(uid, "UPDATE missions SET done_at = NOW() WHERE user_id = %s AND kind = 'new'", (uid,))
+    assert m.claim(uid, "day", "new", now)["credits"] == m.DAY_CREDITS
+
+
+def test_waives_names_what_an_open_mission_asks_until_it_is_done(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    _assign(uid, ["translation", "in_out", "duel"], now)
+    assert m.waives(uid, "translation", now) is True
+    assert m.waives(uid, "reading", now) is True            # in_out: any of the six
+    assert m.waives(uid, "exam", now) is False              # not asked today
+    _insert(uid, "UPDATE missions SET done_at = NOW() WHERE user_id = %s AND kind IN ('translation', 'in_out')", (uid,))
+    assert m.waives(uid, "translation", now) is False
+    assert m.waives(uid, "reading", now) is False
+
+
+def test_a_duel_the_mission_asks_is_free_once_and_only_once(uid):
+    _profile(uid)
+    now = datetime.now(timezone.utc)
+    _assign(uid, ["duel", "ask", "explain"], now)
+    assert m.waives(uid, "duel", now) is True
+    duel_id = 987_000_000 + int(uuid.uuid4().int % 1_000_000)
+    _insert(uid, "INSERT INTO pvp_duels (id, kind, mode, level, seed, paper_rev, paper, status, expires_at) "
+            "VALUES (%s,'ranked','words','N5',1,'x','{}','open', NOW() + interval '1 day')",
+            (duel_id,))
+    _insert(uid, "INSERT INTO pvp_entries (duel_id, user_id, role, answers, started_at, finished_at) "
+                 "VALUES (%s,%s,'challenger','[{\"n\":0}]', NOW(), NOW())", (duel_id, uid))
+    try:
+        assert m.waives(uid, "duel", now) is False          # one is played: the next pays its fare
+    finally:
+        _insert(uid, "DELETE FROM pvp_duels WHERE id = %s", (duel_id,))
+
+
+def test_a_deep_explanation_counts_for_the_mission_even_when_the_cache_serves_it(client, monkeypatch):
+    """A sentence explained before is read from the shared cache and claims
+    no daily_usage slot: the mission must not wait for one."""
+    import routes.phrase as phrase_module
+    from core.auth import DEV_USER_ID
+    phrase = "猫が机の上で寝ています。"
+
+    def used(feature):
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COALESCE(SUM(count), 0) FROM daily_usage WHERE user_id = %s AND feature = %s",
+                            (DEV_USER_ID, feature))
+                return cur.fetchone()[0]
+        finally:
+            conn.close()
+
+    for sql_, args in (("DELETE FROM phrase_analysis_cache WHERE phrase = %s", (phrase,)),
+                       ("DELETE FROM daily_usage WHERE user_id = %s", (DEV_USER_ID,))):
+        _insert(DEV_USER_ID, sql_, args)
+    monkeypatch.setattr(phrase_module, "chat", lambda *a, **k: '{"words": [], "explanation": "Un chat dort."}')
+    try:
+        for expected_ticks in (1, 2):
+            r = client.post("/api/phrase/analyze", json={"phrase": phrase, "deep": True, "lang": "en", "save": False})
+            assert r.status_code == 200
+            assert used(m.TICKS["explain"]) == expected_ticks
+        assert used("deep_analysis") == 1               # the second one was the cache's: no slot
+        # A local analysis, which explains nothing, ticks nothing.
+        client.post("/api/phrase/analyze", json={"phrase": phrase, "lang": "en", "save": False})
+        assert used(m.TICKS["explain"]) == 2
+    finally:
+        _insert(DEV_USER_ID, "DELETE FROM daily_usage WHERE user_id = %s", (DEV_USER_ID,))
+        _insert(DEV_USER_ID, "DELETE FROM phrase_analysis_cache WHERE phrase = %s", (phrase,))
 
 
 def test_the_routes_answer_and_refuse_what_is_not_a_kind(client):

@@ -26,6 +26,7 @@ from study.line_cut import cut_line
 from study.sentences import split_sentences, MAX_SENTENCES
 from routes.reading import LANG_NAMES, known_lang
 from core import daily_limit
+from study import missions
 from core.credits import resets_at
 
 # A pass feature (plan 069): every route here refuses a free learner
@@ -685,6 +686,11 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
                 # finds it, as it would have found the stored row.
                 cached[_phrase_key(text, lang, context)] = llm_result
         if llm_result is not None:
+            if allow_llm_call:
+                # An explanation asked for and given (bought, or served from
+                # the shared cache, which claims no slot): the day's
+                # `explain` mission counts it (plan 335).
+                missions.tick(user_id, "explain")
             llm_result = _normalize_explanation_key(llm_result)
             # Held to the line every time it is read, not only when it
             # was bought (plan 311): the rules move, the cache does not.

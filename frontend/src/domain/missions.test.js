@@ -4,6 +4,7 @@ import { VALUES } from '../lib/track'
 import fr from '../locales/fr/index.js'
 import en from '../locales/en/index.js'
 import es from '../locales/es/index.js'
+import id from '../locales/id/index.js'
 import { missionsFixture, bookFixture } from '../components/missions/fixtures'
 
 const KINDS = VALUES.mission_done.kind
@@ -36,7 +37,7 @@ describe('missions (plan 331): what the screens know', () => {
   })
 
   it('sends a practice coupon to a line that exists', () => {
-    expect(Object.values(PLATFORM_LINE).sort()).toEqual(['honyaku', 'kaiwa', 'reading', 'rikai'])
+    expect(Object.values(PLATFORM_LINE).sort()).toEqual(['exam', 'honyaku', 'kaiwa', 'kakitori', 'reading', 'rikai', 'sakubun'])
   })
 
   it('has a fixture the server could have sent', () => {
@@ -47,9 +48,9 @@ describe('missions (plan 331): what the screens know', () => {
 })
 
 describe('missions (plan 331): every text in every language', () => {
-  const day = ['due', 'new', 'practice', 'accuracy', 'write', 'all3']
+  const day = ['duel', 'explain', 'analyze', 'comprehension', 'dictation', 'read', 'conversation', 'message', 'translation', 'composition', 'exam', 'in_out', 'ask', 'due', 'new', 'accuracy', 'write', 'all3']
   const week = ['days5', 'volume', 'new_mode', 'exam_section', 'duels5', 'write10']
-  for (const [lang, table] of [['fr', fr], ['en', en], ['es', es]]) {
+  for (const [lang, table] of [['fr', fr], ['en', en], ['es', es], ['id', id]]) {
     it(`says every mission and every plate in ${lang}`, () => {
       for (const kind of [...day, ...week]) {
         const said = table.msnLabel[kind]({ of: 20, goal: 87, platform: 'reading' })
@@ -57,7 +58,7 @@ describe('missions (plan 331): every text in every language', () => {
         expect(said.length).toBeGreaterThan(3)
       }
       for (const key of [...DISCOVERIES, ...ACHIEVEMENTS]) expect(table.msnMark[key], `${lang} ${key}`).toBeTruthy()
-      for (const platform of Object.keys(PLATFORM_LINE)) {
+      for (const platform of ['reading', 'comprehension', 'translation', 'conversation']) {   // the retired `practice`'s four
         expect(table.msnLabel.practice({ platform })).not.toBe(table.msnLabel.practice({ platform: 'x' }))
       }
     })

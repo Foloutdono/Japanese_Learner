@@ -66,7 +66,7 @@ from datetime import datetime, timedelta, timezone
 
 from core import credits, events
 from core.user_level import NOVICE_GOAL, resolve_level
-from study import duel_elo, duel_friends as friends, duel_paper
+from study import duel_elo, duel_friends as friends, duel_paper, missions
 from study.duel_friends import Refused
 
 logger = logging.getLogger(__name__)
@@ -1012,7 +1012,7 @@ def cover(cur, after: list, me: str, duel_id: int) -> dict:
                 "refunded": refunded},
         "them": them,
         # The pass pays for everything: nothing to print on it.
-        "price": 0 if passed else _price(duel, mine),
+        "price": 0 if passed or (duel["kind"] == "ranked" and missions.waives_on(cur, me, "duel", now=now)) else _price(duel, mine),
         "sprintMs": sprint_ms(duel),
         "rules": rules(duel),
         "expiresAt": _iso(duel["expires_at"]),
@@ -1078,7 +1078,9 @@ def start(cur, after: list, me: str, duel_id: int) -> dict:
         if duel["status"] != "open":
             raise Refused(409, "pvp_closed")
         if duel["kind"] == "ranked":
-            mine["paid"] = _pay(cur, after, me, RANKED_PRICE, "duel", duel_id)
+            # A duel the day's mission asks costs nothing (plan 335).
+            fare = 0 if missions.waives_on(cur, me, "duel", now=now) else RANKED_PRICE
+            mine["paid"] = _pay(cur, after, me, fare, "duel", duel_id)
             _save(cur, mine, "paid")
             row = duel_elo.rating_row(cur, me)
             mine["rating_before"] = row["rating"] if row else None
@@ -1529,7 +1531,8 @@ def hub(cur, after: list, me: str) -> dict:
         "done": done,
         "friends": {"count": friends.friend_count(cur, me), "requests": friends.requests_waiting(cur, me)},
         "prices": ({"ranked": 0, "review": 0} if credits.unlimited_on(cur, me)
-                   else {"ranked": RANKED_PRICE, "review": REVIEW_PRICE}),
+                   else {"ranked": 0 if missions.waives_on(cur, me, "duel", now=now) else RANKED_PRICE,
+                         "review": REVIEW_PRICE}),
         "xp": {"today": xp_today(cur, me, now), "cap": XP_CAP},
     }
 

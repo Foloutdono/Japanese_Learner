@@ -34,8 +34,9 @@ XP and cosmetics"). Nothing is paid to an account that has not studied
 (`srs.first_studied_day`): a reward is for study.
 
 -- The anti-farming rules, in one place ------------------------------
-  * a goal that asks the learner to beat themselves is computed from their
-    own history and capped (NEW_MAX, ACCURACY_MAX, VOLUME_MAX_GAIN);
+  * the week's volume goal, which asks the learner to beat themselves, is
+    computed from their own history and capped (VOLUME_MAX_GAIN); the
+    day's goals are small and fixed (DAY_TARGETS, plan 335);
   * the XP the repeatable ones pay counts on the 番付 only up to
     XP_DAY_CAP a local day (written clipped, as duels' XP_CAP is);
     discoveries and achievements are bounded by the catalogue itself;
@@ -47,7 +48,8 @@ XP and cosmetics"). Nothing is paid to an account that has not studied
 
 -- What this module does not do --------------------------------------
 It does not price the practice modes: they cost no credit today. What
-exists is the seam, `waives()`, that the practice fare will read.
+exists is the seam, `waives()`, that the practice fare will read; the
+one fare there is today, a ranked duel's departure, reads it already.
 """
 from __future__ import annotations
 
@@ -69,40 +71,83 @@ BONUS_CREDITS, BONUS_XP = 6, 5
 WEEK_CREDITS, WEEK_XP = 12, 15
 DAYS_PER_DAY = 3
 PER_WEEK = 3
-DISCOVERY_XP = 10
+DISCOVERY_XP = 30
 XP_DAY_CAP = 100
 
 # The pinned sizing: what a free learner who does them all earns a day.
 DAILY_INCOME = DAYS_PER_DAY * DAY_CREDITS + BONUS_CREDITS            # 30
 WEEKLY_INCOME = PER_WEEK * WEEK_CREDITS                              # 36
 
-NEW_MAX = 30           # the most new cards a day a mission asks
-NEW_MIN = 3
-NEW_UPLIFT = 1.1       # their own seven-day average, plus a tenth
-ACCURACY_WINDOW = 28   # days the average is taken over
-ACCURACY_MIN_ANSWERS = 200
-ACCURACY_ANSWERS = 20  # answers a session needs for its accuracy to count
-ACCURACY_GAIN = 3      # points over their average
-ACCURACY_MAX = 95
-DUE_MIN = 10           # reviews due for "finish them" to be offered
 VOLUME_MIN_PREV = 40
 VOLUME_UPLIFT = 1.1
 VOLUME_MAX_GAIN = 150
 DAYS_TARGET = 5
 WRITE_TARGET = 10
 DUELS_TARGET = 5
+ACCURACY_ANSWERS = 20  # answers an `accuracy` mission (retired, plan 335) still reads
 
-DAILY = ("due", "new", "practice", "accuracy", "write")
+# ── The day's pool (plan 335, the owner's picks) ────────────────────────
+# Three of these a day, by a rotation of the date, in this order: the
+# order is the choice (`pick_day` takes every third-or-so of the list, so
+# the three of a day come from different corners: an exercise, the
+# analyser, a duel, the tutor). What each asks is a fixed, small goal
+# (DAY_TARGETS), frozen on the row; none depends on how the learner did.
+DAILY = ("duel", "explain", "analyze", "comprehension", "dictation", "read", "conversation",
+         "message", "translation", "composition", "exam", "in_out", "ask")
+# The five of plan 331's pool, retired: a row assigned before plan 335 is
+# still read and paid, nothing new is assigned.
+LEGACY_DAILY = ("due", "new", "practice", "accuracy", "write")
 WEEKLY = ("days5", "volume", "new_mode", "exam_section", "duels5", "write10")
 BONUS = "all3"
 
+# What a day's mission asks, counted from the logs: sentences read,
+# dictation lines, translations, composition sentences, answered turns of
+# a conversation (a scene has four to six), texts, sections, analyses...
+DAY_TARGETS = {
+    "read": 5, "comprehension": 1, "dictation": 5, "translation": 3, "composition": 2,
+    "conversation": 4, "in_out": 2, "exam": 1, "analyze": 1, "duel": 1, "ask": 1, "explain": 1,
+    "message": 1,
+}
+# The thing a mission asks the learner to do, free of fare while the
+# mission is open (`waives`): a practice platform, or `duel`. Also the
+# coupon's line (`PLATFORM_LINE` on the client).
+DAY_PLATFORM = {
+    "read": "reading", "comprehension": "comprehension", "dictation": "dictation",
+    "translation": "translation", "composition": "composition", "conversation": "conversation",
+    "exam": "exam", "duel": "duel",
+}
+# `in_out`: one exercise that takes in (reading, comprehension, dictation)
+# and one that makes (translation, composition, conversation) on the day.
+IN_PLATFORMS = ("reading", "comprehension", "dictation")
+OUT_PLATFORMS = ("translation", "composition", "conversation")
+
+# Nous écrire (plan 222) rings a person, never a dashboard: the mission
+# counts a message that says something (MESSAGE_MIN_CHARS characters, of
+# a kind a learner writes: not a card's flag, not a rating) and reads
+# nothing of it. It is offered at most once a fortnight, so it is a
+# nudge and not a farm.
+MESSAGE_KINDS = ("problem", "idea", "fault")
+MESSAGE_MIN_CHARS = 20
+MESSAGE_EVERY_DAYS = 14
+# An analysis of a line shorter than this is no sentence.
+ANALYZE_MIN_CHARS = 4
+
+# The counters a mission reads that no log of its own holds: a
+# deep-explanation served from the shared cache claims no daily_usage
+# slot, so it is ticked here (`tick`). daily_usage's own keys otherwise.
+TICKS = {"explain": "mission_explain"}
+USAGE = {"ask": "ask"}
+
 # A discovery's credits (its XP is DISCOVERY_XP). Seen once; the first
 # seven are read off the tables from SINCE on, the last three are noted at
-# the act (note()) because nothing durable says they happened.
+# the act (note()) because nothing durable says they happened. Plan 335
+# (the owner: "too small") raised them fourfold: a discovery is a one-off,
+# worth what a day or two of the refill, since a learner who finds the
+# photo or the library is a learner the app has kept.
 DISCOVERIES = {
-    "first_dictation": 10, "first_photo": 15, "first_conversation": 15,
-    "first_exam": 15, "first_deck": 20, "first_friend": 10, "first_duel": 10,
-    "arrival_date": 10, "first_import": 20, "first_video": 15,
+    "first_dictation": 40, "first_photo": 60, "first_conversation": 60,
+    "first_exam": 60, "first_deck": 80, "first_friend": 40, "first_duel": 40,
+    "arrival_date": 40, "first_import": 80, "first_video": 60,
 }
 NOTED = frozenset({"first_photo", "arrival_date", "first_import"})
 # Whatever was done before this instant is not a "first": a discovery is
@@ -110,32 +155,37 @@ NOTED = frozenset({"first_photo", "arrival_date", "first_import"})
 # month has seen dictation).
 SINCE = datetime(2026, 11, 23, tzinfo=timezone.utc)
 
-# An achievement's (credits, xp).
+# An achievement's (credits, xp). Plan 335 raised them: the plate is a
+# milestone and pays like one, a hundred days' plate a day and a half of
+# the refill beside a streak's jackpot (srs/xp.py's JACKPOTS).
 ACHIEVEMENTS = {
-    "kana_done": (5, 60),
-    "words_100": (3, 40), "words_500": (6, 100), "words_1000": (10, 200),
-    "grammar_n5": (5, 100),
-    "days_7": (3, 30), "days_30": (6, 100), "days_100": (12, 300),
-    "exam_passed": (5, 80),
-    "ranked_win": (5, 80),
+    "kana_done": (30, 150),
+    "words_100": (25, 100), "words_500": (60, 250), "words_1000": (120, 500),
+    "grammar_n5": (60, 250),
+    "days_7": (20, 80), "days_30": (60, 250), "days_100": (150, 600),
+    "exam_passed": (50, 200),
+    "ranked_win": (40, 200),
 }
 WORD_MARKS = {"words_100": 100, "words_500": 500, "words_1000": 1000}
 DAY_MARKS = {"days_7": 7, "days_30": 30, "days_100": 100}
 EXAM_PASS = 0.6
 
-# The practice platforms a mission may ask: their log and its clock. The
-# table names are literals here, never parameters (SQL cannot bind one).
-# Dictation and composition are 写's own (`write`).
+# The practice platforms plan 331's weekly `new_mode` reads, and its
+# retired `practice` day mission did: their log and its clock. The table
+# names are literals here, never parameters (SQL cannot bind one).
 PLATFORMS = {
     "reading": "reading_log",
     "comprehension": "comprehension_log",
     "translation": "translation_log",
     "conversation": "conversation_log",
 }
+# Every platform a day's mission may count (plan 335): the four above and
+# 写's two, whose logs have the same `user_id` and `created_at`.
+SKILL_LOGS = {**PLATFORMS, "dictation": "dictation_log", "composition": "composition_log"}
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 
 SCOPES = ("day", "week", "bonus", "mark")
-KINDS = frozenset(DAILY) | frozenset(WEEKLY) | {BONUS} | frozenset(DISCOVERIES) | frozenset(ACHIEVEMENTS)
+KINDS = frozenset(DAILY) | frozenset(LEGACY_DAILY) | frozenset(WEEKLY) | {BONUS} | frozenset(DISCOVERIES) | frozenset(ACHIEVEMENTS)
 
 
 # ── Tables ────────────────────────────────────────────────────────────
@@ -302,7 +352,7 @@ def studied_days_between(cur, user_id: str, tz: int | None, start: datetime, end
 
 
 def platform_count(cur, user_id: str, platform: str, start: datetime, end: datetime) -> int:
-    table = PLATFORMS[platform]
+    table = SKILL_LOGS[platform]
     return int(_one(cur, f"SELECT COUNT(*) FROM {table} WHERE user_id = %s AND created_at >= %s AND created_at < %s",
                     (user_id, start, end)))
 
@@ -330,6 +380,65 @@ def duels_played(cur, user_id: str, start: datetime, end: datetime) -> int:
         "AND jsonb_array_length(answers) >= 1",
         (user_id, start, end),
     ))
+
+
+def analyses_count(cur, user_id: str, start: datetime, end: datetime) -> int:
+    """Lines the learner broke down in the analyser (typed, a photo's) or
+    a video they opened there: the sentence bank's rows (a line of at
+    least ANALYZE_MIN_CHARS) and the video sessions made."""
+    n = int(_one(cur, "SELECT COUNT(*) FROM phrase_history WHERE user_id = %s AND created_at >= %s AND created_at < %s "
+                      "AND char_length(phrase) >= %s", (user_id, start, end, ANALYZE_MIN_CHARS)))
+    v = int(_one(cur, "SELECT COUNT(*) FROM video_sessions WHERE user_id = %s AND created_at >= %s AND created_at < %s",
+                 (user_id, start, end)))
+    return n + v
+
+
+def usage_on(cur, user_id: str, feature: str, day: date) -> int:
+    """What daily_usage counted for `feature` on the learner's local
+    `day`: the asking claims a slot on every question, so its count is
+    the questions asked (a slot given back for an outage is no question)."""
+    return int(_one(cur, "SELECT count FROM daily_usage WHERE user_id = %s AND feature = %s AND day = %s",
+                    (user_id, feature, day)))
+
+
+def messages_written(cur, user_id: str, start: datetime, end: datetime) -> int:
+    """Messages of a kind a learner writes (Nous écrire) that say
+    something: counted by their length alone. Their words are read by a
+    person with scripts/read_feedback, never here (plan 222)."""
+    return int(_one(cur, "SELECT COUNT(*) FROM feedback WHERE user_id = %s AND kind = ANY(%s) "
+                         "AND char_length(body) >= %s AND created_at >= %s AND created_at < %s",
+                    (user_id, list(MESSAGE_KINDS), MESSAGE_MIN_CHARS, start, end)))
+
+
+def message_offered_lately(cur, user_id: str, day: date) -> bool:
+    """Whether a `message` mission was assigned in the last fortnight."""
+    return bool(_one(cur, "SELECT COUNT(*) FROM missions WHERE user_id = %s AND scope = 'day' AND kind = 'message' "
+                          "AND period >= %s AND period < %s",
+                     (user_id, day - timedelta(days=MESSAGE_EVERY_DAYS), day)))
+
+
+def tick(user_id: str, key: str) -> None:
+    """Count one use of a thing no log of its own records (TICKS: a deep
+    explanation, which a shared cache may serve without claiming a slot),
+    in daily_usage under the learner's local day. Never raises: what it
+    follows must not fail for it."""
+    feature = TICKS.get(key)
+    if feature is None:
+        return
+    try:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                tz, _ = _profile(cur, user_id)
+                cur.execute(
+                    "INSERT INTO daily_usage (user_id, feature, day, count) VALUES (%s,%s,%s,1) "
+                    "ON CONFLICT (user_id, feature, day) DO UPDATE SET count = daily_usage.count + 1",
+                    (user_id, feature, credits_mod.local_today(tz)))
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        logger.exception("missions: tick %s failed", key)
 
 
 def day_cleared(cur, user_id: str, start: datetime, end: datetime) -> bool:
@@ -364,11 +473,6 @@ def new_mode_done(cur, user_id: str, start: datetime, end: datetime) -> bool:
     return False
 
 
-def last_platform_use(cur, user_id: str) -> dict[str, datetime | None]:
-    return {p: _one(cur, f"SELECT MAX(created_at) FROM {t} WHERE user_id = %s", (user_id,), None)
-            for p, t in PLATFORMS.items()}
-
-
 def has_met_duels(cur, user_id: str) -> bool:
     return bool(_one(cur, "SELECT COUNT(*) FROM pvp_entries WHERE user_id = %s", (user_id,))
                 or _one(cur, "SELECT COUNT(*) FROM pvp_friends WHERE user_id = %s", (user_id,)))
@@ -376,15 +480,18 @@ def has_met_duels(cur, user_id: str) -> bool:
 
 # ── Choosing (pure) ───────────────────────────────────────────────────
 def pick_day(eligible: dict[str, bool], ordinal: int) -> list[str]:
-    """The day's three: `due` first (else `new`), then two of the rest by
-    a rotation of the date. Nothing random: two learners of one profile
-    get the same missions the same day."""
-    first = "due" if eligible.get("due") else "new"
-    rest = [k for k in DAILY if k != first and eligible.get(k)]
-    if rest:
-        turn = ordinal % len(rest)
-        rest = rest[turn:] + rest[:turn]
-    return [first, *rest][:DAYS_PER_DAY]
+    """The day's three, from the pool's eligible kinds: a start turned by
+    the date, then every n//3-th of the list from there (DAILY's order is
+    what makes the three differ). The next day starts one further, so two
+    days in a row share nothing and every kind comes round. Nothing
+    random: two learners of one profile get the same missions the same
+    day."""
+    pool = [k for k in DAILY if eligible.get(k)]
+    if len(pool) <= DAYS_PER_DAY:
+        return pool
+    step = len(pool) // DAYS_PER_DAY
+    turn = ordinal % len(pool)
+    return [pool[(turn + i * step) % len(pool)] for i in range(DAYS_PER_DAY)]
 
 
 def pick_week(eligible: dict[str, bool], ordinal: int) -> list[str]:
@@ -403,28 +510,8 @@ def _tenth_more(n: float, uplift: float) -> int:
     return math.ceil(round(n * uplift, 6))
 
 
-def new_goal(avg_week: float, cap: int | None) -> int:
-    """N new cards: their own seven-day average plus a tenth, at least
-    NEW_MIN and never past the day's ration nor NEW_MAX."""
-    ceiling = min(NEW_MAX, cap) if cap else NEW_MAX
-    return max(min(NEW_MIN, ceiling), min(ceiling, _tenth_more(avg_week, NEW_UPLIFT)))
-
-
-def accuracy_goal(avg_pct: float) -> int:
-    return min(ACCURACY_MAX, round(avg_pct) + ACCURACY_GAIN)
-
-
 def volume_goal(prev: int) -> int:
     return min(_tenth_more(prev, VOLUME_UPLIFT), prev + VOLUME_MAX_GAIN)
-
-
-def practice_platform(last_use: dict[str, datetime | None], yesterday: str | None) -> str:
-    """The platform the learner practised least recently (never first),
-    not the one yesterday's mission named, ties in the platforms' order."""
-    order = list(PLATFORMS)
-    floor = datetime.min.replace(tzinfo=timezone.utc)
-    choices = [p for p in order if p != yesterday] or order
-    return min(choices, key=lambda p: (last_use.get(p) or floor, order.index(p)))
 
 
 # ── Assigning ─────────────────────────────────────────────────────────
@@ -443,42 +530,20 @@ def _insert_mission(cur, user_id, scope, period, kind, slot, target, baseline, c
 
 
 def ensure_day(cur, user_id: str, tz: int | None, now: datetime) -> date:
-    """The day's missions, written the first time the day is read."""
-    from core import pace
-    from core.srs_instance import srs
+    """The day's missions, written the first time the day is read: three
+    from the pool (plan 335), their goals fixed (DAY_TARGETS) and frozen
+    on the row. A duel is asked only of a learner who has met them, and
+    the message at most once a fortnight."""
     day, start, end = day_window(tz, now)
     cur.execute("SELECT COUNT(*) FROM missions WHERE user_id = %s AND scope = 'day' AND period = %s", (user_id, day))
     if cur.fetchone()[0]:
         return day
-
-    due = len(srs.get_due_rows(user_id))
-    p = pace.resolve_pace(user_id)
-    cap = p.target if p else None
-    week_ago = start - timedelta(days=7)
-    by_day = new_by_day(cur, user_id, tz, week_ago, start)
-    avg_week = sum(by_day.values()) / 7
-    answers, good = reviews_between(cur, user_id, start - timedelta(days=ACCURACY_WINDOW), start)
-    eligible = {
-        "due": due >= DUE_MIN, "new": True, "practice": True, "write": True,
-        "accuracy": answers >= ACCURACY_MIN_ANSWERS,
-    }
-    kinds = pick_day(eligible, day.toordinal())
-    cur.execute("SELECT platform FROM missions WHERE user_id = %s AND scope = 'day' AND kind = 'practice' "
-                "AND period = %s", (user_id, day - timedelta(days=1)))
-    row = cur.fetchone()
-    yesterday = row[0] if row else None
-    for slot, kind in enumerate(kinds):
-        target, baseline, platform = 1, None, None
-        if kind == "due":
-            target, baseline = max(1, due), due
-        elif kind == "new":
-            target, baseline = new_goal(avg_week, cap), round(avg_week)
-        elif kind == "accuracy":
-            avg_pct = 100 * good / answers if answers else 0
-            target, baseline = accuracy_goal(avg_pct), round(avg_pct)
-        elif kind == "practice":
-            platform = practice_platform(last_platform_use(cur, user_id), yesterday)
-        _insert_mission(cur, user_id, "day", day, kind, slot, target, baseline, DAY_CREDITS, DAY_XP, platform)
+    eligible = {k: True for k in DAILY}
+    eligible["duel"] = has_met_duels(cur, user_id)
+    eligible["message"] = not message_offered_lately(cur, user_id, day)
+    for slot, kind in enumerate(pick_day(eligible, day.toordinal())):
+        _insert_mission(cur, user_id, "day", day, kind, slot, DAY_TARGETS[kind], None, DAY_CREDITS, DAY_XP,
+                        DAY_PLATFORM.get(kind))
     _insert_mission(cur, user_id, "bonus", day, BONUS, DAYS_PER_DAY, DAYS_PER_DAY, None, BONUS_CREDITS, BONUS_XP)
     return day
 
@@ -503,18 +568,51 @@ def ensure_week(cur, user_id: str, tz: int | None, now: datetime) -> date:
 
 
 # ── Reading progress ──────────────────────────────────────────────────
-def progress(cur, user_id: str, tz: int | None, row: dict, window: tuple[datetime, datetime]) -> dict:
-    """{have, of, done, ...} for one mission, from the logs, now."""
+def _day_progress(cur, user_id: str, row: dict, window: tuple[datetime, datetime], day: date, out: dict) -> dict:
+    """The pool's missions (plan 335), each counted from the log of what
+    it asks: a platform's rows, the analyser's, the duels, the daily
+    counters of the asking and the explanations, a message's length."""
+    start, end = window
+    kind, target = row["kind"], row["target"]
+    if kind in DAY_PLATFORM and kind not in ("exam", "duel"):
+        n = platform_count(cur, user_id, DAY_PLATFORM[kind], start, end)
+    elif kind == "in_out":
+        # Two halves, one of each side: how many of the two are met.
+        n = sum(1 for side in (IN_PLATFORMS, OUT_PLATFORMS)
+                if any(platform_count(cur, user_id, p, start, end) for p in side))
+    elif kind == "exam":
+        n = exam_sections(cur, user_id, start, end)
+    elif kind == "duel":
+        n = duels_played(cur, user_id, start, end)
+    elif kind == "analyze":
+        n = analyses_count(cur, user_id, start, end)
+    elif kind in USAGE:
+        n = usage_on(cur, user_id, USAGE[kind], day)
+    elif kind in TICKS:
+        n = usage_on(cur, user_id, TICKS[kind], day)
+    else:                         # message
+        n = messages_written(cur, user_id, start, end)
+    out.update(have=min(n, target), done=n >= target)
+    return out
+
+
+def progress(cur, user_id: str, tz: int | None, row: dict, window: tuple[datetime, datetime],
+             period: date | None = None) -> dict:
+    """{have, of, done, ...} for one mission, from the logs, now. `period`
+    is the local day a daily mission belongs to, which daily_usage is
+    keyed by."""
     start, end = window
     kind, target = row["kind"], row["target"]
     out = {"have": 0, "of": target, "done": False}
+    if kind in DAY_TARGETS:
+        return _day_progress(cur, user_id, row, window, period or credits_mod.local_today(tz, start), out)
     if kind == "due":
         n, _ = reviews_between(cur, user_id, start, end)
         out.update(have=min(n, target), done=day_cleared(cur, user_id, start, end))
     elif kind == "new":
         n = sum(new_by_day(cur, user_id, tz, start, end).values())
         out.update(have=min(n, target), done=n >= target)
-    elif kind == "practice":
+    elif kind == "practice":      # retired (plan 335), still read where it was assigned
         n = platform_count(cur, user_id, row["platform"], start, end)
         out.update(of=1, have=min(n, 1), done=n >= 1)
     elif kind == "accuracy":
@@ -571,7 +669,7 @@ def _evaluate(cur, user_id, tz, scope, period, window, rows) -> list[dict]:
     for row in rows:
         if row["kind"] == BONUS:
             continue
-        prog = progress(cur, user_id, tz, row, window) if not row["done_at"] else {"have": row["target"], "of": row["target"], "done": True}
+        prog = progress(cur, user_id, tz, row, window, period if scope in ("day", "bonus") else None) if not row["done_at"] else {"have": row["target"], "of": row["target"], "done": True}
         if prog["done"] and not row["done_at"]:
             _stamp_done(cur, user_id, scope, period, row["kind"])
             row["done_at"] = datetime.now(timezone.utc)
@@ -886,21 +984,35 @@ def book(user_id: str) -> dict:
     }
 
 
-def waives(user_id: str, platform: str, now: datetime | None = None) -> bool:
-    """Whether the next graded exercise on `platform` is one the day's
-    mission asks, and so costs no credit. The seam the practice fare will
-    read when practice is priced (it costs nothing today, so nothing
-    calls this yet): true while today's `practice` mission names the
-    platform and is not yet done."""
+def waives_on(cur, user_id: str, key: str, tz: int | None = None, now: datetime | None = None) -> bool:
+    """Whether the next graded exercise `key` names (a practice platform
+    or `duel`) is one the day's mission asks, and so costs no credit
+    (docs/business/strategie-monetisation.md: "un exercice demandé par une
+    mission ne coûte rien"), on the caller's cursor: a fare taken in a
+    transaction of its own (a ranked duel's departure) reads it there.
+
+    True while a mission of today's names it and is not yet done: its
+    platform, or, for `in_out`, any of the two sides'. A duel is no longer
+    waived once one has been played today, whether or not the missions
+    have been read since to stamp it."""
     now = now or datetime.now(timezone.utc)
+    if tz is None:
+        tz, _ = _profile(cur, user_id)
+    day, start, end = day_window(tz, now)
+    cur.execute("SELECT kind FROM missions WHERE user_id = %s AND scope = 'day' AND period = %s "
+                "AND done_at IS NULL AND (platform = %s OR (kind = 'in_out' AND %s = ANY(%s)))",
+                (user_id, day, key, key, list(IN_PLATFORMS + OUT_PLATFORMS)))
+    if cur.fetchone() is None:
+        return False
+    return not (key == "duel" and duels_played(cur, user_id, start, end))
+
+
+def waives(user_id: str, key: str, now: datetime | None = None) -> bool:
+    """`waives_on` on a connection of its own: the seam the practice fare
+    will read when practice is priced (it costs nothing today)."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            tz, _ = _profile(cur, user_id)
-            day, _, _ = day_window(tz, now)
-            cur.execute("SELECT 1 FROM missions WHERE user_id = %s AND scope = 'day' AND period = %s "
-                        "AND kind = 'practice' AND platform = %s AND done_at IS NULL", (user_id, day, platform))
-            return cur.fetchone() is not None
+            return waives_on(cur, user_id, key, None, now)
     finally:
         conn.close()
-

@@ -390,6 +390,43 @@ def _ranked(client, user_id):
         return r.json()
 
 
+def _ask_the_duel(user_id, now):
+    """Today's missions for `user_id` are a duel and two the test never
+    reads (plan 335)."""
+    from study import missions
+    sql("DELETE FROM missions WHERE user_id = %s", (user_id,))
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            tz, _ = missions._profile(cur, user_id)
+            day, _, _ = missions.day_window(tz, now)
+            for slot, kind in enumerate(["duel", "ask", "explain"]):
+                missions._insert_mission(cur, user_id, "day", day, kind, slot, 1, None, 8, 5,
+                                         missions.DAY_PLATFORM.get(kind))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_a_ranked_duel_the_days_mission_asks_departs_free_and_the_next_pays(client, learners, clock):
+    for uid in (A, B, C):
+        place(uid)
+    _ask_the_duel(A, clock())
+    try:
+        first = _ranked(client, A)
+        assert client.get(f"/api/pvp/duels/{first['id']}").json()["price"] == 0
+        assert client.get("/api/pvp").json()["prices"]["ranked"] == 0
+        play(client, clock, A, first["id"], [(1000, True)] * 4)
+        assert _ledger(A, "duel") == []                       # no fare was taken
+        # One is played: the mission is met, whether or not anyone read it since.
+        assert client.get("/api/pvp").json()["prices"]["ranked"] == duels.RANKED_PRICE
+        second = _ranked(client, A)
+        play(client, clock, A, second["id"], [(1000, True)] * 4)
+        assert _ledger(A, "duel") == [-duels.RANKED_PRICE]
+    finally:
+        sql("DELETE FROM missions WHERE user_id = %s", (A,))
+
+
 def test_ranked_play_never_waits(client, learners, clock):
     for uid in (A, B, C):
         place(uid)
