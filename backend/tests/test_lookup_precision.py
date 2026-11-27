@@ -2783,8 +2783,11 @@ class EighthReviewWordTests(unittest.TestCase):
         self.assertEqual(token_of("iPhone15を買った。", "15")["reading"], "15")
 
     def test_glosses(self) -> None:
-        for sentence, surface, gloss in (("花粉の飛ぶ量は、非常に多いでしょう。", "の", "(in a clause before a noun)"),
-                                         ("ついには親の預金にまで手をつけるしまつだ。", "まで", "even, as far as"),
+        # (the の for が is a point of its own since plan 335, and a token a
+        # point is written on is never glossed: the point carries it)
+        self.assertEqual([g["pattern"] for g in token_of("花粉の飛ぶ量は、非常に多いでしょう。", "の")["grammar"]],
+                         ["〜の（主語）"])
+        for sentence, surface, gloss in (("ついには親の預金にまで手をつけるしまつだ。", "まで", "even, as far as"),
                                          ("人の都合に合わせて育ってはくれない。", "は",
                                           "(between a て form and a negative)"),
                                          ("一円たりともむだにはできない。", "は", "(after a particle)")):
@@ -3277,10 +3280,11 @@ class HeldOutWordTests(unittest.TestCase):
             ("触っちゃやだ。", "ちゃ", "(spoken) = ては"),
             ("早く食べやあ。", "やあ", "(Nagoya) a gentle command"),
             ("えらい混んでるな。", "えらい", "(Kansai) very"),
-            ("意味のない話はやめよう。", "の", "(in a clause before a noun)"),
         ):
             with self.subTest(sentence=sentence, surface=surface):
                 self.assertTrue(gloss_of(sentence, surface).startswith(gloss), gloss_of(sentence, surface))
+        # (意味のない話: の for が before an adjective ない, the point's, plan 335)
+        self.assertEqual([g["pattern"] for g in token_of("意味のない話はやめよう。", "の")["grammar"]], ["〜の（主語）"])
         # ...never where the same letters are the plain word
         self.assertIn("〜やすい／〜にくい", grammar_detect_patterns("読みやすい本だ。"))
         self.assertEqual(token_of("台所にアリが出た。", "アリ")["vocab_match"]["entry"]["kanji"], "蟻")
@@ -3346,7 +3350,7 @@ class HeldOutWordTests(unittest.TestCase):
         self.assertEqual(token_of("内角高め、ボール。", "高め")["pos"], "noun")
         self.assertEqual(token_of("声を低めた。", "低め")["vocab_match"]["entry"]["kanji"], "低める")
         # and a noun's の before ある is who has it, = が
-        self.assertTrue(gloss_of("運転経験のある人を探している。", "の").startswith("(in a clause before a noun)"))
+        self.assertEqual([g["pattern"] for g in token_of("運転経験のある人を探している。", "の")["grammar"]], ["〜の（主語）"])
 
 
 def grammar_detect_patterns(sentence: str) -> set[str]:

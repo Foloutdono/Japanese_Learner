@@ -18296,6 +18296,182 @@
     }
   },
   {
+    "pattern": "〜ほど〜ない",
+    "structure": "noun／plain form + ほど + ない-form",
+    "structure_fr": "nom／forme neutre + ほど + forme en ない",
+    "structure_es": "sustantivo／forma llana + ほど + forma en ない",
+    "structure_id": "kata benda／bentuk biasa + ほど + bentuk ない",
+    "meaning": {
+      "en": "not as … as, not so … that",
+      "fr": "pas aussi … que, pas si … que",
+      "es": "no tan … como, no tan … que",
+      "id": "tidak se… itu, tidak sampai"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**B + ほど + negative** says that A does not reach B's level: not as … as B. The negative closing the clause is what makes it work: 今日は、きのうほどさむくないです (It is not as cold today as yesterday).",
+        "fr": "**B + ほど + négation** dit que A n'atteint pas le niveau de B : pas aussi … que B. C'est la négation qui ferme la proposition qui fait fonctionner la tournure : 今日は、きのうほどさむくないです (Il ne fait pas aussi froid aujourd'hui qu'hier).",
+        "es": "**B + ほど + negación** dice que A no llega al nivel de B: no tan … como B. Lo que hace funcionar la estructura es la negación que cierra la oración: 今日は、きのうほどさむくないです (Hoy no hace tanto frío como ayer).",
+        "id": "**B + ほど + negatif** berarti A tidak mencapai level B: tidak se… B. Negasi yang menutup klausa inilah yang membuatnya bekerja: 今日は、きのうほどさむくないです (Hari ini tidak sedingin kemarin)."
+      },
+      {
+        "kind": "use",
+        "en": "- Two things: あには、ちちほど高くありません.\n- Against what one expected: 思ったほど難しくなかった (not as hard as I thought).\n- With これ／それ／あれ: それほど高くない (not that expensive).",
+        "fr": "- Deux choses : あには、ちちほど高くありません.\n- Face à ce qu'on attendait : 思ったほど難しくなかった (pas aussi difficile que je le pensais).\n- Avec これ／それ／あれ : それほど高くない (pas si cher que ça).",
+        "es": "- Dos cosas: あには、ちちほど高くありません.\n- Frente a lo que se esperaba: 思ったほど難しくなかった (no fue tan difícil como pensaba).\n- Con これ／それ／あれ: それほど高くない (no es tan caro).",
+        "id": "- Dua hal: あには、ちちほど高くありません.\n- Dibanding yang diperkirakan: 思ったほど難しくなかった (tidak sesulit yang kukira).\n- Dengan これ／それ／あれ: それほど高くない (tidak semahal itu)."
+      },
+      {
+        "kind": "careful",
+        "en": "A negative must close the clause: a positive ending turns ほど into a measure of degree (〜ほど): 泣くほど嬉しい, so happy I could cry. For « more than », use 〜より: きのうよりさむい.",
+        "fr": "Une négation doit fermer la proposition : avec une fin positive, ほど mesure un degré (〜ほど) : 泣くほど嬉しい, si heureux qu'on pourrait pleurer. Pour « plus que », on emploie 〜より : きのうよりさむい.",
+        "es": "Una negación debe cerrar la oración: con un final afirmativo, ほど mide un grado (〜ほど): 泣くほど嬉しい, tan feliz que podría llorar. Para «más que» se usa 〜より: きのうよりさむい.",
+        "id": "Negasi harus menutup klausa: kalau akhirnya positif, ほど menyatakan tingkat (〜ほど): 泣くほど嬉しい, sebahagia itu sampai bisa menangis. Untuk “lebih daripada”, pakai 〜より: きのうよりさむい."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜より",
+        "en": "ほど〜ない: A does not reach B; より: A goes beyond B.",
+        "fr": "ほど〜ない : A n'atteint pas B ; より : A dépasse B.",
+        "es": "ほど〜ない: A no llega a B; より: A supera a B.",
+        "id": "ほど〜ない: A tidak sampai ke B; より: A melampaui B."
+      },
+      {
+        "pattern": "〜ほど",
+        "en": "With a negative closing the clause, ほど compares (not as … as); with a positive one it measures a degree (so … that).",
+        "fr": "Avec une négation en fin de proposition, ほど compare (pas aussi … que) ; avec une fin positive, il mesure un degré (si … que).",
+        "es": "Con una negación al final, ほど compara (no tan … como); con un final afirmativo mide un grado (tan … que).",
+        "id": "Dengan negasi di akhir klausa, ほど membandingkan (tidak se… itu); dengan akhir positif, ia menyatakan tingkat (sampai-sampai)."
+      },
+      {
+        "pattern": "〜くらい／〜ぐらい",
+        "en": "ほど〜ない: falls short of the level; くらい: about the same level.",
+        "fr": "ほど〜ない : reste en dessous du niveau ; くらい : à peu près le même niveau.",
+        "es": "ほど〜ない: se queda por debajo del nivel; くらい: más o menos el mismo nivel.",
+        "id": "ほど〜ない: kurang dari level itu; くらい: kira-kira sama levelnya."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今日は、きのうほどさむくないです。",
+        "en": "It is not as cold today as yesterday.",
+        "fr": "Il ne fait pas aussi froid aujourd'hui qu'hier.",
+        "es": "Hoy no hace tanto frío como ayer.",
+        "id": "Hari ini tidak sedingin kemarin.",
+        "register": "polite"
+      },
+      {
+        "jp": "この店のラーメンは、それほどおいしくない。",
+        "en": "The ramen at this shop is not that good.",
+        "fr": "Les ramen de ce restaurant ne sont pas si bons que ça.",
+        "es": "El ramen de esta tienda no es tan rico.",
+        "id": "Ramen di kedai ini tidak seenak itu.",
+        "register": "casual"
+      },
+      {
+        "jp": "思ったほど、テストはむずかしくなかった。",
+        "en": "The test was not as hard as I thought.",
+        "fr": "L'examen n'était pas aussi difficile que je le pensais.",
+        "es": "El examen no fue tan difícil como pensaba.",
+        "id": "Ujiannya tidak sesulit yang kukira.",
+        "register": "casual"
+      },
+      {
+        "jp": "兄は父ほど、せが高くありません。",
+        "en": "My older brother is not as tall as my father.",
+        "fr": "Mon grand frère n'est pas aussi grand que mon père.",
+        "es": "Mi hermano mayor no es tan alto como mi padre.",
+        "id": "Kakakku tidak setinggi ayahku.",
+        "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "きょうは、きのう＿＿＿あつくないです。",
+        "tr": {
+          "en": "It is not as hot today as yesterday.",
+          "fr": "Il ne fait pas aussi chaud aujourd'hui qu'hier.",
+          "es": "Hoy no hace tanto calor como ayer.",
+          "id": "Hari ini tidak sepanas kemarin."
+        },
+        "choices": [
+          "ほど",
+          "から",
+          "まで"
+        ],
+        "why": {
+          "en": "ほど with a negative sets the level that is not reached: きのうほどあつくない, not as hot as yesterday. から and まで give a starting point or an end point, and cannot compare.",
+          "fr": "ほど avec une négation fixe le niveau qui n'est pas atteint : きのうほどあつくない, pas aussi chaud qu'hier. から et まで donnent un point de départ ou d'arrivée, et ne peuvent pas comparer.",
+          "es": "ほど con una negación fija el nivel que no se alcanza: きのうほどあつくない, no tan caluroso como ayer. から y まで dan un punto de partida o de llegada, y no sirven para comparar.",
+          "id": "ほど dengan negasi menetapkan level yang tidak tercapai: きのうほどあつくない, tidak sepanas kemarin. から dan まで memberi titik awal atau titik akhir, dan tidak bisa dipakai untuk membandingkan."
+        }
+      },
+      {
+        "jp": "思った＿＿＿、人は多くなかったです。",
+        "tr": {
+          "en": "There were not as many people as I thought.",
+          "fr": "Il n'y avait pas autant de monde que je le pensais.",
+          "es": "No había tanta gente como pensaba.",
+          "id": "Orangnya tidak sebanyak yang kukira."
+        },
+        "choices": [
+          "ほど",
+          "から",
+          "に"
+        ],
+        "why": {
+          "en": "思ったほど…ない is « not as … as I thought »: the crowd did not reach what was expected. から would say « since I thought », which is a reason, not a measure.",
+          "fr": "思ったほど…ない veut dire « pas aussi … que je le pensais » : la foule n'a pas atteint ce qu'on attendait. から dirait « puisque je pensais », une raison et non une mesure.",
+          "es": "思ったほど…ない significa «no tan … como pensaba»: la multitud no llegó a lo que se esperaba. から diría «como pensé», que es una razón, no una medida.",
+          "id": "思ったほど…ない berarti “tidak se… yang kukira”: keramaiannya tidak mencapai yang diharapkan. から berarti “karena kukira”, yaitu alasan, bukan ukuran."
+        }
+      },
+      {
+        "jp": "弟は、わたし＿＿＿じょうずに歌えません。",
+        "tr": {
+          "en": "My younger brother cannot sing as well as I can.",
+          "fr": "Mon petit frère ne chante pas aussi bien que moi.",
+          "es": "Mi hermano menor no canta tan bien como yo.",
+          "id": "Adikku tidak bisa menyanyi sebagus aku."
+        },
+        "choices": [
+          "ほど",
+          "を",
+          "へ"
+        ],
+        "why": {
+          "en": "わたしほど…ません: my level is the one he does not reach. を and へ cannot stand before じょうずに in this way.",
+          "fr": "わたしほど…ません : mon niveau est celui qu'il n'atteint pas. を et へ ne peuvent pas se placer ainsi devant じょうずに.",
+          "es": "わたしほど…ません: mi nivel es el que él no alcanza. を y へ no pueden ponerse así antes de じょうずに.",
+          "id": "わたしほど…ません: levelku adalah yang tidak dicapainya. を dan へ tidak bisa berdiri seperti itu sebelum じょうずに."
+        }
+      },
+      {
+        "jp": "この町は、東京＿＿＿にぎやかではありません。",
+        "tr": {
+          "en": "This town is not as lively as Tokyo.",
+          "fr": "Cette ville n'est pas aussi animée que Tokyo.",
+          "es": "Este pueblo no es tan animado como Tokio.",
+          "id": "Kota ini tidak seramai Tokyo."
+        },
+        "choices": [
+          "ほど",
+          "だけ",
+          "しか"
+        ],
+        "why": {
+          "en": "東京ほど…ではありません sets Tokyo as the level this town does not reach. だけ would make the town the only place that is not lively, and しか needs its negative to mean « only ».",
+          "fr": "東京ほど…ではありません prend Tokyo comme le niveau que cette ville n'atteint pas. だけ ferait de la ville le seul endroit sans animation, et しか a besoin de sa négation pour dire « seulement ».",
+          "es": "東京ほど…ではありません toma Tokio como el nivel que este pueblo no alcanza. だけ haría del pueblo el único lugar sin animación, y しか necesita su negación para significar «solo».",
+          "id": "東京ほど…ではありません menjadikan Tokyo level yang tidak dicapai kota ini. だけ akan menjadikan kota ini satu-satunya yang tidak ramai, dan しか butuh negasinya untuk berarti “hanya”."
+        }
+      }
+    ]
+  },
+  {
     "pattern": "〜かどうか",
     "structure": "plain form + かどうか",
     "structure_fr": "forme neutre + かどうか",
@@ -26545,6 +26721,184 @@
         }
       ]
     }
+  },
+  {
+    "pattern": "〜の（主語）",
+    "reading": "〜の（しゅご）",
+    "structure": "noun + の + verb plain form + noun",
+    "structure_fr": "nom + の + verbe forme neutre + nom",
+    "structure_es": "sustantivo + の + verbo en forma llana + sustantivo",
+    "structure_id": "kata benda + の + kata kerja bentuk biasa + kata benda",
+    "meaning": {
+      "en": "の in place of が, inside a clause that describes a noun",
+      "fr": "の à la place de が, dans une proposition qui décrit un nom",
+      "es": "の en lugar de が, dentro de una oración que describe un sustantivo",
+      "id": "の sebagai pengganti が, di dalam klausa yang menerangkan kata benda"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "In a clause that describes a noun, **subject + の** can stand for が: 私の知らない人 is 私が知らない人 (a person I don't know). The verb is in its plain form, and the noun it describes follows.",
+        "fr": "Dans une proposition qui décrit un nom, **sujet + の** peut remplacer が : 私の知らない人 équivaut à 私が知らない人 (une personne que je ne connais pas). Le verbe est à la forme neutre, et le nom qu'il décrit suit.",
+        "es": "En una oración que describe un sustantivo, **sujeto + の** puede reemplazar a が: 私の知らない人 equivale a 私が知らない人 (una persona que no conozco). El verbo va en forma llana, y le sigue el sustantivo que describe.",
+        "id": "Dalam klausa yang menerangkan kata benda, **subjek + の** bisa menggantikan が: 私の知らない人 sama dengan 私が知らない人 (orang yang tidak kukenal). Kata kerjanya berbentuk biasa, dan kata benda yang diterangkannya mengikuti."
+      },
+      {
+        "kind": "use",
+        "en": "- Describing a thing by who did it: 母の作った料理 (the food my mother made).\n- Describing a day or a place: 雨のふる日 (a day when it rains).\n- In prose and song lyrics, where it reads softer than が.",
+        "fr": "- Décrire une chose par celui qui l'a faite : 母の作った料理 (le plat que ma mère a préparé).\n- Décrire un jour ou un lieu : 雨のふる日 (un jour de pluie).\n- Dans la prose et les paroles de chansons, où cela sonne plus doux que が.",
+        "es": "- Describir algo por quien lo hizo: 母の作った料理 (la comida que preparó mi madre).\n- Describir un día o un lugar: 雨のふる日 (un día de lluvia).\n- En prosa y letras de canciones, donde suena más suave que が.",
+        "id": "- Menerangkan sesuatu lewat pelakunya: 母の作った料理 (masakan yang dibuat ibuku).\n- Menerangkan hari atau tempat: 雨のふる日 (hari ketika hujan turun).\n- Dalam prosa dan lirik lagu, yang terdengar lebih lembut daripada が."
+      },
+      {
+        "kind": "careful",
+        "en": "Only inside the describing clause: noun + の + noun is « of » (母の料理, my mother's cooking), but with a verb after the の and a noun after the verb, の plays が. In the main clause が stays: 母が料理を作った.",
+        "fr": "Seulement dans la proposition qui décrit : nom + の + nom veut dire « de » (母の料理, la cuisine de ma mère), mais avec un verbe après の et un nom après le verbe, の joue le rôle de が. Dans la proposition principale, が reste : 母が料理を作った.",
+        "es": "Solo dentro de la oración descriptiva: sustantivo + の + sustantivo es «de» (母の料理, la cocina de mi madre), pero con un verbo tras の y un sustantivo tras el verbo, の hace de が. En la oración principal が se queda: 母が料理を作った.",
+        "id": "Hanya di dalam klausa yang menerangkan: kata benda + の + kata benda berarti “milik” (母の料理, masakan ibu), tetapi dengan kata kerja setelah の dan kata benda setelah kata kerja itu, の berperan sebagai が. Dalam klausa utama が tetap dipakai: 母が料理を作った."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "が",
+        "en": "が works in any clause; の replaces it only inside a clause that describes a noun, and sounds softer or more literary.",
+        "fr": "が marche dans toute proposition ; の ne le remplace que dans une proposition qui décrit un nom, et sonne plus doux ou plus littéraire.",
+        "es": "が funciona en cualquier oración; の solo lo reemplaza dentro de una oración que describe un sustantivo, y suena más suave o más literario.",
+        "id": "が bisa dipakai di klausa mana pun; の hanya menggantikannya di dalam klausa yang menerangkan kata benda, dan terdengar lebih lembut atau lebih sastrawi.",
+        "same": true
+      },
+      {
+        "pattern": "の",
+        "en": "の between two nouns is « of »; の before a verb marks who does it.",
+        "fr": "の entre deux noms veut dire « de » ; の devant un verbe marque qui fait l'action.",
+        "es": "の entre dos sustantivos es «de»; の ante un verbo marca quién hace la acción.",
+        "id": "の di antara dua kata benda berarti “milik”; の sebelum kata kerja menandai siapa pelakunya."
+      },
+      {
+        "pattern": "〜こと",
+        "en": "の for が goes inside a clause that describes a noun; ことの turns a clause into a noun.",
+        "fr": "の pour が se place dans une proposition qui décrit un nom ; こと transforme une proposition en nom.",
+        "es": "の por が va dentro de una oración que describe un sustantivo; こと convierte una oración en sustantivo.",
+        "id": "の pengganti が berada di dalam klausa yang menerangkan kata benda; こと mengubah klausa menjadi kata benda."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "母の作った料理は、いつもおいしいです。",
+        "en": "The food my mother makes is always delicious.",
+        "fr": "Les plats que prépare ma mère sont toujours délicieux.",
+        "es": "La comida que prepara mi madre siempre es deliciosa.",
+        "id": "Masakan yang dibuat ibuku selalu enak.",
+        "register": "polite"
+      },
+      {
+        "jp": "私の知らない人が、家の前に立っていた。",
+        "en": "A person I did not know was standing in front of the house.",
+        "fr": "Une personne que je ne connaissais pas se tenait devant la maison.",
+        "es": "Una persona que yo no conocía estaba parada frente a la casa.",
+        "id": "Ada orang yang tidak kukenal berdiri di depan rumah.",
+        "register": "casual"
+      },
+      {
+        "jp": "雨のふる日は、家で本を読みます。",
+        "en": "On days when it rains, I read at home.",
+        "fr": "Les jours de pluie, je lis à la maison.",
+        "es": "Los días de lluvia, leo en casa.",
+        "id": "Pada hari ketika hujan turun, aku membaca di rumah.",
+        "register": "polite"
+      },
+      {
+        "jp": "あの人の言うことは、いつも正しい。",
+        "en": "What that person says is always right.",
+        "fr": "Ce que dit cette personne est toujours juste.",
+        "es": "Lo que dice esa persona siempre es cierto.",
+        "id": "Apa yang dikatakan orang itu selalu benar.",
+        "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "母＿＿＿作った料理は、おいしいです。",
+        "tr": {
+          "en": "The food my mother made is delicious.",
+          "fr": "Le plat que ma mère a préparé est délicieux.",
+          "es": "La comida que preparó mi madre está deliciosa.",
+          "id": "Masakan yang dibuat ibuku enak."
+        },
+        "choices": [
+          "の",
+          "を",
+          "で"
+        ],
+        "why": {
+          "en": "In a clause that describes 料理, the one who makes it can take の: 母の作った料理. を and で cannot mark who cooks.",
+          "fr": "Dans une proposition qui décrit 料理, celui qui cuisine peut prendre の : 母の作った料理. を et で ne peuvent pas marquer qui cuisine.",
+          "es": "En una oración que describe 料理, quien cocina puede llevar の: 母の作った料理. を y で no pueden marcar quién cocina.",
+          "id": "Dalam klausa yang menerangkan 料理, pelaku yang memasak bisa memakai の: 母の作った料理. を dan で tidak bisa menandai siapa yang memasak."
+        }
+      },
+      {
+        "jp": "私＿＿＿知らない人から、手紙が来ました。",
+        "tr": {
+          "en": "A letter came from a person I don't know.",
+          "fr": "J'ai reçu une lettre d'une personne que je ne connais pas.",
+          "es": "Llegó una carta de una persona que no conozco.",
+          "id": "Ada surat dari orang yang tidak kukenal."
+        },
+        "choices": [
+          "の",
+          "へ",
+          "で"
+        ],
+        "why": {
+          "en": "私の知らない人 is « a person I don't know »: の marks me as the one who does not know. へ and で cannot do that before 知らない.",
+          "fr": "私の知らない人 veut dire « une personne que je ne connais pas » : の marque « moi » comme celui qui ne connaît pas. へ et で ne peuvent pas le faire devant 知らない.",
+          "es": "私の知らない人 es «una persona que no conozco»: の marca a «yo» como quien no conoce. へ y で no pueden hacerlo antes de 知らない.",
+          "id": "私の知らない人 berarti “orang yang tidak kukenal”: の menandai “aku” sebagai yang tidak mengenal. へ dan で tidak bisa melakukannya sebelum 知らない."
+        }
+      },
+      {
+        "jp": "雨＿＿＿ふる日は、家にいます。",
+        "tr": {
+          "en": "On days when it rains, I stay home.",
+          "fr": "Les jours de pluie, je reste à la maison.",
+          "es": "Los días de lluvia me quedo en casa.",
+          "id": "Pada hari hujan, aku di rumah."
+        },
+        "choices": [
+          "の",
+          "を",
+          "へ"
+        ],
+        "why": {
+          "en": "雨のふる日 is « a day when rain falls »: の stands for が before ふる. 雨をふる and 雨へふる are not sentences, since ふる takes no object and no direction here.",
+          "fr": "雨のふる日 veut dire « un jour où il pleut » : の tient lieu de が devant ふる. 雨をふる et 雨へふる ne se disent pas, car ふる n'a ici ni complément d'objet ni direction.",
+          "es": "雨のふる日 es «un día en que llueve»: の hace de が ante ふる. 雨をふる y 雨へふる no se dicen, porque ふる aquí no lleva objeto ni dirección.",
+          "id": "雨のふる日 berarti “hari ketika hujan turun”: の berperan sebagai が sebelum ふる. 雨をふる dan 雨へふる tidak dipakai, karena ふる di sini tidak punya objek maupun arah."
+        }
+      },
+      {
+        "jp": "あの人＿＿＿言うことは、よくわかりません。",
+        "tr": {
+          "en": "I don't understand well what that person says.",
+          "fr": "Je ne comprends pas bien ce que dit cette personne.",
+          "es": "No entiendo bien lo que dice esa persona.",
+          "id": "Aku tidak begitu mengerti apa yang dikatakan orang itu."
+        },
+        "choices": [
+          "の",
+          "を",
+          "へ"
+        ],
+        "why": {
+          "en": "あの人の言うこと is « what that person says »: の marks who speaks, as が would. を and へ cannot mark the speaker of 言う.",
+          "fr": "あの人の言うこと veut dire « ce que dit cette personne » : の marque celui qui parle, comme le ferait が. を et へ ne peuvent pas marquer celui qui dit.",
+          "es": "あの人の言うこと es «lo que dice esa persona»: の marca quién habla, como lo haría が. を y へ no pueden marcar a quien dice 言う.",
+          "id": "あの人の言うこと berarti “apa yang dikatakan orang itu”: の menandai siapa yang berbicara, seperti が. を dan へ tidak bisa menandai pelaku 言う."
+        }
+      }
+    ]
   },
   {
     "pattern": "〜ばよかった",

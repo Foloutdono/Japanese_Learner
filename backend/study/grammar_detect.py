@@ -303,6 +303,17 @@ _POINT_SPELLINGS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
 }
 
 
+# The よう that means "the way things look" is 様 on a page as often as it is
+# よう: 同じ様な人, 雪の様に白い, 泣いている様です (plan 335). Only the points
+# written on that word take the spelling -- 〜ようとする's よう is a
+# volitional's ending -- and only where the tokenizer reads the kanji よう
+# (_sama_for_you): 同様, 仕様, 様子 and お客様 are other words.
+_YOU_POINTS = ("〜ような", "〜ように", "〜ようです", "〜ようになる", "〜ようにする", "〜ように言う",
+               "〜かのようだ", "〜ようなら", "〜ようでは")
+for _p in _YOU_POINTS:
+    _POINT_SPELLINGS[_p] = (*_POINT_SPELLINGS.get(_p, ()), ("よう", ("様",)))
+
+
 # A kanji cut short is still the word (と思, に行き); the same letters in
 # kana are the start of others -- とおも of とおもしろい, にいき of
 # にいきなり, にいた of 家にいた and にいたします, which is why 〜に至る
@@ -413,6 +424,8 @@ _SHORT_FORMS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
                                 ("じゃいけない", ("じゃだめ", "じゃダメ", "じゃ駄目"))),
     "〜ところだ": (("ところだ", ("とこだ", "とこです", "とこ")),),
     "〜ようです": (("ようです", ("ようなの", "ようなん")),),
+    # (願うほどに: the ほど said with its adverbial に, plan 335)
+    "〜ほど": (("ほど", ("ほどに",)),),
     # (drawn out: 待ってるよー, 行くね〜)
     "よ": (("よ", ("よー", "よ〜", "よぉ", "よっ")),),
     "ね": (("ね", ("ねー", "ね〜", "ねぇ", "ねっ")),),
@@ -1578,6 +1591,10 @@ _ALSO_AFTER = {"〜か（間接疑問）": frozenset({"adjective", "other"}),
                # (plan 272) の after a particle phrase: 医者としての意見,
                # 歩きながらの電話, 母への手紙 -- a noun's, all the same
                "の": frozenset({"particle"}),
+               # (さよならさえ言えずに, ありがとうさえ言えない: a greeting said as a
+               # thing, which the tokenizer files an interjection, plan 335)
+               "〜さえ": frozenset({"interjection"}),
+               "〜すら": frozenset({"interjection"}),
                # (練習しさえすれば: a verb's stem, then さえすれば, plan 272)
                "〜さえ〜ば": frozenset({"verb"}),
                # (plan 314: what the lessons' nouns leave out -- the written
@@ -3437,6 +3454,13 @@ def _placed_in_spans(tokens):
     return out
 
 
+def _you(t) -> bool:
+    """Whether t is the noun よう, "the way things look", in kana or in 様
+    (plan 335: 雪の様に白い)."""
+    return t.lemma in ("様", "よう") and (
+        t.surface == "よう" or (t.surface == "様" and morphology.kata_to_hira(t.reading) == "よう"))
+
+
 def _likeness_spans(tokens):
     """〜ような before a verb or an adjective, ように, as its first step
     teaches it (plan 272): 母のように話す, 魚のようにおよぐ, 嘘のように晴れた
@@ -3445,7 +3469,7 @@ def _likeness_spans(tokens):
     out = []
     for i in range(1, len(tokens) - 1):
         t, ni = tokens[i], tokens[i + 1]
-        if not (t.surface == "よう" and t.lemma in ("様", "よう") and tokens[i - 1].surface == "の"
+        if not (_you(t) and tokens[i - 1].surface == "の"
                 and tokens[i - 1].pos == "particle" and ni.surface == "に"):
             continue
         if i >= 2 and tokens[i - 2].pos in ("noun", "pronoun", "suffix"):
@@ -3713,7 +3737,9 @@ def _na_adjective_te_spans(tokens):
             # 会いたくて来た, "came wanting to see you" -- no lesson writes it
             # either, and no 〜てくる, plan 314; ending what is said,
             # 時間を確認したくて。 trails off on why, and stays so)
-            if nxt is not None and nxt.surface not in ("は", "も") and not _sentence_final(tokens, i):
+            # (a line of a song that stops on it, 会いたくて, has no mark to say
+            # it trails off: the clause goes on in the next line, plan 335)
+            if nxt is None or (nxt.surface not in ("は", "も") and not _sentence_final(tokens, i)):
                 out.append((prev.end - 1, t.end))
             continue
         # (...and a state said twice over, before the quality it joins: 麺は
@@ -3765,6 +3791,146 @@ def _only_after_verb_spans(tokens):
     return [(t.start, t.end) for i, t in enumerate(tokens)
             if t.pos == "particle" and t.surface == "だけ" and (_after_a_plain_form(tokens, i) or (
                 i > 0 and tokens[i - 1].pos == "adjective" and _form_head(tokens[i - 1].cform) in ("終止形", "連体形")))]
+
+
+def _subject_no_spans(tokens):
+    """〜の（主語）: the の that stands for が in a clause describing the noun
+    after it (plan 335): 私の知らない人, 母の作った料理, 雨の降る日 -- the
+    clause's own subject, a plain verb, then the noun. subject_no says which
+    の it is, which the breakdown's gloss reads too."""
+    return [(t.start, t.end) for t in tokens
+            if t.pos == "particle" and t.surface == "の" and subject_no(tokens, t.start)]
+
+
+# それほど, これほど, あれほど, さほど: "that much", one word to the tokenizer
+# where ほど is no particle of its own (plan 335).
+_THAT_MUCH = frozenset({"それほど", "それ程", "さほど", "さ程", "これほど", "これ程", "あれほど", "あれ程"})
+
+
+def _that_much_spans(tokens):
+    """〜ほど〜ない said with a word that holds the ほど (plan 335): それほど
+    高くない, "not that expensive", さほど難しくない -- the word and the negative
+    that closes its clause."""
+    out = []
+    for i, t in enumerate(tokens):
+        if t.surface not in _THAT_MUCH and not (t.surface in ("これ", "それ", "あれ") and i + 1 < len(tokens)
+                                                  and tokens[i + 1].surface == "ほど"):
+            continue
+        end = t.end if t.surface in _THAT_MUCH else tokens[i + 1].end
+        negative = _closing_negative(tokens, end)
+        if negative is not None:
+            out.append(((t.start, end), (negative.start, negative.end)))
+    return out
+
+
+# What a clause may end on after its negative: the past, the copula, a question
+# or a softener (高くなかったです, 高くないよ).
+_AFTER_A_NEGATIVE = frozenset({"た", "です", "だ", "でしょう", "だろう", "でし", "まし"})
+
+
+def _closing_negative(tokens, end: int):
+    """The negative that closes the clause beginning at `end`, or None:
+    高くない, 高くありません, 難しくなかった, 行きません -- the last predicate of
+    the clause, said no, before a comma, a mark, or a particle that opens
+    another clause (けど, から, ので...). It is what makes ほど a comparison
+    (〜ほど〜ない, plan 335) rather than a degree (〜ほど). Only where the
+    negative belongs to ほど: no other verb or adjective in its attributive or
+    final form stands between (使い込むほどに手になじむ感覚は…得られない: the
+    ほど is "the more", and the negative is the sentence's)."""
+    rest = []
+    for u in tokens[_index_from(tokens, end):]:
+        if not rest and u.pos == "symbol" and u.surface in _COMMAS:
+            continue                      # (思ったほど、テストは…ない: a comma after ほど)
+        if u.pos == "symbol" and (u.surface in _COMMAS or u.surface in _UTTERANCE_ENDS or not u.surface.strip()):
+            break
+        if u.pos == "particle" and (u.surface in ("けど", "けれど", "けれども", "から", "ので", "のに", "し",
+                                                   "ば", "たら", "と", "って", "ほど", "ても", "でも")
+                                    or (u.surface == "が" and u.conjunctive)):
+            break
+        rest.append(u)
+    k = len(rest) - 1
+    while k >= 0 and (rest[k].pos == "particle" or rest[k].pos == "symbol"
+                      or (rest[k].pos == "auxiliary" and rest[k].lemma in _AFTER_A_NEGATIVE)
+                      or (rest[k].pos == "auxiliary" and rest[k].lemma == "ます")):
+        k -= 1
+    if k < 0:
+        return None
+    last = rest[k]
+    if not ((last.lemma in ("ない", "無い", "ぬ", "ず") and last.pos in ("auxiliary", "adjective"))
+            # (ありません: あり + ませ + ん -- the ん is the ぬ of the polite negative)
+            or last.surface == "ん"):
+        return None
+    # the negative's own stem and endings, then nothing that is a clause of its own
+    j = k - 1
+    while j >= 0 and rest[j].pos in ("verb", "adjective", "auxiliary", "suffix"):
+        j -= 1
+    if any(u.pos in ("verb", "adjective", "auxiliary") and not _is_copula(u)
+           and _form_head(u.cform) in ("連体形", "終止形") for u in rest[:j + 1]):
+        return None
+    return last
+
+
+_NUMERAL_CHARS = frozenset("〇一二三四五六七八九十百千万億数何0123456789０１２３４５６７８９")
+
+
+def _hodo_refused(tokens, s, e, _g) -> bool:
+    """〜ほど is a degree. A negative that closes its clause makes it
+    〜ほど〜ない, "not as … as" (plan 335): 彼ほど速くない, 思ったほど難しくな
+    かった. And ほど of ば〜ほど is that point's, owned by _PART_OF."""
+    return _closing_negative(tokens, e) is not None and not _after_an_amount(tokens, s)
+
+
+def _after_an_amount(tokens, s: int) -> bool:
+    """Whether the ほど at `s` follows an amount (二週間ほど, 八百円ほど, 数日ほど):
+    "about", never "not as … as" (plan 335) -- 二週間ほど待てないでしょうか asks
+    for about two weeks."""
+    prev = _prev_word(tokens, s)
+    if prev is None:
+        return False
+    # (the number may be the word before the counter: 二 + 週間, 一 + 割)
+    before = _prev_word(tokens, prev.start)
+    return any(c in _NUMERAL_CHARS for c in prev.surface + (before.surface if before is not None else ""))
+
+
+def _hodo_nai_refused(tokens, s, e, segments) -> bool:
+    """The ほど of これほど, それほど, あれほど read on its own letters is the word's:
+    _that_much_spans reads those words whole (plan 335), so the breakdown,
+    which folds a それほど opening a sentence into one word, keeps the point on
+    the word."""
+    a, b = segments[0]
+    negative = _closing_negative(tokens, b)
+    # (the negative is the clause's own, written on the point's last piece;
+    # 二週間ほど…ないでしょうか asks for about two weeks; どれほど is "however
+    # much", no "as … as")
+    if negative is None or not (b <= segments[-1][0] < negative.end) or _after_an_amount(tokens, a):
+        return True
+    t = next((t for t in tokens if t.start == a and t.end == b), None)
+    if t is None or t.surface != "ほど":
+        return False
+    k = tokens.index(t)
+    return k > 0 and tokens[k - 1].surface in ("これ", "それ", "あれ", "どれ", "いか", "何", "なん")
+
+
+# What takes より away from a comparison: "nothing but" (行くよりほかない,
+# 待つよりしかたがない), which is a point of its own and no than.
+_YORI_ELSE = frozenset({"ほか", "他", "外", "しか", "仕方", "しかた", "他に", "ほかに"})
+
+
+def _yori_refused(tokens, s, e, _g) -> bool:
+    """〜より is the particle after what is compared against (plan 335).
+    Not the adverb "more" (より良い: the tokenizer names it an adverb, so no
+    particle is found), nor より ほか(に)ない, "nothing but", nor the formal
+    "from" (母より。, 口座より引き落とされます, 心よりお礼): the lookups' own
+    reading of it (card_lookup._from_not_than), which glosses it."""
+    nxt = _next_word(tokens, e)
+    if nxt is not None and nxt.surface in _YORI_ELSE:
+        return True
+    prev = _prev_word(tokens, s)
+    if prev is not None and prev.surface == "心":
+        return True                      # 心より感謝申し上げます: "from the heart"
+    from study.card_lookup import _from_not_than
+    i = _index_at(tokens, s)
+    return i is not None and _from_not_than(tokens, i)
 
 
 def _one_no_spans(tokens):
@@ -6216,9 +6382,17 @@ def _explaining_no(tokens, end: int) -> bool:
     k = _tok_ending(tokens, end)
     if k is None:
         return False
+    at = tokens[k].end
     for u in tokens[k + 1:]:
+        # (a space between two phrases closes the first, as a lyric or a
+        # subtitle sets them: 何をしていたの　何を見ていたの -- the tagger
+        # drops an ASCII space, which leaves a gap in the offsets, and keeps
+        # a wide one as a symbol; plan 335)
+        if u.start > at:
+            return True
+        at = u.end
         if u.pos == "symbol":
-            return u.surface in _UTTERANCE_ENDS or u.surface in "…‥"
+            return u.surface in _UTTERANCE_ENDS or u.surface in "…‥" or not u.surface.strip()
         if u.pos == "particle" and u.surface in _AFTER_A_FINAL_NO:
             continue
         return False
@@ -8133,12 +8307,20 @@ def subject_no(tokens, s: int) -> bool:
             and tokens[j].cform.startswith(("連体形", "終止形")) and tokens[j + 1].pos == "noun" \
             and tokens[j + 1].surface not in ("の", "ん"):
         return True                     # 定めのない事項, 人の多い町: = が, what there is none or much of (plan 272)
-    if j >= len(tokens) or tokens[j].pos != "verb" or (tokens[j].auxiliary_use and tokens[j].lemma not in ("有る", "ある")):
-        return False                    # (経験のある方: ある after の is the verb, plan 272)
+    if j >= len(tokens) or tokens[j].pos != "verb":
+        return False                    # (a verb UniDic marks 非自立可能 -- ある, いる, する, 見る, くれる -- is the verb
+        #                               itself straight after の, 経験のある方, あなたのいない世界, 私のしている仕事:
+        #                               only a て before it makes it an ending; plans 272, 335)
     if tokens[j].lemma in ("有る", "ある") and tokens[j].surface == "ある" \
             and tokens[k - 1].surface.endswith(("代", "時代", "年", "日", "月", "時", "頃", "ころ", "世紀", "時期", "朝", "晩")):
         return False                    # (七十代のある女性, ある時代のある土地: 或る, "a certain")
     j += 1
+    # (あなたの笑っている顔, 私の住んでいる町: the verb's て and the ending it
+    # takes, plan 335)
+    if j + 1 < len(tokens) and tokens[j].pos == "particle" and tokens[j].surface in ("て", "で") \
+            and tokens[j].conjunctive and tokens[j + 1].pos == "verb" \
+            and tokens[j + 1].lemma in ("居る", "いる", "有る", "ある", "おる", "居る"):
+        j += 2
     while j < len(tokens) and tokens[j].pos == "auxiliary" and tokens[j].lemma in ("た", "ない", "ず", "れる", "られる",
                                                                                  "せる", "させる", "ぬ"):
         j += 1
@@ -8333,7 +8515,13 @@ _REFUSALS = {
     # 割に合わない, "it doesn't pay": the idiom 割に合う (plan 272)
     "〜わりに": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.lemma in ("合う", "あう"),
     # (熱があるようなので: ようだ and ので, no likeness before a noun)
-    "〜ような": lambda t, s, e, g: (n := _next_word(t, e)) is None or (n.pos == "particle" and n.surface in ("の", "ので", "のに")),
+    # (a line of a song or a subtitle may stop on it, わたしと同じ様な: the
+    # modifier waits for its noun on the next line, plan 335)
+    "〜ような": lambda t, s, e, g: (n := _next_word(t, e)) is not None and n.pos == "particle"
+        and n.surface in ("の", "ので", "のに"),
+    "〜ほど": _hodo_refused,
+    "〜ほど〜ない": _hodo_nai_refused,
+    "〜より": _yori_refused,
 }
 
 
@@ -8358,6 +8546,10 @@ def adverbial_ni(tokens, i: int) -> bool:
     if i < 1 or tokens[i].surface != "に":
         return False
     prev = tokens[i - 1]
+    if prev.pos == "particle" and prev.surface == "ほど":
+        # 泣きたいほどに: ほど and its adverbial に (plan 335) -- but 二十箱ほどに
+        # なる is 〜になる's
+        return not (i + 1 < len(tokens) and tokens[i + 1].lemma in ("成る", "なる", "為る", "する"))
     if prev.pos not in ("noun", "pronoun", "other"):
         return False
     if prev.surface in ("代わり", "次第"):
@@ -8382,7 +8574,10 @@ _PART_OF = {"〜さえ": ("〜さえ〜ば",), "〜まい": ("〜ようが〜ま
             # (たとえ日曜日でも: たとえ〜ても's own example, plan 306)
             "〜でも": ("たとえ〜ても",),
             # (重さといい手ざわりといい: 〜といい〜といい's, no 〜という each, plan 306)
-            "〜という": ("〜といい〜といい",)}
+            "〜という": ("〜といい〜といい",),
+            # (読めば読むほど and 彼ほど速くない: the ほど of those points, 犬より
+            # 猫のほうが: their より, plan 335)
+            "〜ほど": ("〜ば〜ほど", "〜ほど〜ない"), "〜より": ("〜より〜のほうが",)}
 
 
 def _parts_owned(found):
@@ -8394,7 +8589,17 @@ def _parts_owned(found):
 _REFUSALS.update({p: r for p, r in _pattern_refusals().items() if p not in _REFUSALS})
 
 
+def _sama_for_you(tokens, pattern: str, segments) -> bool:
+    """Whether a likeness point written with 様 reads it otherwise than よう
+    (plan 335): 同様, 仕様, 様子, お客様 are words of their own, never a point's
+    よう. Only the pieces the point is written on are read: the 様々 of a
+    sentence a wider point reaches over is no business of it."""
+    return pattern in _YOU_POINTS and any(_misread(tokens, a, b, "様", ("よう",)) for a, b in segments)
+
+
 def _refused(tokens, pattern: str, start: int, end: int, segments) -> bool:
+    if _sama_for_you(tokens, pattern, segments):
+        return True
     rule = _REFUSALS.get(pattern)
     return rule is not None and rule(tokens, start, end, segments)
 
@@ -9588,6 +9793,9 @@ _PARTIAL = frozenset({"い形容詞／な形容詞",
 # the letters' conjugations reach ません, which the ない-form's own
 # lesson names as a different point.
 _RULE_ONLY = frozenset({"た形 〜た", "ない形 〜ない", "〜て／〜ないで（依頼）", "〜も（強調）", "〜か（間接疑問）",
+                        # (the の that stands for が is told by the clause around it,
+                        # never by its letter, plan 335)
+                        "〜の（主語）",
                         # (a て gives a reason only where what follows says so, plan 272)
                         "〜て（理由）",
                         # (a で gives a cause by the noun before it, never by its
@@ -9986,6 +10194,9 @@ _EXTRA_RULES = (
     ("〜ます／〜ません", _polite_spans),
     ("は", _topic_after_compound_spans),
     ("は", _topic_after_beki_spans),
+    # plan 335
+    ("〜の（主語）", _subject_no_spans),
+    ("〜ほど〜ない", _that_much_spans),
     # plan 272
     ("の", _one_no_spans),
     ("は", _adverb_wa_spans),

@@ -97,6 +97,8 @@ class GrammarPointsShapeTests(unittest.TestCase):
             "可能形 〜(ら)れる", "意向形 〜(よ)う", "受身形 〜られる", "使役形 〜させる",
             "使役受身形 〜させられる", "お〜になる／お〜する", "〜があります／います",
             "〜そうだ（伝聞）", "〜そうです",
+            # A sense of a particle, written on the の itself (plan 335).
+            "〜の（主語）",
             # A form defined by where it stands: the end of the sentence.
             "〜て／〜ないで（依頼）",
         }
