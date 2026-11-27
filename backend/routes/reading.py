@@ -216,7 +216,7 @@ class ResultPayload(BaseModel):
     source_word: dict | None = None
 
 
-def _chat(messages, timeout=60, max_tokens=3000, task="", accept=None):
+def _chat(messages, timeout=60, max_tokens=3000, task="", accept=None, reasoning=True):
     """Thin adapter over study/llm_shared.chat -- kept as a local name so
     this module's many call sites are unchanged, and so the shared
     function's LLMUnavailable becomes the HTTPException(503) they already
@@ -229,9 +229,12 @@ def _chat(messages, timeout=60, max_tokens=3000, task="", accept=None):
     generators, which pass reasoning=False.
 
     `accept` is llm_shared.chat's own: a reply it refuses is not
-    returned, the next model is asked."""
+    returned, the next model is asked. `reasoning` too: the tutor reviews
+    pass False, since a reasoning pass spent their whole small budget and
+    left no answer (2026-11-27: out=1000 reasoning=1000, every model)."""
     try:
-        return chat(messages, timeout=timeout, max_tokens=max_tokens, task=task, accept=accept)
+        return chat(messages, timeout=timeout, max_tokens=max_tokens, task=task, accept=accept,
+                    reasoning=reasoning)
     except LLMUnavailable as e:
         raise HTTPException(503, detail=str(e))
 

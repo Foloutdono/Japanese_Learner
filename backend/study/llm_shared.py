@@ -876,7 +876,17 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                         # to the next one rather than a second payment.
                         logger.warning("%s answered, but not with a usable reply: %s", label, content[:200])
                         break
-                    logger.error("%s returned an unusable body: %s", label, response.text[:300])
+                    try:
+                        finish = payload["choices"][0].get("finish_reason")
+                    except (KeyError, IndexError, TypeError, AttributeError):
+                        finish = None
+                    logger.error("%s returned an unusable body (finish_reason=%s): %s",
+                                 label, finish, response.text.strip()[:300])
+                    if finish == "length":
+                        # The cap ran out before any answer (a reasoning pass
+                        # spent it all): the same model under the same cap
+                        # would do it again, so the second payment is skipped.
+                        break
                     continue
 
                 status = response.status_code
