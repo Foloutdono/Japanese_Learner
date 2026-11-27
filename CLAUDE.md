@@ -1119,7 +1119,9 @@ The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
 which voices only lines the catalogue says, by who says them: the reader
 for an example, a twist, a reading-bank sentence or a Tatoeba sentence
 the French layer holds (reading practice's voice on a phone without a
-Japanese one; the Tatoeba ones are made on request, never prewarmed), speaker A for the other person in a scene and
+Japanese one; the deck words' Tatoeba sentences are prewarmed only by
+`prewarm_all_audio --part tatoeba`, ~10,000 clips and twelve hours, and
+a pool word's are made on request), speaker A for the other person in a scene and
 B for the learner. `build_grammar_audio` makes them ahead of the first
 learner, as `build_dictation_audio` does for dictation; without it each
 line is made on the request that wants it. Without `--tours` it also

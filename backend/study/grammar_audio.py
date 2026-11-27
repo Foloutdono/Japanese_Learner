@@ -35,9 +35,10 @@
 # course corrected or wrote, content/example_fixes). Some 28k sentences,
 # too many for a set held in memory, so they are asked of the layer's
 # indexed SQLite rather than added to catalog(); still a fixed list, never
-# what a learner typed. They are made on the request that wants them, not
-# ahead (prewarm_all_audio leaves them out): all of them would fill the
-# store past its cap, and the cap evicts the oldest first.
+# what a learner typed. They are made on the request that wants them; the
+# ~10,000 under the deck's words can also be made ahead, by name only
+# (prewarm_all_audio --part tatoeba), and a pool word's never are: all of
+# them would fill the store past its cap, which evicts the oldest first.
 import logging
 import os
 import threading
