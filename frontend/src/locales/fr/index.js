@@ -2309,6 +2309,18 @@ const decks = {
   importIgnoredCols: 'Colonnes ignorées : {cols}',
   importSkipped:     '{n} ignorées',
   importMissing:     'manque : {fields}',
+  importOwn:         'La mienne',
+  importMatchLabel:  'Carte pour {word}',
+  importLinked:      '{n} de l’app',
+  importMatchAsk:     '{n} cartes correspondent aux cartes intégrées de l’app. Les utiliser à la place de tes copies ?',
+  importMatchYes:     'Oui, les utiliser',
+  importMatchNo:      'Non',
+  importDetails:      'Détails',
+  importHideDetails:  'Masquer les détails',
+  importMatchUsing:   '{n} cartes utiliseront celles de l’app',
+  importMatchKept:    'Tes cartes restent telles qu’écrites',
+  importChange:       'Modifier',
+  importAppCard:      'Carte de l’app',
 
   // Study screen
   studyMode:         "Mode d'étude",

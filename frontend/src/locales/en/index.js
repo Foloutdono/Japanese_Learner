@@ -2373,6 +2373,18 @@ const decks = {
   importIgnoredCols: 'Ignored columns: {cols}',
   importSkipped:     '{n} skipped',
   importMissing:     'missing: {fields}',
+  importOwn:         'Mine',
+  importMatchLabel:  'Card for {word}',
+  importLinked:      '{n} from the app',
+  importMatchAsk:     '{n} cards match the app’s built-in cards. Use them instead of your own copies?',
+  importMatchYes:     'Yes, use them',
+  importMatchNo:      'No',
+  importDetails:      'Details',
+  importHideDetails:  'Hide details',
+  importMatchUsing:   '{n} cards will use the app’s cards',
+  importMatchKept:    'Your cards stay as written',
+  importChange:       'Change',
+  importAppCard:      'App card',
 
   // Study screen
   studyMode:         'Study mode',

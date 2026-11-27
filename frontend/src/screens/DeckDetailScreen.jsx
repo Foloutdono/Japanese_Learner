@@ -876,9 +876,13 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // The dialog's whole rows, already in this deck's fields
   // (components/decks/importCards.js), in slices of the batch route's
   // size. What the dialog left out (`skipped`) and what the server
-  // refused are both counted, so the banner says what landed.
-  async function handleImport(rows, skipped = 0) {
+  // refused are both counted, so the banner says what landed. `apps` are
+  // the rows the learner put on the app's own card instead of a written
+  // one (importMatches.js): linked through /cards/app, a card the deck
+  // already held counting as skipped, not landed.
+  async function handleImport(rows, skipped = 0, apps = []) {
     let inserted = 0
+    let linked = 0
     let refused = 0
     for (let i = 0; i < rows.length; i += IMPORT_SLICE) {
       const slice = rows.slice(i, i + IMPORT_SLICE)
@@ -895,10 +899,43 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         refused += slice.length
       }
     }
-    setImportResult({ inserted, skipped: skipped + refused })
+    for (let i = 0; i < apps.length; i += IMPORT_SLICE) {
+      const slice = apps.slice(i, i + IMPORT_SLICE)
+      try {
+        const r = await apiFetch(`/api/decks/${deck_id}/cards/app`, session, {
+          method: 'POST',
+          body: JSON.stringify({ cards: slice }),
+        })
+        if (!r.ok) { refused += slice.length; continue }
+        const added = (await r.json()).added ?? 0
+        linked += added
+        refused += slice.length - added
+      } catch {
+        refused += slice.length
+      }
+    }
+    setImportResult({ inserted: inserted + linked, linked, skipped: skipped + refused })
     setShowImport(false)
     fetchCards()
   }
+
+  // Which of the app's own cards the dialog's rows may mean, one list per
+  // row (POST /import/match reads, adds nothing). A plain front/back deck
+  // holds no app card, so the dialog is not given the means to ask.
+  const matchRows = useCallback(async rows => {
+    const found = []
+    for (let i = 0; i < rows.length; i += IMPORT_SLICE) {
+      const r = await apiFetch(`/api/decks/${deck_id}/import/match`, session, {
+        method: 'POST',
+        body: JSON.stringify({ cards: rows.slice(i, i + IMPORT_SLICE), lang }),
+      })
+      if (!r.ok) return null
+      const body = await r.json()
+      if (!body.available) return null
+      found.push(...body.rows)
+    }
+    return found
+  }, [deck_id, session, lang])
 
   const addLabel = String(t.addCard).replace(/^\+\s*/, '')
 
@@ -1127,6 +1164,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         <div className="deckdetail-import-banner">
           <div className="deckdetail-import-banner__text">
             <CheckCircleIcon size={15} /> {importResult.inserted} {t.cards}
+            {importResult.linked > 0 && ` · ${t.importLinked.replace('{n}', importResult.linked)}`}
             {importResult.skipped > 0 && ` · ${t.importSkipped.replace('{n}', importResult.skipped)}`}
           </div>
           <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close" aria-label={t.close}>
@@ -1676,7 +1714,9 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       </Sheet>
 
       {showImport && (
-        <ImportCardsMenu structure={structure} onImport={handleImport} onClose={closeImport} />
+        <ImportCardsMenu structure={structure} onImport={handleImport}
+                         onMatch={deck?.type && deck.type !== 'standard' ? matchRows : undefined}
+                         onClose={closeImport} />
       )}
 
       {showBrowse && !desk && (

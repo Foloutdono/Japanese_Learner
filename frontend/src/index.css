@@ -20173,6 +20173,56 @@ s.rvw-chg__was { text-decoration-thickness: 2px; }
 .import-preview-row__meta { color: var(--text-secondary); font-size: var(--fs-caption); margin-inline-start: auto; }
 .import-preview-row--skipped { opacity: 0.6; }
 
+/* The notice that asks once whether to use the app's own cards for the
+   rows that match them (importMatches.js, plan 337): a rail in the
+   selection's gold, the question, Details / No / Yes. Answered it shrinks
+   to a line and Change. Details lists every match with the choice between
+   the app's card and the learner's own; the chosen card's meaning is the
+   only caption. */
+.import-match-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-card);
+  border: 1px solid var(--surface-line);
+  border-inline-start: 3px solid var(--accent2);
+  border-radius: var(--r-card);
+}
+.import-match-note--done {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-inline-start-color: var(--success);
+}
+.import-match-note__msg { margin: 0; font-size: var(--fs-sm); display: flex; align-items: center; gap: var(--sp-3); }
+.import-match-note__ok { flex: none; color: var(--success); }
+.import-match-note__act { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.import-match-note__push { margin-inline-start: auto; }
+.import-match-note__list { max-height: 40vh; overflow-y: auto; border-top: 1px solid var(--surface-line); }
+.import-match-note__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--surface-line);
+}
+.import-match-note__row:last-child { border-bottom: 0; }
+.import-match-note__you { color: var(--text-secondary); font-size: var(--fs-caption); }
+.import-match-note__you > span { color: var(--text-primary); }
+.import-preview-row__app { display: inline-flex; align-items: center; flex: none; color: var(--success); }
+.import-match { flex: 1 1 100%; display: flex; flex-direction: column; gap: var(--sp-2); }
+.import-match__seg .seg__opt { min-width: 0; }
+.import-match__seg > :last-child { flex: none; white-space: nowrap; }
+.import-match__opt { display: inline-flex; align-items: baseline; gap: var(--sp-2); min-width: 0; }
+.import-match__opt > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.import-match__kind {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.import-match__line { color: var(--text-secondary); font-size: var(--fs-caption); }
+
 .import-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .import-footer__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); font-size: 14px; }
 .import-footer__submit {

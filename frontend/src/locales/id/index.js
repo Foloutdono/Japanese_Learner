@@ -2382,6 +2382,18 @@ const decks = {
   importIgnoredCols: 'Kolom diabaikan: {cols}',
   importSkipped:     '{n} dilewati',
   importMissing:     'kurang: {fields}',
+  importOwn:         'Milikku',
+  importMatchLabel:  'Kartu untuk {word}',
+  importLinked:      '{n} dari aplikasi',
+  importMatchAsk:     '{n} kartu cocok dengan kartu bawaan aplikasi. Pakai kartu itu sebagai ganti salinanmu?',
+  importMatchYes:     'Ya, pakai',
+  importMatchNo:      'Tidak',
+  importDetails:      'Detail',
+  importHideDetails:  'Sembunyikan detail',
+  importMatchUsing:   '{n} kartu akan memakai kartu aplikasi',
+  importMatchKept:    'Kartumu tetap seperti yang kamu tulis',
+  importChange:       'Ubah',
+  importAppCard:      'Kartu aplikasi',
 
   // Study screen
   studyMode:         'Mode belajar',

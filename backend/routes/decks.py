@@ -21,12 +21,12 @@ from content.kana_data import KANA_SETS, kana_to_id
 from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, gloss as grammar_gloss, grammar_to_id,
 )
-from translations import get_meaning
+from translations import get_meaning, spoken
 from content.jmdict_fr import pool_meaning
 from translations.course import KANJI_GLOSSES, VOCAB_GLOSSES
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
 from content.kanji_readings import display_reading
-from study import card_index
+from study import card_index, import_match
 from study.duel_friends import blocked_between
 from study.card_lookup import card_stats
 from study.furigana import align_deck as align_furigana, align_sentence
@@ -2103,6 +2103,62 @@ def add_cards(deck_id: str, payload: CardBatchPayload, user_id: str = Depends(ge
         return {"inserted": len(inserted), "cards": inserted, "errors": errors}
     finally:
         conn.close()
+
+
+class ImportMatchPayload(BaseModel):
+    # The import dialog's whole rows, as it would post them to /cards/batch.
+    cards: list[CardPayload] = Field(max_length=MAX_BATCH)
+    lang: str = "fr"
+
+
+@router.post("/api/decks/{deck_id}/import/match")
+def match_import(deck_id: str, payload: ImportMatchPayload, user_id: str = Depends(get_user_id)):
+    """
+    The app's own cards the import dialog's rows may mean (plan 337) -- the
+    step that lets a learner use the built-in 水 instead of a written copy of it.
+
+    Reads only: nothing is added here, the learner chooses in the dialog
+    and the chosen refs go to POST /cards/app, the rest to /cards/batch.
+    One list of candidates per row, in the rows' order (`study/import_match`
+    has the rule); `available` is false for a deck whose structure holds
+    no app card (a plain front/back deck), and the dialog then asks for
+    nothing more. `in_deck` marks a card the deck already holds, which
+    /cards/app would take as a no-op.
+    """
+    lang = spoken(payload.lang)
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
+        sources = _allowed_sources(access.type)
+        if not sources:
+            return {"available": False, "rows": [[] for _ in payload.cards]}
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT source, raw_id FROM deck_cards
+                WHERE deck_id = %s AND user_id = %s
+            """, (access.deck_id, access.owner_id))
+            held = {(s, r) for s, r in cur.fetchall()}
+    finally:
+        conn.close()
+
+    def gloss(source: str, entry: dict) -> str:
+        # The learner's words are compared with the line they would be
+        # shown and with the English the deck is keyed on.
+        return f"{_meaning_preview(source, entry, lang)['meaning']} {entry.get('meaning', '')}"
+
+    rows = []
+    for card in payload.cards:
+        found = import_match.candidates(access.type, card.resolved(), gloss)
+        rows.append([
+            {
+                **_meaning_preview(c.source, c.entry, lang),
+                "source": c.source, "level": c.level, "raw_id": c.raw_id,
+                "exact": c.exact, "via": c.via, "meaning_agrees": c.meaning_agrees,
+                "in_deck": (c.source, c.raw_id) in held,
+            }
+            for c in found
+        ])
+    return {"available": True, "rows": rows}
 
 
 @router.delete("/api/decks/{deck_id}/cards/app")
