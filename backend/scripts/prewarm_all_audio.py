@@ -8,7 +8,8 @@ Make every clip the app can say, ahead of the learner (plan 235).
 -- What "everything" is ---------------------------------------
 Every line a route will voice is fixed by the content (ADR 0006): no
 endpoint says what a learner typed. So the clips that can ever exist are
-a finite list, and this walks all of it, in six parts:
+a finite list, and this walks all of it, in six parts, and a seventh
+when asked for by name:
 
   words         the card readings, /api/tts (study/word_tts.deck_readings)
   dictation     the 書取 bank (content/listening_clips.py)
@@ -18,8 +19,15 @@ a finite list, and this walks all of it, in six parts:
   tours         each point's twists and scene (plan 187d)
   conversation  the 会話 bank (plan 217): the other person's lines in A's
                 voice, and every reply the learner can pick in B's
+  tatoeba       only with --part tatoeba: the Tatoeba sentences under the
+                deck's words (vocab_extras.get_vocab_extras' examples), what
+                reading practice serves past its bank, in the reader's voice;
+                each under the lowest level whose words show it. About
+                10,000 clips, 190 MB and twelve hours on the engine, so never
+                part of the default run. A pool word's sentences (the
+                frequency picker's JMdict tier) stay made on request.
 
-The last four are one store, /api/grammar/audio (study/grammar_audio).
+The last five are one store, /api/grammar/audio (study/grammar_audio).
 Exam papers are not here: their clips hang off stored papers, so they
 need the database; `scripts.revoice_audio --yes` makes those.
 
@@ -33,10 +41,11 @@ the one a learner is served.
 Two stores are capped and evict their oldest clips past the cap:
 word_tts at 100 MB and grammar_audio at 500 MB. The words, N5 to N1,
 come to about 70 MB and fit, and so does the whole grammar store
-(examples, reading, tours and conversation). The report still gives an
-estimate for each store, and the run still makes the grammar store's parts in
-the order examples, reading, tours, conversation: if anything is evicted, it is
-the examples, the least asked for, and never the conversation lines.
+(tatoeba, examples, reading, tours and conversation, about 250 MB). The
+report still gives an estimate for each store, and the run still makes the
+grammar store's parts in the order tatoeba, examples, reading, tours,
+conversation: if anything is evicted, it is the Tatoeba sentences first,
+which any request remakes, and never the conversation lines.
 
 -- Safe to stop, safe to run twice -----------------------------
 Without --yes it only reports. With it, a clip the current voice already
@@ -65,7 +74,9 @@ from dotenv import load_dotenv
 # the environment by then.
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
+from content import vocab_extras
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+from content.vocab_data import VOCAB_BY_LEVEL
 from content.listening_clips import BY_LEVEL as DICTATION_BY_LEVEL
 from study import (
     conversation,
@@ -87,7 +98,10 @@ logger = logging.getLogger("prewarm_all_audio")
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 # In the order they are made: within the grammar store, the most wanted
 # last, so the store's eviction (oldest first) reaches it last.
-PARTS = ("words", "dictation", "examples", "reading", "tours", "conversation")
+PARTS = ("words", "dictation", "tatoeba", "examples", "reading", "tours", "conversation")
+# What a run makes without --part: everything but the Tatoeba sentences,
+# twelve hours on their own.
+DEFAULT_PARTS = tuple(part for part in PARTS if part != "tatoeba")
 
 # What the report assumes. A bound rather than a promise, measured on the
 # engine at Starter's 0.5 CPU (docs/adr/0019): a word ~2 s and ~10 KB
@@ -159,6 +173,17 @@ def _reading(level: str) -> list[Clip]:
     return [_line("reading", level, jp, "reader") for jp in grammar_audio.reading_lines((level,))]
 
 
+def _tatoeba(level: str) -> list[Clip]:
+    """The sentences under the level's deck words, as their cards and
+    reading practice serve them (corrections and written ones included)."""
+    out = []
+    for entry in VOCAB_BY_LEVEL.get(level, []):
+        examples = vocab_extras.get_vocab_extras(entry.get("kanji") or "", entry.get("kana") or "", "", "en")["examples"]
+        out += [_line("tatoeba", level, ex["jp"], "reader") for ex in examples
+                if ex.get("jp") and grammar_audio.speakable(ex["jp"], "reader")]
+    return out
+
+
 def _tours(level: str) -> list[Clip]:
     out = []
     for entry in GRAMMAR_POINTS_BY_LEVEL.get(level, []):
@@ -191,6 +216,7 @@ BUILDERS = {
     "words": _words,
     "dictation": _dictations,
     "examples": _examples,
+    "tatoeba": _tatoeba,
     "reading": _reading,
     "tours": _tours,
     "conversation": _conversations,
@@ -199,6 +225,7 @@ BUILDERS = {
 STORES = {
     "words": ("word", word_tts._MAX_BYTES),
     "examples": ("grammar", grammar_audio._MAX_BYTES),
+    "tatoeba": ("grammar", grammar_audio._MAX_BYTES),
     "reading": ("grammar", grammar_audio._MAX_BYTES),
     "tours": ("grammar", grammar_audio._MAX_BYTES),
     "conversation": ("grammar", grammar_audio._MAX_BYTES),
@@ -254,7 +281,7 @@ def report(clips: list[Clip], parts, levels) -> list[Clip]:
         mb, cap_mb = total // (1024 * 1024), cap // (1024 * 1024)
         if total > cap:
             logger.warning("The %s store would hold about %d MB, past its %d MB cap: its oldest clips "
-                           "will be evicted as new ones are made (in the grammar store, the examples first).",
+                           "will be evicted as new ones are made (in the grammar store, the Tatoeba sentences first).",
                            name, mb, cap_mb)
         else:
             logger.info("The %s store would hold about %d MB of its %d MB.", name, mb, cap_mb)
@@ -264,12 +291,12 @@ def report(clips: list[Clip], parts, levels) -> list[Clip]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     parser.add_argument("--part", action="append", choices=PARTS,
-                        help="a part to make (repeat for several; default all)")
+                        help="a part to make (repeat for several; default all but tatoeba)")
     parser.add_argument("--level", action="append", choices=LEVELS,
                         help="a level to make (repeat for several; default N5 to N1)")
     parser.add_argument("--yes", action="store_true", help="make the missing clips (without it, only report)")
     args = parser.parse_args(argv)
-    parts = tuple(args.part) if args.part else PARTS
+    parts = tuple(args.part) if args.part else DEFAULT_PARTS
     levels = tuple(args.level) if args.level else LEVELS
 
     clips = plan(parts, levels)

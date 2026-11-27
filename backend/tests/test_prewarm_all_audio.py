@@ -51,6 +51,16 @@ def test_the_default_plan_is_every_part_at_every_level():
             assert (part, level) in seen, f"{part} {level} missing from the plan"
 
 
+def test_the_tatoeba_sentences_are_made_only_when_asked_for():
+    assert "tatoeba" not in prewarm.DEFAULT_PARTS
+    assert set(prewarm.DEFAULT_PARTS) | {"tatoeba"} == set(prewarm.PARTS)
+    clips = prewarm.plan(("tatoeba",), ("N5",))
+    assert len(clips) > 500
+    # Each is one the route will serve, in the reader's voice, once.
+    assert all(c.key[1] == "reader" and grammar_audio.speakable(c.text, "reader") for c in clips)
+    assert len({c.key for c in clips}) == len(clips)
+
+
 def test_every_conversation_line_is_planned_in_its_speakers_voice():
     clips = prewarm.plan(("conversation",), prewarm.LEVELS)
     planned = {c.key for c in clips}
