@@ -66,4 +66,83 @@ describe('the import dialog', () => {
     expect(document.querySelectorAll('.import-preview-row')).toHaveLength(1)
     expect(document.querySelectorAll('.import-preview-row--skipped')).toHaveLength(0)
   })
+
+  // The app's own cards a row may mean (importMatches.js): an exact one
+  // starts on the app's card, a guess on the learner's own, and the choice
+  // splits the import in two.
+  describe('with the app’s cards to match', () => {
+    const VOCAB = {
+      key: 'vocab', front_key: 'word', back_key: 'meaning',
+      fields: [
+        { key: 'word', kind: 'text', required: true },
+        { key: 'meaning', kind: 'text', required: true },
+        { key: 'reading', kind: 'text', required: false },
+      ],
+    }
+    const WATER = { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_水_みず', front: '水', kana: 'みず', meaning: 'water', exact: true }
+    const SALT = { source: 'vocab', level: 'N3', raw_id: 'vocab_N3_塩_しお', front: '塩', kana: 'しお', meaning: 'salt', exact: false }
+    const onMatch = vi.fn(async () => [[WATER], [SALT], []])
+
+    async function open(props = {}) {
+      const onImport = vi.fn(async () => {})
+      await render(<LangProvider><ImportCardsMenu structure={VOCAB} onImport={onImport} onMatch={onMatch} onClose={() => {}} {...props} /></LangProvider>)
+      await settle()
+      type(document.querySelector('.import-textarea'), '水,water\n塩,salt\nzzz,none')
+      await settle(700)
+      return onImport
+    }
+
+    it('offers the card each row may mean and starts only an exact one on it', async () => {
+      await open()
+      expect(onMatch).toHaveBeenCalledOnce()
+      const groups = document.querySelectorAll('.import-match .seg')
+      expect(groups).toHaveLength(2)
+      const checked = [...groups].map(g => g.querySelector('[aria-checked="true"]').textContent)
+      expect(checked[0]).toContain('水')
+      expect(checked[1]).not.toContain('塩')
+      expect(document.querySelector('.import-match__line').textContent).toContain('water')
+    })
+
+    it('sends the app’s cards to be linked and the other rows to be written', async () => {
+      const onImport = await open()
+      document.querySelector('.import-footer__submit').click()
+      await settle()
+      const [own, skipped, apps] = onImport.mock.calls[0]
+      expect(apps).toEqual([{ source: 'vocab', level: 'N5', raw_id: 'vocab_N5_水_みず' }])
+      expect(own.map(r => r.fields.word)).toEqual(['塩', 'zzz'])
+      expect(skipped).toBe(0)
+    })
+
+    it('writes every row when the learner keeps their own', async () => {
+      const onImport = await open()
+      document.querySelector('.import-match__bar button').click()
+      await settle()
+      document.querySelector('.import-footer__submit').click()
+      await settle()
+      const [own, , apps] = onImport.mock.calls[0]
+      expect(apps).toEqual([])
+      expect(own).toHaveLength(3)
+    })
+
+    it('takes a card offered as a guess once the learner picks it', async () => {
+      const onImport = await open()
+      document.querySelectorAll('.import-match .seg')[1].querySelector('[role="radio"]').click()
+      await settle()
+      document.querySelector('.import-footer__submit').click()
+      await settle()
+      const [own, , apps] = onImport.mock.calls[0]
+      expect(apps.map(a => a.raw_id)).toEqual(['vocab_N5_水_みず', 'vocab_N3_塩_しお'])
+      expect(own.map(r => r.fields.word)).toEqual(['zzz'])
+    })
+
+    it('imports as written when the ask fails', async () => {
+      const onImport = await open({ onMatch: vi.fn(async () => { throw new Error('offline') }) })
+      expect(document.querySelectorAll('.import-match')).toHaveLength(0)
+      document.querySelector('.import-footer__submit').click()
+      await settle()
+      const [own, , apps] = onImport.mock.calls[0]
+      expect(own).toHaveLength(3)
+      expect(apps).toEqual([])
+    })
+  })
 })

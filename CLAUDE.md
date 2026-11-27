@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **335** (331 is the missions', 332 the referral's, 333 the readings', 334 the Indonesian branch's source fixes). `git ls-tree HEAD plans/` under-reports
+  The next free number is **336** (331 is the missions', 332 the referral's, 333 the readings', 334 the Indonesian branch's source fixes, 335 the import's match to the app's cards). `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -327,6 +327,25 @@ runtime purpose.
   `scripts/read_referrals`, never a dashboard. Today says a word only
   while `/api/profile`'s `referralNotice` does, so a learner it has
   nothing for asks `/api/referral` nothing.
+- **A pasted row may be the app's own card, and the learner decides (plan
+  335).** The import dialog of a deck that holds app cards (every structure
+  but `standard`) asks `POST /api/decks/{id}/import/match` once the paste has
+  rested, and `study/import_match.py` answers per row with the cards it may
+  mean: a written form matches the card whose face it is (width, case,
+  spaces and a pattern's leading 〜 folded); a word typed in kana matches a
+  kana-only card outright and a kanji card as a *reading* only; a reading
+  the row gives holds the card to it; the meaning ranks homographs and
+  never matches alone. A match is `exact` only when one card stands alone
+  at the top, and only an exact one starts on the app's card
+  (`importMatches.defaultPick`): a guess, a tie or a reading hit is offered
+  and left to the learner. Asking reads and adds nothing. The choice splits
+  the import: the chosen refs go to `/cards/app` (a card the deck already
+  holds counts as skipped), the rest to `/cards/batch` as before, and a
+  failed ask leaves the import exactly as it was. The sources are the
+  browse picker's table (`decks.SOURCE_FOR_TYPE`, held equal by
+  `tests/test_import_match.py`), so a new source is added to both. A linked
+  card is the app's, in its own gloss and sentences: the learner's pasted
+  meaning is not kept beside it.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.

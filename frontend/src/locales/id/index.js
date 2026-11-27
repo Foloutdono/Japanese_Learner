@@ -2382,6 +2382,12 @@ const decks = {
   importIgnoredCols: 'Kolom diabaikan: {cols}',
   importSkipped:     '{n} dilewati',
   importMissing:     'kurang: {fields}',
+  importMatched:     '{n} ditemukan di kartu aplikasi',
+  importUseApp:      'Pakai kartu aplikasi',
+  importKeepOwn:     'Pakai kartuku',
+  importOwn:         'Milikku',
+  importMatchLabel:  'Kartu untuk {word}',
+  importLinked:      '{n} dari aplikasi',
 
   // Study screen
   studyMode:         'Mode belajar',

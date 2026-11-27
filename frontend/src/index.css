@@ -20173,6 +20173,31 @@ s.rvw-chg__was { text-decoration-thickness: 2px; }
 .import-preview-row__meta { color: var(--text-secondary); font-size: var(--fs-caption); margin-inline-start: auto; }
 .import-preview-row--skipped { opacity: 0.6; }
 
+/* A row found among the app's own cards (importMatches.js): the choice
+   between that card and the learner's own, under the row it belongs to.
+   The preview's list grows to hold them; the bar above it says how many
+   were found and takes them all or none. The chosen card's meaning is
+   the only caption. */
+.import-preview__list--match { max-height: 60vh; }
+.import-match__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+.import-match__bar .import-preview__note { margin-bottom: 0; }
+.import-match { flex: 1 1 100%; display: flex; flex-direction: column; gap: var(--sp-2); }
+.import-match__seg .seg__opt { min-width: 0; }
+.import-match__seg > :last-child { flex: none; white-space: nowrap; }
+.import-match__opt { display: inline-flex; align-items: baseline; gap: var(--sp-2); min-width: 0; }
+.import-match__opt > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.import-match__kind {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.import-match__line { color: var(--text-secondary); font-size: var(--fs-caption); }
+
 .import-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .import-footer__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); font-size: 14px; }
 .import-footer__submit {

@@ -2375,6 +2375,12 @@ const decks = {
   importIgnoredCols: 'Columnas ignoradas: {cols}',
   importSkipped:     '{n} omitidas',
   importMissing:     'falta: {fields}',
+  importMatched:     '{n} encontradas en las tarjetas de la app',
+  importUseApp:      'Usar las de la app',
+  importKeepOwn:     'Conservar las mías',
+  importOwn:         'La mía',
+  importMatchLabel:  'Tarjeta para {word}',
+  importLinked:      '{n} de la app',
 
   // Study screen
   studyMode:         'Modo de estudio',
