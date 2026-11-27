@@ -90,8 +90,8 @@ def test_the_week_always_has_its_five_days_and_two_more():
 def test_a_discovery_and_a_plate_pay_what_a_milestone_is_worth():
     assert sum(m.DISCOVERIES.values()) == 560 and min(m.DISCOVERIES.values()) >= 40
     assert m.DISCOVERY_XP == 30
-    assert sum(c for c, _ in m.ACHIEVEMENTS.values()) == 615
-    assert min(c for c, _ in m.ACHIEVEMENTS.values()) >= 20
+    assert sum(c for c, _ in m.ACHIEVEMENTS.values()) == 1075
+    assert min(c for c, _ in m.ACHIEVEMENTS.values()) >= 45
     # A harder plate pays more than an easier one of its line.
     assert m.ACHIEVEMENTS["words_100"] < m.ACHIEVEMENTS["words_500"] < m.ACHIEVEMENTS["words_1000"]
     assert m.ACHIEVEMENTS["days_7"] < m.ACHIEVEMENTS["days_30"] < m.ACHIEVEMENTS["days_100"]

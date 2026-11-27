@@ -46,10 +46,10 @@ export function bookFixture({ plan = 'free' } = {}) {
       d('first_duel', 40, false), d('arrival_date', 40, false), d('first_import', 80, false), d('first_video', 60, false),
     ],
     achievements: [
-      a('kana_done', 30, 150, true), a('words_100', 25, 100, true), a('words_500', 60, 250, false, { have: 312, of: 500 }),
-      a('words_1000', 120, 500, false, { have: 312, of: 1000 }), a('grammar_n5', 60, 250, false, { have: 24, of: 93 }),
-      a('days_7', 20, 80, true), a('days_30', 60, 250, false, { have: 18, of: 30 }), a('days_100', 150, 600, false, { have: 18, of: 100 }),
-      a('exam_passed', 50, 200, false), a('ranked_win', 40, 200, false),
+      a('kana_done', 60, 150, true), a('words_100', 50, 100, true), a('words_500', 100, 250, false, { have: 312, of: 500 }),
+      a('words_1000', 200, 500, false, { have: 312, of: 1000 }), a('grammar_n5', 100, 250, false, { have: 24, of: 93 }),
+      a('days_7', 45, 80, true), a('days_30', 100, 250, false, { have: 18, of: 30 }), a('days_100', 250, 600, false, { have: 18, of: 100 }),
+      a('exam_passed', 90, 200, false), a('ranked_win', 80, 200, false),
     ],
   }
 }

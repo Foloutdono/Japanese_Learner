@@ -165,7 +165,7 @@ par quatre : 560 crédits en tout) et montre une fonction.
 N5 complète, 7 / 30 / 100 jours d'étude, premier examen blanc réussi,
 première victoire classée. Ils rapportent de l'XP, une plaque de station
 (cosmétique) et, depuis le plan 335, des crédits à la mesure du palier : de
-20 (7 jours) à 150 (100 jours), 615 en tout.
+45 (7 jours) à 250 (100 jours), 1 075 en tout.
 
 **Règles anti-farming** :
 

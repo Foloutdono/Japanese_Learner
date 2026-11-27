@@ -315,7 +315,7 @@ runtime purpose.
   `xp_ledger` that counts rows as practice excludes it as it does
   `day_clear`. The repeatable XP counts on the 番付 up to `XP_DAY_CAP` a
   local day, clipped when written; discoveries (40-80 credits, 30 XP) and
-  achievements (20-150 credits, 80-600 XP, plan 335) are paid once and
+  achievements (45-250 credits, 80-600 XP, plan 335) are paid once and
   bounded by the catalogue. A discovery read off a table counts only what
   was done after `SINCE`; the three that leave no trace (a photo, an
   arrival date, an import) are `missions.note()`d at the act. A new

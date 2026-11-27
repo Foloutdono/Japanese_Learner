@@ -155,16 +155,17 @@ NOTED = frozenset({"first_photo", "arrival_date", "first_import"})
 # month has seen dictation).
 SINCE = datetime(2026, 11, 23, tzinfo=timezone.utc)
 
-# An achievement's (credits, xp). Plan 335 raised them: the plate is a
-# milestone and pays like one, a hundred days' plate a day and a half of
-# the refill beside a streak's jackpot (srs/xp.py's JACKPOTS).
+# An achievement's (credits, xp). Plan 335 raised them, twice (the owner:
+# "too small", then "again, 20 more at least"): a plate is a milestone and
+# pays like one, the hundred days' plate nearly three days of the refill,
+# beside a streak's jackpot (srs/xp.py's JACKPOTS).
 ACHIEVEMENTS = {
-    "kana_done": (30, 150),
-    "words_100": (25, 100), "words_500": (60, 250), "words_1000": (120, 500),
-    "grammar_n5": (60, 250),
-    "days_7": (20, 80), "days_30": (60, 250), "days_100": (150, 600),
-    "exam_passed": (50, 200),
-    "ranked_win": (40, 200),
+    "kana_done": (60, 150),
+    "words_100": (50, 100), "words_500": (100, 250), "words_1000": (200, 500),
+    "grammar_n5": (100, 250),
+    "days_7": (45, 80), "days_30": (100, 250), "days_100": (250, 600),
+    "exam_passed": (90, 200),
+    "ranked_win": (80, 200),
 }
 WORD_MARKS = {"words_100": 100, "words_500": 500, "words_1000": 1000}
 DAY_MARKS = {"days_7": 7, "days_30": 30, "days_100": 100}
