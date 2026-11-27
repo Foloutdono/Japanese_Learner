@@ -88,14 +88,14 @@ describe('the gate\'s pill', () => {
     const sheet = document.querySelector('.msn-sheet')
     expect(sheet).not.toBeNull()
     expect(sheet.querySelectorAll('.msn-cpn')).toHaveLength(3 + 1 + 3)   // the day, its bonus, the week
-    expect(sheet.textContent).toContain(en.msnLabel.due())
+    expect(sheet.textContent).toContain(en.msnLabel.dictation({ of: 5 }))
     expect(sheet.textContent).toContain(en.msnLabel.days5())
     expect(countUse).toHaveBeenCalledWith('missions', 'open')
   })
 
   it('collects a finished mission with the tap, and redraws on the answer', async () => {
     seedMissions(missionsFixture({ step: 1 }))
-    apiJson.mockResolvedValueOnce({ paid: { credits: 8, xp: 5, scope: 'day', kind: 'due' }, missions: missionsFixture({ step: 2 }) })
+    apiJson.mockResolvedValueOnce({ paid: { credits: 8, xp: 5, scope: 'day', kind: 'dictation' }, missions: missionsFixture({ step: 2 }) })
     const screen = await shell(<MissionsGate />)
     await userEvent.click(screen.container.querySelector('.msn-pill'))
     await settle()
@@ -107,7 +107,7 @@ describe('the gate\'s pill', () => {
     expect(apiJson).toHaveBeenCalledTimes(1)
     const [path, , opts] = apiJson.mock.calls[0]
     expect(path).toBe('/api/missions/claim')
-    expect(JSON.parse(opts.body)).toEqual({ scope: 'day', kind: 'due' })
+    expect(JSON.parse(opts.body)).toEqual({ scope: 'day', kind: 'dictation' })
     expect(document.querySelectorAll('.msn-cpn--ready')).toHaveLength(1)      // the bonus is still to collect
     expect(document.querySelector('.msn-cpn--ready').textContent).toContain(en.msnLabel.all3())
     expect(document.querySelectorAll('.msn-cpn--torn')).toHaveLength(3)
@@ -121,11 +121,11 @@ describe('the gate\'s pill', () => {
     await settle()
     const all = document.querySelector('[data-action="missions-collect-all"]')
     expect(all.textContent).toContain(en.msnCollectAll)
-    expect(all.textContent).toContain('+14')                       // the reviews' 8 and the bonus's 6
+    expect(all.textContent).toContain('+14')                       // the dictation's 8 and the bonus's 6
     await userEvent.click(all)
     await settle(120)
     expect(apiJson.mock.calls.map(([, , o]) => JSON.parse(o.body))).toEqual([
-      { scope: 'day', kind: 'due' }, { scope: 'bonus', kind: 'all3' },
+      { scope: 'day', kind: 'dictation' }, { scope: 'bonus', kind: 'all3' },
     ])
   })
 
