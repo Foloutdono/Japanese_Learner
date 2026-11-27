@@ -1078,7 +1078,7 @@ def start(cur, after: list, me: str, duel_id: int) -> dict:
         if duel["status"] != "open":
             raise Refused(409, "pvp_closed")
         if duel["kind"] == "ranked":
-            # A duel the day's mission asks costs nothing (plan 335).
+            # A duel the day's mission asks costs nothing (plan 336).
             fare = 0 if missions.waives_on(cur, me, "duel", now=now) else RANKED_PRICE
             mine["paid"] = _pay(cur, after, me, fare, "duel", duel_id)
             _save(cur, mine, "paid")

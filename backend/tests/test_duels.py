@@ -392,7 +392,7 @@ def _ranked(client, user_id):
 
 def _ask_the_duel(user_id, now):
     """Today's missions for `user_id` are a duel and two the test never
-    reads (plan 335)."""
+    reads (plan 336)."""
     from study import missions
     sql("DELETE FROM missions WHERE user_id = %s", (user_id,))
     conn = db_conn()

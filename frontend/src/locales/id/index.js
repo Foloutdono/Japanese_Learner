@@ -3884,7 +3884,7 @@ const missions = {
       reading: 'Satu latihan membaca', comprehension: 'Satu latihan pemahaman bacaan',
       translation: 'Satu latihan terjemahan', conversation: 'Satu latihan percakapan',
     })[m.platform] ?? 'Satu latihan',
-    // Kumpulan misi rencana 335, sesuai urutannya.
+    // Kumpulan misi rencana 336, sesuai urutannya.
     duel:          () => 'Mainkan satu duel',
     explain:       () => 'Minta penjelasan satu kalimat',
     analyze:       () => 'Uraikan satu kalimat di penganalisis',

@@ -50,7 +50,15 @@ def _closes(morphemes, i: int) -> bool:
 def closes_sentence(morphemes, i: int) -> bool:
     """Whether nothing but particles follows morphemes[i] in its
     sentence: 好きだったの。でも… closes the first one."""
+    end = morphemes[i].end
     for m in _rest(morphemes, i):
+        # (a space between two phrases ends the first, as a lyric or a
+        # subtitle sets them: 何をしていたの　何を見ていたの -- the tagger
+        # drops an ASCII space and leaves a gap in the offsets, a wide one
+        # it keeps as a symbol; plan 335)
+        if m.start > end or (m.pos == "symbol" and not m.surface.strip()):
+            return True
+        end = m.end
         # (a hashtag or an emoji after a post's line ends it: 来てね〜🎮 #ゲーム,
         # plan 272)
         if m.pos == "symbol" and (m.surface in "。！？!?」』…‥#＃" or any(ord(c) >= 0x1F000 for c in m.surface)):

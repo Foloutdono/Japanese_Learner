@@ -689,7 +689,7 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
             if allow_llm_call:
                 # An explanation asked for and given (bought, or served from
                 # the shared cache, which claims no slot): the day's
-                # `explain` mission counts it (plan 335).
+                # `explain` mission counts it (plan 336).
                 missions.tick(user_id, "explain")
             llm_result = _normalize_explanation_key(llm_result)
             # Held to the line every time it is read, not only when it

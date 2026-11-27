@@ -3853,7 +3853,7 @@ const missions = {
       reading: 'Un exercice de lecture', comprehension: 'Un exercice de compréhension',
       translation: 'Un exercice de traduction', conversation: 'Un exercice de conversation',
     })[m.platform] ?? 'Un exercice de pratique',
-    // Le pool du plan 335, dans son ordre.
+    // Le pool du plan 336, dans son ordre.
     duel:          () => 'Jouer un duel',
     explain:       () => 'Te faire expliquer une phrase',
     analyze:       () => 'Décomposer une phrase dans l’analyseur',

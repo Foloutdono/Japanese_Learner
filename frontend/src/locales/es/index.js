@@ -3902,7 +3902,7 @@ const missions = {
       reading: 'Un ejercicio de lectura', comprehension: 'Un ejercicio de comprensión',
       translation: 'Un ejercicio de traducción', conversation: 'Un ejercicio de conversación',
     })[m.platform] ?? 'Un ejercicio de práctica',
-    // El conjunto del plan 335, en su orden.
+    // El conjunto del plan 336, en su orden.
     duel:          () => 'Jugar un duelo',
     explain:       () => 'Pedir que te expliquen una oración',
     analyze:       () => 'Desglosar una oración en el analizador',

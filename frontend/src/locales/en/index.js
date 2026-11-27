@@ -3901,7 +3901,7 @@ const missions = {
       reading: 'A reading exercise', comprehension: 'A comprehension exercise',
       translation: 'A translation exercise', conversation: 'A conversation exercise',
     })[m.platform] ?? 'A practice exercise',
-    // The pool of plan 335, in the pool's own order.
+    // The pool of plan 336, in the pool's own order.
     duel:          () => 'Play a duel',
     explain:       () => 'Have a sentence explained',
     analyze:       () => 'Break a sentence down in the analyzer',

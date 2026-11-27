@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **336** (331 is the missions', 332 the referral's, 333 the readings', 334 the Indonesian branch's source fixes, 335 the missions' second pool). `git ls-tree HEAD plans/` under-reports
+  The next free number is **337** (331 is the missions', 332 the referral's, 333 the readings', 334 the Indonesian branch's source fixes, 335 the lyric breakdown's gaps, 336 the missions' second pool). `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -265,6 +265,18 @@ runtime purpose.
   saying read whole takes the particles and the forms inside it, never a
   construction the catalogue teaches: 昼夜を問わず and 若気の至り are
   〜を問わず's and 〜の至り's own examples, and stay in their pieces.
+- **A line of a song is a fragment, and a space is a stop (plan 335).**
+  A lyric or a subtitle sets its phrases apart with a space (the tagger drops
+  an ASCII one and leaves a gap in the offsets, and keeps a wide one as a
+  symbol): a space closes the phrase before it, so a final の explains
+  (`_explaining_no`, `particle_glosses.closes_sentence`) whichever phrase it
+  ends, and a modifier may stop a line (わたしと同じ様な) for its noun on the
+  next. よう is 様 on a page as often as it is kana: the likeness points
+  (`_YOU_POINTS`) read the kanji only where the tokenizer reads it よう, and
+  only on the pieces they are written on. A word every learner meets in a
+  song and that no lesson taught (ほど, より, の for が) is a point of its own,
+  not a gloss: its refusals are its counter-cases, pinned in
+  `tests/test_grammar_precision.py`.
 - **A run of the deck's nouns is the dictionary's word (plan 280).**
   Where JMdict writes a run of deck nouns as one word (電話番号, 観光客,
   記者会見), the breakdown reads that word, as the dictionary reads it
@@ -280,7 +292,7 @@ runtime purpose.
   makes with what follows (最終 + 報告書, where 原材料 + 費 keeps 原材料).
   `DeckNounCompoundTests` holds both sides.
 - **A mission pays study, once, and is neither study nor chance (plan 331,
-  its pool replaced by plan 335).**
+  its pool replaced by plan 336).**
   `study/missions.py` holds the figures, and `tests/test_missions.py` pins
   them: a free learner who does their missions earns about 35 credits a day
   (3 × 8 and a bonus of 6 a day, 3 × 12 a week), which is what the refill's
@@ -315,7 +327,7 @@ runtime purpose.
   `xp_ledger` that counts rows as practice excludes it as it does
   `day_clear`. The repeatable XP counts on the 番付 up to `XP_DAY_CAP` a
   local day, clipped when written; discoveries (40-80 credits, 30 XP) and
-  achievements (45-250 credits, 80-600 XP, plan 335) are paid once and
+  achievements (45-250 credits, 80-600 XP, plan 336) are paid once and
   bounded by the catalogue. A discovery read off a table counts only what
   was done after `SINCE`; the three that leave no trace (a photo, an
   arrival date, an import) are `missions.note()`d at the act. A new

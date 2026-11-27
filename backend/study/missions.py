@@ -36,7 +36,7 @@ XP and cosmetics"). Nothing is paid to an account that has not studied
 -- The anti-farming rules, in one place ------------------------------
   * the week's volume goal, which asks the learner to beat themselves, is
     computed from their own history and capped (VOLUME_MAX_GAIN); the
-    day's goals are small and fixed (DAY_TARGETS, plan 335);
+    day's goals are small and fixed (DAY_TARGETS, plan 336);
   * the XP the repeatable ones pay counts on the 番付 only up to
     XP_DAY_CAP a local day (written clipped, as duels' XP_CAP is);
     discoveries and achievements are bounded by the catalogue itself;
@@ -84,9 +84,9 @@ VOLUME_MAX_GAIN = 150
 DAYS_TARGET = 5
 WRITE_TARGET = 10
 DUELS_TARGET = 5
-ACCURACY_ANSWERS = 20  # answers an `accuracy` mission (retired, plan 335) still reads
+ACCURACY_ANSWERS = 20  # answers an `accuracy` mission (retired, plan 336) still reads
 
-# ── The day's pool (plan 335, the owner's picks) ────────────────────────
+# ── The day's pool (plan 336, the owner's picks) ────────────────────────
 # Three of these a day, by a rotation of the date, in this order: the
 # order is the choice (`pick_day` takes every third-or-so of the list, so
 # the three of a day come from different corners: an exercise, the
@@ -94,7 +94,7 @@ ACCURACY_ANSWERS = 20  # answers an `accuracy` mission (retired, plan 335) still
 # (DAY_TARGETS), frozen on the row; none depends on how the learner did.
 DAILY = ("duel", "explain", "analyze", "comprehension", "dictation", "read", "conversation",
          "message", "translation", "composition", "exam", "in_out", "ask")
-# The five of plan 331's pool, retired: a row assigned before plan 335 is
+# The five of plan 331's pool, retired: a row assigned before plan 336 is
 # still read and paid, nothing new is assigned.
 LEGACY_DAILY = ("due", "new", "practice", "accuracy", "write")
 WEEKLY = ("days5", "volume", "new_mode", "exam_section", "duels5", "write10")
@@ -140,7 +140,7 @@ USAGE = {"ask": "ask"}
 
 # A discovery's credits (its XP is DISCOVERY_XP). Seen once; the first
 # seven are read off the tables from SINCE on, the last three are noted at
-# the act (note()) because nothing durable says they happened. Plan 335
+# the act (note()) because nothing durable says they happened. Plan 336
 # (the owner: "too small") raised them fourfold: a discovery is a one-off,
 # worth what a day or two of the refill, since a learner who finds the
 # photo or the library is a learner the app has kept.
@@ -155,7 +155,7 @@ NOTED = frozenset({"first_photo", "arrival_date", "first_import"})
 # month has seen dictation).
 SINCE = datetime(2026, 11, 23, tzinfo=timezone.utc)
 
-# An achievement's (credits, xp). Plan 335 raised them, twice (the owner:
+# An achievement's (credits, xp). Plan 336 raised them, twice (the owner:
 # "too small", then "again, 20 more at least"): a plate is a milestone and
 # pays like one, the hundred days' plate nearly three days of the refill,
 # beside a streak's jackpot (srs/xp.py's JACKPOTS).
@@ -180,7 +180,7 @@ PLATFORMS = {
     "translation": "translation_log",
     "conversation": "conversation_log",
 }
-# Every platform a day's mission may count (plan 335): the four above and
+# Every platform a day's mission may count (plan 336): the four above and
 # 写's two, whose logs have the same `user_id` and `created_at`.
 SKILL_LOGS = {**PLATFORMS, "dictation": "dictation_log", "composition": "composition_log"}
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
@@ -532,7 +532,7 @@ def _insert_mission(cur, user_id, scope, period, kind, slot, target, baseline, c
 
 def ensure_day(cur, user_id: str, tz: int | None, now: datetime) -> date:
     """The day's missions, written the first time the day is read: three
-    from the pool (plan 335), their goals fixed (DAY_TARGETS) and frozen
+    from the pool (plan 336), their goals fixed (DAY_TARGETS) and frozen
     on the row. A duel is asked only of a learner who has met them, and
     the message at most once a fortnight."""
     day, start, end = day_window(tz, now)
@@ -570,7 +570,7 @@ def ensure_week(cur, user_id: str, tz: int | None, now: datetime) -> date:
 
 # ── Reading progress ──────────────────────────────────────────────────
 def _day_progress(cur, user_id: str, row: dict, window: tuple[datetime, datetime], day: date, out: dict) -> dict:
-    """The pool's missions (plan 335), each counted from the log of what
+    """The pool's missions (plan 336), each counted from the log of what
     it asks: a platform's rows, the analyser's, the duels, the daily
     counters of the asking and the explanations, a message's length."""
     start, end = window
@@ -613,7 +613,7 @@ def progress(cur, user_id: str, tz: int | None, row: dict, window: tuple[datetim
     elif kind == "new":
         n = sum(new_by_day(cur, user_id, tz, start, end).values())
         out.update(have=min(n, target), done=n >= target)
-    elif kind == "practice":      # retired (plan 335), still read where it was assigned
+    elif kind == "practice":      # retired (plan 336), still read where it was assigned
         n = platform_count(cur, user_id, row["platform"], start, end)
         out.update(of=1, have=min(n, 1), done=n >= 1)
     elif kind == "accuracy":

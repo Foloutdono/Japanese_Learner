@@ -86,7 +86,7 @@ def test_the_week_always_has_its_five_days_and_two_more():
     assert "duels5" not in m.pick_week({**elig, "duels5": False}, 47)
 
 
-# ── Rewards (plan 335, the owner: "too small") ─────────────────────────
+# ── Rewards (plan 336, the owner: "too small") ─────────────────────────
 def test_a_discovery_and_a_plate_pay_what_a_milestone_is_worth():
     assert sum(m.DISCOVERIES.values()) == 560 and min(m.DISCOVERIES.values()) >= 40
     assert m.DISCOVERY_XP == 30
