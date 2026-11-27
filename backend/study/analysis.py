@@ -2592,7 +2592,9 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # and four points of their own, 〜より (N5), 〜ほど〜ない and 〜の（主語）
 # (N4, where the course's own texts already use it), 〜ほど (N3), which the
 # glosses of ほど, より and a subject の stood in for.
-LOCAL_REV = 54
+# 55: plan 335 -- a line that stops on たくて links (会いたくて), and 〜さえ
+# follows a greeting said as a thing (さよならさえ言えず).
+LOCAL_REV = 55
 
 
 def analyze_local(text: str, level: str | None = None, before: str = "", after: str = "") -> dict:

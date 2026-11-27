@@ -4460,3 +4460,22 @@ class SubjectNoTests(unittest.TestCase):
         for sentence in ("母の料理", "日本の古い寺", "私のほしい本", "これは私のです。", "歌うのが好きです。"):
             with self.subTest(sentence=sentence):
                 self.assertNotIn(self.P, found_in(sentence))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class LineEndsOnAConnectiveTests(unittest.TestCase):
+    """Plan 335: a line of a song stops on a て and goes on in the next, and
+    a greeting is said as a thing before さえ."""
+
+    def test_a_line_that_stops_on_takute_links(self) -> None:
+        for sentence in ("会いたくて", "時間を確認したくて", "食べたくて、寝た", "食べたくて…"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜くて／〜で", found_in(sentence))
+
+    def test_a_sentence_that_trails_off_on_it_stays_unlit(self) -> None:
+        self.assertNotIn("〜くて／〜で", found_in("時間を確認したくて。"))
+
+    def test_a_greeting_before_sae(self) -> None:
+        for sentence in ("さよならさえ言えずに", "ありがとうさえ言えない"):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("〜さえ"), "さえ")

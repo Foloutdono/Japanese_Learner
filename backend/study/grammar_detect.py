@@ -1591,6 +1591,10 @@ _ALSO_AFTER = {"〜か（間接疑問）": frozenset({"adjective", "other"}),
                # (plan 272) の after a particle phrase: 医者としての意見,
                # 歩きながらの電話, 母への手紙 -- a noun's, all the same
                "の": frozenset({"particle"}),
+               # (さよならさえ言えずに, ありがとうさえ言えない: a greeting said as a
+               # thing, which the tokenizer files an interjection, plan 335)
+               "〜さえ": frozenset({"interjection"}),
+               "〜すら": frozenset({"interjection"}),
                # (練習しさえすれば: a verb's stem, then さえすれば, plan 272)
                "〜さえ〜ば": frozenset({"verb"}),
                # (plan 314: what the lessons' nouns leave out -- the written
@@ -3733,7 +3737,9 @@ def _na_adjective_te_spans(tokens):
             # 会いたくて来た, "came wanting to see you" -- no lesson writes it
             # either, and no 〜てくる, plan 314; ending what is said,
             # 時間を確認したくて。 trails off on why, and stays so)
-            if nxt is not None and nxt.surface not in ("は", "も") and not _sentence_final(tokens, i):
+            # (a line of a song that stops on it, 会いたくて, has no mark to say
+            # it trails off: the clause goes on in the next line, plan 335)
+            if nxt is None or (nxt.surface not in ("は", "も") and not _sentence_final(tokens, i)):
                 out.append((prev.end - 1, t.end))
             continue
         # (...and a state said twice over, before the quality it joins: 麺は
