@@ -494,7 +494,7 @@ def test_the_message_is_offered_at_most_once_a_fortnight(uid):
         conn.close()
 
 
-def test_a_mission_retired_by_plan_335_is_still_read_and_paid(uid):
+def test_a_mission_retired_by_plan_336_is_still_read_and_paid(uid):
     _profile(uid)
     now = datetime.now(timezone.utc)
     conn = db_conn()
