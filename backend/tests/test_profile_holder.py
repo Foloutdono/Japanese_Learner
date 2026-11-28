@@ -32,6 +32,12 @@ def test_profile_retention_is_a_share_or_absent(client):
 
 
 def test_leaderboard_has_a_weekly_side(client):
+    # Each board is kept up to a minute (study/banzuke.py), apart: a
+    # lifetime board an earlier test kept could predate XP a later one
+    # wrote, which the week built now counts. Built from now, the week
+    # first, the lifetime board can only hold as much or more.
+    from study import banzuke
+    banzuke.forget()
     week = client.get("/api/leaderboard?period=week&limit=6")
     assert week.status_code == 200
     body = week.json()
